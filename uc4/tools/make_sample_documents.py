@@ -16,7 +16,9 @@ cropped out without removing the data with it.
 
 Case 2's director ID is genuinely blurred - the image is downsampled and box
 blurred - so the quality screen has something real to fail on rather than a
-label saying "pretend this is blurry".
+label saying "pretend this is blurry". The card is drawn with the director's
+full details first and blurred afterwards, so the data is there on the page and
+simply cannot be read. A blank card would be a different defect.
 
     python tools/make_sample_documents.py
     python tools/make_sample_documents.py --cases WAL-ONB-0001 --out sample_documents/
@@ -25,6 +27,7 @@ label saying "pretend this is blurry".
 import argparse
 import csv
 import sys
+import zlib
 from pathlib import Path
 
 UC4 = Path(__file__).resolve().parent.parent
@@ -79,6 +82,45 @@ FIELD_LABELS = {
     "tax_number": "Tax number", "target_segment": "Target segment",
     "expected_card_volume": "Expected volume", "platform_url": "Platform",
 }
+
+
+def invented_id_details(person: dict, document: dict) -> list[dict]:
+    """What an identity document shows when nothing was extracted from it.
+
+    Only used for a document the pipeline could not read: the details belong on
+    the card, and their absence from extracted_field.csv is the point - they
+    were there and nobody could make them out. Derived from the individual so
+    the card is consistent with the rest of the case, with a document number and
+    expiry invented deterministically.
+    """
+    initials = "".join(part[0] for part in person["full_name"].split()[:2]).upper()
+    # crc32, not hash(): Python randomises hash() per process, which would give
+    # the same person a different document number on every run.
+    serial = zlib.crc32(person["individual_id"].encode()) % 9000000 + 1000000
+    expiry = document.get("expiry_date") or f"20{28 + serial % 5}-0{1 + serial % 9}-1{serial % 9}"
+    return [
+        {"name": "full_name", "value": person["full_name"]},
+        {"name": "date_of_birth", "value": person["date_of_birth"]},
+        {"name": "document_number", "value": f"{person['nationality']}-{initials}-{serial}"},
+        {"name": "expiry_date", "value": expiry},
+    ]
+
+
+def save_pdf(img, path: Path, upload_time: str) -> None:
+    """Write a PDF whose timestamps come from the dataset, not from the clock.
+
+    Pillow stamps the current time into every PDF it writes, which would make
+    the generator produce different bytes on every run. The document's own
+    upload time is both stable and the honest answer to "when was this made".
+    """
+    import io
+    import re as _re
+
+    buffer = io.BytesIO()
+    img.convert("RGB").save(buffer, "PDF", resolution=150)
+    stamp = "D:" + _re.sub(r"[^0-9]", "", upload_time or "20260101000000")[:14].ljust(14, "0") + "Z"
+    data = _re.sub(rb"D:\d{14}Z?", stamp.encode(), buffer.getvalue())
+    path.write_bytes(data)
 
 
 def read_csv(path: Path) -> list[dict]:
@@ -200,6 +242,8 @@ def build(dataset: Path, out: Path, cases: tuple) -> list[dict]:
     for r in read_csv(dataset / "extracted_field.csv"):
         fields_by_doc.setdefault(r["document_id"], []).append(r)
 
+    people = {r["individual_id"]: r for r in read_csv(dataset / "individual.csv")}
+
     made = []
     for doc in documents:
         if doc["case_id"] not in cases:
@@ -210,8 +254,15 @@ def build(dataset: Path, out: Path, cases: tuple) -> list[dict]:
         folder.mkdir(parents=True, exist_ok=True)
         path = folder / doc["file_name"]
 
+        drawn_only = []
         if doc["document_type"] in ID_TYPES:
-            img = identity_card(doc, fields)
+            shown = fields
+            if not fields and doc["subject_individual_id"] in people:
+                # Nothing was extracted because nothing could be read. Draw the
+                # details anyway - they were on the card all along.
+                drawn_only = invented_id_details(people[doc["subject_individual_id"]], doc)
+                shown = drawn_only
+            img = identity_card(doc, shown)
             # Case 2's director ID is the one the quality screen must reject.
             if doc["quality_flags"] == "blurred_unreadable":
                 img = blur(img)
@@ -221,7 +272,7 @@ def build(dataset: Path, out: Path, cases: tuple) -> list[dict]:
             img = paper(doc, fields, issuer)
 
         if path.suffix.lower() == ".pdf":
-            img.convert("RGB").save(path, "PDF", resolution=150)
+            save_pdf(img, path, doc.get("upload_time", ""))
         else:
             img.convert("RGB").save(path, quality=92)
         made.append({"path": path, "document_id": doc["document_id"],
@@ -230,6 +281,9 @@ def build(dataset: Path, out: Path, cases: tuple) -> list[dict]:
                      "fields": len(fields),
                      # exactly what was drawn onto the page, for the test to check
                      "printed": [(f["name"], f["value"]) for f in fields],
+                     # details drawn on the card that no extraction recorded,
+                     # because the document was unreadable
+                     "drawn_only": [(f["name"], f["value"]) for f in drawn_only],
                      "blurred": doc["quality_flags"] == "blurred_unreadable"})
     return made
 
@@ -252,8 +306,10 @@ def main() -> None:
         by_case.setdefault(m["case_id"], []).append(m)
     for case_id, items in sorted(by_case.items()):
         blurred = sum(1 for i in items if i["blurred"])
+        unreadable = sum(len(i["drawn_only"]) for i in items)
         print(f"{case_id}  {len(items):>2} files, {sum(i['fields'] for i in items):>2} printed "
-              f"values" + (f", {blurred} deliberately blurred" if blurred else ""))
+              f"values" + (f", {blurred} deliberately blurred carrying {unreadable} "
+                           f"unreadable value(s)" if blurred else ""))
     print(f"\n{len(made)} file(s) in {args.out}")
 
 

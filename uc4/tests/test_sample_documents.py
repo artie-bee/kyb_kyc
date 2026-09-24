@@ -34,6 +34,40 @@ def made(tmp_path_factory):
     return maker.build(DEFAULT_DATASET, out, maker.DEMO_CASES), out
 
 
+def test_the_blurred_id_carries_real_details_under_the_blur(made):
+    """The data is on the card. It simply cannot be read - which is why the
+    dataset records no extracted fields for it."""
+    records, _ = made
+    blurred = next(r for r in records if r["blurred"])
+    assert blurred["printed"] == [],         "nothing was extracted from this document, and nothing should claim to be"
+
+    drawn = dict(blurred["drawn_only"])
+    assert drawn, "a blank card is a different defect from an unreadable one"
+    assert drawn["full_name"] == "Denton Halliwell"
+    assert drawn["date_of_birth"] == "1978-06-02"
+    assert drawn["document_number"].startswith("GB-DH-")
+    assert len(drawn["expiry_date"]) == 10 and drawn["expiry_date"].startswith("20")
+
+    # every other ID prints what was extracted from it and invents nothing
+    for record in records:
+        if record["document_type"] == "id_document" and not record["blurred"]:
+            assert record["drawn_only"] == []
+
+
+def test_the_generator_is_deterministic(tmp_path):
+    """Two runs, identical bytes. Document numbers come from crc32 rather than
+    hash(), which Python randomises per process, and PDF timestamps come from
+    the dataset rather than the clock."""
+    first = maker.build(DEFAULT_DATASET, tmp_path / "a", ("WAL-ONB-0002",))
+    second = maker.build(DEFAULT_DATASET, tmp_path / "b", ("WAL-ONB-0002",))
+    assert len(first) == len(second) == 10
+
+    for a, b in zip(first, second):
+        assert a["file_name"] == b["file_name"]
+        assert a["path"].read_bytes() == b["path"].read_bytes(),             f"{a['file_name']} differs between runs"
+        assert a["drawn_only"] == b["drawn_only"]
+
+
 def test_a_file_exists_for_every_document_on_the_demo_cases(made):
     records, _ = made
     expected = [d for d in _csv("document.csv") if d["case_id"] in maker.DEMO_CASES]
