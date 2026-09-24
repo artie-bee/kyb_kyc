@@ -50,6 +50,10 @@
     {
       "individual_ref": "IND-0023",
       "ownership_percentage": 70.0,
+      "ownership_chain_percentages": [
+        100.0,
+        70.0
+      ],
       "control_type": "indirect_shareholding",
       "ownership_path": "Marchbank Holdings Ltd > Thornbury Analytics Ltd"
     }
@@ -73,7 +77,7 @@
       "scripted_quality_flags": [],
       "scripted_fields": [
         {
-          "field_id": "FLD-0167",
+          "field_id": "FLD-0168",
           "document_id": "DOC-0108",
           "name": "company_name",
           "value": "Thornbury Analytics Ltd",
@@ -82,7 +86,7 @@
           "corrected_by_analyst": "false"
         },
         {
-          "field_id": "FLD-0168",
+          "field_id": "FLD-0169",
           "document_id": "DOC-0108",
           "name": "registration_number",
           "value": "UK-99025819",
@@ -103,7 +107,25 @@
       "scripted_quality_flags": [],
       "scripted_fields": [
         {
-          "field_id": "FLD-0169",
+          "field_id": "FLD-0170",
+          "document_id": "DOC-0109",
+          "name": "company_name",
+          "value": "Thornbury Analytics Ltd",
+          "confidence": "0.95",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        },
+        {
+          "field_id": "FLD-0171",
+          "document_id": "DOC-0109",
+          "name": "registration_number",
+          "value": "UK-99025819",
+          "confidence": "0.94",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        },
+        {
+          "field_id": "FLD-0172",
           "document_id": "DOC-0109",
           "name": "registered_address",
           "value": "5 Wraysbury Mews, Bristol BS1 6TT, United Kingdom",
@@ -112,7 +134,7 @@
           "corrected_by_analyst": "false"
         },
         {
-          "field_id": "FLD-0170",
+          "field_id": "FLD-0173",
           "document_id": "DOC-0109",
           "name": "entity_status",
           "value": "active",
@@ -133,7 +155,7 @@
       "scripted_quality_flags": [],
       "scripted_fields": [
         {
-          "field_id": "FLD-0171",
+          "field_id": "FLD-0174",
           "document_id": "DOC-0110",
           "name": "director_name",
           "value": "Imogen Skellow",
@@ -142,7 +164,7 @@
           "corrected_by_analyst": "false"
         },
         {
-          "field_id": "FLD-0172",
+          "field_id": "FLD-0175",
           "document_id": "DOC-0110",
           "name": "director_name_2",
           "value": "Callum Pryde-Nash",
@@ -163,7 +185,7 @@
       "scripted_quality_flags": [],
       "scripted_fields": [
         {
-          "field_id": "FLD-0173",
+          "field_id": "FLD-0176",
           "document_id": "DOC-0111",
           "name": "signatory_name",
           "value": "Imogen Skellow",
@@ -184,7 +206,7 @@
       "scripted_quality_flags": [],
       "scripted_fields": [
         {
-          "field_id": "FLD-0174",
+          "field_id": "FLD-0177",
           "document_id": "DOC-0112",
           "name": "ubo_name",
           "value": "Helena Marchbank",
@@ -193,7 +215,7 @@
           "corrected_by_analyst": "false"
         },
         {
-          "field_id": "FLD-0175",
+          "field_id": "FLD-0178",
           "document_id": "DOC-0112",
           "name": "ownership_percentage",
           "value": "70.0",
@@ -202,7 +224,7 @@
           "corrected_by_analyst": "false"
         },
         {
-          "field_id": "FLD-0176",
+          "field_id": "FLD-0179",
           "document_id": "DOC-0112",
           "name": "control_basis",
           "value": "indirect shareholding through Marchbank Holdings Ltd",
@@ -223,7 +245,7 @@
       "scripted_quality_flags": [],
       "scripted_fields": [
         {
-          "field_id": "FLD-0177",
+          "field_id": "FLD-0180",
           "document_id": "DOC-0113",
           "name": "chart_summary",
           "value": "Two layers: Helena Marchbank 100 percent of Marchbank Holdings Ltd (UK-99026440), which holds 70 percent of Thornbury Analytics Ltd; two directors hold 15 percent each directly",
@@ -232,7 +254,7 @@
           "corrected_by_analyst": "false"
         },
         {
-          "field_id": "FLD-0178",
+          "field_id": "FLD-0181",
           "document_id": "DOC-0113",
           "name": "intermediate_entity",
           "value": "Marchbank Holdings Ltd (UK-99026440), active on the UK register",
@@ -253,7 +275,7 @@
       "scripted_quality_flags": [],
       "scripted_fields": [
         {
-          "field_id": "FLD-0179",
+          "field_id": "FLD-0182",
           "document_id": "DOC-0114",
           "name": "shareholder_name",
           "value": "Marchbank Holdings Ltd",
@@ -262,7 +284,7 @@
           "corrected_by_analyst": "false"
         },
         {
-          "field_id": "FLD-0180",
+          "field_id": "FLD-0183",
           "document_id": "DOC-0114",
           "name": "shareholder_name_2",
           "value": "Helena Marchbank (sole shareholder of Marchbank Holdings Ltd)",
@@ -283,7 +305,7 @@
       "scripted_quality_flags": [],
       "scripted_fields": [
         {
-          "field_id": "FLD-0181",
+          "field_id": "FLD-0184",
           "document_id": "DOC-0115",
           "name": "full_name",
           "value": "Imogen Skellow",
@@ -304,7 +326,7 @@
       "scripted_quality_flags": [],
       "scripted_fields": [
         {
-          "field_id": "FLD-0182",
+          "field_id": "FLD-0185",
           "document_id": "DOC-0116",
           "name": "full_name",
           "value": "Callum Pryde-Nash",
@@ -325,7 +347,7 @@
       "scripted_quality_flags": [],
       "scripted_fields": [
         {
-          "field_id": "FLD-0183",
+          "field_id": "FLD-0186",
           "document_id": "DOC-0117",
           "name": "full_name",
           "value": "Helena Marchbank",
@@ -346,7 +368,7 @@
       "scripted_quality_flags": [],
       "scripted_fields": [
         {
-          "field_id": "FLD-0184",
+          "field_id": "FLD-0187",
           "document_id": "DOC-0118",
           "name": "document_date",
           "value": "2026-09-08",
@@ -367,7 +389,7 @@
       "scripted_quality_flags": [],
       "scripted_fields": [
         {
-          "field_id": "FLD-0185",
+          "field_id": "FLD-0188",
           "document_id": "DOC-0119",
           "name": "document_date",
           "value": "2026-08-31",
@@ -388,7 +410,7 @@
       "scripted_quality_flags": [],
       "scripted_fields": [
         {
-          "field_id": "FLD-0186",
+          "field_id": "FLD-0189",
           "document_id": "DOC-0120",
           "name": "document_date",
           "value": "2026-09-02",
@@ -409,7 +431,7 @@
       "scripted_quality_flags": [],
       "scripted_fields": [
         {
-          "field_id": "FLD-0187",
+          "field_id": "FLD-0190",
           "document_id": "DOC-0121",
           "name": "declared_source",
           "value": "Consultancy fees under annual retainer contracts",
@@ -430,7 +452,7 @@
       "scripted_quality_flags": [],
       "scripted_fields": [
         {
-          "field_id": "FLD-0188",
+          "field_id": "FLD-0191",
           "document_id": "DOC-0122",
           "name": "declared_industry",
           "value": "Management and data analytics consultancy",
@@ -451,7 +473,7 @@
       "scripted_quality_flags": [],
       "scripted_fields": [
         {
-          "field_id": "FLD-0189",
+          "field_id": "FLD-0192",
           "document_id": "DOC-0123",
           "name": "declared_source_of_wealth",
           "value": "Proceeds of the founder's earlier consultancy sale, held through Marchbank Holdings Ltd",
@@ -463,5 +485,71 @@
     }
   ],
   "analyst_releases": [],
-  "field_corrections": []
+  "field_corrections": [],
+  "field_acceptances": [],
+  "scripted_registry": [
+    {
+      "check_id": "REG-0008",
+      "case_id": "WAL-ONB-0010",
+      "applicant_id": "APP-0010",
+      "provider_name": "MockRegistryHub UK",
+      "company_status": "active",
+      "registry_legal_name": "Thornbury Analytics Ltd",
+      "registry_number": "UK-99025819",
+      "registry_address": "5 Wraysbury Mews, Bristol BS1 6TT, United Kingdom",
+      "registry_directors": "Imogen Skellow|Callum Pryde-Nash",
+      "name_match": "match",
+      "number_match": "match",
+      "address_match": "match",
+      "director_match": "match",
+      "ubo_supported_by_registry": "true",
+      "high_risk_jurisdiction_or_industry": "false",
+      "confidence": "0.95",
+      "result": "pass"
+    }
+  ],
+  "scripted_identity": [
+    {
+      "check_id": "IDC-0018",
+      "case_id": "WAL-ONB-0010",
+      "individual_id": "IND-0021",
+      "provider_name": "VerifyMock ID",
+      "document_result": "pass",
+      "liveness_result": "pass",
+      "biometric_result": "pass",
+      "address_result": "pass",
+      "name_dob_match": "match",
+      "document_expired": "false",
+      "duplicate_individual_detected": "false",
+      "result": "pass"
+    },
+    {
+      "check_id": "IDC-0019",
+      "case_id": "WAL-ONB-0010",
+      "individual_id": "IND-0022",
+      "provider_name": "VerifyMock ID",
+      "document_result": "pass",
+      "liveness_result": "pass",
+      "biometric_result": "pass",
+      "address_result": "pass",
+      "name_dob_match": "match",
+      "document_expired": "false",
+      "duplicate_individual_detected": "false",
+      "result": "pass"
+    },
+    {
+      "check_id": "IDC-0020",
+      "case_id": "WAL-ONB-0010",
+      "individual_id": "IND-0023",
+      "provider_name": "VerifyMock ID",
+      "document_result": "pass",
+      "liveness_result": "pass",
+      "biometric_result": "pass",
+      "address_result": "pass",
+      "name_dob_match": "match",
+      "document_expired": "false",
+      "duplicate_individual_detected": "false",
+      "result": "pass"
+    }
+  ]
 }

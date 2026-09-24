@@ -9,6 +9,8 @@ kb/                         Knowledge base (read-only CSV, versioned in kb_manif
   requirement_rule_sample.csv  The original 36-rule sample matrix, kept for reference
   document_quality_rules.csv   Quality checks per document type (Section 5.3)
   extraction_fields.csv        Fields each document type must yield (Section 5.4)
+  registry_rules.csv           Registry outcomes and what blocks (Section 5.5)
+  ubo_policy.csv               Beneficial-ownership threshold and findings (Section 5.6)
 orchestrator/
   orchestrator.py           The orchestration layer: runs steps in order, stops cleanly
   kb.py                     Loads the KB + tiny rule engine
@@ -18,6 +20,8 @@ orchestrator/
   steps/document_quality.py Step 3: screens each uploaded document (Section 5.3)
   steps/analyst_review.py   Analyst release of a document held at Step 3
   steps/extraction.py       Step 4: OCR and structured extraction (Section 5.4)
+  steps/verification.py     Step 5: registry, identity and UBO (Sections 5.5, 5.6)
+  providers.py              Registry and identity providers (mock / live stubs)
   quality_checker.py        AI half of Step 3 (mock / Claude Vision stub)
   extractor.py              AI half of Step 4 (mock / Claude stub)
 sample_applications/        6 test applications (normal, complex, branch, and failure cases)
@@ -26,8 +30,9 @@ tools/
   dataset_to_applications.py  Dataset CSVs -> application JSON; prints every assumption
   compare_to_dataset.py       Runs the orchestrator and scores it against the dataset
 tests/test_first_layers.py    4 unit tests
-tests/test_against_dataset.py 26 tests - full match against the dataset:
-                              50/50 case fields, 123/123 documents, 161/161 extracted fields
+tests/test_against_dataset.py 36 tests - full match against the dataset:
+                              50/50 case fields, 123/123 documents,
+                              192/192 extracted fields, 36/36 verification
 
 ## Run
 # On Windows PowerShell the shell does not expand the glob, so expand it explicitly:
@@ -48,8 +53,12 @@ application -> [Step 1 intake] --primary--> [Step 2 requirement pack] -> [Step 3
                           --required items outstanding--> document_quality_review (customer)
                           --white-label--> stop (KYB intake only)
 
-[Step 4 extraction] --all required fields above the floor--> verification
+[Step 4 extraction] --all required fields above the floor--> [Step 5 verification]
                     --missing / low confidence / date conflict--> analyst_review_required
+                    --required checklist item outstanding--> stays with the customer
+
+[Step 5 verification] --blocking outcome--> analyst_review_required
+                      --non-blocking findings--> screening (findings travel with the case)
 
 A document held at Step 3 waits for a named analyst: steps/analyst_review.py
 release_document(document_id, analyst_id, decision, reason) with decision
@@ -70,6 +79,26 @@ rather than one reading being preferred.
   mock    replays the dataset's extracted_field rows - the default, calls no API
   claude  STUB, raises; see orchestrator/extractor.py
 Set the mode with EXTRACTOR_MODE in orchestrator/orchestrator.py.
+
+## Step 5 - verification (Sections 5.5, 5.6)
+The paid-check boundary. verification.gate() refuses to run unless every REQUIRED
+checklist item is accepted, so a case still owing a document is never billed for
+provider calls it would have to repeat.
+  registry  the provider returns what the register HOLDS (name, number, address,
+            directors); the match results are COMPUTED here against the extracted
+            fields, an analyst's correction included. RG-09: a provider that does
+            not answer is retried once and then stops the case - never a pass.
+  identity  one call per director, UBO and signatory. fail / review / duplicate
+            stop the case; an expired ID goes back to the customer as a
+            resubmission of that one document.
+  ubo       effective ownership is multiplied along the chain (70% x 45% = 31.5%)
+            and compared with the declared total; owners at or above the 25%
+            threshold must be verified.
+Blocking outcomes stop at analyst_review_required. Non-blocking findings are rows
+in the finding table with evidence references, and the case goes on to screening.
+  mock  replays registry_check.csv / identity_check.csv - the default, calls no API
+  live  STUBS, raise; see orchestrator/providers.py
+Set the mode with PROVIDER_MODE in orchestrator/orchestrator.py.
 
 ## Step 3 - document quality (Section 5.3)
 Deterministic checks (file type, expiry, proof-of-address age, page count) run in code.

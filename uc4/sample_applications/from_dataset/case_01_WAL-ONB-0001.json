@@ -50,7 +50,7 @@
         {
           "field_id": "FLD-0001",
           "document_id": "DOC-0001",
-          "name": "legal_name",
+          "name": "company_name",
           "value": "Kaari Mets",
           "confidence": "0.97",
           "source_page": "1",
@@ -254,5 +254,43 @@
     }
   ],
   "analyst_releases": [],
-  "field_corrections": []
+  "field_corrections": [],
+  "field_acceptances": [],
+  "scripted_registry": [
+    {
+      "check_id": "REG-0001",
+      "case_id": "WAL-ONB-0001",
+      "applicant_id": "APP-0001",
+      "provider_name": "MockRegistryHub EE",
+      "company_status": "active",
+      "registry_legal_name": "Kaari Mets",
+      "registry_number": "EE-FIE-4410932",
+      "registry_address": "Kastani 12-4, 51006 Tartu, Estonia",
+      "registry_directors": "Kaari Mets",
+      "name_match": "match",
+      "number_match": "match",
+      "address_match": "match",
+      "director_match": "match",
+      "ubo_supported_by_registry": "true",
+      "high_risk_jurisdiction_or_industry": "false",
+      "confidence": "0.96",
+      "result": "pass"
+    }
+  ],
+  "scripted_identity": [
+    {
+      "check_id": "IDC-0001",
+      "case_id": "WAL-ONB-0001",
+      "individual_id": "IND-0001",
+      "provider_name": "VerifyMock ID",
+      "document_result": "pass",
+      "liveness_result": "pass",
+      "biometric_result": "pass",
+      "address_result": "pass",
+      "name_dob_match": "match",
+      "document_expired": "false",
+      "duplicate_individual_detected": "false",
+      "result": "pass"
+    }
+  ]
 }

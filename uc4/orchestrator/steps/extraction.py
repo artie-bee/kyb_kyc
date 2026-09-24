@@ -158,10 +158,24 @@ def route_case(conn, case_id: str, kb: KnowledgeBase, documents_read: int = 0,
         "SELECT COUNT(*) FROM document WHERE case_id = ? AND quality_status = "
         "'manual_review_required'", (case_id,)).fetchone()[0]
 
+    required_open = conn.execute(
+        "SELECT COUNT(*) FROM checklist_item i JOIN requirement_pack p USING (pack_id) "
+        "WHERE p.case_id = ? AND i.level = 'required' AND i.status != 'accepted'",
+        (case_id,)).fetchone()[0]
+
     if outstanding or held:
         status, owner, next_step = "analyst_review_required", "analyst", None
         summary = (f"{outstanding} field(s) need an analyst"
                    + (f"; {held} document(s) held after a date conflict" if held else ""))
+    elif required_open:
+        # Everything readable has been read, but the checklist is not complete, so
+        # Step 5 stays shut. The case keeps whatever Step 3 set: it is still the
+        # customer's move, and extraction does not change whose move it is.
+        case = conn.execute("SELECT status, next_action_owner FROM onboarding_case "
+                            "WHERE case_id = ?", (case_id,)).fetchone()
+        status, owner, next_step = case["status"], case["next_action_owner"], None
+        summary = (f"{required_open} required checklist item(s) still outstanding; "
+                   f"verification stays closed")
     else:
         status, owner, next_step = "verification_in_progress", "system", "verification"
         summary = "every required field extracted above the confidence floor"
@@ -182,6 +196,54 @@ def _set_item_status(conn, document_id: str, status: str) -> None:
     if item:
         conn.execute("UPDATE checklist_item SET status = ? WHERE item_id = ?",
                      (status, item["item_id"]))
+
+
+def accept_field_as_read(conn, field_id: str, analyst_id: str, reason: str,
+                        kb: KnowledgeBase | None = None) -> dict:
+    """An analyst has read the original and is content with what OCR produced.
+
+    The alternative to correcting a faint value is not ignoring it: someone looks
+    at the document and says the reading is right. The confidence stays on the
+    record and corrected_by_analyst stays false - nothing was changed - but the
+    field no longer holds the case up.
+    """
+    if not (reason or "").strip():
+        raise ValueError("a reason is required to accept a low-confidence field as read")
+    if not (analyst_id or "").strip():
+        raise ValueError("the accepting analyst must be identified")
+
+    kb = kb or KnowledgeBase()
+    row = conn.execute(
+        "SELECT f.*, d.case_id, d.file_name FROM extracted_field f JOIN document d "
+        "USING (document_id) WHERE f.field_id = ?", (field_id,)).fetchone()
+    if row is None:
+        raise KeyError(f"no such extracted field {field_id}")
+    if not row["needs_analyst_correction"]:
+        raise ValueError(f"{field_id} is not waiting on an analyst")
+
+    conn.execute("UPDATE extracted_field SET needs_analyst_correction = 0 WHERE field_id = ?",
+                 (field_id,))
+    db.audit(conn, row["case_id"], "analyst", analyst_id, "extracted_field_accepted_as_read",
+             f"{field_id} ({row['name']} on {row['file_name']}) accepted as read by {analyst_id}; "
+             f"value {row['value']!r} kept at confidence {row['confidence']}; reason: {reason}",
+             kb.version)
+    return {"field_id": field_id, "value": row["value"], "accepted_as_read": True}
+
+
+def replay_scripted_acceptances(conn, case_id: str, acceptances: list[dict],
+                                kb: KnowledgeBase | None = None) -> list[dict]:
+    """Mock-mode replay of the analyst decisions the dataset scripted."""
+    out = []
+    for a in acceptances:
+        row = conn.execute(
+            "SELECT f.field_id FROM extracted_field f JOIN document d USING (document_id) "
+            "WHERE d.case_id = ? AND d.file_name = ? AND f.name = ?",
+            (case_id, a["file_name"], a["name"])).fetchone()
+        if row is None:
+            raise KeyError(f"scripted acceptance names {a['name']} on {a['file_name']}, "
+                           f"which was not extracted on {case_id}")
+        out.append(accept_field_as_read(conn, row["field_id"], a["analyst_id"], a["reason"], kb))
+    return out
 
 
 def replay_scripted_corrections(conn, case_id: str, corrections: list[dict],

@@ -24,9 +24,12 @@ from orchestrator.quality_checker import (MockQualityChecker,                  #
                                           QualityVerdict, UnknownQualityFlag)
 from orchestrator.extractor import (ExtractedValue, ExtractionResult,        # noqa: E402
                                     UnknownExtractedField)
-from orchestrator.steps import analyst_review, document_quality, extraction  # noqa: E402
+from orchestrator import providers                                            # noqa: E402
+from orchestrator.steps import (analyst_review, document_quality, extraction,  # noqa: E402
+                                verification)
 from tools.compare_to_dataset import (compare, compare_documents,              # noqa: E402
-                                      compare_fields, render, run_orchestrator, score)
+                                      compare_fields, compare_verification, render,
+                                      run_orchestrator, score)
 from tools.dataset_to_applications import DEFAULT_DATASET, DEFAULT_OUT         # noqa: E402
 
 # Cases whose pipeline genuinely ends at Step 3, so the dataset's final status is
@@ -56,6 +59,37 @@ def _rows():
     subprocess.run([sys.executable, str(ROOT / "tools" / "dataset_to_applications.py")],
                    check=True, capture_output=True)
     return compare(run_orchestrator(DEFAULT_OUT), DEFAULT_DATASET)
+
+
+def _scripted_providers(app: dict, case_id: str, registry_edit=None, identity_edit=None):
+    """Mock providers keyed to THIS run's case id.
+
+    A single-application run mints WAL-ONB-0001 whatever the dataset called the
+    case, so the scripted rows have to be re-keyed or every lookup misses and
+    every provider looks unavailable.
+    """
+    registry = {case_id: dict(r) for r in app["scripted_registry"]}
+    identity = {(case_id, r["individual_id"]): dict(r) for r in app["scripted_identity"]}
+    if registry_edit:
+        registry_edit(registry)
+    if identity_edit:
+        identity_edit(identity)
+    return (providers.MockRegistryProvider(registry),
+            providers.MockIdentityProvider(identity))
+
+
+def _rerun_verification(app: dict, registry_edit=None, identity_edit=None,
+                        registry_provider=None):
+    """Run a case to completion, then redo Step 5 with edited provider answers."""
+    conn = db.connect(":memory:")
+    trace = process_application(conn, app, KnowledgeBase())
+    case_id = trace["intake"]["case_id"]
+    for table in ("registry_check", "identity_check", "finding"):
+        conn.execute(f"DELETE FROM {table}")
+    reg, ident = _scripted_providers(app, case_id, registry_edit, identity_edit)
+    return conn, verification.run(conn, case_id, app, KnowledgeBase(),
+                                  registry_provider=registry_provider or reg,
+                                  identity_provider=ident)
 
 
 def test_dataset_comparison_is_a_full_match():
@@ -134,12 +168,14 @@ def test_case_status_after_step_3():
                 f"{case_id} left Step 3 in unexpected status {status}"
 
 
-def test_case_2_never_reaches_extraction_or_a_paid_check():
+def test_case_2_never_reaches_a_paid_provider_check():
     conn, trace = _run_one(_application("WAL-ONB-0002"))
     dq = trace["document_quality"]
     assert dq["status"] == "resubmission_required"
-    assert dq["next_step"] is None, "a failed document must not open the extraction step"
-    assert trace.get("waiting_for") != "extraction"
+    # Extraction is free and runs; verification is the paid boundary and does not.
+    assert trace["extraction"]["next_step"] is None
+    assert trace.get("waiting_for") != "verification"
+    assert "verification" not in trace
 
     case_id = trace["intake"]["case_id"]
     accepted = document_quality.accepted_documents(conn, case_id)
@@ -308,7 +344,8 @@ def test_release_request_resubmission_sends_the_case_back_to_the_customer():
         conn, held["document_id"], "analyst.m.sild", "request_resubmission",
         "the annex is needed in full to confirm the chain")
     assert out.document_status == "resubmission_required"
-    assert out.case_status == "resubmission_required" and out.next_step is None
+    assert out.case_status == "resubmission_required"
+    assert out.next_step == "extraction", "the readable documents can still be read"
     assert conn.execute("SELECT next_action_owner FROM onboarding_case WHERE case_id = ?",
                         (held["case_id"],)).fetchone()[0] == "customer"
 
@@ -345,28 +382,41 @@ def test_a_release_needs_a_reason_a_decision_and_a_held_document():
 def test_extracted_fields_match_the_dataset_in_mock_mode():
     rows = compare_fields(run_orchestrator(DEFAULT_OUT), DEFAULT_DATASET)
     ok, total = score(rows)
-    assert total == 161, f"expected 161 extracted fields, got {total}"
+    assert total == 192, f"expected 192 extracted fields, got {total}"
     assert ok == total, (
         f"{ok}/{total} fields match; mismatches:\n"
         + render([r for r in rows if r[4] == "NO"]))
 
 
 def test_extraction_coverage_accounts_for_every_dataset_field():
-    """161 of the dataset's 189 fields. The other 28 belong to the two cases that
-    stop before Step 4 - so the gap is the routing, not a silent failure."""
+    """Every extracted_field row in the dataset has a counterpart here - no gap.
+
+    Case 2 is extracted while it waits for a resubmission (only the paid checks
+    wait); case 8 stops before Step 4 and the dataset gives it no fields.
+    """
     docs = {r["document_id"]: r for r in _csv("document.csv")}
-    by_case = collections.Counter(
+    ds = collections.Counter(
         docs[r["document_id"]]["case_id"] for r in _csv("extracted_field.csv"))
-    assert sum(by_case.values()) == 189
-    # case 2 waits on a resubmission, case 8 is white-label KYB intake only
-    assert by_case["WAL-ONB-0002"] + by_case["WAL-ONB-0008"] == 28
+    assert ds["WAL-ONB-0008"] == 0, "white-label stops before Step 4 and extracts nothing"
 
     conn = run_orchestrator(DEFAULT_OUT)
-    for case_id in ("WAL-ONB-0002", "WAL-ONB-0008"):
-        n = conn.execute(
-            "SELECT COUNT(*) FROM extracted_field f JOIN document d USING (document_id) "
-            "WHERE d.case_id = ?", (case_id,)).fetchone()[0]
-        assert n == 0, f"{case_id} stops before Step 4 and should have extracted nothing"
+    ours = collections.Counter(
+        r["case_id"] for r in conn.execute(
+            "SELECT d.case_id FROM extracted_field f JOIN document d USING (document_id)"))
+    assert ours == ds, f"per-case field counts differ: dataset={dict(ds)} ours={dict(ours)}"
+
+    rows = compare_fields(conn, DEFAULT_DATASET)
+    assert score(rows)[1] == sum(ds.values()) == 192
+
+
+def test_case_2_is_extracted_while_it_waits_for_a_resubmission():
+    conn, trace = _run_one(_application("WAL-ONB-0002"))
+    case_id = trace["intake"]["case_id"]
+    assert trace["extraction"]["documents_read"] == 9, "the nine accepted documents are read"
+    assert trace["extraction"]["next_step"] is None, "but verification stays shut"
+    case = conn.execute("SELECT status, next_action_owner FROM onboarding_case WHERE case_id = ?",
+                        (case_id,)).fetchone()
+    assert case["status"] == "resubmission_required" and case["next_action_owner"] == "customer",         "extraction must not take the case away from the customer"
 
 
 def test_extraction_never_reads_a_document_that_is_not_accepted():
@@ -446,8 +496,10 @@ def test_case_3_corrected_address_survives_for_the_registry_check():
         "WHERE d.file_name = 'registry_extract_calderwick.pdf' AND f.name = 'registered_address'"
     ).fetchone()
 
+    docs = {r["document_id"]: r for r in _csv("document.csv")}
     ds_value = next(r["value"] for r in _csv("extracted_field.csv")
-                    if r["field_id"] == "FLD-0040")
+                    if docs[r["document_id"]]["file_name"] == "registry_extract_calderwick.pdf"
+                    and r["name"] == "registered_address")
     assert row["value"] == ds_value == "Unit 7 Calderwick Way, Leeds LS12 4QT, United Kingdom"
     assert row["corrected_by_analyst"] == 1
     assert row["needs_analyst_correction"] == 0, "a corrected field no longer blocks the case"
@@ -476,6 +528,186 @@ def test_an_extractor_may_not_invent_a_field():
         raise AssertionError("an unlisted field name should be rejected")
     except UnknownExtractedField:
         pass
+
+
+# ---------------------------------------------------------------------------
+# Step 5 - verification
+# ---------------------------------------------------------------------------
+
+def test_verification_matches_the_dataset_in_mock_mode():
+    rows = compare_verification(run_orchestrator(DEFAULT_OUT), DEFAULT_DATASET)
+    ok, total = score(rows)
+    assert total == 36, f"expected 8 registry + 20 identity + 8 UBO checks, got {total}"
+    assert ok == total, (
+        f"{ok}/{total} verification checks match; mismatches:\n"
+        + render([r for r in rows if r[4] == "NO"]))
+
+
+def test_step_5_refuses_to_run_while_a_required_item_is_not_accepted():
+    """The paid-check boundary. Case 2 owes a document, so nothing external runs."""
+    conn, trace = _run_one(_application("WAL-ONB-0002"))
+    case_id = trace["intake"]["case_id"]
+    assert "verification" not in trace
+
+    try:
+        verification.run(conn, case_id, _application("WAL-ONB-0002"), KnowledgeBase())
+        raise AssertionError("verification should refuse to run on an incomplete checklist")
+    except verification.VerificationGateError as e:
+        assert "id_document" in str(e)
+
+    for table in ("registry_check", "identity_check"):
+        assert conn.execute(f"SELECT COUNT(*) FROM {table}").fetchone()[0] == 0, \
+            f"{table} must be empty: the gate refused before any provider was called"
+
+
+def test_case_3_address_mismatch_is_found_using_the_corrected_address():
+    conn = run_orchestrator(DEFAULT_OUT)
+    case_id = conn.execute(
+        "SELECT case_id FROM document WHERE file_name = 'registry_extract_calderwick.pdf'"
+    ).fetchone()["case_id"]
+
+    corrected = conn.execute(
+        "SELECT f.value FROM extracted_field f JOIN document d USING (document_id) "
+        "WHERE d.case_id = ? AND f.name = 'registered_address' AND f.corrected_by_analyst = 1",
+        (case_id,)).fetchone()["value"]
+    reg = conn.execute("SELECT * FROM registry_check WHERE case_id = ?", (case_id,)).fetchone()
+
+    assert reg["address_match"] == "mismatch"
+    assert reg["registry_address"] != corrected, "the mismatch is between these two values"
+    # and it is the corrected value, not the 0.58 reading, that was compared
+    assert corrected == "Unit 7 Calderwick Way, Leeds LS12 4QT, United Kingdom"
+    assert verification._match(reg["registry_address"], corrected) == "mismatch"
+
+    finding = conn.execute(
+        "SELECT * FROM finding WHERE case_id = ? AND rule_id = 'RG-07'", (case_id,)).fetchone()
+    assert finding is not None and finding["blocking"] == 0, "an address mismatch is not blocking"
+    assert reg["check_id"] in finding["evidence_refs"]
+    # non-blocking, so the case still goes on to screening
+    assert conn.execute("SELECT status FROM onboarding_case WHERE case_id = ?",
+                        (case_id,)).fetchone()["status"] == "verification_in_progress"
+
+
+def test_case_4_effective_ubo_ownership_is_31_5_percent():
+    assert verification.effective_ownership([70, 45]) == 31.5
+    assert verification.effective_ownership([100, 70]) == 70.0
+    assert verification.effective_ownership([60]) == 60.0
+
+    conn = run_orchestrator(DEFAULT_OUT)
+    row = conn.execute(
+        "SELECT u.*, i.full_name FROM ubo u JOIN individual i USING (individual_id) "
+        "WHERE i.full_name = 'Ruben Halvorsen'").fetchone()
+    assert float(row["ownership_percentage"]) == 31.5
+    assert row["verification_status"] == "unverified", \
+        "the register does not support this indirect chain"
+
+    event = conn.execute(
+        "SELECT payload_summary FROM audit_event WHERE action = 'ubo_verified' "
+        "AND payload_summary LIKE '%Ruben Halvorsen%'").fetchone()
+    assert "[70.0, 45.0] -> 31.5% effective" in event["payload_summary"]
+
+    # the direct 24.5% holder on the same case is unaffected by the chain finding
+    other = conn.execute(
+        "SELECT u.verification_status FROM ubo u JOIN individual i USING (individual_id) "
+        "WHERE i.full_name = 'Anneli Sormus'").fetchone()
+    assert other["verification_status"] == "verified"
+
+
+def test_an_unavailable_provider_is_never_a_pass():
+    class SilentRegistry(providers.MockRegistryProvider):
+        mode, name = "mock", "MockRegistryHub"
+        calls = 0
+
+        def lookup(self, applicant, case):
+            SilentRegistry.calls += 1
+            return providers.RegistryResponse(available=False, provider_name=self.name)
+
+    app = _application("WAL-ONB-0009")
+    conn, result = _rerun_verification(app, registry_provider=SilentRegistry())
+
+    assert result.registry_result == "unavailable" != "pass"
+    assert result.status == "analyst_review_required" and result.next_step is None
+    assert any("RG-09" in b for b in result.blocking)
+    assert SilentRegistry.calls == verification.MAX_REGISTRY_ATTEMPTS,         "RG-09 retries once, then stops rather than hammering the provider"
+
+    row = conn.execute("SELECT * FROM registry_check").fetchone()
+    assert row["result"] == "unavailable" and row["attempts"] == 2
+
+
+def test_blocking_registry_outcomes_stop_the_case():
+    """No dataset case is dissolved or name-mismatched, so these are driven directly."""
+    app = _application("WAL-ONB-0009")
+
+    def dissolve(registry):
+        for row in registry.values():
+            row["company_status"] = "dissolved"
+
+    _, result = _rerun_verification(app, registry_edit=dissolve)
+    assert result.status == "analyst_review_required" and result.next_step is None
+    assert any("RG-01" in b for b in result.blocking)
+
+    def rename(registry):
+        for row in registry.values():
+            row["registry_legal_name"] = "Some Other Company OU"
+
+    _, mismatched = _rerun_verification(app, registry_edit=rename)
+    assert any("RG-05" in b for b in mismatched.blocking), "a name mismatch is blocking"
+
+
+def test_identity_failures_route_correctly():
+    """Every dataset identity row is a clean pass, so each branch is driven here."""
+    app = _application("WAL-ONB-0009")
+
+    def first(key, value):
+        def edit(identity):
+            identity[sorted(identity)[0]][key] = value
+        return edit
+
+    _, failed = _rerun_verification(app, identity_edit=first("result", "fail"))
+    assert failed.status == "analyst_review_required" and failed.next_step is None
+
+    _, review = _rerun_verification(app, identity_edit=first("result", "review"))
+    assert review.status == "analyst_review_required", "'review' is an analyst question too"
+
+    _, dup = _rerun_verification(
+        app, identity_edit=first("duplicate_individual_detected", "true"))
+    assert dup.status == "analyst_review_required"
+    assert any("ID-DUPLICATE" in b for b in dup.blocking)
+
+    conn, expired = _rerun_verification(app, identity_edit=first("document_expired", "true"))
+    assert expired.status == "verification_in_progress",         "an expired ID is the customer's to replace, not an analyst's to judge"
+    assert not expired.blocking
+    assert conn.execute(
+        "SELECT COUNT(*) FROM checklist_item WHERE document_type = 'id_document' "
+        "AND status = 'resubmission_requested'").fetchone()[0] == 1
+
+
+def test_non_blocking_findings_still_let_screening_run():
+    conn = run_orchestrator(DEFAULT_OUT)
+    for case_id in ("WAL-ONB-0003", "WAL-ONB-0004"):
+        found = conn.execute("SELECT COUNT(*) FROM finding WHERE case_id = ? AND blocking = 0",
+                             (case_id,)).fetchone()[0]
+        assert found, f"{case_id} should carry non-blocking findings forward"
+        assert conn.execute("SELECT status FROM onboarding_case WHERE case_id = ?",
+                            (case_id,)).fetchone()["status"] == "verification_in_progress"
+        # every subject was still checked, findings or not
+        subjects = conn.execute(
+            "SELECT COUNT(*) FROM individual WHERE applicant_id = "
+            "(SELECT applicant_id FROM onboarding_case WHERE case_id = ?)", (case_id,)).fetchone()[0]
+        checks = conn.execute("SELECT COUNT(*) FROM identity_check WHERE case_id = ?",
+                              (case_id,)).fetchone()[0]
+        assert checks == subjects
+
+
+def test_every_provider_call_is_audited_with_name_and_mode():
+    conn = run_orchestrator(DEFAULT_OUT)
+    reg = conn.execute("SELECT COUNT(*) FROM registry_check").fetchone()[0]
+    idc = conn.execute("SELECT COUNT(*) FROM identity_check").fetchone()[0]
+    events = conn.execute(
+        "SELECT payload_summary FROM audit_event WHERE action IN "
+        "('registry_check_completed', 'identity_check_completed')").fetchall()
+    assert len(events) == reg + idc
+    assert all("mode=mock" in e["payload_summary"] for e in events)
+    assert all("rules=" in e["payload_summary"] for e in events)
 
 
 def test_a_checker_may_not_invent_a_flag():

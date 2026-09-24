@@ -91,9 +91,24 @@ ASSUMPTIONS = [
     ("E2", "extracted_field rows whose corrected_by_analyst is true are replayed as scripted "
            "analyst corrections (field_corrections[]), not as the value OCR read - otherwise "
            "the correction would look like a confident first reading."),
+    ("E3", "field_acceptances[] is parsed from the audit rows with action "
+           "extracted_field_accepted_as_read: a low-confidence value an analyst read against "
+           "the original and kept. It clears the field without changing it."),
+    # --- verification, for Step 5 -----------------------------------------------
+    ("V1", "scripted_registry[] and scripted_identity[] are registry_check.csv and "
+           "identity_check.csv rows, replayed by the mock providers. The registry row now "
+           "carries the raw values the register holds, so Step 5 computes the match results "
+           "rather than being handed them."),
+    ("V2", "ownership_chain_percentages is carried onto each UBO so effective ownership can "
+           "be multiplied along the chain and cross-checked against the declared total."),
 ]
 
 # "DOC-0038 (ownership_chart) released by a.name; decision accept; reason: ..."
+# "director_name on file.pdf accepted as read by a.name; reason: ..."
+ACCEPT_RE = re.compile(
+    r"^(?P<name>\S+) on (?P<file>\S+) accepted as read by (?P<analyst>[^;]+); "
+    r"reason: (?P<reason>.+)$", re.S)
+
 RELEASE_RE = re.compile(
     r"^(?P<doc>DOC-\d+).*?released by (?P<analyst>\S+); "
     r"decision (?P<decision>\w+); reason: (?P<reason>.+)$", re.S)
@@ -214,7 +229,8 @@ def build_releases(events: list[dict], file_names: dict[str, str]) -> list[dict]
 
 def build_application(case: dict, applicant: dict, people: list[dict], ubos: list[dict],
                       documents: list[dict], releases: list[dict],
-                      corrections: list[dict]) -> dict:
+                      corrections: list[dict], acceptances: list[dict],
+                      registry: list[dict], identity: list[dict]) -> dict:
     return {
         "application_id": f"{case['source_channel'].upper()}-{case['case_id']}",
         "source_channel": case["source_channel"],
@@ -243,7 +259,10 @@ def build_application(case: dict, applicant: dict, people: list[dict], ubos: lis
         "ubos": [
             {"individual_ref": u["individual_id"],
              "ownership_percentage": float(u["ownership_percentage"]),
-             "control_type": u["control_type"] or None,
+             "ownership_chain_percentages": [float(c) for c in
+                                        (u.get("ownership_chain_percentages") or "").split("|")
+                                        if c],                                          # V2
+         "control_type": u["control_type"] or None,
              "ownership_path": u["ownership_path"] or None}
             for u in ubos
         ],
@@ -251,6 +270,9 @@ def build_application(case: dict, applicant: dict, people: list[dict], ubos: lis
         "documents": documents,                                 # D1-D4
         "analyst_releases": releases,                           # D5
         "field_corrections": corrections,                       # E2
+        "field_acceptances": acceptances,                       # E3
+        "scripted_registry": registry,                          # V1
+        "scripted_identity": identity,                          # V1
     }
 
 
@@ -281,6 +303,13 @@ def main() -> None:
                   for case_rows in docs_by_case.values() for r in case_rows}
     releases_by_case = defaultdict(list)
     correction_events = {}
+    acceptances_by_case = defaultdict(list)
+    registry_by_case = defaultdict(list)
+    for r in read_csv(args.dataset / "registry_check.csv"):
+        registry_by_case[r["case_id"]].append(r)
+    identity_by_case = defaultdict(list)
+    for r in read_csv(args.dataset / "identity_check.csv"):
+        identity_by_case[r["case_id"]].append(r)
     for r in read_csv(args.dataset / "audit_event.csv"):
         if r["action"] == "document_released_after_review":
             releases_by_case[r["case_id"]].append(r)
@@ -288,6 +317,13 @@ def main() -> None:
             m = re.search(r"(FLD-\d+)", r["payload_summary"])
             if m:
                 correction_events[m.group(1)] = r
+        elif r["action"] == "extracted_field_accepted_as_read":
+            m = ACCEPT_RE.match(r["payload_summary"].strip())
+            if not m:
+                raise ValueError("cannot parse acceptance row: " + r["payload_summary"][:80])
+            acceptances_by_case[r["case_id"]].append(
+                {"name": m["name"], "file_name": m["file"], "analyst_id": m["analyst"],
+                 "reason": m["reason"].strip()})
     doc_case = {r["document_id"]: r["case_id"]
                 for rows in docs_by_case.values() for r in rows}
     fields_by_case = defaultdict(list)
@@ -305,7 +341,9 @@ def main() -> None:
             build_documents(docs_by_case[case["case_id"]], doc_dates, fields_by_doc),
             build_releases(releases_by_case[case["case_id"]], file_names),
             build_corrections(fields_by_case[case["case_id"]], file_names,
-                              correction_events))
+                              correction_events),
+            acceptances_by_case[case["case_id"]],
+            registry_by_case[case["case_id"]], identity_by_case[case["case_id"]])
         out = args.out / f"case_{n:02d}_{case['case_id']}.json"
         out.write_text(json.dumps(app, indent=2, ensure_ascii=False), encoding="utf-8")
         own = app["ownership"]

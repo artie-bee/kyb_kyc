@@ -46,26 +46,7 @@
       "document_date": null,
       "issue_country": "EE",
       "scripted_quality_flags": [],
-      "scripted_fields": [
-        {
-          "field_id": "FLD-0142",
-          "document_id": "DOC-0090",
-          "name": "company_name",
-          "value": "Kestrel Pay Partners OU",
-          "confidence": "0.95",
-          "source_page": "1",
-          "corrected_by_analyst": "false"
-        },
-        {
-          "field_id": "FLD-0143",
-          "document_id": "DOC-0090",
-          "name": "registration_number",
-          "value": "EE-90016004",
-          "confidence": "0.94",
-          "source_page": "1",
-          "corrected_by_analyst": "false"
-        }
-      ]
+      "scripted_fields": []
     },
     {
       "document_type": "registry_extract",
@@ -76,26 +57,7 @@
       "document_date": null,
       "issue_country": "EE",
       "scripted_quality_flags": [],
-      "scripted_fields": [
-        {
-          "field_id": "FLD-0144",
-          "document_id": "DOC-0091",
-          "name": "registered_address",
-          "value": "Valukoja 8, 11415 Tallinn, Estonia",
-          "confidence": "0.92",
-          "source_page": "1",
-          "corrected_by_analyst": "false"
-        },
-        {
-          "field_id": "FLD-0145",
-          "document_id": "DOC-0091",
-          "name": "entity_status",
-          "value": "active",
-          "confidence": "0.94",
-          "source_page": "1",
-          "corrected_by_analyst": "false"
-        }
-      ]
+      "scripted_fields": []
     },
     {
       "document_type": "director_register",
@@ -106,17 +68,7 @@
       "document_date": null,
       "issue_country": null,
       "scripted_quality_flags": [],
-      "scripted_fields": [
-        {
-          "field_id": "FLD-0146",
-          "document_id": "DOC-0092",
-          "name": "director_name",
-          "value": "Marek Tonisson",
-          "confidence": "0.93",
-          "source_page": "1",
-          "corrected_by_analyst": "false"
-        }
-      ]
+      "scripted_fields": []
     },
     {
       "document_type": "ubo_declaration",
@@ -127,26 +79,7 @@
       "document_date": null,
       "issue_country": null,
       "scripted_quality_flags": [],
-      "scripted_fields": [
-        {
-          "field_id": "FLD-0147",
-          "document_id": "DOC-0093",
-          "name": "ubo_name",
-          "value": "Marek Tonisson",
-          "confidence": "0.91",
-          "source_page": "1",
-          "corrected_by_analyst": "false"
-        },
-        {
-          "field_id": "FLD-0148",
-          "document_id": "DOC-0093",
-          "name": "ownership_percentage",
-          "value": "100.0",
-          "confidence": "0.9",
-          "source_page": "1",
-          "corrected_by_analyst": "false"
-        }
-      ]
+      "scripted_fields": []
     },
     {
       "document_type": "programme_business_plan",
@@ -157,26 +90,7 @@
       "document_date": null,
       "issue_country": null,
       "scripted_quality_flags": [],
-      "scripted_fields": [
-        {
-          "field_id": "FLD-0149",
-          "document_id": "DOC-0094",
-          "name": "target_segment",
-          "value": "SME expense management in the Baltics",
-          "confidence": "0.86",
-          "source_page": "1",
-          "corrected_by_analyst": "false"
-        },
-        {
-          "field_id": "FLD-0150",
-          "document_id": "DOC-0094",
-          "name": "expected_card_volume",
-          "value": "15000 cards in year one",
-          "confidence": "0.83",
-          "source_page": "2",
-          "corrected_by_analyst": "false"
-        }
-      ]
+      "scripted_fields": []
     },
     {
       "document_type": "website_or_platform_details",
@@ -187,19 +101,12 @@
       "document_date": null,
       "issue_country": null,
       "scripted_quality_flags": [],
-      "scripted_fields": [
-        {
-          "field_id": "FLD-0151",
-          "document_id": "DOC-0095",
-          "name": "platform_url",
-          "value": "kestrelpay.example",
-          "confidence": "0.88",
-          "source_page": "1",
-          "corrected_by_analyst": "false"
-        }
-      ]
+      "scripted_fields": []
     }
   ],
   "analyst_releases": [],
-  "field_corrections": []
+  "field_corrections": [],
+  "field_acceptances": [],
+  "scripted_registry": [],
+  "scripted_identity": []
 }

@@ -41,6 +41,9 @@
     {
       "individual_ref": "IND-0017",
       "ownership_percentage": 45.0,
+      "ownership_chain_percentages": [
+        45.0
+      ],
       "control_type": "direct_shareholding",
       "ownership_path": "Bramforth Aggregates Ltd"
     }
@@ -64,7 +67,7 @@
       "scripted_quality_flags": [],
       "scripted_fields": [
         {
-          "field_id": "FLD-0124",
+          "field_id": "FLD-0131",
           "document_id": "DOC-0077",
           "name": "company_name",
           "value": "Bramforth Aggregates Ltd",
@@ -73,7 +76,7 @@
           "corrected_by_analyst": "false"
         },
         {
-          "field_id": "FLD-0125",
+          "field_id": "FLD-0132",
           "document_id": "DOC-0077",
           "name": "registration_number",
           "value": "UK-99021560",
@@ -94,7 +97,25 @@
       "scripted_quality_flags": [],
       "scripted_fields": [
         {
-          "field_id": "FLD-0126",
+          "field_id": "FLD-0133",
+          "document_id": "DOC-0078",
+          "name": "company_name",
+          "value": "Bramforth Aggregates Ltd",
+          "confidence": "0.95",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        },
+        {
+          "field_id": "FLD-0134",
+          "document_id": "DOC-0078",
+          "name": "registration_number",
+          "value": "UK-99021560",
+          "confidence": "0.94",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        },
+        {
+          "field_id": "FLD-0135",
           "document_id": "DOC-0078",
           "name": "registered_address",
           "value": "Bramforth Yard, Pinfold Lane, Doncaster DN4 6RS, United Kingdom",
@@ -103,7 +124,7 @@
           "corrected_by_analyst": "false"
         },
         {
-          "field_id": "FLD-0127",
+          "field_id": "FLD-0136",
           "document_id": "DOC-0078",
           "name": "entity_status",
           "value": "active",
@@ -124,7 +145,7 @@
       "scripted_quality_flags": [],
       "scripted_fields": [
         {
-          "field_id": "FLD-0128",
+          "field_id": "FLD-0137",
           "document_id": "DOC-0079",
           "name": "vat_number",
           "value": "GB-VAT-664120933",
@@ -145,7 +166,7 @@
       "scripted_quality_flags": [],
       "scripted_fields": [
         {
-          "field_id": "FLD-0129",
+          "field_id": "FLD-0138",
           "document_id": "DOC-0080",
           "name": "director_name",
           "value": "Nigel Braithwaite-Cole",
@@ -154,7 +175,7 @@
           "corrected_by_analyst": "false"
         },
         {
-          "field_id": "FLD-0130",
+          "field_id": "FLD-0139",
           "document_id": "DOC-0080",
           "name": "appointment_date",
           "value": "2015-02-03",
@@ -175,7 +196,7 @@
       "scripted_quality_flags": [],
       "scripted_fields": [
         {
-          "field_id": "FLD-0131",
+          "field_id": "FLD-0140",
           "document_id": "DOC-0081",
           "name": "signatory_name",
           "value": "Nigel Braithwaite-Cole",
@@ -196,7 +217,7 @@
       "scripted_quality_flags": [],
       "scripted_fields": [
         {
-          "field_id": "FLD-0132",
+          "field_id": "FLD-0141",
           "document_id": "DOC-0082",
           "name": "ubo_name",
           "value": "Fenella Quist",
@@ -205,7 +226,7 @@
           "corrected_by_analyst": "false"
         },
         {
-          "field_id": "FLD-0133",
+          "field_id": "FLD-0142",
           "document_id": "DOC-0082",
           "name": "ownership_percentage",
           "value": "45.0",
@@ -226,7 +247,7 @@
       "scripted_quality_flags": [],
       "scripted_fields": [
         {
-          "field_id": "FLD-0134",
+          "field_id": "FLD-0143",
           "document_id": "DOC-0083",
           "name": "full_name",
           "value": "Nigel Braithwaite-Cole",
@@ -235,7 +256,7 @@
           "corrected_by_analyst": "false"
         },
         {
-          "field_id": "FLD-0135",
+          "field_id": "FLD-0144",
           "document_id": "DOC-0083",
           "name": "date_of_birth",
           "value": "1968-04-12",
@@ -256,7 +277,7 @@
       "scripted_quality_flags": [],
       "scripted_fields": [
         {
-          "field_id": "FLD-0136",
+          "field_id": "FLD-0145",
           "document_id": "DOC-0084",
           "name": "full_name",
           "value": "Fenella Quist",
@@ -277,7 +298,7 @@
       "scripted_quality_flags": [],
       "scripted_fields": [
         {
-          "field_id": "FLD-0137",
+          "field_id": "FLD-0146",
           "document_id": "DOC-0085",
           "name": "document_date",
           "value": "2026-08-09",
@@ -298,7 +319,7 @@
       "scripted_quality_flags": [],
       "scripted_fields": [
         {
-          "field_id": "FLD-0138",
+          "field_id": "FLD-0147",
           "document_id": "DOC-0086",
           "name": "document_date",
           "value": "2026-08-15",
@@ -319,7 +340,7 @@
       "scripted_quality_flags": [],
       "scripted_fields": [
         {
-          "field_id": "FLD-0139",
+          "field_id": "FLD-0148",
           "document_id": "DOC-0087",
           "name": "declared_source",
           "value": "Aggregate supply contracts with regional construction firms",
@@ -340,7 +361,7 @@
       "scripted_quality_flags": [],
       "scripted_fields": [
         {
-          "field_id": "FLD-0140",
+          "field_id": "FLD-0149",
           "document_id": "DOC-0088",
           "name": "declared_industry",
           "value": "Construction aggregates and haulage",
@@ -361,7 +382,7 @@
       "scripted_quality_flags": [],
       "scripted_fields": [
         {
-          "field_id": "FLD-0141",
+          "field_id": "FLD-0150",
           "document_id": "DOC-0089",
           "name": "account_holder",
           "value": "Bramforth Aggregates Ltd",
@@ -373,5 +394,64 @@
     }
   ],
   "analyst_releases": [],
-  "field_corrections": []
+  "field_corrections": [],
+  "field_acceptances": [
+    {
+      "name": "director_name",
+      "file_name": "director_register_bramforth_scan.pdf",
+      "analyst_id": "compliance.d.ferreira",
+      "reason": "the name matches the signatory list and the director's passport, so the faint scan is corroborated"
+    }
+  ],
+  "scripted_registry": [
+    {
+      "check_id": "REG-0006",
+      "case_id": "WAL-ONB-0007",
+      "applicant_id": "APP-0007",
+      "provider_name": "MockRegistryHub UK",
+      "company_status": "active",
+      "registry_legal_name": "Bramforth Aggregates Ltd",
+      "registry_number": "UK-99021560",
+      "registry_address": "Bramforth Yard, Pinfold Lane, Doncaster DN4 6RS, United Kingdom",
+      "registry_directors": "Nigel Braithwaite-Cole",
+      "name_match": "match",
+      "number_match": "match",
+      "address_match": "match",
+      "director_match": "match",
+      "ubo_supported_by_registry": "true",
+      "high_risk_jurisdiction_or_industry": "false",
+      "confidence": "0.9",
+      "result": "pass"
+    }
+  ],
+  "scripted_identity": [
+    {
+      "check_id": "IDC-0014",
+      "case_id": "WAL-ONB-0007",
+      "individual_id": "IND-0016",
+      "provider_name": "VerifyMock ID",
+      "document_result": "pass",
+      "liveness_result": "pass",
+      "biometric_result": "pass",
+      "address_result": "pass",
+      "name_dob_match": "match",
+      "document_expired": "false",
+      "duplicate_individual_detected": "false",
+      "result": "pass"
+    },
+    {
+      "check_id": "IDC-0015",
+      "case_id": "WAL-ONB-0007",
+      "individual_id": "IND-0017",
+      "provider_name": "VerifyMock ID",
+      "document_result": "pass",
+      "liveness_result": "pass",
+      "biometric_result": "pass",
+      "address_result": "pass",
+      "name_dob_match": "match",
+      "document_expired": "false",
+      "duplicate_individual_detected": "false",
+      "result": "pass"
+    }
+  ]
 }

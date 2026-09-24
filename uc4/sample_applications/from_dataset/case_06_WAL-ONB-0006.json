@@ -50,6 +50,9 @@
     {
       "individual_ref": "IND-0015",
       "ownership_percentage": 80.0,
+      "ownership_chain_percentages": [
+        80.0
+      ],
       "control_type": "direct_shareholding",
       "ownership_path": "Saarvik Metall OU"
     }
@@ -73,7 +76,7 @@
       "scripted_quality_flags": [],
       "scripted_fields": [
         {
-          "field_id": "FLD-0105",
+          "field_id": "FLD-0110",
           "document_id": "DOC-0063",
           "name": "company_name",
           "value": "Saarvik Metall OU",
@@ -82,7 +85,7 @@
           "corrected_by_analyst": "false"
         },
         {
-          "field_id": "FLD-0106",
+          "field_id": "FLD-0111",
           "document_id": "DOC-0063",
           "name": "registration_number",
           "value": "EE-90014782",
@@ -103,7 +106,25 @@
       "scripted_quality_flags": [],
       "scripted_fields": [
         {
-          "field_id": "FLD-0107",
+          "field_id": "FLD-0112",
+          "document_id": "DOC-0064",
+          "name": "company_name",
+          "value": "Saarvik Metall OU",
+          "confidence": "0.95",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        },
+        {
+          "field_id": "FLD-0113",
+          "document_id": "DOC-0064",
+          "name": "registration_number",
+          "value": "EE-90014782",
+          "confidence": "0.94",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        },
+        {
+          "field_id": "FLD-0114",
           "document_id": "DOC-0064",
           "name": "registered_address",
           "value": "Tehnika 27, 76505 Saue, Estonia",
@@ -112,7 +133,7 @@
           "corrected_by_analyst": "false"
         },
         {
-          "field_id": "FLD-0108",
+          "field_id": "FLD-0115",
           "document_id": "DOC-0064",
           "name": "entity_status",
           "value": "active",
@@ -133,7 +154,7 @@
       "scripted_quality_flags": [],
       "scripted_fields": [
         {
-          "field_id": "FLD-0109",
+          "field_id": "FLD-0116",
           "document_id": "DOC-0065",
           "name": "tax_number",
           "value": "EE-TAX-90014782",
@@ -154,7 +175,7 @@
       "scripted_quality_flags": [],
       "scripted_fields": [
         {
-          "field_id": "FLD-0110",
+          "field_id": "FLD-0117",
           "document_id": "DOC-0066",
           "name": "director_name",
           "value": "Rasmus Kalda",
@@ -163,7 +184,7 @@
           "corrected_by_analyst": "false"
         },
         {
-          "field_id": "FLD-0111",
+          "field_id": "FLD-0118",
           "document_id": "DOC-0066",
           "name": "director_name_2",
           "value": "Triin Lepik",
@@ -184,7 +205,7 @@
       "scripted_quality_flags": [],
       "scripted_fields": [
         {
-          "field_id": "FLD-0112",
+          "field_id": "FLD-0119",
           "document_id": "DOC-0067",
           "name": "signatory_name",
           "value": "Rasmus Kalda",
@@ -205,7 +226,7 @@
       "scripted_quality_flags": [],
       "scripted_fields": [
         {
-          "field_id": "FLD-0113",
+          "field_id": "FLD-0120",
           "document_id": "DOC-0068",
           "name": "ubo_name",
           "value": "Oskar Magiste",
@@ -214,7 +235,7 @@
           "corrected_by_analyst": "false"
         },
         {
-          "field_id": "FLD-0114",
+          "field_id": "FLD-0121",
           "document_id": "DOC-0068",
           "name": "ownership_percentage",
           "value": "80.0",
@@ -235,7 +256,7 @@
       "scripted_quality_flags": [],
       "scripted_fields": [
         {
-          "field_id": "FLD-0115",
+          "field_id": "FLD-0122",
           "document_id": "DOC-0069",
           "name": "full_name",
           "value": "Rasmus Kalda",
@@ -244,7 +265,7 @@
           "corrected_by_analyst": "false"
         },
         {
-          "field_id": "FLD-0116",
+          "field_id": "FLD-0123",
           "document_id": "DOC-0069",
           "name": "date_of_birth",
           "value": "1977-05-21",
@@ -265,7 +286,7 @@
       "scripted_quality_flags": [],
       "scripted_fields": [
         {
-          "field_id": "FLD-0117",
+          "field_id": "FLD-0124",
           "document_id": "DOC-0070",
           "name": "full_name",
           "value": "Triin Lepik",
@@ -286,7 +307,7 @@
       "scripted_quality_flags": [],
       "scripted_fields": [
         {
-          "field_id": "FLD-0118",
+          "field_id": "FLD-0125",
           "document_id": "DOC-0071",
           "name": "full_name",
           "value": "Oskar Magiste",
@@ -307,7 +328,7 @@
       "scripted_quality_flags": [],
       "scripted_fields": [
         {
-          "field_id": "FLD-0119",
+          "field_id": "FLD-0126",
           "document_id": "DOC-0072",
           "name": "document_date",
           "value": "2026-09-02",
@@ -328,7 +349,7 @@
       "scripted_quality_flags": [],
       "scripted_fields": [
         {
-          "field_id": "FLD-0120",
+          "field_id": "FLD-0127",
           "document_id": "DOC-0073",
           "name": "document_date",
           "value": "2026-08-21",
@@ -349,7 +370,7 @@
       "scripted_quality_flags": [],
       "scripted_fields": [
         {
-          "field_id": "FLD-0121",
+          "field_id": "FLD-0128",
           "document_id": "DOC-0074",
           "name": "document_date",
           "value": "2026-08-18",
@@ -370,7 +391,7 @@
       "scripted_quality_flags": [],
       "scripted_fields": [
         {
-          "field_id": "FLD-0122",
+          "field_id": "FLD-0129",
           "document_id": "DOC-0075",
           "name": "declared_source",
           "value": "Subcontracting revenue from industrial clients",
@@ -391,7 +412,7 @@
       "scripted_quality_flags": [],
       "scripted_fields": [
         {
-          "field_id": "FLD-0123",
+          "field_id": "FLD-0130",
           "document_id": "DOC-0076",
           "name": "declared_industry",
           "value": "Metal fabrication",
@@ -403,5 +424,71 @@
     }
   ],
   "analyst_releases": [],
-  "field_corrections": []
+  "field_corrections": [],
+  "field_acceptances": [],
+  "scripted_registry": [
+    {
+      "check_id": "REG-0005",
+      "case_id": "WAL-ONB-0006",
+      "applicant_id": "APP-0006",
+      "provider_name": "MockRegistryHub EE",
+      "company_status": "active",
+      "registry_legal_name": "Saarvik Metall OU",
+      "registry_number": "EE-90014782",
+      "registry_address": "Tehnika 27, 76505 Saue, Estonia",
+      "registry_directors": "Rasmus Kalda|Triin Lepik",
+      "name_match": "match",
+      "number_match": "match",
+      "address_match": "match",
+      "director_match": "match",
+      "ubo_supported_by_registry": "true",
+      "high_risk_jurisdiction_or_industry": "false",
+      "confidence": "0.94",
+      "result": "pass"
+    }
+  ],
+  "scripted_identity": [
+    {
+      "check_id": "IDC-0011",
+      "case_id": "WAL-ONB-0006",
+      "individual_id": "IND-0013",
+      "provider_name": "VerifyMock ID",
+      "document_result": "pass",
+      "liveness_result": "pass",
+      "biometric_result": "pass",
+      "address_result": "pass",
+      "name_dob_match": "match",
+      "document_expired": "false",
+      "duplicate_individual_detected": "false",
+      "result": "pass"
+    },
+    {
+      "check_id": "IDC-0012",
+      "case_id": "WAL-ONB-0006",
+      "individual_id": "IND-0014",
+      "provider_name": "VerifyMock ID",
+      "document_result": "pass",
+      "liveness_result": "pass",
+      "biometric_result": "pass",
+      "address_result": "pass",
+      "name_dob_match": "match",
+      "document_expired": "false",
+      "duplicate_individual_detected": "false",
+      "result": "pass"
+    },
+    {
+      "check_id": "IDC-0013",
+      "case_id": "WAL-ONB-0006",
+      "individual_id": "IND-0015",
+      "provider_name": "VerifyMock ID",
+      "document_result": "pass",
+      "liveness_result": "pass",
+      "biometric_result": "pass",
+      "address_result": "pass",
+      "name_dob_match": "match",
+      "document_expired": "false",
+      "duplicate_individual_detected": "false",
+      "result": "pass"
+    }
+  ]
 }

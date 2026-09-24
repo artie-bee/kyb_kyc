@@ -150,6 +150,58 @@ def compare_fields(conn: sqlite3.Connection, dataset: Path = DEFAULT_DATASET) ->
     return rows
 
 
+def compare_verification(conn: sqlite3.Connection, dataset: Path = DEFAULT_DATASET) -> list[tuple]:
+    """Step 5 output against the dataset: registry rows, identity rows, UBO status.
+
+    The registry match columns are COMPUTED here from the raw values the register
+    holds versus the extracted fields, so this compares a derivation against the
+    scripted answer. The identity columns are provider verdicts and are replayed,
+    so those rows confirm the plumbing rather than a calculation.
+    """
+    rows = []
+    reg_cmp = ("company_status", "name_match", "number_match", "address_match",
+               "director_match", "ubo_supported_by_registry", "result")
+    ds_reg = {r["case_id"]: r for r in read_csv(dataset / "registry_check.csv")}
+    for r in conn.execute("SELECT * FROM registry_check ORDER BY check_id"):
+        want = ds_reg.get(r["case_id"])
+        got = tuple(str(r[c]) for c in reg_cmp)
+        exp = tuple(want[c] for c in reg_cmp) if want else None
+        rows.append((r["case_id"], "registry_check",
+                     " | ".join(exp) if exp else "(no dataset row)", " | ".join(got),
+                     "YES" if exp == got else "NO"))
+
+    # dataset individual ids are minted per run here, so match people by name
+    name_by_ds = {r["individual_id"]: r["full_name"] for r in read_csv(dataset / "individual.csv")}
+    idc_cmp = ("document_result", "liveness_result", "biometric_result", "address_result",
+               "name_dob_match", "document_expired", "duplicate_individual_detected", "result")
+    ds_idc = {(r["case_id"], name_by_ds[r["individual_id"]]): r
+              for r in read_csv(dataset / "identity_check.csv")}
+    for r in conn.execute(
+            "SELECT c.*, i.full_name FROM identity_check c JOIN individual i USING (individual_id)"
+            " ORDER BY c.check_id"):
+        want = ds_idc.get((r["case_id"], r["full_name"]))
+        got = tuple(str(r[c]) for c in idc_cmp)
+        exp = tuple(want[c] for c in idc_cmp) if want else None
+        rows.append((r["case_id"], f"identity_check / {r['full_name']}",
+                     " | ".join(exp) if exp else "(no dataset row)", " | ".join(got),
+                     "YES" if exp == got else "NO"))
+
+    ds_ubo = {(r["individual_id"], r["ownership_percentage"]): r
+              for r in read_csv(dataset / "ubo.csv")}
+    ds_by_name = {(name_by_ds[k[0]], k[1]): v for k, v in ds_ubo.items()}
+    for r in conn.execute(
+            "SELECT u.*, i.full_name FROM ubo u JOIN individual i USING (individual_id)"
+            " ORDER BY u.ubo_id"):
+        want = ds_by_name.get((r["full_name"], str(r["ownership_percentage"])))
+        rows.append((None, f"ubo verification_status / {r['full_name']}",
+                     want["verification_status"] if want else "(no dataset row)",
+                     r["verification_status"],
+                     "YES" if want and want["verification_status"] == r["verification_status"]
+                     else "NO"))
+    # the case column is only for display; fill it in from the checks above
+    return [(c or "-", *rest) for c, *rest in rows]
+
+
 def score(rows: list[tuple]) -> tuple[int, int]:
     scored = [r for r in rows if not r[1].startswith("  ")]
     return sum(1 for r in scored if r[4] == "YES"), len(scored)
@@ -182,7 +234,8 @@ def main() -> None:
     ok, total = score(rows)
     print(f"\n{ok}/{total} case field checks match")
 
-    for label, fn in (("document quality", compare_documents), ("extracted field", compare_fields)):
+    for label, fn in (("document quality", compare_documents), ("extracted field", compare_fields),
+                     ("verification", compare_verification)):
         rows = fn(conn, args.dataset)
         ok, total = score(rows)
         print(f"{ok}/{total} {label} checks match")

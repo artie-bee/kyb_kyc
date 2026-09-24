@@ -292,7 +292,10 @@ def route_case(conn, case_id: str, kb: KnowledgeBase,
         status, owner, next_step = "analyst_review_required", "analyst", None
         summary = f"{len(held) or counts['manual_review_required']} item(s) need an analyst"
     elif to_resend or counts["resubmission_required"]:
-        status, owner, next_step = "resubmission_required", "customer", None
+        # The customer owes a better copy, but the documents that DID pass can
+        # still be read: extraction costs nothing external. The paid provider
+        # checks are what must wait, and Step 5 gates itself on the checklist.
+        status, owner, next_step = "resubmission_required", "customer", "extraction"
         summary = f"{len(to_resend) or counts['resubmission_required']} item(s) must be resubmitted"
     elif not required_open:
         status, owner, next_step = "verification_in_progress", "system", "extraction"

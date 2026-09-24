@@ -15,7 +15,9 @@ from . import db
 from .kb import KnowledgeBase
 from .extractor import get_extractor
 from .quality_checker import get_checker
-from .steps import analyst_review, document_quality, extraction, intake, requirement_pack
+from .providers import get_providers
+from .steps import (analyst_review, document_quality, extraction, intake, requirement_pack,
+                    verification)
 
 # Which document-quality checker to use. "mock" replays scripted verdicts;
 # "claude_vision" is a stub and raises. Default stays mock so that running the
@@ -23,18 +25,22 @@ from .steps import analyst_review, document_quality, extraction, intake, require
 QUALITY_CHECKER_MODE = "mock"
 # Same for OCR: "mock" replays the scripted fields, "claude" is a stub and raises.
 EXTRACTOR_MODE = "mock"
+# And for the paid provider calls in Step 5. "live" providers are stubs and raise.
+PROVIDER_MODE = "mock"
 
 STEPS = {
     "requirement_pack": requirement_pack.run,
     "document_quality": document_quality.run,
     "extraction": extraction.run,
-    # "verification": verification.run,   <- next layer
+    "verification": verification.run,
+    # "screening": screening.run,   <- next layer
 }
 
 
 def process_application(conn, application: dict, kb: KnowledgeBase,
                         checker_mode: str = QUALITY_CHECKER_MODE,
-                        extractor_mode: str = EXTRACTOR_MODE) -> dict:
+                        extractor_mode: str = EXTRACTOR_MODE,
+                        provider_mode: str = PROVIDER_MODE) -> dict:
     trace = {"application_id": application.get("application_id")}
 
     result = intake.run(conn, application, kb)
@@ -50,6 +56,9 @@ def process_application(conn, application: dict, kb: KnowledgeBase,
             kwargs = {"checker": get_checker(checker_mode)}
         elif next_step == "extraction":
             kwargs = {"extractor": get_extractor(extractor_mode)}
+        elif next_step == "verification":
+            reg, ident = get_providers(provider_mode, application)
+            kwargs = {"registry_provider": reg, "identity_provider": ident}
         step_result = STEPS[next_step](conn, result.case_id, application, kb, **kwargs)
         trace[next_step] = step_result.__dict__
 
@@ -69,9 +78,13 @@ def process_application(conn, application: dict, kb: KnowledgeBase,
         # Same idea after extraction: a field OCR could not read confidently waits
         # for an analyst, and mock mode replays the corrections the dataset scripted.
         if (next_step == "extraction" and extractor_mode == "mock"
-                and step_result.next_step is None and application.get("field_corrections")):
+                and step_result.next_step is None
+                and (application.get("field_corrections")
+                     or application.get("field_acceptances"))):
             applied = extraction.replay_scripted_corrections(
-                conn, result.case_id, application["field_corrections"], kb)
+                conn, result.case_id, application.get("field_corrections", []), kb)
+            applied += extraction.replay_scripted_acceptances(
+                conn, result.case_id, application.get("field_acceptances", []), kb)
             step_result = extraction.route_case(conn, result.case_id, kb,
                                                 step_result.documents_read,
                                                 step_result.fields_extracted,

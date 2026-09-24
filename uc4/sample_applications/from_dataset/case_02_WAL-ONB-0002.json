@@ -98,6 +98,15 @@
         {
           "field_id": "FLD-0020",
           "document_id": "DOC-0008",
+          "name": "company_name",
+          "value": "Northbridge Craft Supplies Ltd",
+          "confidence": "0.95",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        },
+        {
+          "field_id": "FLD-0021",
+          "document_id": "DOC-0008",
           "name": "registered_address",
           "value": "Suite 3, 88 Fettlers Row, Sheffield S3 8PQ, United Kingdom",
           "confidence": "0.91",
@@ -105,7 +114,7 @@
           "corrected_by_analyst": "false"
         },
         {
-          "field_id": "FLD-0021",
+          "field_id": "FLD-0022",
           "document_id": "DOC-0008",
           "name": "entity_status",
           "value": "active",
@@ -114,7 +123,7 @@
           "corrected_by_analyst": "false"
         },
         {
-          "field_id": "FLD-0022",
+          "field_id": "FLD-0023",
           "document_id": "DOC-0008",
           "name": "registration_number",
           "value": "UK-99010288",
@@ -135,7 +144,7 @@
       "scripted_quality_flags": [],
       "scripted_fields": [
         {
-          "field_id": "FLD-0023",
+          "field_id": "FLD-0024",
           "document_id": "DOC-0009",
           "name": "director_name",
           "value": "Denton Halliwell",
@@ -144,7 +153,7 @@
           "corrected_by_analyst": "false"
         },
         {
-          "field_id": "FLD-0024",
+          "field_id": "FLD-0025",
           "document_id": "DOC-0009",
           "name": "director_name_2",
           "value": "Priya Nankivell",
@@ -165,7 +174,7 @@
       "scripted_quality_flags": [],
       "scripted_fields": [
         {
-          "field_id": "FLD-0025",
+          "field_id": "FLD-0026",
           "document_id": "DOC-0010",
           "name": "signatory_name",
           "value": "Priya Nankivell",
@@ -199,7 +208,7 @@
       "scripted_quality_flags": [],
       "scripted_fields": [
         {
-          "field_id": "FLD-0026",
+          "field_id": "FLD-0027",
           "document_id": "DOC-0012",
           "name": "full_name",
           "value": "Priya Nankivell",
@@ -208,7 +217,7 @@
           "corrected_by_analyst": "false"
         },
         {
-          "field_id": "FLD-0027",
+          "field_id": "FLD-0028",
           "document_id": "DOC-0012",
           "name": "date_of_birth",
           "value": "1985-11-19",
@@ -217,7 +226,7 @@
           "corrected_by_analyst": "false"
         },
         {
-          "field_id": "FLD-0028",
+          "field_id": "FLD-0029",
           "document_id": "DOC-0012",
           "name": "expiry_date",
           "value": "2029-09-30",
@@ -238,7 +247,7 @@
       "scripted_quality_flags": [],
       "scripted_fields": [
         {
-          "field_id": "FLD-0029",
+          "field_id": "FLD-0030",
           "document_id": "DOC-0013",
           "name": "address",
           "value": "12 Sowerby Lane, Sheffield S7 2LT, United Kingdom",
@@ -247,7 +256,7 @@
           "corrected_by_analyst": "false"
         },
         {
-          "field_id": "FLD-0030",
+          "field_id": "FLD-0031",
           "document_id": "DOC-0013",
           "name": "document_date",
           "value": "2026-07-28",
@@ -268,7 +277,7 @@
       "scripted_quality_flags": [],
       "scripted_fields": [
         {
-          "field_id": "FLD-0031",
+          "field_id": "FLD-0032",
           "document_id": "DOC-0014",
           "name": "address",
           "value": "4 Carrowbrook Court, Sheffield S11 9DD, United Kingdom",
@@ -277,7 +286,7 @@
           "corrected_by_analyst": "false"
         },
         {
-          "field_id": "FLD-0032",
+          "field_id": "FLD-0033",
           "document_id": "DOC-0014",
           "name": "document_date",
           "value": "2026-08-05",
@@ -298,7 +307,7 @@
       "scripted_quality_flags": [],
       "scripted_fields": [
         {
-          "field_id": "FLD-0033",
+          "field_id": "FLD-0034",
           "document_id": "DOC-0015",
           "name": "declared_source",
           "value": "Trading revenue from wholesale supply contracts",
@@ -319,7 +328,7 @@
       "scripted_quality_flags": [],
       "scripted_fields": [
         {
-          "field_id": "FLD-0034",
+          "field_id": "FLD-0035",
           "document_id": "DOC-0016",
           "name": "declared_industry",
           "value": "Wholesale of craft and hobby goods",
@@ -331,5 +340,8 @@
     }
   ],
   "analyst_releases": [],
-  "field_corrections": []
+  "field_corrections": [],
+  "field_acceptances": [],
+  "scripted_registry": [],
+  "scripted_identity": []
 }

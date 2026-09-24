@@ -85,6 +85,34 @@ CREATE TABLE IF NOT EXISTS extracted_field (
     -- floor. An analyst supplies the value; the orchestrator never guesses it.
     needs_analyst_correction INTEGER NOT NULL DEFAULT 0
 );
+CREATE TABLE IF NOT EXISTS registry_check (
+    check_id TEXT PRIMARY KEY,
+    case_id TEXT NOT NULL REFERENCES onboarding_case(case_id),
+    applicant_id TEXT NOT NULL REFERENCES applicant(applicant_id),
+    provider_name TEXT NOT NULL, company_status TEXT NOT NULL,
+    -- what the register holds; the match columns are computed from these
+    registry_legal_name TEXT, registry_number TEXT, registry_address TEXT,
+    registry_directors TEXT,
+    name_match TEXT, number_match TEXT, address_match TEXT, director_match TEXT,
+    ubo_supported_by_registry TEXT, high_risk_jurisdiction_or_industry TEXT,
+    confidence REAL, result TEXT NOT NULL, attempts INTEGER NOT NULL DEFAULT 1
+);
+CREATE TABLE IF NOT EXISTS identity_check (
+    check_id TEXT PRIMARY KEY,
+    case_id TEXT NOT NULL REFERENCES onboarding_case(case_id),
+    individual_id TEXT NOT NULL REFERENCES individual(individual_id),
+    provider_name TEXT NOT NULL, document_result TEXT, liveness_result TEXT,
+    biometric_result TEXT, address_result TEXT, name_dob_match TEXT,
+    document_expired TEXT, duplicate_individual_detected TEXT, result TEXT NOT NULL
+);
+-- Non-blocking findings: the case moves on, but these travel with it to the
+-- risk step, each pointing at the evidence it was drawn from.
+CREATE TABLE IF NOT EXISTS finding (
+    finding_id TEXT PRIMARY KEY,
+    case_id TEXT NOT NULL REFERENCES onboarding_case(case_id),
+    source TEXT NOT NULL, rule_id TEXT NOT NULL, summary TEXT NOT NULL,
+    evidence_refs TEXT, blocking INTEGER NOT NULL DEFAULT 0, created_at TEXT NOT NULL
+);
 CREATE TABLE IF NOT EXISTS audit_event (
     event_id TEXT PRIMARY KEY,
     case_id TEXT NOT NULL REFERENCES onboarding_case(case_id),
@@ -108,6 +136,9 @@ ID_PREFIX = {
     "checklist_item": ("item_id", "CHK-"),
     "document": ("document_id", "DOC-"),
     "extracted_field": ("field_id", "FLD-"),
+    "registry_check": ("check_id", "REG-"),
+    "identity_check": ("check_id", "IDC-"),
+    "finding": ("finding_id", "FND-"),
     "audit_event": ("event_id", "EVT-"),
 }
 
