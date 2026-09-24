@@ -171,6 +171,10 @@ def customer_safe_facts(conn, case_id: str) -> dict:
         "contact_name": contact["full_name"] if contact else applicant["legal_name"],
         "document_list": ", ".join(outstanding) or "the outstanding documents",
         "missing_items": ", ".join(outstanding) or "the outstanding documents",
+        # TPL-0001 and TPL-0003 declare {{item_list}}. Without it render() leaves
+        # "[item_list]" in a message that goes to the applicant, and the one thing
+        # a resubmission request has to do is name what is missing.
+        "item_list": ", ".join(outstanding) or "the outstanding documents",
         "reason_text": "we need a clearer copy",
         "escalation_target": "the compliance team",
     }

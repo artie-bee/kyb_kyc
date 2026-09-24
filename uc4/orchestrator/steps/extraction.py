@@ -191,11 +191,15 @@ def route_case(conn, case_id: str, kb: KnowledgeBase, documents_read: int = 0,
     holds.release_own(conn, case_id, ACTOR, "extraction re-evaluated", kb)
 
     if outstanding or held:
+        # `held` counts every document waiting on an analyst, whatever put it
+        # there - a date conflict found here, or a fault found at the quality
+        # screen. Naming one cause for both would put a false reason on the
+        # hold banner, so the wording states the fact and not the cause.
         summary = (f"{outstanding} field(s) need an analyst"
-                   + (f"; {held} document(s) held after a date conflict" if held else ""))
+                   + (f"; {held} document(s) still held for an analyst" if held else ""))
         holds.place(conn, case_id, ACTOR, "insufficient_evidence",
                     f"{outstanding} extracted field(s) cannot be relied on as read"
-                    + (f" and {held} document(s) have conflicting dates" if held else ""),
+                    + (f" and {held} document(s) are still held for an analyst" if held else ""),
                     "analyst", kb)
     elif required_open:
         summary = (f"{required_open} required checklist item(s) still outstanding; "

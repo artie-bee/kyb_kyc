@@ -363,13 +363,34 @@ def open_holds(conn, case_id: str):
     return holds.open_holds(conn, case_id)
 
 
-def available_decisions(conn, case_id: str) -> list[str]:
-    """What the taxonomy allows at this case's band."""
+def band_for_decisions(conn, case_id: str) -> str:
+    """The band the taxonomy is read against. A case with no assessment has not
+    been scored, which the taxonomy treats as insufficient evidence."""
     assessment = conn.execute("SELECT risk_band FROM risk_assessment WHERE case_id = ?",
                               (case_id,)).fetchone()
-    band = assessment["risk_band"] if assessment else "insufficient_evidence"
+    return assessment["risk_band"] if assessment else "insufficient_evidence"
+
+
+def available_decisions(conn, case_id: str) -> list[str]:
+    """What the taxonomy allows at this case's band."""
+    band = band_for_decisions(conn, case_id)
     return [name for name, rule in kb().decision_taxonomy.items()
             if band in rule["allowed_bands"].split("|")]
+
+
+def withheld_decisions(conn, case_id: str) -> list[dict]:
+    """The decisions this band does not allow, and the bands that do.
+
+    The dropdown offers only what the taxonomy permits, which is right but
+    silent: a critical case simply has no 'approve' on it and the reason is
+    nowhere on the screen. This says so, from the same CSV.
+    """
+    band = band_for_decisions(conn, case_id)
+    return [{"decision": name,
+             "allowed_bands": rule["allowed_bands"].replace("|", ", "),
+             "required_role": rule["required_role"]}
+            for name, rule in kb().decision_taxonomy.items()
+            if band not in rule["allowed_bands"].split("|")]
 
 
 def export_bundle(conn, case_id: str) -> dict:
@@ -409,8 +430,23 @@ def release_document(conn, document_id, analyst_id, choice, reason):
                            (document_id,)).fetchone()[0]
     result = analyst_review.release_document(conn, document_id, analyst_id, choice, reason, kb())
     conn.commit()
+    # If extraction has already run and left a hold of its own, its wording was
+    # written when the document was still held. Releasing the document does not
+    # by itself correct that sentence, and the presenter is looking straight at
+    # it. Re-routing extraction recomputes the hold from the facts as they now
+    # stand - the same call a field correction already makes. Guarded, because a
+    # case that never reached extraction has no extraction hold to recompute.
+    if _extraction_has_run(conn, case_id):
+        extraction.route_case(conn, case_id, kb())
+        conn.commit()
     carry_on(conn, case_id)
     return result
+
+
+def _extraction_has_run(conn, case_id: str) -> bool:
+    return bool(conn.execute(
+        "SELECT 1 FROM extracted_field f JOIN document d USING (document_id)"
+        " WHERE d.case_id = ? LIMIT 1", (case_id,)).fetchone())
 
 
 def accept_field_as_read(conn, field_id, analyst_id, reason):

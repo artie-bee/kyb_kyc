@@ -134,6 +134,10 @@ def screen_case(conn, case_id, role, reviewer):
             st.subheader("Future phase")
             st.caption("This is a white-label partner. The POC does the KYB intake and "
                        "stops; everything below belongs to the programme phase.")
+            st.write(f"**Entity scope:** `{case['entity_scope'] or 'undetermined'}`"
+                     + ("  - which of the Wallester entities contracts with the partner "
+                        "is settled in the programme phase, not here."
+                        if (case["entity_scope"] or "undetermined") == "undetermined" else ""))
             for name, detail in data.FUTURE_PHASE_STEPS:
                 st.write(f"- **{name}** - {detail}")
                 st.caption("future phase, not in this POC")
@@ -291,6 +295,12 @@ def tab_checks(conn, case_id):
         st.write(f"**{reg['provider_name']}** - company status **{reg['company_status']}**, "
                  f"result **{reg['result']}** "
                  f"(attempt{'s' if reg['attempts'] > 1 else ''}: {reg['attempts']})")
+        supported = str(reg["ubo_supported_by_registry"]).lower() == "true"
+        if supported:
+            st.success("The register corroborates the declared beneficial ownership.")
+        else:
+            st.warning("The register does **not** corroborate the declared beneficial "
+                       "ownership. The chain rests on the applicant's own documents.")
         st.dataframe(
             [{"Compared": name, "The register holds": held or "-",
               "Extracted from documents": got or "-", "Result": outcome}
@@ -377,10 +387,19 @@ def tab_decision(conn, case_id, role, reviewer):
 
     open_now = data.open_holds(conn, case_id)
     if open_now:
-        st.info(f"{len(open_now)} hold(s) open. Approving is refused while any stands - "
-                f"try it and the backend will say so.")
+        st.info(f"{len(open_now)} hold(s) open. A decision that would close the case is "
+                f"refused while any stands - try it and the backend will say so.")
 
     options = data.available_decisions(conn, case_id)
+    withheld = data.withheld_decisions(conn, case_id)
+    if withheld:
+        band = data.band_for_decisions(conn, case_id)
+        st.warning(f"**Not offered at band `{band}`** - the taxonomy does not allow "
+                   f"these here, so they are not on the list to be attempted:\n\n"
+                   + "\n".join(f"- **{w['decision']}** (allowed at {w['allowed_bands']})"
+                                for w in withheld))
+    st.caption("The dropdown is kb/analyst_decision_taxonomy.csv read at this band. "
+               "The role each decision needs is checked by the backend when you record it.")
     if not options:
         st.caption("No decision is available at this band.")
         return
