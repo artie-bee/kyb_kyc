@@ -5,7 +5,8 @@ Same shape as quality_checker.py: the orchestration layer talks to an interface,
 so it does not care whether a model, an OCR engine or a script is behind it.
 
     MockExtractor    replays the fields scripted on the document (tests, demos)
-    ClaudeExtractor  sends the file to Claude  (live; needs ANTHROPIC_API_KEY)
+    ClaudeExtractor  sends the file to the model named by LLM_PROVIDER
+                     (live; needs that provider's key)
 
 An extractor may only return field names the KB lists for that document type.
 An unrecognised name has no `used_by`, so nothing downstream would ever read it
@@ -17,7 +18,7 @@ know which values are trustworthy enough to act on.
 from dataclasses import dataclass, field
 from pathlib import Path
 
-from . import claude_client, live_mode
+from . import live_mode, llm_client
 
 
 class UnknownExtractedField(ValueError):
@@ -83,20 +84,13 @@ class MockExtractor(Extractor):
 class ClaudeExtractor(Extractor):
     """Send the file to Claude and parse a strict JSON extraction.
 
-    TODO - LIVE MODE IS A PLACEHOLDER.
-    
-    This code is written and unit-tested, but it has never been run against the real
-    Claude API: there is no API access on this network. Treat it as a first draft to
-    be exercised, not as working integration. Nothing calls it unless live mode is
-    selected explicitly, and selecting live mode currently stops with a message
-    rather than attempting a call.
-    
-    To enable it later: set ANTHROPIC_API_KEY, confirm the network or proxy allows
-    api.anthropic.com, set LIVE_MODE_READY = True in orchestrator/live_mode.py, then
-    run tools/evaluate_live.py and read eval_report.md before trusting any of it.
+    Live mode, and opt-in: selecting it while LIVE_MODE_READY is False stops
+    with a message rather than attempting a call.
 
-    Live mode. Key from ANTHROPIC_API_KEY, model from a setting, prompt from
-    prompts/extraction_v1.txt with its version written into every audit row.
+    Which model answers is set by LLM_PROVIDER (anthropic | xai). Key from that
+    provider's environment variable, model from a setting, prompt from
+    prompts/extraction_v1.txt with its version and the provider written into
+    every audit row.
 
     The KB's field list for the document type is sent with the request AND
     checked against the reply: a name outside it discards the extraction rather
@@ -107,14 +101,17 @@ class ClaudeExtractor(Extractor):
     mode = "claude"
 
     def __init__(self, model: str | None = None, prompt_version: str = "v1",
-                 document_root: Path | None = None, allow_unready: bool = False):
+                 document_root: Path | None = None, allow_unready: bool = False,
+                 provider: str | None = None, client: llm_client.LLMClient | None = None):
         if not allow_unready:
             live_mode.require_ready()
-        self.prompt = claude_client.load_prompt("extraction", prompt_version)
-        self.model = model or claude_client.model_name()
-        self.version = f"{self.model}/{self.prompt.stamp}"
+        self.prompt = llm_client.load_prompt("extraction", prompt_version)
+        self.client = client or llm_client.get_client(provider, model)
+        self.model = self.client.model
+        self.provider = self.client.provider
+        self.version = f"{self.provider}:{self.model}/{self.prompt.stamp}"
         self.document_root = Path(document_root) if document_root else None
-        self.last_call: claude_client.Call | None = None
+        self.last_call: llm_client.Call | None = None
 
     def _path(self, document: dict) -> Path:
         path = document.get("file_path")
@@ -122,7 +119,7 @@ class ClaudeExtractor(Extractor):
             return Path(path)
         if self.document_root:
             return self.document_root / document["file_name"]
-        raise claude_client.CallFailed(
+        raise llm_client.CallFailed(
             f"{document['file_name']}: no file to send. Live mode needs the actual "
             f"document, not a row about it")
 
@@ -134,17 +131,17 @@ class ClaudeExtractor(Extractor):
         instruction = (
             f"This is a {document['document_type'].replace('_', ' ')}. Read these fields "
             f"and no others:\n{wanted}")
-        call = claude_client.ask(self._path(document), self.prompt, instruction,
-                                 model=self.model, max_tokens=2000)
+        call = self.client.ask(self._path(document), self.prompt, instruction,
+                               max_tokens=2000)
         self.last_call = call
         rows = call.data.get("fields")
         if not isinstance(rows, list):
-            raise claude_client.CallFailed("'fields' is not a list")
+            raise llm_client.CallFailed("'fields' is not a list")
 
         values = []
         for row in rows:
             if not isinstance(row, dict) or "name" not in row:
-                raise claude_client.CallFailed(f"a field entry is malformed: {row!r}")
+                raise llm_client.CallFailed(f"a field entry is malformed: {row!r}")
             page = row.get("source_page")
             values.append(ExtractedValue(
                 name=str(row["name"]),
@@ -155,7 +152,9 @@ class ClaudeExtractor(Extractor):
                                 notes=call.audit_note()).validate(allowed)
 
 
-EXTRACTORS = {"mock": MockExtractor, "claude": ClaudeExtractor}
+LiveExtractor = ClaudeExtractor
+
+EXTRACTORS = {"mock": MockExtractor, "live": ClaudeExtractor, "claude": ClaudeExtractor}
 
 
 def get_extractor(mode: str = "mock") -> Extractor:

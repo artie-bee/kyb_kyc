@@ -1,33 +1,31 @@
 """
-TODO - LIVE MODE IS A PLACEHOLDER.
-
-This code is written and unit-tested, but it has never been run against the real
-Claude API: there is no API access on this network. Treat it as a first draft to
-be exercised, not as working integration. Nothing calls it unless live mode is
-selected explicitly, and selecting live mode currently stops with a message
-rather than attempting a call.
-
-To enable it later: set ANTHROPIC_API_KEY, confirm the network or proxy allows
-api.anthropic.com, set LIVE_MODE_READY = True in orchestrator/live_mode.py, then
-run tools/evaluate_live.py and read eval_report.md before trusting any of it.
-
 Live vs mock: how well does the real model agree with the scripted answers?
 
-Runs ClaudeVisionQualityChecker and ClaudeExtractor over sample_documents/,
-compares what comes back with the verdicts and fields the dataset scripts, and
-writes eval_report.md.
+Runs the live quality checker and extractor over sample_documents/, compares
+what comes back with the verdicts and fields the dataset scripts, and writes
+eval_report.md.
+
+Which model answers is set by LLM_PROVIDER (anthropic | xai); the key comes from
+that provider's environment variable, and live mode has to be enabled first by
+setting LIVE_MODE_READY = True in orchestrator/live_mode.py.
 
 The report is the point. Nothing here tunes a prompt or loosens a KB rule to
 make the numbers look better - a disagreement is information about the prompt,
 the document or the rule, and hiding it would waste the exercise. Every
 disagreement is listed in full for a person to read.
 
-Needs ANTHROPIC_API_KEY. Costs money: one call per document for quality, one
-more for extraction.
+One thing to keep in mind when reading a run made through xAI: that provider
+takes images only, so every PDF is rasterised to page images before it is sent.
+The conversion is recorded on each call and printed at the top of the report,
+because a disagreement on a PDF may be about the rendering rather than about
+the model.
 
-    python tools/evaluate_live.py                       # every demo case
+Costs money: one call per document for quality, one more for extraction. Use
+--limit while you are still checking the setup works.
+
+    python tools/evaluate_live.py --limit 2             # two documents, four calls
     python tools/evaluate_live.py --cases WAL-ONB-0001
-    python tools/evaluate_live.py --limit 5 --quality-only
+    python tools/evaluate_live.py                       # every demo case
 """
 
 import argparse
@@ -39,7 +37,7 @@ from pathlib import Path
 UC4 = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(UC4))
 
-from orchestrator import claude_client, live_mode                   # noqa: E402
+from orchestrator import live_mode, llm_client                      # noqa: E402
 from orchestrator.extractor import ClaudeExtractor                  # noqa: E402
 from orchestrator.kb import KnowledgeBase                           # noqa: E402
 from orchestrator.quality_checker import ClaudeVisionQualityChecker  # noqa: E402
@@ -90,6 +88,7 @@ def evaluate(dataset: Path, docs_root: Path, cases: tuple, limit: int | None,
                     "file_name": d["file_name"], "scripted": scripted, "live": live,
                     "agree": scripted == live, "confidence": verdict.confidence,
                     "notes": verdict.notes,
+                    "transport": call.transport if call else "",
                     "cost": call.audit_note() if call else ""})
             except Exception as e:
                 errors.append((d["document_id"], d["file_name"], f"quality: {e}"))
@@ -111,7 +110,9 @@ def evaluate(dataset: Path, docs_root: Path, cases: tuple, limit: int | None,
                 errors.append((d["document_id"], d["file_name"], f"extraction: {e}"))
 
     return {"quality": quality_rows, "fields": field_rows, "errors": errors,
-            "model": claude_client.model_name(),
+            "provider": llm_client.provider_name(),
+            "model": llm_client.model_name(),
+            "transport": sorted({r["transport"] for r in quality_rows if r.get("transport")}),
             "prompts": [p.stamp for p in
                         (checker.prompt if checker else None,
                          extractor.prompt if extractor else None) if p]}
@@ -127,13 +128,18 @@ def _same(want, got) -> bool:
 def report(result: dict) -> str:
     q, f, errors = result["quality"], result["fields"], result["errors"]
     lines = [
-        "# Live evaluation - Claude against the scripted answers", "",
+        "# Live evaluation - the live model against the scripted answers", "",
+        f"Provider: `{result.get('provider', '?')}`  ",
         f"Model: `{result['model']}`  ",
         f"Prompts: {', '.join(f'`{p}`' for p in result['prompts']) or 'none'}", "",
         "Nothing was tuned to improve these numbers. Where the model and the script "
         "disagree, both are listed so a person can decide which is right - sometimes "
         "it will be the script.", "",
     ]
+    if result.get("transport"):
+        lines += ["> **How the files were sent.** " + "; ".join(result["transport"])
+                  + ". A disagreement on one of those may be about the rendering "
+                    "rather than about the model.", ""]
 
     if q:
         agreed = sum(1 for r in q if r["agree"])
@@ -208,9 +214,11 @@ def main() -> None:
         raise SystemExit(str(e))
 
     try:
-        claude_client.api_key()
-    except claude_client.MissingApiKey as e:
+        provider = llm_client.provider_name()
+        llm_client.api_key(provider)
+    except (llm_client.MissingApiKey, llm_client.UnknownProvider) as e:
         raise SystemExit(f"{e}\n\nMock mode needs no key and is the default everywhere else.")
+    print(f"provider={provider}  model={llm_client.model_name(provider)}")
 
     if not args.documents.exists():
         raise SystemExit(f"no sample documents at {args.documents}; "

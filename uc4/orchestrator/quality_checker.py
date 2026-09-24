@@ -8,7 +8,8 @@ model is behind it, or on there being a model at all.
 
 Two implementations:
     MockQualityChecker          replays a scripted verdict (tests, demos)
-    ClaudeVisionQualityChecker  sends the file to Claude  (live; needs ANTHROPIC_API_KEY)
+    ClaudeVisionQualityChecker  sends the file to the model named by LLM_PROVIDER
+                                (live; needs that provider's key)
 
 Whatever the implementation, it may only return flags from ALLOWED_FLAGS. A
 model that invents a flag has its verdict rejected rather than trusted: an
@@ -20,7 +21,7 @@ from dataclasses import dataclass, field
 from datetime import date
 from pathlib import Path
 
-from . import claude_client, live_mode
+from . import live_mode, llm_client
 
 # The quality_flags vocabulary. Anything outside this set is rejected.
 ALLOWED_FLAGS = frozenset({
@@ -102,23 +103,19 @@ class MockQualityChecker(QualityChecker):
 
 
 class ClaudeVisionQualityChecker(QualityChecker):
-    """Send the file to Claude and parse a strict JSON verdict.
+    """Send the file to the live model and parse a strict JSON verdict.
 
-    TODO - LIVE MODE IS A PLACEHOLDER.
-    
-    This code is written and unit-tested, but it has never been run against the real
-    Claude API: there is no API access on this network. Treat it as a first draft to
-    be exercised, not as working integration. Nothing calls it unless live mode is
-    selected explicitly, and selecting live mode currently stops with a message
-    rather than attempting a call.
-    
-    To enable it later: set ANTHROPIC_API_KEY, confirm the network or proxy allows
-    api.anthropic.com, set LIVE_MODE_READY = True in orchestrator/live_mode.py, then
-    run tools/evaluate_live.py and read eval_report.md before trusting any of it.
+    Live mode, and opt-in: selecting it while LIVE_MODE_READY is False stops
+    with a message rather than attempting a call.
 
-    Live mode. The key comes from ANTHROPIC_API_KEY, the model from a setting,
-    and the prompt from prompts/quality_check_v1.txt - the version of which is
-    written into the audit row for every call.
+    Which model answers is set by LLM_PROVIDER (anthropic | xai). The key comes
+    from that provider's environment variable, the model from a setting, and the
+    prompt from prompts/quality_check_v1.txt - the version of which is written
+    into the audit row for every call, alongside the provider that served it.
+
+    This class owns the vocabulary check and nothing else; the client owns the
+    transport. That split is why the same guarantees hold for every provider,
+    and why a test can exercise them with a fake client and no key.
 
     A reply that will not parse is retried once and then raises. The caller
     places a manual-review hold on that: a failed call is never a pass, because
@@ -128,14 +125,19 @@ class ClaudeVisionQualityChecker(QualityChecker):
     mode = "claude_vision"
 
     def __init__(self, model: str | None = None, prompt_version: str = "v1",
-                 document_root: Path | None = None, allow_unready: bool = False):
+                 document_root: Path | None = None, allow_unready: bool = False,
+                 provider: str | None = None, client: llm_client.LLMClient | None = None):
         if not allow_unready:
             live_mode.require_ready()
-        self.prompt = claude_client.load_prompt("quality_check", prompt_version)
-        self.model = model or claude_client.model_name()
-        self.version = f"{self.model}/{self.prompt.stamp}"
+        self.prompt = llm_client.load_prompt("quality_check", prompt_version)
+        # The client owns the transport; this class owns the vocabulary check.
+        # Injecting one is how the tests exercise every guardrail without a key.
+        self.client = client or llm_client.get_client(provider, model)
+        self.model = self.client.model
+        self.provider = self.client.provider
+        self.version = f"{self.provider}:{self.model}/{self.prompt.stamp}"
         self.document_root = Path(document_root) if document_root else None
-        self.last_call: claude_client.Call | None = None
+        self.last_call: llm_client.Call | None = None
 
     def _path(self, document: dict) -> Path:
         path = document.get("file_path")
@@ -143,7 +145,7 @@ class ClaudeVisionQualityChecker(QualityChecker):
             return Path(path)
         if self.document_root:
             return self.document_root / document["file_name"]
-        raise claude_client.CallFailed(
+        raise llm_client.CallFailed(
             f"{document['file_name']}: no file to send. Live mode needs the actual "
             f"document, not a row about it")
 
@@ -152,12 +154,11 @@ class ClaudeVisionQualityChecker(QualityChecker):
             f"The checklist asked for a {document['document_type'].replace('_', ' ')}"
             + (f" for {document['subject_name']}" if document.get("subject_name") else "")
             + ". Assess the document supplied.")
-        call = claude_client.ask(self._path(document), self.prompt, instruction,
-                                 model=self.model)
+        call = self.client.ask(self._path(document), self.prompt, instruction)
         self.last_call = call
         data = call.data
         if not isinstance(data.get("flags", []), list):
-            raise claude_client.CallFailed("'flags' is not a list")
+            raise llm_client.CallFailed("'flags' is not a list")
         verdict = QualityVerdict(
             flags=[str(f) for f in data.get("flags", [])],
             confidence=float(data.get("confidence", 0.0)),
@@ -168,7 +169,13 @@ class ClaudeVisionQualityChecker(QualityChecker):
         return verdict.validate()
 
 
-CHECKERS = {"mock": MockQualityChecker, "claude_vision": ClaudeVisionQualityChecker}
+# "live" is the provider-neutral name; the two older names are kept so that
+# anything selecting a checker by string carries on working.
+LiveVisionQualityChecker = ClaudeVisionQualityChecker
+
+CHECKERS = {"mock": MockQualityChecker,
+            "live": ClaudeVisionQualityChecker,
+            "claude_vision": ClaudeVisionQualityChecker}
 
 
 def get_checker(mode: str = "mock") -> QualityChecker:

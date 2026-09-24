@@ -25,7 +25,7 @@ from datetime import date
 
 from .. import db
 from .. import holds
-from .. import claude_client
+from .. import llm_client
 from ..extractor import (Extractor, MockExtractor,
                          UnknownExtractedField)
 from ..kb import KnowledgeBase
@@ -86,7 +86,7 @@ def run(conn, case_id: str, application: dict, kb: KnowledgeBase,
 
         try:
             result = extractor.extract(payload, expected)
-        except (claude_client.CallFailed, UnknownExtractedField, ValueError) as e:
+        except (llm_client.CallFailed, UnknownExtractedField, ValueError) as e:
             # Nothing was read, so nothing is known. The document is held rather
             # than recorded as having yielded no fields.
             msg = f"{doc['file_name']}: extraction failed ({e})"

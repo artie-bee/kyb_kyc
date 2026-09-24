@@ -28,7 +28,7 @@ from datetime import date
 from .. import db
 from ..kb import KnowledgeBase
 from .. import holds
-from .. import claude_client
+from .. import llm_client
 from ..quality_checker import (QualityChecker, MockQualityChecker,
                                UnknownQualityFlag)
 
@@ -203,7 +203,7 @@ def run(conn, case_id: str, application: dict, kb: KnowledgeBase,
         if not flags:
             try:
                 verdict = checker.check(doc).validate()
-            except (claude_client.CallFailed, UnknownQualityFlag, ValueError) as e:
+            except (llm_client.CallFailed, UnknownQualityFlag, ValueError) as e:
                 # A checker that could not answer has told us nothing about the
                 # document. That is not a pass: the document goes to an analyst.
                 ai_failed = str(e)
