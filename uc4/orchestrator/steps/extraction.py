@@ -25,7 +25,9 @@ from datetime import date
 
 from .. import db
 from .. import holds
-from ..extractor import Extractor, MockExtractor
+from .. import claude_client
+from ..extractor import (Extractor, MockExtractor,
+                         UnknownExtractedField)
 from ..kb import KnowledgeBase
 from . import document_quality
 
@@ -75,7 +77,22 @@ def run(conn, case_id: str, application: dict, kb: KnowledgeBase,
         expected = kb.fields_for(doc_type)
         payload = payload_by_name.get(doc["file_name"], {})
 
-        result = extractor.extract(payload, expected)
+        try:
+            result = extractor.extract(payload, expected)
+        except (claude_client.CallFailed, UnknownExtractedField, ValueError) as e:
+            # Nothing was read, so nothing is known. The document is held rather
+            # than recorded as having yielded no fields.
+            msg = f"{doc['file_name']}: extraction failed ({e})"
+            problems.append(msg)
+            conflicts += 1
+            conn.execute("UPDATE document SET quality_status = 'manual_review_required' "
+                         "WHERE document_id = ?", (doc["document_id"],))
+            _set_item_status(conn, doc["document_id"], "manual_review")
+            db.audit(conn, case_id, "system", ACTOR, "extraction_failed",
+                     f"{msg}; the {extractor.mode} extractor returned nothing usable, so the "
+                     f"document is held rather than treated as empty",
+                     extractor.version or kb.version)
+            continue
         values, flagged = {}, []
 
         for value in result.fields:

@@ -46,6 +46,17 @@ def scripted_decisions(dataset: Path) -> dict:
     return out
 
 
+def scripted_silence(dataset: Path) -> set:
+    """Cases where the customer never replied.
+
+    Read from the audit trail rather than a decision row: a case closing for
+    want of an answer is something that happened to it, not a judgement anyone
+    made about it.
+    """
+    return {r["case_id"] for r in read_csv(dataset / "audit_event.csv")
+            if r["action"] == "case_closed_no_response"}
+
+
 def run(conn, dataset: Path = DEFAULT_DATASET, app_dir: Path = DEFAULT_OUT,
         clock: communication.Clock | None = None, verbose: bool = True) -> dict:
     kb = KnowledgeBase()
@@ -53,6 +64,7 @@ def run(conn, dataset: Path = DEFAULT_DATASET, app_dir: Path = DEFAULT_OUT,
     # then runs forward; otherwise no time appears to pass at all.
     clock = clock or communication.FakeClock(date.today())
     decisions = scripted_decisions(dataset)
+    silent = scripted_silence(dataset)
     results = {}
 
     for path in sorted(app_dir.glob("*.json")):
@@ -81,7 +93,7 @@ def run(conn, dataset: Path = DEFAULT_DATASET, app_dir: Path = DEFAULT_OUT,
             communication.send_required_message(conn, case_id, situation, kb,
                                                 approver="ops.queue")
 
-        if customer_hold and decisions.get(case_id, {}).get("decision") == "withdrawn":
+        if customer_hold and case_id in silent:
             for _ in range(7):
                 communication.chase(conn, case_id, kb, clock)
                 clock.advance(5)

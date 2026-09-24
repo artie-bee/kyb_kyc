@@ -170,6 +170,9 @@ CREATE TABLE IF NOT EXISTS human_decision (
     reviewer TEXT NOT NULL, reviewer_role TEXT NOT NULL, decision TEXT NOT NULL,
     reason_code TEXT NOT NULL, rationale TEXT NOT NULL, evidence_relied_on TEXT,
     override_flag INTEGER NOT NULL DEFAULT 0, override_reason TEXT,
+    -- stricter or more_lenient than the recommendation, from the taxonomy's
+    -- severity order. A more lenient override is the one that needs scrutiny.
+    override_direction TEXT,
     escalation_target TEXT, customer_template_id TEXT, timestamp TEXT NOT NULL
 );
 CREATE TABLE IF NOT EXISTS case_hold (

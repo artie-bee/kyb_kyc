@@ -72,6 +72,21 @@ class KnowledgeBase:
     def action_for_band(self, band: str) -> str:
         return next(r["recommended_action"] for r in self.risk_bands if r["band"] == band)
 
+    def severity_rank(self, action: str) -> int | None:
+        """How strict an outcome is, from the taxonomy. Used to say whether an
+        override went stricter or more lenient than the recommendation."""
+        row = self.decision_taxonomy.get(action)
+        return int(row["severity_rank"]) if row else None
+
+    def override_direction(self, decision: str, recommended: str) -> str | None:
+        """None when they agree, else 'stricter' or 'more_lenient'."""
+        if decision == recommended:
+            return None
+        taken, advised = self.severity_rank(decision), self.severity_rank(recommended)
+        if taken is None or advised is None:
+            return "stricter"       # an outcome outside the taxonomy is treated as strict
+        return "stricter" if taken > advised else "more_lenient"
+
     def templates_for(self, situation: str, restricted: bool = False) -> list[dict]:
         """Templates allowed for a situation. A restricted case gets only the
         generic ones - those that state no reason and reveal no finding."""

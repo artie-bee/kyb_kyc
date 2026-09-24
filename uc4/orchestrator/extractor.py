@@ -5,7 +5,7 @@ Same shape as quality_checker.py: the orchestration layer talks to an interface,
 so it does not care whether a model, an OCR engine or a script is behind it.
 
     MockExtractor    replays the fields scripted on the document (tests, demos)
-    ClaudeExtractor  sends the file to Claude  (STUB - see below)
+    ClaudeExtractor  sends the file to Claude  (live; needs ANTHROPIC_API_KEY)
 
 An extractor may only return field names the KB lists for that document type.
 An unrecognised name has no `used_by`, so nothing downstream would ever read it
@@ -15,6 +15,9 @@ know which values are trustworthy enough to act on.
 """
 
 from dataclasses import dataclass, field
+from pathlib import Path
+
+from . import claude_client
 
 
 class UnknownExtractedField(ValueError):
@@ -80,35 +83,62 @@ class MockExtractor(Extractor):
 class ClaudeExtractor(Extractor):
     """Send the file to Claude and parse a strict JSON extraction.
 
-    TODO: not wired up. No API call is made yet - calling extract() raises.
+    Live mode. Key from ANTHROPIC_API_KEY, model from a setting, prompt from
+    prompts/extraction_v1.txt with its version written into every audit row.
 
-    When this is implemented it must:
-      - send the file bytes plus the KB's field list for this document_type,
-        naming each field and whether it is required;
-      - require exactly {"fields": [{"name", "value", "confidence", "source_page"}]}
-        with no prose around it, and re-ask once if the reply does not parse;
-      - only use names from that field list, and pass the result through
-        ExtractionResult.validate(), so an invented field raises rather than
-        being written to the case;
-      - return a field it could not read as value null with a low confidence,
-        never as a plausible-looking guess - Step 4 routes an unreadable value
-        to an analyst, which is only safe if the model admits to it;
-      - set `version` to the model id plus the prompt version, which
-        extraction.py already writes into every audit row;
-      - only ever be handed documents from accepted_documents().
+    The KB's field list for the document type is sent with the request AND
+    checked against the reply: a name outside it discards the extraction rather
+    than storing a value nothing downstream could read. A reply that will not
+    parse is retried once and then raises, and the caller holds the case.
     """
 
     mode = "claude"
 
-    def __init__(self, model: str = "claude-opus-5", prompt_version: str = "ex-v1"):
-        self.model = model
-        self.prompt_version = prompt_version
-        self.version = f"{model}/{prompt_version}"
+    def __init__(self, model: str | None = None, prompt_version: str = "v1",
+                 document_root: Path | None = None):
+        self.prompt = claude_client.load_prompt("extraction", prompt_version)
+        self.model = model or claude_client.model_name()
+        self.version = f"{self.model}/{self.prompt.stamp}"
+        self.document_root = Path(document_root) if document_root else None
+        self.last_call: claude_client.Call | None = None
+
+    def _path(self, document: dict) -> Path:
+        path = document.get("file_path")
+        if path:
+            return Path(path)
+        if self.document_root:
+            return self.document_root / document["file_name"]
+        raise claude_client.CallFailed(
+            f"{document['file_name']}: no file to send. Live mode needs the actual "
+            f"document, not a row about it")
 
     def extract(self, document: dict, expected_fields: list[dict]) -> ExtractionResult:
-        raise NotImplementedError(
-            "ClaudeExtractor is a stub: no API call is wired up yet. "
-            "Run with the mock extractor (the default) until it is.")
+        allowed = [f["field_name"] for f in expected_fields]
+        wanted = "\n".join(
+            f"  {f['field_name']} ({'required' if f['required'].lower() == 'true' else 'optional'})"
+            for f in expected_fields)
+        instruction = (
+            f"This is a {document['document_type'].replace('_', ' ')}. Read these fields "
+            f"and no others:\n{wanted}")
+        call = claude_client.ask(self._path(document), self.prompt, instruction,
+                                 model=self.model, max_tokens=2000)
+        self.last_call = call
+        rows = call.data.get("fields")
+        if not isinstance(rows, list):
+            raise claude_client.CallFailed("'fields' is not a list")
+
+        values = []
+        for row in rows:
+            if not isinstance(row, dict) or "name" not in row:
+                raise claude_client.CallFailed(f"a field entry is malformed: {row!r}")
+            page = row.get("source_page")
+            values.append(ExtractedValue(
+                name=str(row["name"]),
+                value=None if row.get("value") is None else str(row["value"]),
+                confidence=float(row.get("confidence", 0.0)),
+                source_page=int(page) if page not in (None, "") else None))
+        return ExtractionResult(fields=values,
+                                notes=call.audit_note()).validate(allowed)
 
 
 EXTRACTORS = {"mock": MockExtractor, "claude": ClaudeExtractor}

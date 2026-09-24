@@ -8,7 +8,7 @@ model is behind it, or on there being a model at all.
 
 Two implementations:
     MockQualityChecker          replays a scripted verdict (tests, demos)
-    ClaudeVisionQualityChecker  sends the file to Claude  (STUB - see below)
+    ClaudeVisionQualityChecker  sends the file to Claude  (live; needs ANTHROPIC_API_KEY)
 
 Whatever the implementation, it may only return flags from ALLOWED_FLAGS. A
 model that invents a flag has its verdict rejected rather than trusted: an
@@ -18,6 +18,9 @@ it would put an unauditable decision on the case.
 
 from dataclasses import dataclass, field
 from datetime import date
+from pathlib import Path
+
+from . import claude_client
 
 # The quality_flags vocabulary. Anything outside this set is rejected.
 ALLOWED_FLAGS = frozenset({
@@ -101,37 +104,54 @@ class MockQualityChecker(QualityChecker):
 class ClaudeVisionQualityChecker(QualityChecker):
     """Send the file to Claude and parse a strict JSON verdict.
 
-    TODO: not wired up. No API call is made yet - calling check() raises.
+    Live mode. The key comes from ANTHROPIC_API_KEY, the model from a setting,
+    and the prompt from prompts/quality_check_v1.txt - the version of which is
+    written into the audit row for every call.
 
-    When this is implemented it must:
-      - send the file bytes plus a prompt naming the expected document_type
-        and the individual it was supplied for;
-      - require exactly {"flags": [...], "confidence": 0-1, "notes": "...",
-        "expiry_date": "yyyy-mm-dd"|null, "document_date": "yyyy-mm-dd"|null}
-        with no prose around it, and re-ask once if the reply does not parse;
-      - read both dates off the image. Step 3 runs before any extraction, so
-        these are the only dates the date rules have; a date the model cannot
-        find must come back null, never guessed, and a null simply means the
-        rule does not fire;
-      - pass the result through QualityVerdict.validate(), so a hallucinated
-        flag raises UnknownQualityFlag instead of reaching a case;
-      - set `version` to the model id plus the prompt version, which
-        document_quality.py already writes into every audit row;
-      - never send a file that a deterministic rule has already failed - that
-        would pay for a model call on a document we know is unusable.
+    A reply that will not parse is retried once and then raises. The caller
+    places a manual-review hold on that: a failed call is never a pass, because
+    "the model did not answer" and "the document is fine" are opposite things.
     """
 
     mode = "claude_vision"
 
-    def __init__(self, model: str = "claude-opus-5", prompt_version: str = "dq-v1"):
-        self.model = model
-        self.prompt_version = prompt_version
-        self.version = f"{model}/{prompt_version}"
+    def __init__(self, model: str | None = None, prompt_version: str = "v1",
+                 document_root: Path | None = None):
+        self.prompt = claude_client.load_prompt("quality_check", prompt_version)
+        self.model = model or claude_client.model_name()
+        self.version = f"{self.model}/{self.prompt.stamp}"
+        self.document_root = Path(document_root) if document_root else None
+        self.last_call: claude_client.Call | None = None
+
+    def _path(self, document: dict) -> Path:
+        path = document.get("file_path")
+        if path:
+            return Path(path)
+        if self.document_root:
+            return self.document_root / document["file_name"]
+        raise claude_client.CallFailed(
+            f"{document['file_name']}: no file to send. Live mode needs the actual "
+            f"document, not a row about it")
 
     def check(self, document: dict) -> QualityVerdict:
-        raise NotImplementedError(
-            "ClaudeVisionQualityChecker is a stub: no API call is wired up yet. "
-            "Run with the mock checker (the default) until it is.")
+        instruction = (
+            f"The checklist asked for a {document['document_type'].replace('_', ' ')}"
+            + (f" for {document['subject_name']}" if document.get("subject_name") else "")
+            + ". Assess the document supplied.")
+        call = claude_client.ask(self._path(document), self.prompt, instruction,
+                                 model=self.model)
+        self.last_call = call
+        data = call.data
+        if not isinstance(data.get("flags", []), list):
+            raise claude_client.CallFailed("'flags' is not a list")
+        verdict = QualityVerdict(
+            flags=[str(f) for f in data.get("flags", [])],
+            confidence=float(data.get("confidence", 0.0)),
+            notes=str(data.get("notes", "")),
+            expiry_date=data.get("expiry_date") or None,
+            document_date=data.get("document_date") or None)
+        # An invented flag, or a date that is not a date, discards the verdict.
+        return verdict.validate()
 
 
 CHECKERS = {"mock": MockQualityChecker, "claude_vision": ClaudeVisionQualityChecker}

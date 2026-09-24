@@ -28,7 +28,9 @@ from datetime import date
 from .. import db
 from ..kb import KnowledgeBase
 from .. import holds
-from ..quality_checker import QualityChecker, MockQualityChecker
+from .. import claude_client
+from ..quality_checker import (QualityChecker, MockQualityChecker,
+                               UnknownQualityFlag)
 
 ACTOR = "step.document_quality"
 MAX_ATTEMPTS = 3
@@ -197,10 +199,24 @@ def run(conn, case_id: str, application: dict, kb: KnowledgeBase,
         #    be unusable: no point paying for a model call on it.
         verdict = None
         dates = {}
+        ai_failed = None
         if not flags:
-            verdict = checker.check(doc).validate()
-            flags.update(verdict.flags)
-            dates = {"expiry_date": verdict.expiry_date, "document_date": verdict.document_date}
+            try:
+                verdict = checker.check(doc).validate()
+            except (claude_client.CallFailed, UnknownQualityFlag, ValueError) as e:
+                # A checker that could not answer has told us nothing about the
+                # document. That is not a pass: the document goes to an analyst.
+                ai_failed = str(e)
+                flags = set()
+                problems.append(f"{doc['file_name']}: quality check failed ({ai_failed})")
+                db.audit(conn, case_id, "system", ACTOR, "quality_check_failed",
+                         f"{doc['file_name']}: the {checker.mode} checker returned nothing "
+                         f"usable ({ai_failed}); sent for manual review rather than passed",
+                         checker.version or kb.version)
+            else:
+                flags.update(verdict.flags)
+                dates = {"expiry_date": verdict.expiry_date,
+                         "document_date": verdict.document_date}
 
             # 3b. Date rules, against what the checker read. Step 4 re-reads both
             #     dates and re-runs these same rules to confirm.
@@ -208,6 +224,8 @@ def run(conn, case_id: str, application: dict, kb: KnowledgeBase,
 
         # 4. Combine into one outcome for the document.
         status, reasons, fired = _resolve(flags, doc["document_type"], kb)
+        if ai_failed:
+            status, note = "manual_review_required", f"quality check failed: {ai_failed}"
         counts[status] += 1
 
         # 5. Record it.

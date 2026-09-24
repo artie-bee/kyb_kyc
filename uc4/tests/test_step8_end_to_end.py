@@ -42,6 +42,52 @@ def demo():
 
 # ---------------------------------------------------------------------------
 
+def test_a_more_lenient_override_always_carries_a_reason(demo):
+    """Going stricter than the system is ordinary judgement. Going more lenient
+    is the one a reviewer will be asked about, so it must say why."""
+    for r in demo.execute("SELECT * FROM human_decision WHERE override_flag = 1"):
+        assert r["override_direction"] in ("stricter", "more_lenient")
+        if r["override_direction"] == "more_lenient":
+            assert (r["override_reason"] or "").strip(), (
+                f"{r['case_id']} was decided more leniently than recommended "
+                f"({r['decision']} against {r['override_direction']}) with no reason")
+
+    # the rule itself, exercised directly so it is not vacuous
+    kb = KnowledgeBase()
+    assert kb.override_direction("request_more_information", "conditional_approve") == "stricter"
+    assert kb.override_direction("escalate", "enhanced_due_diligence") == "stricter"
+    assert kb.override_direction("approve", "enhanced_due_diligence") == "more_lenient"
+    assert kb.override_direction("conditional_approve", "escalate") == "more_lenient"
+    assert kb.override_direction("approve", "approve") is None
+
+
+def test_a_system_closure_is_not_a_decision(demo):
+    """Case 14 closed because nobody answered. Nobody decided anything."""
+    assert not demo.execute(
+        "SELECT 1 FROM human_decision WHERE case_id = 'WAL-ONB-0014'").fetchone()
+    assert demo.execute("SELECT status FROM onboarding_case WHERE case_id = 'WAL-ONB-0014'"
+                        ).fetchone()[0] == "closed_withdrawn"
+    actions = {r["action"] for r in demo.execute(
+        "SELECT action FROM audit_event WHERE case_id = 'WAL-ONB-0014'")}
+    assert "case_closed_no_response" in actions
+    assert "human_decision_recorded" not in actions
+
+
+def test_customer_communication_approval_is_its_own_audit_action(demo):
+    """Approving what the customer reads is separate from deciding the case."""
+    approvals = [dict(r) for r in demo.execute(
+        "SELECT * FROM audit_event WHERE action = 'customer_communication_approved'")]
+    assert approvals, "no customer communication approvals recorded"
+
+    case12 = [r for r in approvals if r["case_id"] == "WAL-ONB-0012"]
+    assert case12, "case 12's customer message must carry its own approval record"
+    assert all(r["actor_type"] in ("analyst", "compliance") for r in case12)
+    # and it is a different event from the decision
+    decisions = {r["event_id"] for r in demo.execute(
+        "SELECT event_id FROM audit_event WHERE action = 'human_decision_recorded'")}
+    assert not decisions & {r["event_id"] for r in approvals}
+
+
 def test_final_status_of_all_14_cases_matches_the_dataset(demo):
     expected = {r["case_id"]: r["status"] for r in _csv("onboarding_case.csv")}
     actual = {r["case_id"]: r["status"] for r in

@@ -49,13 +49,20 @@ tools/
   compare_to_dataset.py       Runs the orchestrator and scores it against the dataset
   run_demo.py                 All 14 cases through Steps 1-8, scripted humans replayed
   export_case.py              Audit bundle per case: rows, trail, versions (10.8)
+  make_sample_documents.py    Demo document files for cases 1, 2, 3, 4 and 6
+  evaluate_live.py            Live Claude vs the scripted answers -> eval_report.md
+prompts/                    Versioned prompt files; the version is audited per call
+sample_documents/           Generated demo files (git-ignored)
+ARCHITECTURE.md             The 8 steps, holds, the KB, and mock vs live
 tests/test_first_layers.py    4 unit tests
 tests/test_against_dataset.py 65 tests - full match against the 14-case dataset:
                               70/70 case fields, 168/168 documents, 256/256 extracted
                               fields, 50/50 verification, 39/39 screening,
                               33/33 risk and evidence pack
-tests/test_step8_end_to_end.py 14 tests - all 14 cases through Steps 1-8:
+tests/test_step8_end_to_end.py 17 tests - all 14 cases through Steps 1-8:
                               14/14 final statuses, 14/14 applicant communications
+tests/test_sample_documents.py 5 tests - printed values match extracted_field
+tests/test_live_mode.py       9 tests - live mode stays opt-in and never passes on failure
 tests/test_schema_sync.py     6 tests - fails if the dataset or database gains a
                               column or enum value the schema file does not describe
 

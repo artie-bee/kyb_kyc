@@ -57,6 +57,7 @@ class DecisionResult:
     decision: str
     status: str
     override_flag: bool
+    override_direction: str | None = None
     customer_message: communication.CommunicationResult | None = None
     problems: list[str] = field(default_factory=list)
 
@@ -114,6 +115,7 @@ def record_decision(conn, case_id: str, reviewer: str, reviewer_role: str, decis
 
     # 4. override is computed, never claimed
     override = decision != recommended
+    direction = kb.override_direction(decision, recommended)
     if override and not (override_reason or "").strip():
         raise DecisionRefused(
             f"the recommendation was '{recommended}' and the decision is '{decision}'. "
@@ -138,13 +140,14 @@ def record_decision(conn, case_id: str, reviewer: str, reviewer_role: str, decis
 
     decision_id = db.next_id(conn, "human_decision")
     conn.execute(
-        "INSERT INTO human_decision VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)",
+        "INSERT INTO human_decision VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
         (decision_id, case_id, reviewer, reviewer_role, decision, reason_code, rationale,
-         "|".join(refs), int(override), override_reason, escalation_target,
+         "|".join(refs), int(override), override_reason, direction, escalation_target,
          rule["customer_template_id"], db.now()))
     db.audit(conn, case_id, reviewer_role, reviewer, "human_decision_recorded",
              f"{decision_id} -> {decision} (reason {reason_code}); band {band}, recommendation "
              f"{recommended}; override={override}"
+             + (f" ({direction})" if direction else "")
              + (f"; escalated to {escalation_target}" if escalation_target else ""),
              kb.version)
 
@@ -165,7 +168,8 @@ def record_decision(conn, case_id: str, reviewer: str, reviewer_role: str, decis
              + (f"; customer message {comm.communication_id} ({comm.sent_status})"
                 if comm and comm.communication_id else "; no automatic customer message"),
              kb.version)
-    return DecisionResult(case_id, decision_id, decision, status, override, comm, [])
+    return DecisionResult(case_id, decision_id, decision, status, override,
+                          direction, comm, [])
 
 
 def _allowed(kb: KnowledgeBase, situation: str, template_id: str, case) -> bool:

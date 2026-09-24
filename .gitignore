@@ -2,3 +2,5 @@ __pycache__/
 *.pyc
 onboarding.db
 exports/
+sample_documents/
+eval_report.md

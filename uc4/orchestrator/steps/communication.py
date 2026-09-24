@@ -277,10 +277,15 @@ def send_required_message(conn, case_id: str, situation: str, kb: KnowledgeBase,
         sent = "sent"
         conn.execute("UPDATE communication SET sent_status = 'sent' WHERE communication_id = ?",
                      (comm_id,))
+        # A person approving something the customer will read is a distinct act
+        # from the case decision that prompted it, and is recorded as one.
+        action = ("customer_communication_approved"
+                  if approver and rule["audience"] == "applicant"
+                  else "communication_approved")
         db.audit(conn, case_id, "analyst" if approver else "system",
-                 approver or ACTOR, "communication_approved",
-                 f"{comm_id} approved for release under template {choice.template_id}",
-                 kb.version)
+                 approver or ACTOR, action,
+                 f"{comm_id} approved for release to {rule['audience']} under template "
+                 f"{choice.template_id}", kb.version)
     else:
         db.audit(conn, case_id, "system", ACTOR, "communication_held",
                  f"{comm_id} drafted and held for approval under template "
