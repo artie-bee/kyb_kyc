@@ -17,7 +17,7 @@ know which values are trustworthy enough to act on.
 from dataclasses import dataclass, field
 from pathlib import Path
 
-from . import claude_client
+from . import claude_client, live_mode
 
 
 class UnknownExtractedField(ValueError):
@@ -83,6 +83,18 @@ class MockExtractor(Extractor):
 class ClaudeExtractor(Extractor):
     """Send the file to Claude and parse a strict JSON extraction.
 
+    TODO - LIVE MODE IS A PLACEHOLDER.
+    
+    This code is written and unit-tested, but it has never been run against the real
+    Claude API: there is no API access on this network. Treat it as a first draft to
+    be exercised, not as working integration. Nothing calls it unless live mode is
+    selected explicitly, and selecting live mode currently stops with a message
+    rather than attempting a call.
+    
+    To enable it later: set ANTHROPIC_API_KEY, confirm the network or proxy allows
+    api.anthropic.com, set LIVE_MODE_READY = True in orchestrator/live_mode.py, then
+    run tools/evaluate_live.py and read eval_report.md before trusting any of it.
+
     Live mode. Key from ANTHROPIC_API_KEY, model from a setting, prompt from
     prompts/extraction_v1.txt with its version written into every audit row.
 
@@ -95,7 +107,9 @@ class ClaudeExtractor(Extractor):
     mode = "claude"
 
     def __init__(self, model: str | None = None, prompt_version: str = "v1",
-                 document_root: Path | None = None):
+                 document_root: Path | None = None, allow_unready: bool = False):
+        if not allow_unready:
+            live_mode.require_ready()
         self.prompt = claude_client.load_prompt("extraction", prompt_version)
         self.model = model or claude_client.model_name()
         self.version = f"{self.model}/{self.prompt.stamp}"

@@ -20,7 +20,7 @@ from dataclasses import dataclass, field
 from datetime import date
 from pathlib import Path
 
-from . import claude_client
+from . import claude_client, live_mode
 
 # The quality_flags vocabulary. Anything outside this set is rejected.
 ALLOWED_FLAGS = frozenset({
@@ -104,6 +104,18 @@ class MockQualityChecker(QualityChecker):
 class ClaudeVisionQualityChecker(QualityChecker):
     """Send the file to Claude and parse a strict JSON verdict.
 
+    TODO - LIVE MODE IS A PLACEHOLDER.
+    
+    This code is written and unit-tested, but it has never been run against the real
+    Claude API: there is no API access on this network. Treat it as a first draft to
+    be exercised, not as working integration. Nothing calls it unless live mode is
+    selected explicitly, and selecting live mode currently stops with a message
+    rather than attempting a call.
+    
+    To enable it later: set ANTHROPIC_API_KEY, confirm the network or proxy allows
+    api.anthropic.com, set LIVE_MODE_READY = True in orchestrator/live_mode.py, then
+    run tools/evaluate_live.py and read eval_report.md before trusting any of it.
+
     Live mode. The key comes from ANTHROPIC_API_KEY, the model from a setting,
     and the prompt from prompts/quality_check_v1.txt - the version of which is
     written into the audit row for every call.
@@ -116,7 +128,9 @@ class ClaudeVisionQualityChecker(QualityChecker):
     mode = "claude_vision"
 
     def __init__(self, model: str | None = None, prompt_version: str = "v1",
-                 document_root: Path | None = None):
+                 document_root: Path | None = None, allow_unready: bool = False):
+        if not allow_unready:
+            live_mode.require_ready()
         self.prompt = claude_client.load_prompt("quality_check", prompt_version)
         self.model = model or claude_client.model_name()
         self.version = f"{self.model}/{self.prompt.stamp}"

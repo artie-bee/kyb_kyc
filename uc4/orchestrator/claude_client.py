@@ -1,4 +1,16 @@
 """
+TODO - LIVE MODE IS A PLACEHOLDER.
+
+This code is written and unit-tested, but it has never been run against the real
+Claude API: there is no API access on this network. Treat it as a first draft to
+be exercised, not as working integration. Nothing calls it unless live mode is
+selected explicitly, and selecting live mode currently stops with a message
+rather than attempting a call.
+
+To enable it later: set ANTHROPIC_API_KEY, confirm the network or proxy allows
+api.anthropic.com, set LIVE_MODE_READY = True in orchestrator/live_mode.py, then
+run tools/evaluate_live.py and read eval_report.md before trusting any of it.
+
 The one place this project talks to the Claude API.
 
 Everything the live checkers share lives here: the key, the model setting, the

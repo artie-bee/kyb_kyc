@@ -187,6 +187,47 @@ copied into any field a customer could be shown.
   claude  STUB, raises; see orchestrator/narrator.py
 Set the mode with NARRATOR_MODE in orchestrator/orchestrator.py.
 
+## Live mode (pending)
+
+**Mock is the default everywhere and needs no key, no network and no
+configuration.** Live mode is written but has never been run against the real
+Claude API - there is no API access on this network - so it is marked as a
+placeholder and selecting it stops with a message rather than failing part-way
+through a case.
+
+What is built:
+
+- `orchestrator/claude_client.py` - key from `ANTHROPIC_API_KEY`, model from a
+  setting, versioned prompts, strict JSON parsing with one retry, and the
+  latency and token counts that go into the audit row
+- `prompts/quality_check_v1.txt` and `prompts/extraction_v1.txt` - the prompt
+  text as versioned files, never inline, so the audit trail can say what was
+  asked
+- `ClaudeVisionQualityChecker` and `ClaudeExtractor` - both validate the reply
+  against the KB and raise rather than return something unusable
+- Steps 3 and 4 hold the document when a call fails: a failed call is never a
+  pass
+- `tools/evaluate_live.py` - runs the live checkers over `sample_documents/`,
+  compares with the scripted answers and writes `eval_report.md`
+
+What is untested: **all of it, against the real API.** The JSON parsing, the
+validation and the failure paths have unit tests with injected failures, but no
+real request has ever been sent. Prompt wording in particular is unproven -
+`eval_report.md` exists to find out how far the model and the script actually
+agree, and that report has not been produced.
+
+To enable it later:
+
+1. set `ANTHROPIC_API_KEY` in the environment
+2. confirm the network or proxy allows `api.anthropic.com`
+3. `pip install anthropic`
+4. set `LIVE_MODE_READY = True` in `orchestrator/live_mode.py`
+5. run `python tools/evaluate_live.py` and read `eval_report.md` before trusting
+   any of it
+
+A prompt that needs changing gets a new file - `quality_check_v2.txt` - never an
+edit to v1, or the audit trail stops meaning anything.
+
 ## Step 8 - communications and decisions (Sections 5.9, 5.10, 11.3, 18)
 Everything a customer receives comes from kb/message_template.csv. The model may
 choose among the templates kb/communication_rules.csv allows for the situation and

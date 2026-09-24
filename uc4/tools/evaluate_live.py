@@ -1,4 +1,16 @@
 """
+TODO - LIVE MODE IS A PLACEHOLDER.
+
+This code is written and unit-tested, but it has never been run against the real
+Claude API: there is no API access on this network. Treat it as a first draft to
+be exercised, not as working integration. Nothing calls it unless live mode is
+selected explicitly, and selecting live mode currently stops with a message
+rather than attempting a call.
+
+To enable it later: set ANTHROPIC_API_KEY, confirm the network or proxy allows
+api.anthropic.com, set LIVE_MODE_READY = True in orchestrator/live_mode.py, then
+run tools/evaluate_live.py and read eval_report.md before trusting any of it.
+
 Live vs mock: how well does the real model agree with the scripted answers?
 
 Runs ClaudeVisionQualityChecker and ClaudeExtractor over sample_documents/,
@@ -27,7 +39,7 @@ from pathlib import Path
 UC4 = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(UC4))
 
-from orchestrator import claude_client                              # noqa: E402
+from orchestrator import claude_client, live_mode                   # noqa: E402
 from orchestrator.extractor import ClaudeExtractor                  # noqa: E402
 from orchestrator.kb import KnowledgeBase                           # noqa: E402
 from orchestrator.quality_checker import ClaudeVisionQualityChecker  # noqa: E402
@@ -187,6 +199,13 @@ def main() -> None:
     ap.add_argument("--quality-only", action="store_true")
     ap.add_argument("--extraction-only", action="store_true")
     args = ap.parse_args()
+
+    # Live mode first: there is no point asking for a key for an integration
+    # that has not been enabled yet.
+    try:
+        live_mode.require_ready()
+    except live_mode.LiveModeNotConfigured as e:
+        raise SystemExit(str(e))
 
     try:
         claude_client.api_key()

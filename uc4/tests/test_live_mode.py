@@ -18,7 +18,7 @@ import pytest
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 
-from orchestrator import claude_client, db                              # noqa: E402
+from orchestrator import claude_client, db, live_mode                   # noqa: E402
 from orchestrator.extractor import ClaudeExtractor, get_extractor       # noqa: E402
 from orchestrator.kb import KnowledgeBase                               # noqa: E402
 from orchestrator.orchestrator import (EXTRACTOR_MODE,                  # noqa: E402
@@ -33,6 +33,22 @@ from tools.dataset_to_applications import DEFAULT_OUT                   # noqa: 
 
 def _application(case_id):
     return json.loads(next(DEFAULT_OUT.glob(f"*{case_id}.json")).read_text(encoding="utf-8"))
+
+
+def test_live_mode_is_a_placeholder_and_says_so():
+    """No API access on this network. Selecting live mode stops with a message
+    rather than failing part-way through a case."""
+    assert live_mode.LIVE_MODE_READY is False
+    assert live_mode.status() == "MOCK"
+
+    with pytest.raises(live_mode.LiveModeNotConfigured) as e:
+        get_checker("claude_vision")
+    assert "LIVE MODE NOT CONFIGURED" in str(e.value)
+    assert "ANTHROPIC_API_KEY" in str(e.value)
+    assert "evaluate_live" in str(e.value)
+
+    with pytest.raises(live_mode.LiveModeNotConfigured):
+        get_extractor("claude")
 
 
 def test_every_mode_defaults_to_mock():
@@ -69,7 +85,10 @@ def test_prompts_are_versioned_files_and_the_version_reaches_the_checkers():
     assert quality.stamp == "quality_check_v1" and extraction.stamp == "extraction_v1"
     assert len(quality.text) > 400 and len(extraction.text) > 400
 
-    checker, extractor = ClaudeVisionQualityChecker(), ClaudeExtractor()
+    # allow_unready: these assert how the checkers are built, not that live
+    # mode is enabled - it is not, and the next test is what proves it.
+    checker = ClaudeVisionQualityChecker(allow_unready=True)
+    extractor = ClaudeExtractor(allow_unready=True)
     assert checker.version.endswith("/quality_check_v1")
     assert extractor.version.endswith("/extraction_v1")
     assert claude_client.DEFAULT_MODEL in checker.version
@@ -83,7 +102,7 @@ def test_the_model_comes_from_a_setting():
     try:
         assert claude_client.model_name() == "claude-sonnet-5"
         os.environ["WALLESTER_UC4_MODEL"] = "claude-opus-5"
-        assert ClaudeExtractor().model == "claude-opus-5"
+        assert ClaudeExtractor(allow_unready=True).model == "claude-opus-5"
     finally:
         os.environ.pop("WALLESTER_UC4_MODEL", None)
         if saved is not None:
@@ -154,7 +173,7 @@ def test_a_failed_extraction_holds_the_document_rather_than_recording_nothing():
 
 
 def test_a_live_checker_needs_the_actual_file():
-    checker = ClaudeVisionQualityChecker()
+    checker = ClaudeVisionQualityChecker(allow_unready=True)
     with pytest.raises(claude_client.CallFailed):
         checker.check({"file_name": "nothing.pdf", "document_type": "registry_extract"})
 

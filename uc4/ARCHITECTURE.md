@@ -119,6 +119,13 @@ unless the mode is changed explicitly.
 | Risk / pack narrative | `narrator.py` | assembles from the pack | stub |
 | Template choice | `steps/communication.py` | first allowed template | stub |
 
+**Live mode is a placeholder.** `LIVE_MODE_READY` in
+`orchestrator/live_mode.py` is `False`, and selecting a live implementation
+raises `LiveModeNotConfigured` with instructions rather than attempting a call.
+The Claude integration for Steps 3 and 4 is written and unit-tested but has
+never met the real API; see the *Live mode (pending)* section of README.md for
+what is built, what is unproven, and how to turn it on.
+
 Modes are set at the top of `orchestrator/orchestrator.py`:
 `QUALITY_CHECKER_MODE`, `EXTRACTOR_MODE`, `PROVIDER_MODE`,
 `MEDIA_ASSESSOR_MODE`, `NARRATOR_MODE`.
