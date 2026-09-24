@@ -63,8 +63,9 @@ tests/test_step8_end_to_end.py 17 tests - all 14 cases through Steps 1-8:
                               14/14 final statuses, 14/14 applicant communications
 tests/test_sample_documents.py 5 tests - printed values match extracted_field
 tests/test_live_mode.py       10 tests - live mode stays opt-in and never passes on failure
-tests/test_app.py             18 tests - no SQL writes in app/, every screen renders,
-                              the customer view leaks nothing
+tests/test_app.py             25 tests - no SQL writes in app/, every screen renders,
+                              the customer view leaks nothing, reuse points at real
+                              KB files, and a human action carries the case forward
 tests/test_schema_sync.py     6 tests - fails if the dataset or database gains a
                               column or enum value the schema file does not describe
 
@@ -75,9 +76,14 @@ pip install -r requirements.txt
 streamlit run app/main.py
 ```
 
-Ten screens: operations dashboard, case detail (timeline, checklist, documents
-and extraction, people and ownership, checks, risk and evidence pack, decision,
-communications), a separate customer view, and the audit export.
+Screens: operations dashboard, case detail (timeline, checklist, documents and
+extraction, people and ownership, checks, risk and evidence pack, decision,
+communications), a separate customer view, an agent reuse table (10.9) and the
+audit export. A white-label case also shows its future-phase panel.
+
+A human action on screen carries the case forward: releasing a document or
+correcting a field clears the hold and the orchestrator resumes from there, so
+case 4 reaches band high / 69 and case 3 medium / 43 as they do in the pipeline.
 
 The sidebar carries a role switch (analyst / compliance), a mode badge showing
 **MOCK**, and a "Reset demo" button that rebuilds the database to the demo start

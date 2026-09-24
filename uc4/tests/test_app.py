@@ -37,7 +37,8 @@ def demo():
     return conn
 
 
-SCREENS = ["Operations dashboard", "Case detail", "Customer view", "Audit export"]
+SCREENS = ["Operations dashboard", "Case detail", "Customer view",
+           "Agent reuse", "Audit export"]
 # One clean case, one held at Step 3, one with a sanctions match, one closed.
 SMOKE_CASES = ["WAL-ONB-0001", "WAL-ONB-0004", "WAL-ONB-0012", "WAL-ONB-0014"]
 
@@ -89,6 +90,144 @@ def test_the_live_option_is_shown_but_disabled():
     assert mode.disabled is True
     assert mode.options == ["Mock", "Live - pending API access"]
     assert mode.value == "Mock"
+
+
+def test_a_human_action_carries_the_case_forward(tmp_path):
+    """The demo depends on this. Releasing a document or correcting a field
+    clears the hold; the case then has to move on by itself, or the presenter is
+    left looking at a case that is unblocked and going nowhere."""
+    from app import data
+
+    db_path = tmp_path / "demo.db"
+    data.reset_demo(db_path)
+    conn = data.connect(db_path)
+
+    def row(case_id):
+        return next(r for r in data.dashboard(conn) if r["case_id"] == case_id)
+
+    # Case 3: one field read at 0.58, waiting to be confirmed.
+    assert row("WAL-ONB-0003")["risk_band"] == "", "case 3 is held and not yet scored"
+    field = next(f for d in data.documents(conn, "WAL-ONB-0003") for f in d["fields"]
+                 if f["needs_analyst_correction"])
+    assert field["name"] == "registered_address"
+    assert float(field["confidence"]) == 0.58
+    data.correct_field(conn, field["field_id"], "analyst.test", field["value"], "confirmed")
+    after = row("WAL-ONB-0003")
+    assert after["open_holds"] == 0
+    assert (after["risk_band"], after["risk_score"]) == ("medium", "43")
+    assert after["status"] == "ready_for_decision"
+
+    # Case 4: a held document and two faint values behind it.
+    assert row("WAL-ONB-0004")["risk_band"] == ""
+    held = next(d for d in data.documents(conn, "WAL-ONB-0004")
+                if d["quality_status"] == "manual_review_required")
+    assert held["file_name"] == "ownership_chart_vestmark.pdf"
+    data.release_document(conn, held["document_id"], "analyst.test", "accept", "annex is dormant")
+    for _ in range(5):
+        low = [f for d in data.documents(conn, "WAL-ONB-0004") for f in d["fields"]
+               if f["needs_analyst_correction"] and not f["corrected_by_analyst"]]
+        if not low:
+            break
+        data.accept_field_as_read(conn, low[0]["field_id"], "analyst.test", "corroborated")
+    after = row("WAL-ONB-0004")
+    assert after["open_holds"] == 0
+    assert (after["risk_band"], after["risk_score"]) == ("high", "69")
+    assert after["status"] == "enhanced_due_diligence"
+
+    # Case 10 needs nobody: it is scored the moment the demo is reset.
+    assert (row("WAL-ONB-0010")["risk_band"], row("WAL-ONB-0010")["risk_score"]) == ("low", "15")
+    conn.close()
+
+
+def test_carrying_on_does_not_duplicate_extracted_values(tmp_path):
+    """Resuming re-runs the steps; it must not read a document twice."""
+    from app import data
+
+    db_path = tmp_path / "dupes.db"
+    data.reset_demo(db_path)
+    conn = data.connect(db_path)
+
+    def field_count():
+        return conn.execute(
+            "SELECT COUNT(*) FROM extracted_field f JOIN document d USING (document_id)"
+            " WHERE d.case_id = 'WAL-ONB-0003'").fetchone()[0]
+
+    before = field_count()
+    field = next(f for d in data.documents(conn, "WAL-ONB-0003") for f in d["fields"]
+                 if f["needs_analyst_correction"])
+    data.correct_field(conn, field["field_id"], "analyst.test", field["value"], "confirmed")
+    assert field_count() == before, "resuming re-extracted documents it had already read"
+    conn.close()
+
+
+def test_the_reuse_screen_names_a_real_kb_file_for_every_override():
+    """A reuse claim that points at a file which does not exist, or quotes a
+    version nobody bumped, is worse than no claim."""
+    from app import data
+    import json
+
+    table = data.reuse_table()
+    manifest = json.loads((ROOT / "kb" / "kb_manifest.json").read_text(encoding="utf-8"))
+    assert table["kb_version"] == manifest["kb_version"]
+
+    components = [r["component"] for r in table["rows"]]
+    assert components == ["Document quality rules", "OCR extraction", "Registry validation",
+                          "Risk scoring", "Customer communications", "Audit summary"]
+
+    versions = {f"kb/{i['file']}": i["version"] for i in manifest["items"].values()}
+    for row in table["rows"]:
+        assert row["reused"] and row["override"], f"{row['component']} says nothing"
+        assert row["files"], f"{row['component']} names no KB file"
+        for f in row["files"]:
+            assert f["exists"], f"{row['component']} points at missing {f['file']}"
+            assert f["version"] == versions[f["file"]], (
+                f"{f['file']} shown as {f['version']}, manifest says {versions[f['file']]}")
+            assert f["rules"] > 0, f"{f['file']} has no rules in it"
+
+
+def test_the_reuse_screen_renders():
+    at = _app().run()
+    at.radio(key="screen").set_value("Agent reuse").run()
+    assert not at.exception, f"agent reuse failed: {at.exception}"
+    assert any("10.9" in h.value for h in at.header)
+    assert at.dataframe and len(at.dataframe[0].value) == 6
+
+
+def test_only_the_white_label_case_shows_the_future_phase_panel(demo):
+    """Case 8 is the white-label partner. No other case has a future phase."""
+    from app import data
+
+    white_label = [r["case_id"] for r in demo.execute("SELECT case_id FROM onboarding_case")
+                   if data.is_white_label(demo, r["case_id"])]
+    assert white_label == ["WAL-ONB-0008"]
+
+    for case_id in ("WAL-ONB-0008", "WAL-ONB-0001", "WAL-ONB-0004"):
+        at = _app().run()
+        at.radio(key="screen").set_value("Case detail").run()
+        at.selectbox(key="case").set_value(case_id).run()
+        assert not at.exception, f"{case_id} failed: {at.exception}"
+        headings = [s.value for s in at.subheader]
+        if case_id == "WAL-ONB-0008":
+            assert "Future phase" in headings, "case 8 must show the future phase panel"
+            captions = [c.value for c in at.caption]
+            assert sum(1 for c in captions if c == "future phase, not in this POC") == 5
+        else:
+            assert "Future phase" not in headings, (
+                f"{case_id} is not white-label and must not show a future phase")
+
+
+def test_the_future_phase_steps_are_the_ones_the_branch_audits(demo):
+    """The panel and the routing audit event must name the same programme steps."""
+    from app import data
+
+    named = [name for name, _ in data.FUTURE_PHASE_STEPS]
+    assert named == ["KYB", "API integration", "Visa co-brand approval",
+                     "BIN and 3DS configuration", "Go-live testing"]
+
+    event = demo.execute(
+        "SELECT payload_summary FROM audit_event WHERE case_id = 'WAL-ONB-0008'"
+        " AND action = 'routed_to_white_label_branch'").fetchone()
+    assert event is not None, "the white-label branch must audit its routing"
 
 
 def test_the_app_contains_no_sql_writes():

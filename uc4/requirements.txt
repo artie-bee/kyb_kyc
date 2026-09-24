@@ -1,5 +1,5 @@
 # Runtime
-streamlit>=1.36
+streamlit>=1.49
 
 # Sample document generation (tools/make_sample_documents.py)
 pillow>=10.0

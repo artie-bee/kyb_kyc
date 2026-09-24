@@ -25,7 +25,8 @@ sys.path.insert(0, str(APP))
 from app import data                                                    # noqa: E402
 from app.customer_view import customer_view, leaks                      # noqa: E402
 
-SCREENS = ["Operations dashboard", "Case detail", "Customer view", "Audit export"]
+SCREENS = ["Operations dashboard", "Case detail", "Customer view",
+           "Agent reuse", "Audit export"]
 
 
 # ---------------------------------------------------------------------------
@@ -51,7 +52,7 @@ def sidebar():
     reviewer = st.sidebar.text_input("Your name", value=f"{role}.demo", key="reviewer")
 
     st.sidebar.divider()
-    if st.sidebar.button("Reset demo", use_container_width=True):
+    if st.sidebar.button("Reset demo", width="stretch"):
         with st.spinner("Rebuilding to the demo start state..."):
             data.reset_demo()
         st.sidebar.success("Reset. Every case is at its first human action.")
@@ -98,7 +99,7 @@ def screen_dashboard(conn):
           "Score": r["risk_score"], "Holds": r["open_holds"],
           "Hold detail": r["hold_detail"], "Age (days)": r["ageing_days"]}
          for r in shown],
-        use_container_width=True, hide_index=True)
+        width="stretch", hide_index=True)
 
     if any(r["restricted"] for r in shown):
         st.info("Cases with a restricted finding get generic customer wording only. "
@@ -128,6 +129,15 @@ def screen_case(conn, case_id, role, reviewer):
         st.error("**Restricted finding on this case.** Customer messages are limited to "
                  "generic templates. Nothing about the finding may reach the applicant.")
 
+    if data.is_white_label(conn, case_id):
+        with st.container(border=True):
+            st.subheader("Future phase")
+            st.caption("This is a white-label partner. The POC does the KYB intake and "
+                       "stops; everything below belongs to the programme phase.")
+            for name, detail in data.FUTURE_PHASE_STEPS:
+                st.write(f"- **{name}** - {detail}")
+                st.caption("future phase, not in this POC")
+
     tabs = st.tabs(["Timeline", "Checklist", "Documents", "People", "Checks",
                     "Risk", "Decision", "Communications"])
     with tabs[0]:
@@ -156,7 +166,7 @@ def tab_timeline(conn, case_id):
         [{"Event": e["event_id"], "When": e["timestamp"], "Actor": f"{e['actor_type']}: "
           f"{e['actor_id']}", "Action": e["action"], "Detail": e["payload_summary"],
           "Version": e["model_or_prompt_version"] or ""} for e in events],
-        use_container_width=True, hide_index=True, height=420)
+        width="stretch", hide_index=True, height=420)
 
 
 def tab_checklist(conn, case_id):
@@ -170,7 +180,7 @@ def tab_checklist(conn, case_id):
         [{"Item": i["item_id"], "Rule": i["rule_id"], "Document": i["document_type"],
           "Level": i["level"], "Status": i["status"], "Attempts": i["resubmission_attempts"],
           "File": i["file_name"] or "", "Note": i["note"] or ""} for i in items],
-        use_container_width=True, hide_index=True)
+        width="stretch", hide_index=True)
 
 
 def tab_documents(conn, case_id, reviewer):
@@ -184,7 +194,7 @@ def tab_documents(conn, case_id, reviewer):
             with left:
                 if doc["sample_path"]:
                     if doc["sample_path"].suffix.lower() in (".jpg", ".jpeg", ".png"):
-                        st.image(str(doc["sample_path"]), use_container_width=True)
+                        st.image(str(doc["sample_path"]), width="stretch")
                     else:
                         st.caption(f"PDF: {doc['sample_path'].name}")
                         st.download_button("Open the file",
@@ -246,7 +256,7 @@ def tab_people(conn, case_id):
         [{"Id": p["individual_id"], "Name": p["full_name"], "Role": p["role"],
           "Date of birth": p["date_of_birth"] or "", "Nationality": p["nationality"] or "",
           "Resident in": p["residence_country"] or ""} for p in data.people(conn, case_id)],
-        use_container_width=True, hide_index=True)
+        width="stretch", hide_index=True)
 
     st.subheader("Beneficial ownership")
     owners = data.ubos(conn, case_id)
@@ -285,7 +295,7 @@ def tab_checks(conn, case_id):
             [{"Compared": name, "The register holds": held or "-",
               "Extracted from documents": got or "-", "Result": outcome}
              for name, held, got, outcome in result["comparisons"]],
-            use_container_width=True, hide_index=True)
+            width="stretch", hide_index=True)
         st.caption("Match results are computed here by comparing the two columns, "
                    "corrections included - not taken from the provider.")
 
@@ -298,7 +308,7 @@ def tab_checks(conn, case_id):
               "Liveness": r["liveness_result"], "Biometric": r["biometric_result"],
               "Name/DOB": r["name_dob_match"], "Expired": r["document_expired"],
               "Duplicate": r["duplicate_individual_detected"], "Result": r["result"]}
-             for r in result["identity"]], use_container_width=True, hide_index=True)
+             for r in result["identity"]], width="stretch", hide_index=True)
 
     st.subheader("Screening")
     if not result["screening"]:
@@ -309,7 +319,7 @@ def tab_checks(conn, case_id):
               "Sanctions": r["sanctions_result"], "PEP": r["pep_result"],
               "Adverse media": r["adverse_media_result"], "Severity": r["severity"],
               "Provider refs": r["evidence_refs"] or ""} for r in result["screening"]],
-            use_container_width=True, hide_index=True)
+            width="stretch", hide_index=True)
         st.caption("Internal only. None of this may be repeated to the applicant.")
 
 
@@ -339,7 +349,7 @@ def tab_risk(conn, case_id):
         st.dataframe(
             [{"Factor": f["factor"], "Points": f["weight"], "Why": f["explanation"],
               "Evidence": (f["evidence_refs"] or "").replace("|", ", ")}
-             for f in result["factors"]], use_container_width=True, hide_index=True)
+             for f in result["factors"]], width="stretch", hide_index=True)
     st.caption("Every weight in kb/risk_scoring_matrix.csv is a POC placeholder for "
                "Wallester to confirm; the brief does not state them.")
 
@@ -442,6 +452,42 @@ def screen_customer(conn, case_id):
             st.write(m["text"])
 
 
+def screen_reuse():
+    st.header("Agent reuse (10.9)")
+    st.caption("What comes from the generic KYC/KYB agent, and what Wallester changes. "
+               "Every override is a CSV in the knowledge base rather than code, which "
+               "is the point: reuse the agent, configure the policy.")
+
+    table = data.reuse_table()
+    st.write(f"Knowledge base in force: **{table['kb_version']}**")
+
+    st.dataframe(
+        [{"Component": row["component"],
+          "Reused from the generic agent": row["reused"],
+          "Wallester override": row["override"],
+          "Implemented by": ", ".join(f["file"] for f in row["files"])}
+         for row in table["rows"]],
+        width="stretch", hide_index=True)
+
+    st.subheader("The files behind each override")
+    for row in table["rows"]:
+        with st.expander(f"{row['component']} - "
+                         f"{', '.join(f['file'] for f in row['files'])}"):
+            st.write(f"**Reused:** {row['reused']}")
+            st.write(f"**Wallester override:** {row['override']}")
+            for f in row["files"]:
+                cols = st.columns([3, 1, 1])
+                cols[0].write(f"`{f['file']}`")
+                cols[1].write(f"version **{f['version']}**")
+                cols[2].write(f"{f['rules']} rules")
+                if not f["exists"]:
+                    st.error(f"{f['file']} is named here but missing from the repository.")
+                    continue
+                st.code(f["path"].read_text(encoding="utf-8"), language="csv")
+    st.caption("Read-only. Changing a rule is a CSV edit and a version bump in "
+               "kb/kb_manifest.json - no release.")
+
+
 def screen_export(conn, case_id):
     st.header("Audit export")
     st.caption("Every row on the case, the full audit trail, the KB versions in force "
@@ -455,7 +501,7 @@ def screen_export(conn, case_id):
     st.write("**Model and prompt versions used:** "
              + (", ".join(f"`{v}`" for v in bundle["model_and_prompt_versions"]) or "none"))
     st.dataframe([{"Table": k, "Rows": v} for k, v in bundle["row_counts"].items()],
-                 use_container_width=True, hide_index=True)
+                 width="stretch", hide_index=True)
     st.download_button("Download the bundle (JSON)",
                        json.dumps(bundle, indent=2, ensure_ascii=False),
                        file_name=f"{case_id}.json", mime="application/json")
@@ -480,7 +526,7 @@ def main():
     screen = st.sidebar.radio("Screen", SCREENS, key="screen")
     case_ids = [r["case_id"] for r in data.dashboard(conn)]
     case_id = None
-    if screen != "Operations dashboard":
+    if screen not in ("Operations dashboard", "Agent reuse"):
         case_id = st.sidebar.selectbox("Case", case_ids, key="case")
 
     if screen == "Operations dashboard":
@@ -489,6 +535,8 @@ def main():
         screen_case(conn, case_id, role, reviewer)
     elif screen == "Customer view":
         screen_customer(conn, case_id)
+    elif screen == "Agent reuse":
+        screen_reuse()
     else:
         screen_export(conn, case_id)
 

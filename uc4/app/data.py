@@ -21,8 +21,10 @@ from orchestrator import db, holds, live_mode                              # noq
 from orchestrator.kb import KnowledgeBase                                  # noqa: E402
 from orchestrator.steps import (analyst_review, communication, decision,   # noqa: E402
                                 evidence_pack, extraction, verification)
+from orchestrator.orchestrator import resume                               # noqa: E402
 from tools.export_case import export                                       # noqa: E402
 from tools.run_demo import run as run_demo                                 # noqa: E402
+from tools.dataset_to_applications import DEFAULT_OUT as APPLICATIONS       # noqa: E402
 
 DB_PATH = UC4 / "onboarding.db"
 SAMPLE_DOCS = UC4 / "sample_documents"
@@ -102,6 +104,132 @@ def dashboard(conn) -> list[dict]:
             "ageing_days": ageing_days(case["created_at"]),
         })
     return out
+
+
+# ---------------------------------------------------------------------------
+# Agent reuse (brief Section 10.9)
+# ---------------------------------------------------------------------------
+
+# The six components the brief names. For each: what a generic KYC/KYB agent
+# already does, what Wallester changes, and the KB file that carries the change.
+# Every override lives in a CSV rather than in code, which is the whole claim -
+# reuse the agent, configure the policy.
+REUSE_COMPONENTS = [
+    {
+        "component": "Document quality rules",
+        "reused": "Reading a document image and spotting the usual faults: out of "
+                  "focus, cropped, a screenshot of a screen, signs of alteration, an "
+                  "expiry date that has passed.",
+        "override": "Which fault does what. Wallester decides that an incomplete "
+                    "ownership chart goes to an analyst while an incomplete anything "
+                    "else goes back to the customer, that suspected tampering is never "
+                    "sent back as a resubmission, and which reason code each failure "
+                    "carries.",
+        "kb_files": ["document_quality_rules.csv"],
+    },
+    {
+        "component": "OCR extraction",
+        "reused": "Transcribing printed values off a page and reporting how confident "
+                  "it is in each one.",
+        "override": "Which fields each document type must yield, which of them are "
+                    "required, and what each value is used for downstream. Wallester "
+                    "also sets the 0.70 confidence floor below which a value goes to a "
+                    "person rather than into a decision.",
+        "kb_files": ["extraction_fields.csv"],
+    },
+    {
+        "component": "Registry validation",
+        "reused": "Looking a company up on a national register and returning what the "
+                  "register holds.",
+        "override": "What the answers mean. Wallester decides that a dissolved or "
+                    "struck-off company blocks the case outright while an address "
+                    "mismatch is a finding that travels to the risk step, and that a "
+                    "provider which does not answer is retried once and then stops the "
+                    "case rather than counting as a pass.",
+        "kb_files": ["registry_rules.csv", "ubo_policy.csv"],
+    },
+    {
+        "component": "Risk scoring",
+        "reused": "Adding up weighted factors into a score and turning the score into "
+                  "a band.",
+        "override": "Every factor, every weight and every threshold, plus the hard "
+                    "floors that override the arithmetic - a confirmed sanctions match "
+                    "is critical whatever it scores. All weights are POC placeholders "
+                    "for Wallester to confirm; the brief does not state them.",
+        "kb_files": ["risk_scoring_matrix.csv", "risk_bands.csv"],
+    },
+    {
+        "component": "Customer communications",
+        "reused": "Filling an approved template and holding it for approval before it "
+                  "is sent.",
+        "override": "The approved library itself, which template fits which situation, "
+                    "and the two rules that matter most: a case with a restricted "
+                    "finding gets only the generic templates, and a confirmed sanctions "
+                    "match produces no automatic message at all - a compliance task "
+                    "instead.",
+        "kb_files": ["message_template.csv", "communication_rules.csv",
+                     "communication_schedule.csv"],
+    },
+    {
+        "component": "Audit summary",
+        "reused": "An append-only trail of who did what, when, and under which model "
+                  "or prompt version.",
+        "override": "Which actions every case must carry for each step it passed "
+                    "through, so a gap is detectable rather than merely unlikely, and "
+                    "the export bundle a reviewer receives.",
+        "kb_files": ["audit_log_standard.csv", "analyst_decision_taxonomy.csv"],
+    },
+]
+
+
+def reuse_table() -> dict:
+    """The reuse picture, with a real version against every KB file named.
+
+    Versions come from kb_manifest.json rather than this module, so a KB bump
+    shows up here without anyone remembering to edit the screen.
+    """
+    import json
+    manifest = json.loads((UC4 / "kb" / "kb_manifest.json").read_text(encoding="utf-8"))
+    by_file = {item["file"]: (name, item["version"])
+               for name, item in manifest["items"].items()}
+
+    rows = []
+    for entry in REUSE_COMPONENTS:
+        files = []
+        for file_name in entry["kb_files"]:
+            name, version = by_file.get(file_name, (file_name, "?"))
+            path = UC4 / "kb" / file_name
+            files.append({
+                "file": f"kb/{file_name}",
+                "version": version,
+                "exists": path.exists(),
+                "rules": max(0, sum(1 for _ in path.open(encoding="utf-8")) - 1)
+                         if path.exists() else 0,
+                "path": path,
+            })
+        rows.append({**entry, "files": files})
+    return {"kb_version": manifest["kb_version"], "rows": rows}
+
+
+# ---------------------------------------------------------------------------
+# White-label future phase (brief Section 6.2)
+# ---------------------------------------------------------------------------
+
+# Named in the routing audit event the white-label branch writes. Listed here so
+# the screen and the audit trail cannot drift apart.
+FUTURE_PHASE_STEPS = [
+    ("KYB", "Partner company verification, which this POC does run"),
+    ("API integration", "Connecting the partner's platform to the card APIs"),
+    ("Visa co-brand approval", "Scheme approval for the co-branded programme"),
+    ("BIN and 3DS configuration", "Card range and authentication setup"),
+    ("Go-live testing", "End-to-end readiness before the first real card"),
+]
+
+
+def is_white_label(conn, case_id: str) -> bool:
+    row = conn.execute("SELECT white_label_branch_flag FROM onboarding_case WHERE case_id = ?",
+                       (case_id,)).fetchone()
+    return bool(row and row["white_label_branch_flag"])
 
 
 def case(conn, case_id: str) -> dict:
@@ -250,27 +378,58 @@ def export_bundle(conn, case_id: str) -> dict:
 # Actions - each one calls the orchestrator, never the database
 # ---------------------------------------------------------------------------
 
+def _application(case_id: str) -> dict:
+    """The application this case was built from, for the steps that need it."""
+    import json
+    matches = sorted(APPLICATIONS.glob(f"*{case_id}.json"))
+    if not matches:
+        raise FileNotFoundError(
+            f"no application file for {case_id}; run tools/dataset_to_applications.py")
+    return json.loads(matches[0].read_text(encoding="utf-8"))
+
+
+def carry_on(conn, case_id: str) -> dict:
+    """Move the case forward after a person has unblocked it.
+
+    A release or a correction clears a hold; it does not by itself extract the
+    document that was released or re-run the checks that were waiting. This asks
+    the orchestrator to carry the case on from wherever it now stands, which is
+    what happens in the pipeline and so must happen here too.
+    """
+    if open_holds(conn, case_id):
+        return {"stopped_at": "holds", "reason": "holds are still open"}
+    trace = resume(conn, case_id, _application(case_id), kb())
+    conn.commit()
+    return trace
+
 def release_document(conn, document_id, analyst_id, choice, reason):
+    case_id = conn.execute("SELECT case_id FROM document WHERE document_id = ?",
+                           (document_id,)).fetchone()[0]
     result = analyst_review.release_document(conn, document_id, analyst_id, choice, reason, kb())
     conn.commit()
+    carry_on(conn, case_id)
     return result
 
 
 def accept_field_as_read(conn, field_id, analyst_id, reason):
-    result = extraction.accept_field_as_read(conn, field_id, analyst_id, reason, kb())
-    extraction.route_case(conn, conn.execute(
+    case_id = conn.execute(
         "SELECT d.case_id FROM extracted_field f JOIN document d USING (document_id)"
-        " WHERE f.field_id = ?", (field_id,)).fetchone()[0], kb())
+        " WHERE f.field_id = ?", (field_id,)).fetchone()[0]
+    result = extraction.accept_field_as_read(conn, field_id, analyst_id, reason, kb())
+    extraction.route_case(conn, case_id, kb())
     conn.commit()
+    carry_on(conn, case_id)
     return result
 
 
 def correct_field(conn, field_id, analyst_id, value, reason):
-    result = extraction.correct_field(conn, field_id, analyst_id, value, reason, kb())
-    extraction.route_case(conn, conn.execute(
+    case_id = conn.execute(
         "SELECT d.case_id FROM extracted_field f JOIN document d USING (document_id)"
-        " WHERE f.field_id = ?", (field_id,)).fetchone()[0], kb())
+        " WHERE f.field_id = ?", (field_id,)).fetchone()[0]
+    result = extraction.correct_field(conn, field_id, analyst_id, value, reason, kb())
+    extraction.route_case(conn, case_id, kb())
     conn.commit()
+    carry_on(conn, case_id)
     return result
 
 

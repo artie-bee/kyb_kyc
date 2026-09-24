@@ -152,6 +152,12 @@ exactly as they do in the pipeline. `app/customer_view.py` is a plain function
 rather than part of the page, so a test can render what the applicant would see
 and check every word of it.
 
+A human action on a screen clears a hold and then calls
+`orchestrator.resume()`, which carries the case on from wherever it now
+stands. Without that the case would be unblocked and going nowhere, which is
+not what the pipeline does. Extraction skips documents it has already read, so
+resuming cannot duplicate values.
+
 ## Running it
 
 ```

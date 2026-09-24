@@ -129,6 +129,62 @@ def process_application(conn, application: dict, kb: KnowledgeBase,
     return trace
 
 
+def resume(conn, case_id: str, application: dict, kb: KnowledgeBase,
+           start_step: str = "extraction",
+           checker_mode: str = QUALITY_CHECKER_MODE,
+           extractor_mode: str = EXTRACTOR_MODE,
+           provider_mode: str = PROVIDER_MODE,
+           media_mode: str = MEDIA_ASSESSOR_MODE,
+           narrator_mode: str = NARRATOR_MODE) -> dict:
+    """Carry an existing case forward from where it stopped.
+
+    Intake and the requirement pack have already run; this picks up at a later
+    step, which is what is needed after a person releases a document or corrects
+    a field. A step whose gate is still shut raises and the case simply stays
+    where it is.
+    """
+    trace, next_step = {}, start_step
+    while next_step:
+        if next_step not in STEPS:
+            trace["waiting_for"] = next_step
+            break
+        kwargs = {}
+        if next_step == "document_quality":
+            kwargs = {"checker": get_checker(checker_mode)}
+        elif next_step == "extraction":
+            kwargs = {"extractor": get_extractor(extractor_mode)}
+        elif next_step == "verification":
+            reg, ident = get_providers(provider_mode, application)
+            kwargs = {"registry_provider": reg, "identity_provider": ident}
+        elif next_step == "screening":
+            kwargs = {"screening_provider": get_screening_provider(provider_mode, application),
+                      "media_assessor": get_media_assessor(media_mode)}
+        elif next_step == "risk_assessment":
+            kwargs = {"narrator": get_narrator(narrator_mode)}
+
+        try:
+            step_result = STEPS[next_step](conn, case_id, application, kb, **kwargs)
+        except verification.VerificationGateError as e:
+            # The checklist is not complete, so the paid step stays shut. That is
+            # an answer, not a failure.
+            trace["stopped_at"] = next_step
+            trace["reason"] = str(e)
+            break
+        trace[next_step] = step_result.__dict__
+
+        if next_step == "risk_assessment":
+            pack = evidence_pack.run(conn, case_id, application, kb,
+                                     narrator=get_narrator(narrator_mode))
+            trace["evidence_pack"] = pack.__dict__
+
+        next_step = step_result.next_step
+        if next_step not in STEPS:
+            trace["waiting_for"] = next_step
+            break
+    conn.commit()
+    return trace
+
+
 def main(paths: list[str], db_path: str = "onboarding.db") -> None:
     kb = KnowledgeBase()
     conn = db.connect(db_path)

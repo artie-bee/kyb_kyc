@@ -66,6 +66,13 @@ def run(conn, case_id: str, application: dict, kb: KnowledgeBase,
 
     # The ONLY way documents enter this step.
     documents = document_quality.accepted_documents(conn, case_id)
+    # A document already read is not read again. Re-running the step after an
+    # analyst releases one more document should extract that one, not duplicate
+    # every value on the case.
+    already = {r["document_id"] for r in conn.execute(
+        "SELECT DISTINCT document_id FROM extracted_field f JOIN document d"
+        " USING (document_id) WHERE d.case_id = ?", (case_id,))}
+    documents = [d for d in documents if d["document_id"] not in already]
     payload_by_name = {d["file_name"]: d for d in application.get("documents", [])}
     max_age = {r["document_type"]: r["max_age_days"] for r in kb.requirement_rules}
 
