@@ -16,6 +16,11 @@ kb/                         Knowledge base (read-only CSV, versioned in kb_manif
   risk_scoring_matrix.csv      Risk factors and weights (Section 5.8)
                                EVERY weight is a POC placeholder for Wallester to confirm
   risk_bands.csv               Score thresholds and the hard floors that override them
+  message_template.csv         The approved message library (Section 5.9)
+  communication_rules.csv      Which template for which situation (Sections 5.9, 11.3)
+  analyst_decision_taxonomy.csv Decisions, roles and resulting status (5.10, 10.7)
+  audit_log_standard.csv       Audit actions every case must carry (Section 10.8)
+  communication_schedule.csv   Reminder and closure timing
 orchestrator/
   orchestrator.py           The orchestration layer: runs steps in order, stops cleanly
   kb.py                     Loads the KB + tiny rule engine
@@ -32,6 +37,8 @@ orchestrator/
   steps/evidence_pack.py    Step 7b: the analyst pack (Section 5.11)
   media_relevance.py        AI half of Step 6 (mock / Claude stub)
   narrator.py               Written parts of Steps 7-8 (mock / Claude stub)
+  steps/communication.py    Step 8a: customer messages, templates only (5.9, 11.3)
+  steps/decision.py         Step 8b: the human decision (5.10, 10.7, 18)
   holds.py                  Case holds - the one place a case is stopped or released
   quality_checker.py        AI half of Step 3 (mock / Claude Vision stub)
   extractor.py              AI half of Step 4 (mock / Claude stub)
@@ -40,11 +47,15 @@ sample_applications/        6 test applications (normal, complex, branch, and fa
 tools/
   dataset_to_applications.py  Dataset CSVs -> application JSON; prints every assumption
   compare_to_dataset.py       Runs the orchestrator and scores it against the dataset
+  run_demo.py                 All 14 cases through Steps 1-8, scripted humans replayed
+  export_case.py              Audit bundle per case: rows, trail, versions (10.8)
 tests/test_first_layers.py    4 unit tests
 tests/test_against_dataset.py 65 tests - full match against the 14-case dataset:
                               70/70 case fields, 168/168 documents, 256/256 extracted
                               fields, 50/50 verification, 39/39 screening,
                               33/33 risk and evidence pack
+tests/test_step8_end_to_end.py 14 tests - all 14 cases through Steps 1-8:
+                              14/14 final statuses, 14/14 applicant communications
 tests/test_schema_sync.py     6 tests - fails if the dataset or database gains a
                               column or enum value the schema file does not describe
 
@@ -81,6 +92,10 @@ application -> [Step 1 intake] --primary--> [Step 2 requirement pack] -> [Step 3
 [Step 7] low / medium -> ready_for_decision    high -> enhanced_due_diligence
          critical -> analyst_review_required   insufficient_evidence -> analyst
          ...unless a hold is open, in which case the hold decides.
+
+[Step 8] a person decides; the taxonomy says who may decide what at which band,
+         the resulting status comes from the taxonomy, and the customer message
+         comes from the template library. Nothing is approved over an open hold.
 
 ## Case holds
 One mechanism, in orchestrator/holds.py. Any step may PLACE a hold; only the step
@@ -164,6 +179,24 @@ copied into any field a customer could be shown.
   mock    replays / assembles deterministically - the default, calls no API
   claude  STUB, raises; see orchestrator/narrator.py
 Set the mode with NARRATOR_MODE in orchestrator/orchestrator.py.
+
+## Step 8 - communications and decisions (Sections 5.9, 5.10, 11.3, 18)
+Everything a customer receives comes from kb/message_template.csv. The model may
+choose among the templates kb/communication_rules.csv allows for the situation and
+fill their declared placeholders; it writes no sentences. Three gates:
+  1. a case with restricted_finding gets only the generic templates;
+  2. a confirmed sanctions match sends nothing at all - a compliance task
+     "decide customer communication" is raised instead;
+  3. the rendered text is scanned for restricted wording before any send, and a
+     hit blocks it and is audited. A send writes to the outbox table; no mail
+     leaves this POC.
+Decisions go through decision.record_decision(), which refuses to approve over an
+open hold, enforces the role the taxonomy requires, COMPUTES override_flag by
+comparing the decision with the recommendation, and requires every cited
+evidence id to exist.
+The resubmission loop runs on a Clock (real, or fake for the tests): one reminder
+after 14 days, closed_withdrawn after 30. A re-upload re-runs Step 3 for that
+checklist item only.
 
 ## Step 3 - document quality (Section 5.3)
 Deterministic checks (file type, expiry, proof-of-address age, page count) run in code.

@@ -371,8 +371,14 @@ def run(conn, case_id: str, application: dict, kb: KnowledgeBase,
     holds.release_own(conn, case_id, ACTOR, "verification re-evaluated", kb)
     if blocking:
         summary = f"{len(blocking)} blocking outcome(s): " + "; ".join(blocking[:3])
+        # A provider that did not answer is insufficient evidence. An identity
+        # check that came back fail or review is a result, not an absence of one,
+        # so it gets its own hold rather than being filed under "could not tell".
         code = ("insufficient_evidence" if any("RG-09" in b for b in blocking)
-                else "eligibility" if registry_result == "fail" else "manual_review")
+                else "eligibility" if registry_result == "fail"
+                else "identity_failed" if any("ID-RESULT" in b or "ID-DUPLICATE" in b
+                                              for b in blocking)
+                else "manual_review")
         holds.place(conn, case_id, ACTOR, code,
                     f"{len(blocking)} verification outcome(s) need an analyst: "
                     + "; ".join(blocking[:2]), "analyst", kb)

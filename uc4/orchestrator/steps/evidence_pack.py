@@ -43,6 +43,7 @@ def known_ids(conn, case_id: str) -> set[str]:
             ("SELECT finding_id FROM finding WHERE case_id = ?", (case_id,)),
             ("SELECT hold_id FROM case_hold WHERE case_id = ?", (case_id,)),
             ("SELECT assessment_id FROM risk_assessment WHERE case_id = ?", (case_id,)),
+            ("SELECT evidence_pack_id FROM evidence_pack WHERE case_id = ?", (case_id,)),
             ("SELECT f.factor_id FROM risk_factor f JOIN risk_assessment a USING (assessment_id)"
              " WHERE a.case_id = ?", (case_id,)),
             ("SELECT u.ubo_id FROM ubo u JOIN onboarding_case c USING (applicant_id)"

@@ -142,6 +142,36 @@ CREATE TABLE IF NOT EXISTS evidence_pack (
     recommended_next_action TEXT, draft_compliance_narrative TEXT,
     evidence_refs TEXT, created_at TEXT NOT NULL
 );
+CREATE TABLE IF NOT EXISTS communication (
+    communication_id TEXT PRIMARY KEY,
+    case_id TEXT NOT NULL REFERENCES onboarding_case(case_id),
+    template_id TEXT NOT NULL, audience TEXT NOT NULL, message_type TEXT NOT NULL,
+    situation TEXT, approval_status TEXT NOT NULL DEFAULT 'pending_approval',
+    approved_by TEXT, sent_status TEXT NOT NULL DEFAULT 'not_sent',
+    rendered_text TEXT NOT NULL, created_at TEXT NOT NULL
+);
+-- Where a "sent" message actually goes. No mail leaves this POC.
+CREATE TABLE IF NOT EXISTS outbox (
+    outbox_id TEXT PRIMARY KEY,
+    communication_id TEXT NOT NULL REFERENCES communication(communication_id),
+    case_id TEXT NOT NULL REFERENCES onboarding_case(case_id),
+    audience TEXT NOT NULL, body TEXT NOT NULL, sent_at TEXT NOT NULL
+);
+-- Work for a person that the system will not do for itself.
+CREATE TABLE IF NOT EXISTS compliance_task (
+    task_id TEXT PRIMARY KEY,
+    case_id TEXT NOT NULL REFERENCES onboarding_case(case_id),
+    task TEXT NOT NULL, reason TEXT NOT NULL, owner TEXT NOT NULL,
+    created_at TEXT NOT NULL, completed_by TEXT, completed_at TEXT
+);
+CREATE TABLE IF NOT EXISTS human_decision (
+    decision_id TEXT PRIMARY KEY,
+    case_id TEXT NOT NULL REFERENCES onboarding_case(case_id),
+    reviewer TEXT NOT NULL, reviewer_role TEXT NOT NULL, decision TEXT NOT NULL,
+    reason_code TEXT NOT NULL, rationale TEXT NOT NULL, evidence_relied_on TEXT,
+    override_flag INTEGER NOT NULL DEFAULT 0, override_reason TEXT,
+    escalation_target TEXT, customer_template_id TEXT, timestamp TEXT NOT NULL
+);
 CREATE TABLE IF NOT EXISTS case_hold (
     hold_id TEXT PRIMARY KEY,
     case_id TEXT NOT NULL REFERENCES onboarding_case(case_id),
@@ -204,6 +234,10 @@ ID_PREFIX = {
     "risk_assessment": ("assessment_id", "RSK-"),
     "risk_factor": ("factor_id", "RF-"),
     "evidence_pack": ("evidence_pack_id", "EVP-"),
+    "communication": ("communication_id", "COM-"),
+    "outbox": ("outbox_id", "OUT-"),
+    "compliance_task": ("task_id", "TSK-"),
+    "human_decision": ("decision_id", "DEC-"),
     "audit_event": ("event_id", "EVT-"),
 }
 

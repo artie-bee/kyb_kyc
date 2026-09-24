@@ -34,6 +34,14 @@ class KnowledgeBase:
         self.screening_rules = _read_csv("screening_rules.csv")
         self.risk_factors = _read_csv("risk_scoring_matrix.csv")
         self.risk_bands = _read_csv("risk_bands.csv")
+        self.message_templates = {r["template_id"]: r for r in _read_csv("message_template.csv")}
+        self.communication_rules = _read_csv("communication_rules.csv")
+        self.decision_taxonomy = {r["decision"]: r for r in
+                                  _read_csv("analyst_decision_taxonomy.csv")}
+        self.audit_log_standard = {r["step"]: [a for a in r["required_actions"].split("|") if a]
+                                   for r in _read_csv("audit_log_standard.csv")}
+        self.communication_schedule = {r["setting"]: int(r["days"])
+                                       for r in _read_csv("communication_schedule.csv")}
         self.adverse_media_categories = {r["category"]: r
                                          for r in _read_csv("adverse_media_categories.csv")}
 
@@ -54,8 +62,25 @@ class KnowledgeBase:
         return [(r["hard_floor_condition"], r["band"])
                 for r in self.risk_bands if r["hard_floor_condition"]]
 
+    @property
+    def action_floors(self) -> list[tuple]:
+        """(condition, recommended_action) in file order; the first match wins,
+        so a sanctions escalation outranks an eligibility rejection."""
+        return [(r["hard_floor_condition"], r["recommended_action"])
+                for r in self.risk_bands if r["hard_floor_condition"]]
+
     def action_for_band(self, band: str) -> str:
         return next(r["recommended_action"] for r in self.risk_bands if r["band"] == band)
+
+    def templates_for(self, situation: str, restricted: bool = False) -> list[dict]:
+        """Templates allowed for a situation. A restricted case gets only the
+        generic ones - those that state no reason and reveal no finding."""
+        return [r for r in self.communication_rules
+                if r["situation"] == situation
+                and (not restricted or r["allowed_when_restricted"].lower() == "true")]
+
+    def communication_rule(self, template_id: str) -> dict | None:
+        return next((r for r in self.communication_rules if r["template_id"] == template_id), None)
 
     def screening_rule(self, check: str, result: str) -> dict | None:
         return next((r for r in self.screening_rules

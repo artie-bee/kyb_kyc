@@ -1,0 +1,13 @@
+situation,template_id,audience,allowed_when_restricted,requires_approval,description
+resubmission,TPL-0001,applicant,false,true,A document failed the quality screen and a better copy is needed
+clarification,TPL-0002,applicant,false,true,A specific point needs confirming before the case can move
+missing_items,TPL-0003,applicant,false,true,Required checklist items have not been supplied
+manual_review_underway,TPL-0004,applicant,true,true,Generic holding message; states no reason and reveals no finding
+status_update,TPL-0005,applicant,true,true,Generic progress note; states no reason
+verification_delay,TPL-0006,applicant,true,true,Checks are taking longer than usual; no action needed from the customer
+final_outcome_approved,TPL-0007,applicant,false,true,The account has been approved
+final_outcome_declined,TPL-0011,applicant,true,true,The application is declined; states no reason beyond what the customer can act on
+case_closed,TPL-0012,applicant,true,true,Closed for want of a response; carries no adverse inference
+white_label_intake,TPL-0010,applicant,true,true,Partner programme acknowledgement
+internal_case_summary,TPL-0008,analyst,true,true,Internal summary for the analyst queue; never sent to the applicant
+internal_escalation_note,TPL-0009,compliance,true,true,Internal escalation note; never sent to the applicant

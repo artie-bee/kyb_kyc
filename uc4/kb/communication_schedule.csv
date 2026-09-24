@@ -1,0 +1,3 @@
+setting,days,description
+first_reminder_after_days,14,Days to wait before the single reminder on an unanswered request
+close_after_days,30,Days after the original request before the case is closed as withdrawn

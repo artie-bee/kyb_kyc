@@ -120,9 +120,11 @@ def gather_facts(conn, case_id: str, kb: KnowledgeBase) -> tuple[dict, dict]:
     manual = [d for d in documents if d["quality_status_at_screen"] == "manual_review_required"]
     note("document_manual_review", manual, [d["document_id"] for d in manual])
 
-    # Not enough to go on. Scored cases need evidence; these do not have it.
+    # Insufficient evidence means "could not be determined": a provider that did
+    # not answer, or required evidence still outstanding. A failed identity check
+    # is a result, not an absence of one - it scores through RS-08 instead.
     gaps = [h for h in open_holds if h.code in ("insufficient_evidence", "resubmission")]
-    facts["insufficient_evidence_hold"] = bool(gaps) or facts["identity_check_failed"]
+    facts["insufficient_evidence_hold"] = bool(gaps)
     evidence["insufficient_evidence_hold"] = [h.hold_id for h in gaps]
     return facts, evidence
 
@@ -163,6 +165,10 @@ def run(conn, case_id: str, application: dict, kb: KnowledgeBase,
     band = apply_floors(band_for(score, kb), facts, kb)
     insufficient = band == "insufficient_evidence"
     action = kb.action_for_band(band)
+    for condition, floor_action in kb.action_floors:     # first match wins
+        if facts.get(condition):
+            action = floor_action
+            break
 
     screening_finding = any(facts[c] for c in
                             ("pep_match", "adverse_media_moderate", "adverse_media_serious",

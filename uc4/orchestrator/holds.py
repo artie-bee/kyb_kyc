@@ -33,7 +33,8 @@ HOLD_CODES = (
     "sanctions_escalation",     # compliance must resolve a sanctions match
     "eligibility",              # the entity itself cannot be onboarded
     "manual_review",            # an analyst must look at a document or finding
-    "insufficient_evidence",    # a provider did not answer, or a value is unusable
+    "identity_failed",          # an identity check came back fail or review
+    "insufficient_evidence",    # a provider did not answer, or evidence is outstanding
     "resubmission",             # the customer owes a better document
 )
 
@@ -45,6 +46,7 @@ _STATUS = {
     ("compliance", "sanctions_escalation"): "analyst_review_required",
     ("compliance", "manual_review"): "analyst_review_required",
     ("analyst", "manual_review"): "analyst_review_required",
+    ("analyst", "identity_failed"): "analyst_review_required",
     ("analyst", "eligibility"): "analyst_review_required",
     ("analyst", "insufficient_evidence"): "analyst_review_required",
     ("customer", "resubmission"): "resubmission_required",
