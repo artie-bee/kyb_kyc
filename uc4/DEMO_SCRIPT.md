@@ -31,7 +31,7 @@ Then show the **operations dashboard** (10.1).
 
 **Proves:** *Better status visibility* · *Synthetic-data readiness* · *No weak-compliance implication*
 
-Briefly open the **reuse screen** (10.9): "This maps which parts follow the generic KYC/KYB agent pattern and which are Wallester-specific overrides: your applicant types, your requirement packs, your templates, your risk matrix."
+Briefly open the **Agent reuse** screen (10.9), headed "Agent reuse (10.9)": "This maps which parts follow the generic KYC/KYB agent pattern and which are Wallester-specific overrides: your applicant types, your requirement packs, your templates, your risk matrix."
 
 Be precise here. This POC is a standalone build that *represents* the reuse split; it wasn't built on top of an actual existing agent. Section 15 accepts "reused or represented," and Section 18 warns against implying the generic agent fits Wallester without adaptation, so say "represents" and "maps," not "is running."
 
@@ -46,7 +46,7 @@ Be precise here. This POC is a standalone build that *represents* the reuse spli
 1. Open Case 1 from the dashboard.
 2. **Documents tab:** every document is accepted, with no flags. Extracted fields all show high confidence.
 3. **Checks tab:** identity pass; sanctions, PEP and adverse media all clear.
-4. **Risk tab:** band **low**, each factor with its points and evidence links. Point out the recommended action is *approve*, but a person still has to make the decision.
+4. **Risk tab:** band **low**, score **0**. No risk factors fired at all: the table reads *No factors fired.* Point out the recommended action is *approve*, but a person still has to make the decision.
 5. **Decision tab:** as **analyst**, record **approve** with a reason.
 6. **Customer view:** show the approval message the applicant receives.
 
@@ -64,10 +64,10 @@ Be precise here. This POC is a standalone build that *represents* the reuse spli
 2. **Documents tab:** open the director ID preview. The audience can see it's genuinely unreadable. The verdict shows the flag *blurred / unreadable*.
 3. **Checklist:** the UBO declaration item is still *pending*.
 4. **Checks tab:** it's **empty**. Pause here; this is the key moment.
-5. **Communications tab:** the resubmission request lists exactly what's missing, in plain language.
+5. **Communications tab:** nothing has been drafted yet. Under **Send a message**, choose situation `resubmission` and click **Draft and approve as me**. The request appears and names exactly what's missing, in plain language: *ubo declaration, id document*.
 6. **Customer view:** the applicant sees a clear status and knows exactly what to do next.
 
-**What to say:** "The system caught the problem *before* spending money on any paid verification. No identity check, no registry lookup, no screening call was made for a document that was never going to pass. And the customer got a precise request instead of a vague 'please resend your documents.'"
+**What to say:** "The system caught the problem *before* spending money on any paid verification. No identity check, no registry lookup, no screening call was made for a document that was never going to pass. And the customer got a precise request instead of a vague 'please resend your documents.' No one typed that message; it came from the template library and the checklist."
 
 **Proves:** *Reduced manual chasing* · *Better status visibility* (cost avoidance is the headline demo value in 14.2)
 
@@ -86,7 +86,7 @@ Be precise here. This POC is a standalone build that *represents* the reuse spli
 
    Number: match. Address: **mismatch**. Because a human confirmed the reading first, the mismatch is a real conflict, not an OCR error.
 4. **Risk tab:** band **medium**, score **43**, with the address mismatch as a cited factor. Status: *ready for decision*.
-5. **Decision tab:** the recommendation is *conditional approve*. As **analyst**, choose **request more information**, with a reason.
+5. **Decision tab:** the recommendation is *conditional approve*. As **analyst**, choose **request more information**. Fill in **both** *Rationale* and *Override reason*: the decision differs from the recommendation, so the backend requires the second one.
 6. Point out the decision is recorded as an override in the **stricter** direction.
 7. **Communications tab / Customer view:** the clarification request to the customer.
 
@@ -100,9 +100,9 @@ Be precise here. This POC is a standalone build that *represents* the reuse spli
 
 **Story:** a corporate applicant owns through an indirect chain of holding companies.
 
-1. Open Case 4. After Reset demo it has **no risk score yet**, because it's held. Show there are **two open holds** at once: one from the document quality step (the ownership chart) and one from extraction (two low-confidence fields).
-2. **Documents tab:** as **analyst**, release the ownership chart with a reason. Show the case **does not move on**, because extraction's hold is still open. Then accept the two low-confidence fields as read. The case now carries on by itself.
-3. **People and ownership tab:** effective ownership is **calculated, not copied**: 70% × 45% = **31.5%**, above the 25% UBO threshold. The indirect chain is not supported by the registry.
+1. Open Case 4. After Reset demo it has **no risk score yet**, because it's held. Show there are **two open holds** at once: one from the document quality step (the ownership chart) and one from extraction (**one** low-confidence field).
+2. **Documents tab:** as **analyst**, release the ownership chart with a reason. Show the case **does not move on**, because extraction's hold is still open. Then accept the field that's waiting (`indirect_ownership_path`) as read — and look again: reading the released chart has turned up a second one, `intermediate_entity` at 0.55. Accept that too. The case now carries on by itself.
+3. **People tab:** effective ownership is **calculated, not copied**: the app shows `70% x 45% = 31.5%`, above the 25% UBO threshold. On the **Checks tab**, the registry section says the register does **not** corroborate the declared beneficial ownership.
 4. **Risk tab:** band **high**, score **69** → enhanced due diligence route.
 5. **Contrast with the control:** open **Case 10**. Same applicant type and requirement pack, but a transparent, registry-supported chain. It scores **15** against Case 4's **69**.
 
@@ -118,7 +118,7 @@ Be precise here. This POC is a standalone build that *represents* the reuse spli
 
 1. Open Case 5. **Checks tab:** PEP match on the UBO; adverse media *moderate*.
 2. **Risk tab:** the **hard floor** applies: a PEP is never scored below high, whatever the points say. Point out the floor is shown explicitly.
-3. **Evidence pack:** open the draft compliance narrative, labelled **INTERNAL — NOT FOR CUSTOMER**. Show that every statement cites an evidence ID.
+3. **Evidence pack:** open the draft compliance narrative, labelled **INTERNAL - NOT FOR CUSTOMER**. It names every factor and its weight. For the evidence IDs behind them, point at the **Risk factors** table just above it: the PEP and media factors both cite `SCR-0006`.
 4. **Customer view:** nothing about PEP or media appears; only a neutral status.
 
 **What to say:** "The system does the preparation (the pack, the narrative, the evidence links) so the analyst starts from a complete picture instead of a blank page. The judgement stays with them."
@@ -132,9 +132,9 @@ Be precise here. This POC is a standalone build that *represents* the reuse spli
 **Story:** a director returns a possible sanctions match. This is the most important scenario; slow down.
 
 1. Open Case 6. Status: **analyst review required**; band **critical** (the sanctions floor, not the score).
-2. **Decision tab, as analyst:** try to **approve**. The app shows the backend's refusal. Read it aloud.
+2. **Decision tab, as analyst:** there is no **approve** to attempt. Point at the panel headed *Not offered at band `critical`*, which lists approve and conditional approve and the bands that do allow them. Then choose **escalate** and record it as **analyst**. The app shows the backend's refusal — *"analyst.demo is analyst, but the band is critical, so this decision is compliance's to take"*. Read it aloud.
 3. Switch the sidebar role to **compliance**. Record **escalate**, with an escalation target and reason.
-4. **Customer view:** the applicant has only ever seen a generic "your application is under review" message. Nothing mentions sanctions, screening or matches.
+4. **Customer view:** the escalation you just recorded sent the applicant one message, and it is generic — their application is with the onboarding team for an additional manual review step, and no further documents are needed. That is everything they have ever been sent. Nothing mentions sanctions, screening or matches.
 5. Optional: mention that the database itself blocks any attempt to change a sanctions match to "no match." Only a human decision can resolve it.
 
 **What to say:** "The AI can't clear a sanctions match, and neither can an analyst without the right role. The system won't even let the attempt through. And the customer isn't tipped off: the message they get is identical to any other case under review."
@@ -149,7 +149,7 @@ Be precise here. This POC is a standalone build that *represents* the reuse spli
 
 1. Open Case 8. It's recognised as **white-label** and routed to a separate branch. Entity scope is *undetermined*: that's decided in the programme phase.
 2. Show the KYB intake was done (the checklist and document quality), then the case stopped deliberately.
-3. Show the **future-phase panel**: KYB, API integration, Visa co-brand approval, BIN/3DS configuration, go-live testing.
+3. Show the **Future phase** panel: KYB, API integration, Visa co-brand approval, BIN and 3DS configuration, go-live testing. The panel also shows the entity scope, *undetermined*.
 
 **What to say:** "We understand Wallester runs two onboarding workflows. Direct business and freelancer onboarding is the first build; white-label programme onboarding is shown, recognised, and kept as a later phase, so the POC isn't over-scoped."
 
@@ -174,8 +174,8 @@ Be precise here. This POC is a standalone build that *represents* the reuse spli
 
 | Success criterion (Section 15) | Where it's shown |
 |---|---|
-| Clear reuse of existing agent | Opening — reuse screen (10.9) |
-| Wallester-specific variant is standalone | Opening — reuse screen; applicant types and templates throughout |
+| Clear reuse of existing agent | Opening — Agent reuse screen (10.9) |
+| Wallester-specific variant is standalone | Opening — Agent reuse screen; applicant types and templates throughout |
 | Reduced manual chasing | Scenarios 1 and 2 |
 | Better status visibility | Opening dashboard; Scenario 2 customer view |
 | Compliance-safe behaviour | Scenarios 4, 5 and 6 |
@@ -194,7 +194,7 @@ Be precise here. This POC is a standalone build that *represents* the reuse spli
 | "What about a confirmed sanctions hit?" | **Case 12** — clear match, critical, no automatic customer message; compliance decides what (if anything) the customer is told. |
 | "What if the company doesn't exist any more?" | **Case 11** — dissolved on the register; eligibility floor recommends reject; analyst agrees. |
 | "What if a provider is down?" | **Case 13** — unavailable media check never counts as a pass; the case is held as insufficient evidence. |
-| "What if the customer just stops replying?" | **Case 14** — reminders on schedule, then automatic closure as withdrawn. |
+| "What if the customer just stops replying?" | **Case 14** — held for the customer, awaiting a proof of address. The reminder schedule is `kb/communication_schedule.csv`; the demo database stops at the hold rather than fast-forwarding a month, and `python tools/run_demo.py` plays the thirty days out and closes the case as withdrawn. |
 
 ---
 
