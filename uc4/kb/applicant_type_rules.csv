@@ -1,0 +1,7 @@
+rule_id,priority,conditions,applicant_type,route,description
+AT-01,1,programme_type eq white_label,white_label_partner,white_label_branch,White-label programme partners are identified but not decisioned in the first POC (Sections 3 and 6.2)
+AT-02,2,entity_type in sole_trader;freelancer;self_employed,freelancer_sole_trader,primary,Individuals trading on their own account (Section 5.1)
+AT-03,3,entity_type in private_limited;private_limited_company;public_limited;partnership;llp && ownership_layers gt 1,complex_corporate_ubo,primary,Indirect ownership chain needs enhanced UBO handling (Sections 5.1 and 14.4)
+AT-04,4,entity_type in private_limited;private_limited_company;public_limited;partnership;llp && has_corporate_shareholder is_true,complex_corporate_ubo,primary,A company owns part of the applicant
+AT-05,5,entity_type in private_limited;private_limited_company;public_limited;partnership;llp && has_trust_or_nominee is_true,complex_corporate_ubo,primary,Trust or nominee arrangements need explanation (Section 5.2)
+AT-06,6,entity_type in private_limited;private_limited_company;public_limited;partnership;llp,sme_corporate,primary,Standard company with simple direct ownership

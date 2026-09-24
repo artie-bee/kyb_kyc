@@ -1,0 +1,10 @@
+country_code,jurisdiction_path,entity_scope,supported,notes
+GB,UK,wallester_uk_ltd,true,Wallester UK Ltd (FCA EMI)
+EE,EE,wallester_as,true,Wallester AS (EFSA) - home jurisdiction
+LV,EE,wallester_as,true,EEA applicant routed to Wallester AS rule set
+LT,EE,wallester_as,true,EEA applicant routed to Wallester AS rule set
+FI,EE,wallester_as,true,EEA applicant routed to Wallester AS rule set
+DE,EE,wallester_as,true,EEA applicant routed to Wallester AS rule set
+FR,EE,wallester_as,true,EEA applicant routed to Wallester AS rule set
+NL,EE,wallester_as,true,EEA applicant routed to Wallester AS rule set
+IE,EE,wallester_as,true,EEA applicant routed to Wallester AS rule set

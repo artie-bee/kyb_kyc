@@ -1,0 +1,112 @@
+"""
+SQLite store for everything the orchestrator WRITES.
+(CSV = read-only inputs such as KB rules and mock provider data.)
+
+Only the tables used by the first two steps are created here; later steps add
+their own tables with the same column names as the ER diagram.
+"""
+
+import sqlite3
+from datetime import datetime, timezone
+from pathlib import Path
+
+SCHEMA = """
+CREATE TABLE IF NOT EXISTS applicant (
+    applicant_id TEXT PRIMARY KEY, legal_name TEXT NOT NULL, trading_name TEXT,
+    registration_number TEXT, entity_type TEXT NOT NULL, country TEXT NOT NULL,
+    business_activity TEXT, expected_usage TEXT, risk_segment TEXT
+);
+CREATE TABLE IF NOT EXISTS onboarding_case (
+    case_id TEXT PRIMARY KEY,
+    applicant_id TEXT NOT NULL REFERENCES applicant(applicant_id),
+    applicant_type TEXT, jurisdiction_path TEXT, entity_scope TEXT,
+    source_channel TEXT NOT NULL, status TEXT NOT NULL, assigned_owner TEXT,
+    next_action_owner TEXT, white_label_branch_flag INTEGER NOT NULL DEFAULT 0,
+    created_at TEXT NOT NULL, updated_at TEXT NOT NULL
+);
+CREATE TABLE IF NOT EXISTS individual (
+    individual_id TEXT PRIMARY KEY,
+    applicant_id TEXT NOT NULL REFERENCES applicant(applicant_id),
+    role TEXT NOT NULL, full_name TEXT NOT NULL, date_of_birth TEXT,
+    nationality TEXT, residence_country TEXT, id_document_id TEXT,
+    relationship_to_entity TEXT
+);
+CREATE TABLE IF NOT EXISTS ubo (
+    ubo_id TEXT PRIMARY KEY,
+    applicant_id TEXT NOT NULL REFERENCES applicant(applicant_id),
+    individual_id TEXT NOT NULL REFERENCES individual(individual_id),
+    ownership_percentage REAL NOT NULL, control_type TEXT, ownership_path TEXT,
+    verification_status TEXT NOT NULL DEFAULT 'review'
+);
+CREATE TABLE IF NOT EXISTS requirement_pack (
+    pack_id TEXT PRIMARY KEY,
+    case_id TEXT NOT NULL UNIQUE REFERENCES onboarding_case(case_id),
+    applicant_type TEXT NOT NULL, jurisdiction TEXT NOT NULL,
+    entity_type TEXT NOT NULL, kb_version TEXT NOT NULL
+);
+CREATE TABLE IF NOT EXISTS checklist_item (
+    item_id TEXT PRIMARY KEY,
+    pack_id TEXT NOT NULL REFERENCES requirement_pack(pack_id),
+    rule_id TEXT NOT NULL,
+    subject_individual_id TEXT REFERENCES individual(individual_id),
+    document_type TEXT NOT NULL, level TEXT NOT NULL,
+    status TEXT NOT NULL DEFAULT 'pending',
+    resubmission_attempts INTEGER NOT NULL DEFAULT 0,
+    note TEXT
+);
+CREATE TABLE IF NOT EXISTS audit_event (
+    event_id TEXT PRIMARY KEY,
+    case_id TEXT NOT NULL REFERENCES onboarding_case(case_id),
+    actor_type TEXT NOT NULL, actor_id TEXT NOT NULL, action TEXT NOT NULL,
+    payload_summary TEXT NOT NULL, model_or_prompt_version TEXT,
+    timestamp TEXT NOT NULL
+);
+-- Section 12: audit history must never be modified or deleted.
+CREATE TRIGGER IF NOT EXISTS audit_no_update BEFORE UPDATE ON audit_event
+BEGIN SELECT RAISE(ABORT, 'audit_event is append-only'); END;
+CREATE TRIGGER IF NOT EXISTS audit_no_delete BEFORE DELETE ON audit_event
+BEGIN SELECT RAISE(ABORT, 'audit_event is append-only'); END;
+"""
+
+ID_PREFIX = {
+    "onboarding_case": ("case_id", "WAL-ONB-"),
+    "applicant": ("applicant_id", "APP-"),
+    "individual": ("individual_id", "IND-"),
+    "ubo": ("ubo_id", "UBO-"),
+    "requirement_pack": ("pack_id", "PACK-"),
+    "checklist_item": ("item_id", "CHK-"),
+    "audit_event": ("event_id", "EVT-"),
+}
+
+
+def connect(path: str | Path = "onboarding.db") -> sqlite3.Connection:
+    conn = sqlite3.connect(path)
+    conn.row_factory = sqlite3.Row
+    conn.execute("PRAGMA foreign_keys = ON")
+    conn.executescript(SCHEMA)
+    return conn
+
+
+def now() -> str:
+    return datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+
+
+def next_id(conn: sqlite3.Connection, table: str) -> str:
+    col, prefix = ID_PREFIX[table]
+    width = 6 if table in ("audit_event", "checklist_item") else 4
+    (count,) = conn.execute(f"SELECT COUNT(*) FROM {table}").fetchone()
+    return f"{prefix}{count + 1:0{width}d}"
+
+
+def audit(conn, case_id, actor_type, actor_id, action, payload_summary, version=None):
+    conn.execute(
+        "INSERT INTO audit_event VALUES (?,?,?,?,?,?,?,?)",
+        (next_id(conn, "audit_event"), case_id, actor_type, actor_id, action,
+         payload_summary, version, now()),
+    )
+
+
+def update_case(conn, case_id, **fields):
+    fields["updated_at"] = now()
+    cols = ", ".join(f"{k} = ?" for k in fields)
+    conn.execute(f"UPDATE onboarding_case SET {cols} WHERE case_id = ?", (*fields.values(), case_id))

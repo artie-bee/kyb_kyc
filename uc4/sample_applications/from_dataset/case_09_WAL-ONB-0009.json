@@ -1,0 +1,55 @@
+{
+  "application_id": "PORTAL-WAL-ONB-0009",
+  "source_channel": "portal",
+  "programme_type": "direct",
+  "applicant": {
+    "legal_name": "Parnu Kohviubade OU",
+    "trading_name": "Parnu Coffee Roasters",
+    "registration_number": "EE-90018321",
+    "entity_type": "private_limited_company",
+    "country": "EE",
+    "business_activity": "Coffee roasting and wholesale supply to cafes",
+    "expected_usage": "Up to 8 cards; around 9000 EUR per month on green coffee and packaging",
+    "vat_registered": true
+  },
+  "ownership": {
+    "ownership_layers": 1,
+    "has_corporate_shareholder": false,
+    "has_trust_or_nominee": false
+  },
+  "individuals": [
+    {
+      "ref": "IND-0019",
+      "role": "director",
+      "full_name": "Katrin Ilves",
+      "date_of_birth": "1984-02-19",
+      "nationality": "EE",
+      "residence_country": "EE",
+      "relationship_to_entity": "Managing director and authorised signatory"
+    },
+    {
+      "ref": "IND-0020",
+      "role": "ubo",
+      "full_name": "Mihkel Roosaar",
+      "date_of_birth": "1976-06-11",
+      "nationality": "EE",
+      "residence_country": "EE",
+      "relationship_to_entity": "Holds 70 percent of the issued share capital directly"
+    }
+  ],
+  "ubos": [
+    {
+      "individual_ref": "IND-0020",
+      "ownership_percentage": 70.0,
+      "control_type": "direct_shareholding",
+      "ownership_path": "Parnu Kohviubade OU"
+    }
+  ],
+  "flags": {
+    "spend_above_50k": false,
+    "nominee_or_trust_in_chain": false,
+    "ubo_indirect_25pct_or_more": false,
+    "signatory_not_director": false,
+    "vat_registered": true
+  }
+}

@@ -1,0 +1,64 @@
+{
+  "application_id": "PORTAL-WAL-ONB-0010",
+  "source_channel": "portal",
+  "programme_type": "direct",
+  "applicant": {
+    "legal_name": "Thornbury Analytics Ltd",
+    "trading_name": "Thornbury",
+    "registration_number": "UK-99025819",
+    "entity_type": "private_limited_company",
+    "country": "GB",
+    "business_activity": "Data analytics consultancy for the retail sector",
+    "expected_usage": "Up to 18 cards; around 22000 GBP per month on software and travel",
+    "vat_registered": false
+  },
+  "ownership": {
+    "ownership_layers": 2,
+    "has_corporate_shareholder": true,
+    "has_trust_or_nominee": false
+  },
+  "individuals": [
+    {
+      "ref": "IND-0021",
+      "role": "director",
+      "full_name": "Imogen Skellow",
+      "date_of_birth": "1987-12-01",
+      "nationality": "GB",
+      "residence_country": "GB",
+      "relationship_to_entity": "Managing director"
+    },
+    {
+      "ref": "IND-0022",
+      "role": "director",
+      "full_name": "Callum Pryde-Nash",
+      "date_of_birth": "1979-07-23",
+      "nationality": "GB",
+      "residence_country": "GB",
+      "relationship_to_entity": "Technical director"
+    },
+    {
+      "ref": "IND-0023",
+      "role": "ubo",
+      "full_name": "Helena Marchbank",
+      "date_of_birth": "1973-10-14",
+      "nationality": "GB",
+      "residence_country": "GB",
+      "relationship_to_entity": "Holds 70 percent through Marchbank Holdings Ltd, a UK holding company recorded on the register"
+    }
+  ],
+  "ubos": [
+    {
+      "individual_ref": "IND-0023",
+      "ownership_percentage": 70.0,
+      "control_type": "indirect_shareholding",
+      "ownership_path": "Marchbank Holdings Ltd > Thornbury Analytics Ltd"
+    }
+  ],
+  "flags": {
+    "spend_above_50k": false,
+    "nominee_or_trust_in_chain": false,
+    "ubo_indirect_25pct_or_more": true,
+    "signatory_not_director": false,
+    "vat_registered": false
+  }
+}

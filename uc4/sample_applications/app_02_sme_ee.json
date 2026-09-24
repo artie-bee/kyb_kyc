@@ -1,0 +1,9 @@
+{"application_id": "PORTAL-1002", "source_channel": "portal", "programme_type": "direct",
+ "applicant": {"legal_name": "Nordlight Digital OU", "registration_number": "16543210", "entity_type": "private_limited_company",
+   "country": "EE", "business_activity": "Digital marketing agency", "expected_usage": "Team expense cards, ~EUR 15k/month"},
+ "ownership": {"ownership_layers": 1, "has_corporate_shareholder": false, "has_trust_or_nominee": false},
+ "individuals": [
+   {"ref": "p1", "role": "director", "full_name": "Mari Tamm", "date_of_birth": "1988-04-12", "nationality": "EE", "residence_country": "EE"},
+   {"ref": "p2", "role": "ubo", "full_name": "Jaan Kask", "date_of_birth": "1979-11-02", "nationality": "EE", "residence_country": "EE"}],
+ "ubos": [{"individual_ref": "p2", "ownership_percentage": 100, "control_type": "direct_shareholding"}],
+ "flags": {"high_risk_industry": false}}

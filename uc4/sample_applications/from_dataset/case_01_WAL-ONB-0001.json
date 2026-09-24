@@ -1,0 +1,39 @@
+{
+  "application_id": "PORTAL-WAL-ONB-0001",
+  "source_channel": "portal",
+  "programme_type": "direct",
+  "applicant": {
+    "legal_name": "Kaari Mets",
+    "trading_name": "Mets Design Studio",
+    "registration_number": "EE-FIE-4410932",
+    "entity_type": "sole_trader",
+    "country": "EE",
+    "business_activity": "Freelance graphic design and brand identity services",
+    "expected_usage": "One card; up to 4000 EUR per month on software and travel",
+    "vat_registered": false
+  },
+  "ownership": {
+    "ownership_layers": 0,
+    "has_corporate_shareholder": false,
+    "has_trust_or_nominee": false
+  },
+  "individuals": [
+    {
+      "ref": "IND-0001",
+      "role": "sole_trader",
+      "full_name": "Kaari Mets",
+      "date_of_birth": "1991-03-14",
+      "nationality": "EE",
+      "residence_country": "EE",
+      "relationship_to_entity": "Registered sole trader and sole beneficial owner"
+    }
+  ],
+  "ubos": [],
+  "flags": {
+    "spend_above_50k": false,
+    "nominee_or_trust_in_chain": false,
+    "ubo_indirect_25pct_or_more": false,
+    "signatory_not_director": false,
+    "vat_registered": false
+  }
+}

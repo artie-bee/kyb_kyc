@@ -1,0 +1,64 @@
+{
+  "application_id": "PORTAL-WAL-ONB-0006",
+  "source_channel": "portal",
+  "programme_type": "direct",
+  "applicant": {
+    "legal_name": "Saarvik Metall OU",
+    "trading_name": "Saarvik",
+    "registration_number": "EE-90014782",
+    "entity_type": "private_limited_company",
+    "country": "EE",
+    "business_activity": "Metal fabrication and industrial subcontracting",
+    "expected_usage": "Up to 20 cards; around 45000 EUR per month on materials and fuel",
+    "vat_registered": true
+  },
+  "ownership": {
+    "ownership_layers": 1,
+    "has_corporate_shareholder": false,
+    "has_trust_or_nominee": false
+  },
+  "individuals": [
+    {
+      "ref": "IND-0013",
+      "role": "director",
+      "full_name": "Rasmus Kalda",
+      "date_of_birth": "1977-05-21",
+      "nationality": "EE",
+      "residence_country": "EE",
+      "relationship_to_entity": "Registered director with sole signing authority"
+    },
+    {
+      "ref": "IND-0014",
+      "role": "director",
+      "full_name": "Triin Lepik",
+      "date_of_birth": "1986-10-08",
+      "nationality": "EE",
+      "residence_country": "EE",
+      "relationship_to_entity": "Registered director"
+    },
+    {
+      "ref": "IND-0015",
+      "role": "ubo",
+      "full_name": "Oskar Magiste",
+      "date_of_birth": "1970-03-16",
+      "nationality": "EE",
+      "residence_country": "EE",
+      "relationship_to_entity": "Holds 80 percent of the issued share capital directly"
+    }
+  ],
+  "ubos": [
+    {
+      "individual_ref": "IND-0015",
+      "ownership_percentage": 80.0,
+      "control_type": "direct_shareholding",
+      "ownership_path": "Saarvik Metall OU"
+    }
+  ],
+  "flags": {
+    "spend_above_50k": false,
+    "nominee_or_trust_in_chain": false,
+    "ubo_indirect_25pct_or_more": false,
+    "signatory_not_director": false,
+    "vat_registered": true
+  }
+}

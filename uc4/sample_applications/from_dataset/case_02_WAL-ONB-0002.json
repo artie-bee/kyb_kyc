@@ -1,0 +1,48 @@
+{
+  "application_id": "PORTAL-WAL-ONB-0002",
+  "source_channel": "portal",
+  "programme_type": "direct",
+  "applicant": {
+    "legal_name": "Northbridge Craft Supplies Ltd",
+    "trading_name": "Northbridge Crafts",
+    "registration_number": "UK-99010288",
+    "entity_type": "private_limited_company",
+    "country": "GB",
+    "business_activity": "Wholesale of craft and hobby supplies to independent retailers",
+    "expected_usage": "Up to 12 cards; around 25000 GBP per month on stock and logistics",
+    "vat_registered": false
+  },
+  "ownership": {
+    "ownership_layers": 0,
+    "has_corporate_shareholder": false,
+    "has_trust_or_nominee": false
+  },
+  "individuals": [
+    {
+      "ref": "IND-0002",
+      "role": "director",
+      "full_name": "Denton Halliwell",
+      "date_of_birth": "1978-06-02",
+      "nationality": "GB",
+      "residence_country": "GB",
+      "relationship_to_entity": "Registered director and primary application contact"
+    },
+    {
+      "ref": "IND-0003",
+      "role": "director",
+      "full_name": "Priya Nankivell",
+      "date_of_birth": "1985-11-19",
+      "nationality": "GB",
+      "residence_country": "GB",
+      "relationship_to_entity": "Registered director and authorised signatory"
+    }
+  ],
+  "ubos": [],
+  "flags": {
+    "spend_above_50k": false,
+    "nominee_or_trust_in_chain": false,
+    "ubo_indirect_25pct_or_more": false,
+    "signatory_not_director": false,
+    "vat_registered": false
+  }
+}

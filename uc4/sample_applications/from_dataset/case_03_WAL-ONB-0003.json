@@ -1,0 +1,64 @@
+{
+  "application_id": "EMAIL-WAL-ONB-0003",
+  "source_channel": "email",
+  "programme_type": "direct",
+  "applicant": {
+    "legal_name": "Calderwick Logistics Ltd",
+    "trading_name": "Calderwick Freight",
+    "registration_number": "UK-99014477",
+    "entity_type": "private_limited_company",
+    "country": "GB",
+    "business_activity": "Regional road freight and contract haulage",
+    "expected_usage": "Up to 30 fuel cards; around 60000 GBP per month",
+    "vat_registered": true
+  },
+  "ownership": {
+    "ownership_layers": 1,
+    "has_corporate_shareholder": false,
+    "has_trust_or_nominee": false
+  },
+  "individuals": [
+    {
+      "ref": "IND-0004",
+      "role": "director",
+      "full_name": "Marcus Ellersby",
+      "date_of_birth": "1974-01-27",
+      "nationality": "GB",
+      "residence_country": "GB",
+      "relationship_to_entity": "Managing director"
+    },
+    {
+      "ref": "IND-0005",
+      "role": "director",
+      "full_name": "Roisin Delamere",
+      "date_of_birth": "1982-05-09",
+      "nationality": "IE",
+      "residence_country": "GB",
+      "relationship_to_entity": "Operations director"
+    },
+    {
+      "ref": "IND-0006",
+      "role": "ubo",
+      "full_name": "Torvald Kellingray",
+      "date_of_birth": "1969-08-22",
+      "nationality": "GB",
+      "residence_country": "GB",
+      "relationship_to_entity": "Holds 60 percent of the issued share capital directly"
+    }
+  ],
+  "ubos": [
+    {
+      "individual_ref": "IND-0006",
+      "ownership_percentage": 60.0,
+      "control_type": "direct_shareholding",
+      "ownership_path": "Calderwick Logistics Ltd"
+    }
+  ],
+  "flags": {
+    "spend_above_50k": true,
+    "nominee_or_trust_in_chain": false,
+    "ubo_indirect_25pct_or_more": false,
+    "signatory_not_director": false,
+    "vat_registered": true
+  }
+}

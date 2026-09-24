@@ -1,0 +1,70 @@
+{
+  "application_id": "PORTAL-WAL-ONB-0004",
+  "source_channel": "portal",
+  "programme_type": "direct",
+  "applicant": {
+    "legal_name": "Vestmark Nordic OU",
+    "trading_name": "Vestmark",
+    "registration_number": "EE-90012345",
+    "entity_type": "private_limited_company",
+    "country": "EE",
+    "business_activity": "Import and distribution of marine equipment",
+    "expected_usage": "Up to 15 cards; around 35000 EUR per month",
+    "vat_registered": true
+  },
+  "ownership": {
+    "ownership_layers": 3,
+    "has_corporate_shareholder": true,
+    "has_trust_or_nominee": false
+  },
+  "individuals": [
+    {
+      "ref": "IND-0007",
+      "role": "director",
+      "full_name": "Lembit Vaher",
+      "date_of_birth": "1971-02-11",
+      "nationality": "EE",
+      "residence_country": "EE",
+      "relationship_to_entity": "Managing director"
+    },
+    {
+      "ref": "IND-0008",
+      "role": "director",
+      "full_name": "Anneli Sormus",
+      "date_of_birth": "1980-07-30",
+      "nationality": "EE",
+      "residence_country": "EE",
+      "relationship_to_entity": "Director and holder of 24.5 percent of shares directly"
+    },
+    {
+      "ref": "IND-0009",
+      "role": "ubo",
+      "full_name": "Ruben Halvorsen",
+      "date_of_birth": "1966-12-05",
+      "nationality": "NO",
+      "residence_country": "NO",
+      "relationship_to_entity": "Declared indirect beneficial owner through two intermediate companies"
+    }
+  ],
+  "ubos": [
+    {
+      "individual_ref": "IND-0008",
+      "ownership_percentage": 24.5,
+      "control_type": "direct_shareholding",
+      "ownership_path": "Vestmark Nordic OU"
+    },
+    {
+      "individual_ref": "IND-0009",
+      "ownership_percentage": 31.5,
+      "control_type": "indirect_shareholding",
+      "ownership_path": "Harboe Holdings OU > Lindval Mid Holdings SA > Vestmark Nordic OU"
+    }
+  ],
+  "flags": {
+    "spend_above_50k": false,
+    "nominee_or_trust_in_chain": false,
+    "ubo_indirect_25pct_or_more": true,
+    "signatory_not_director": false,
+    "vat_registered": true
+  }
+}

@@ -1,0 +1,54 @@
+"""
+Knowledge base loader.
+
+All decisions in the intake and requirement-pack steps come from these files,
+never from code or model knowledge (brief Section 7). To change a rule, edit
+the CSV and bump the version in kb_manifest.json - no code change needed.
+"""
+
+import csv
+import json
+from pathlib import Path
+
+KB_DIR = Path(__file__).resolve().parent.parent / "kb"
+
+
+def _read_csv(name: str) -> list[dict]:
+    with open(KB_DIR / name, newline="", encoding="utf-8") as f:
+        return [{k: (v.strip() if v else "") for k, v in row.items()} for row in csv.DictReader(f)]
+
+
+class KnowledgeBase:
+    def __init__(self, kb_dir: Path = KB_DIR):
+        manifest = json.loads((kb_dir / "kb_manifest.json").read_text())
+        self.version = manifest["kb_version"]
+        self.applicant_type_rules = sorted(
+            _read_csv("applicant_type_rules.csv"), key=lambda r: int(r["priority"])
+        )
+        self.jurisdiction_routing = {r["country_code"]: r for r in _read_csv("jurisdiction_routing.csv")}
+        self.requirement_rules = _read_csv("requirement_rule.csv")
+
+
+# ---------------------------------------------------------------------------
+# Tiny rule engine for applicant_type_rules.csv
+# Condition format:  "<field> <op> <value>"  joined with " && "
+# Operators: eq, in (values separated by ;), gt, is_true
+# ---------------------------------------------------------------------------
+
+def _check(condition: str, facts: dict) -> bool:
+    field, op, *rest = condition.strip().split(" ", 2)
+    value = rest[0] if rest else None
+    actual = facts.get(field)
+    if op == "eq":
+        return str(actual) == value
+    if op == "in":
+        return str(actual) in value.split(";")
+    if op == "gt":
+        return actual is not None and float(actual) > float(value)
+    if op == "is_true":
+        return actual is True or str(actual).lower() == "true"
+    raise ValueError(f"Unknown operator '{op}' in KB condition: {condition}")
+
+
+def match_rule(conditions: str, facts: dict) -> bool:
+    return all(_check(c, facts) for c in conditions.split("&&"))

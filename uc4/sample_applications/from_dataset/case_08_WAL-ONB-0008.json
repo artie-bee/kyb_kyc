@@ -1,0 +1,39 @@
+{
+  "application_id": "PORTAL-WAL-ONB-0008",
+  "source_channel": "portal",
+  "programme_type": "white_label",
+  "applicant": {
+    "legal_name": "Kestrel Pay Partners OU",
+    "trading_name": "KestrelPay",
+    "registration_number": "EE-90016004",
+    "entity_type": "private_limited_company",
+    "country": "EE",
+    "business_activity": "Payments software platform seeking a white-label card programme",
+    "expected_usage": "Programme level; not assessed in this phase",
+    "vat_registered": true
+  },
+  "ownership": {
+    "ownership_layers": 0,
+    "has_corporate_shareholder": false,
+    "has_trust_or_nominee": false
+  },
+  "individuals": [
+    {
+      "ref": "IND-0018",
+      "role": "director",
+      "full_name": "Marek Tonisson",
+      "date_of_birth": "1981-08-04",
+      "nationality": "EE",
+      "residence_country": "EE",
+      "relationship_to_entity": "Registered director and programme contact"
+    }
+  ],
+  "ubos": [],
+  "flags": {
+    "spend_above_50k": false,
+    "nominee_or_trust_in_chain": false,
+    "ubo_indirect_25pct_or_more": false,
+    "signatory_not_director": false,
+    "vat_registered": true
+  }
+}

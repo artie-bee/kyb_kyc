@@ -1,0 +1,55 @@
+{
+  "application_id": "EMAIL-WAL-ONB-0007",
+  "source_channel": "email",
+  "programme_type": "direct",
+  "applicant": {
+    "legal_name": "Bramforth Aggregates Ltd",
+    "trading_name": "Bramforth",
+    "registration_number": "UK-99021560",
+    "entity_type": "private_limited_company",
+    "country": "GB",
+    "business_activity": "Supply of construction aggregates and tipper haulage",
+    "expected_usage": "Up to 25 cards; around 55000 GBP per month on fuel and plant hire",
+    "vat_registered": true
+  },
+  "ownership": {
+    "ownership_layers": 1,
+    "has_corporate_shareholder": false,
+    "has_trust_or_nominee": false
+  },
+  "individuals": [
+    {
+      "ref": "IND-0016",
+      "role": "director",
+      "full_name": "Nigel Braithwaite-Cole",
+      "date_of_birth": "1968-04-12",
+      "nationality": "GB",
+      "residence_country": "GB",
+      "relationship_to_entity": "Sole registered director and authorised signatory"
+    },
+    {
+      "ref": "IND-0017",
+      "role": "ubo",
+      "full_name": "Fenella Quist",
+      "date_of_birth": "1979-01-25",
+      "nationality": "GB",
+      "residence_country": "GB",
+      "relationship_to_entity": "Holds 45 percent of the issued share capital directly"
+    }
+  ],
+  "ubos": [
+    {
+      "individual_ref": "IND-0017",
+      "ownership_percentage": 45.0,
+      "control_type": "direct_shareholding",
+      "ownership_path": "Bramforth Aggregates Ltd"
+    }
+  ],
+  "flags": {
+    "spend_above_50k": true,
+    "nominee_or_trust_in_chain": false,
+    "ubo_indirect_25pct_or_more": false,
+    "signatory_not_director": false,
+    "vat_registered": true
+  }
+}

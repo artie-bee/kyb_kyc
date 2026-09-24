@@ -1,0 +1,64 @@
+{
+  "application_id": "PORTAL-WAL-ONB-0005",
+  "source_channel": "portal",
+  "programme_type": "direct",
+  "applicant": {
+    "legal_name": "Quillon Marine Services Ltd",
+    "trading_name": "Quillon Marine",
+    "registration_number": "UK-99017733",
+    "entity_type": "private_limited_company",
+    "country": "GB",
+    "business_activity": "Offshore vessel chartering and crew logistics",
+    "expected_usage": "Up to 40 cards; around 120000 GBP per month on fuel, port fees and crew travel",
+    "vat_registered": true
+  },
+  "ownership": {
+    "ownership_layers": 1,
+    "has_corporate_shareholder": false,
+    "has_trust_or_nominee": false
+  },
+  "individuals": [
+    {
+      "ref": "IND-0010",
+      "role": "director",
+      "full_name": "Gareth Pennyfold",
+      "date_of_birth": "1975-09-17",
+      "nationality": "GB",
+      "residence_country": "GB",
+      "relationship_to_entity": "Managing director"
+    },
+    {
+      "ref": "IND-0011",
+      "role": "director",
+      "full_name": "Ines Carrasco-Bell",
+      "date_of_birth": "1983-04-03",
+      "nationality": "ES",
+      "residence_country": "GB",
+      "relationship_to_entity": "Finance director"
+    },
+    {
+      "ref": "IND-0012",
+      "role": "ubo",
+      "full_name": "Aurelio Vantano",
+      "date_of_birth": "1962-11-28",
+      "nationality": "IT",
+      "residence_country": "MT",
+      "relationship_to_entity": "Holds 55 percent of the issued share capital directly"
+    }
+  ],
+  "ubos": [
+    {
+      "individual_ref": "IND-0012",
+      "ownership_percentage": 55.0,
+      "control_type": "direct_shareholding",
+      "ownership_path": "Quillon Marine Services Ltd"
+    }
+  ],
+  "flags": {
+    "spend_above_50k": true,
+    "nominee_or_trust_in_chain": false,
+    "ubo_indirect_25pct_or_more": false,
+    "signatory_not_director": false,
+    "vat_registered": true
+  }
+}

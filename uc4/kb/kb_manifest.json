@@ -1,0 +1,8 @@
+{
+  "kb_version": "kb-2026.09-poc-v2",
+  "items": {
+    "applicant_type_rules": {"file": "applicant_type_rules.csv", "version": "1.1", "brief_section": "7 - Applicant-type rules"},
+    "jurisdiction_routing": {"file": "jurisdiction_routing.csv", "version": "1.0", "brief_section": "6.2 - Wallester AS / UK Ltd routing"},
+    "requirement_rule": {"file": "requirement_rule.csv", "version": "2.0", "brief_section": "7 - Document requirement matrix"}
+  }
+}
