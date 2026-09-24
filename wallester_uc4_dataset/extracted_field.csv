@@ -191,3 +191,67 @@ FLD-0189,DOC-0120,document_date,2026-09-02,0.92,1,false
 FLD-0190,DOC-0121,declared_source,Consultancy fees under annual retainer contracts,0.9,1,false
 FLD-0191,DOC-0122,declared_industry,Management and data analytics consultancy,0.92,1,false
 FLD-0192,DOC-0123,declared_source_of_wealth,"Proceeds of the founder's earlier consultancy sale, held through Marchbank Holdings Ltd",0.91,1,false
+FLD-0193,DOC-0124,company_name,Ardenhall Joinery Ltd,0.95,1,false
+FLD-0194,DOC-0124,registration_number,UK-99031147,0.94,1,false
+FLD-0195,DOC-0125,company_name,Ardenhall Joinery Ltd,0.94,1,false
+FLD-0196,DOC-0125,registration_number,UK-99031147,0.93,1,false
+FLD-0197,DOC-0125,registered_address,"Ardenhall Works, 6 Kiln Row, Derby DE1 3QF, United Kingdom",0.92,1,false
+FLD-0198,DOC-0125,entity_status,active,0.71,1,false
+FLD-0199,DOC-0126,vat_number,GB-VAT-771903442,0.92,1,false
+FLD-0200,DOC-0127,director_name,Rowan Feathersby,0.94,1,false
+FLD-0201,DOC-0127,director_name_2,Delia Ormsby-Crane,0.93,1,false
+FLD-0202,DOC-0128,signatory_name,Rowan Feathersby,0.91,1,false
+FLD-0203,DOC-0129,ubo_name,Wilhelmina Tarrant,0.93,1,false
+FLD-0204,DOC-0129,ownership_percentage,65.0,0.92,1,false
+FLD-0205,DOC-0130,full_name,Rowan Feathersby,0.95,1,false
+FLD-0206,DOC-0131,full_name,Delia Ormsby-Crane,0.94,1,false
+FLD-0207,DOC-0132,full_name,Wilhelmina Tarrant,0.93,1,false
+FLD-0208,DOC-0133,document_date,2026-09-04,0.92,1,false
+FLD-0209,DOC-0134,document_date,2026-09-02,0.91,1,false
+FLD-0210,DOC-0135,document_date,2026-08-27,0.9,1,false
+FLD-0211,DOC-0136,declared_source,Contract joinery revenue from retail fit-out clients,0.89,1,false
+FLD-0212,DOC-0137,declared_industry,Joinery and shopfitting,0.91,1,false
+FLD-0213,DOC-0138,company_name,Solvarn Baltic OU,0.96,1,false
+FLD-0214,DOC-0138,registration_number,EE-90021455,0.95,1,false
+FLD-0215,DOC-0139,company_name,Solvarn Baltic OU,0.95,1,false
+FLD-0216,DOC-0139,registration_number,EE-90021455,0.94,1,false
+FLD-0217,DOC-0139,registered_address,"Punane 18, 13619 Tallinn, Estonia",0.93,1,false
+FLD-0218,DOC-0139,entity_status,active,0.95,1,false
+FLD-0219,DOC-0140,tax_number,EE-TAX-90021455,0.92,1,false
+FLD-0220,DOC-0141,director_name,Taavi Ruumet,0.94,1,false
+FLD-0221,DOC-0142,signatory_name,Taavi Ruumet,0.92,1,false
+FLD-0222,DOC-0143,ubo_name,Ivar Kolmsaar,0.93,1,false
+FLD-0223,DOC-0143,ownership_percentage,80.0,0.92,1,false
+FLD-0224,DOC-0144,full_name,Taavi Ruumet,0.95,1,false
+FLD-0225,DOC-0145,full_name,Ivar Kolmsaar,0.94,1,false
+FLD-0226,DOC-0146,document_date,2026-09-06,0.93,1,false
+FLD-0227,DOC-0147,document_date,2026-09-01,0.92,1,false
+FLD-0228,DOC-0148,declared_source,Distribution margin on industrial valve sales,0.9,1,false
+FLD-0229,DOC-0149,declared_industry,Industrial equipment distribution,0.91,1,false
+FLD-0230,DOC-0150,company_name,Pemberly Tooling Ltd,0.95,1,false
+FLD-0231,DOC-0150,registration_number,UK-99034820,0.94,1,false
+FLD-0232,DOC-0151,company_name,Pemberly Tooling Ltd,0.94,1,false
+FLD-0233,DOC-0151,registration_number,UK-99034820,0.93,1,false
+FLD-0234,DOC-0151,registered_address,"Unit 12 Pemberly Trading Estate, Coventry CV6 5NN, United Kingdom",0.92,1,false
+FLD-0235,DOC-0151,entity_status,active,0.94,1,false
+FLD-0236,DOC-0152,vat_number,GB-VAT-903155721,0.91,1,false
+FLD-0237,DOC-0153,director_name,Hadley Winstock,0.93,1,false
+FLD-0238,DOC-0153,director_name_2,Marguerite Ellcott,0.92,1,false
+FLD-0239,DOC-0154,signatory_name,Hadley Winstock,0.9,1,false
+FLD-0240,DOC-0155,ubo_name,Oswin Prattley,0.92,1,false
+FLD-0241,DOC-0155,ownership_percentage,55.0,0.91,1,false
+FLD-0242,DOC-0156,full_name,Hadley Winstock,0.88,1,false
+FLD-0243,DOC-0157,full_name,Marguerite Ellcott,0.94,1,false
+FLD-0244,DOC-0158,full_name,Oswin Prattley,0.93,1,false
+FLD-0245,DOC-0159,document_date,2026-09-07,0.91,1,false
+FLD-0246,DOC-0160,document_date,2026-09-03,0.92,1,false
+FLD-0247,DOC-0161,document_date,2026-08-30,0.9,1,false
+FLD-0248,DOC-0162,declared_source,Tooling contracts with light manufacturing customers,0.89,1,false
+FLD-0249,DOC-0163,declared_industry,Precision engineering and tooling,0.9,1,false
+FLD-0250,DOC-0164,company_name,Elise Kaarma,0.96,1,false
+FLD-0251,DOC-0164,registration_number,EE-FIE-4471208,0.95,1,false
+FLD-0252,DOC-0164,registered_address,"Vabriku 31-2, 10411 Tallinn, Estonia",0.93,1,false
+FLD-0253,DOC-0164,entity_status,active,0.94,1,false
+FLD-0254,DOC-0165,full_name,Elise Kaarma,0.95,1,false
+FLD-0255,DOC-0167,declared_source,Studio sales and commissioned tableware,0.9,1,false
+FLD-0256,DOC-0168,declared_industry,Studio ceramics,0.92,1,false

@@ -41,3 +41,14 @@ RF-0039,RSK-0009,jurisdiction_risk,0.05,United Kingdom under Wallester UK Ltd; n
 RF-0040,RSK-0009,industry_risk,0.1,Consultancy services carry a low industry weighting.,DOC-0122
 RF-0041,RSK-0009,document_quality,0.0,All sixteen documents passed the pre-screen at the first attempt.,PACK-0010
 RF-0042,RSK-0009,screening_outcome,0.0,"No sanctions, PEP or adverse-media findings for the entity or any of the three individuals.",SCR-0025|SCR-0026|SCR-0027|SCR-0028
+RF-0043,RSK-0010,entity_status,0.95,"The register records the company as dissolved. A dissolved entity cannot hold a card programme, and no document supplied by the applicant can change that.",REG-0009
+RF-0044,RSK-0010,document_quality,0.0,All fourteen documents passed the pre-screen at the first attempt.,PACK-0011
+RF-0045,RSK-0010,screening_outcome,0.0,"No sanctions, PEP or adverse-media findings for the entity or any of the three individuals.",SCR-0029|SCR-0030|SCR-0031|SCR-0032
+RF-0046,RSK-0011,sanctions_exposure,0.95,"The 80 percent beneficial owner returned a confirmed sanctions match. Configured policy routes this to compliance without any automated clearance, and the orchestration layer has not cleared or downgraded the finding.",SCR-0035
+RF-0047,RSK-0011,ownership_concentration,0.3,"A single owner holds 80 percent, so the finding attaches to effective control of the applicant rather than to a minority holding.",DOC-0143
+RF-0048,RSK-0011,document_quality,0.0,All twelve documents passed the pre-screen at the first attempt.,PACK-0012
+RF-0049,RSK-0012,identity_verification,0.0,"The identity check on director IND-0029 failed on the document and biometric components and the name and date of birth did not match. That is a gap in the evidence, not a finding about the person.",IDC-0026
+RF-0050,RSK-0012,media_coverage,0.0,"The adverse-media provider did not return a result for the same director, so the file cannot be said to be clear on that point either.",SCR-0039
+RF-0051,RSK-0012,document_quality,0.0,All fourteen documents passed the pre-screen at the first attempt.,PACK-0013
+RF-0052,RSK-0013,document_completeness,0.0,"The proof of address was a screenshot rather than the original and was never replaced, so the mandatory checklist was never completed.",PACK-0014
+RF-0053,RSK-0013,applicant_engagement,0.0,One request and one reminder were sent and neither was answered within 30 days.,PACK-0014

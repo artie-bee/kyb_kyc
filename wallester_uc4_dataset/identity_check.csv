@@ -19,3 +19,11 @@ IDC-0017,WAL-ONB-0009,IND-0020,VerifyMock ID,pass,pass,pass,pass,match,false,fal
 IDC-0018,WAL-ONB-0010,IND-0021,VerifyMock ID,pass,pass,pass,pass,match,false,false,pass
 IDC-0019,WAL-ONB-0010,IND-0022,VerifyMock ID,pass,pass,pass,pass,match,false,false,pass
 IDC-0020,WAL-ONB-0010,IND-0023,VerifyMock ID,pass,pass,pass,pass,match,false,false,pass
+IDC-0021,WAL-ONB-0011,IND-0024,VerifyMock ID,pass,pass,pass,pass,match,false,false,pass
+IDC-0022,WAL-ONB-0011,IND-0025,VerifyMock ID,pass,pass,pass,pass,match,false,false,pass
+IDC-0023,WAL-ONB-0011,IND-0026,VerifyMock ID,pass,pass,pass,pass,match,false,false,pass
+IDC-0024,WAL-ONB-0012,IND-0027,VerifyMock ID,pass,pass,pass,pass,match,false,false,pass
+IDC-0025,WAL-ONB-0012,IND-0028,VerifyMock ID,pass,pass,pass,pass,match,false,false,pass
+IDC-0026,WAL-ONB-0013,IND-0029,VerifyMock ID,fail,pass,fail,pass,mismatch,false,false,fail
+IDC-0027,WAL-ONB-0013,IND-0030,VerifyMock ID,pass,pass,pass,pass,match,false,false,pass
+IDC-0028,WAL-ONB-0013,IND-0031,VerifyMock ID,pass,pass,pass,pass,match,false,false,pass

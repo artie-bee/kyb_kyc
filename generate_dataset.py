@@ -281,6 +281,16 @@ TEMPLATES = [
   "Hello {{contact_name}}, thank you for the partner programme enquiry for {{applicant_name}} (reference "
   "{{case_id}}). Your company documents have been received. Partner programme onboarding is handled by our "
   "programme delivery team, who will contact you about the next steps.", "1.0", "approved"),
+ # Neither of these may state a reason that would disclose a check result: a
+ # decline says what the applicant can act on and nothing more.
+ ("TPL-0011", "application_declined", "applicant",
+  "Hello {{contact_name}}, thank you for your application for {{applicant_name}} (reference "
+  "{{case_id}}). We are not able to open an account at this time. If your circumstances change you "
+  "are welcome to apply again.", "1.0", "approved"),
+ ("TPL-0012", "case_closed", "applicant",
+  "Hello {{contact_name}}, we have not heard back about the documents we asked for, so we have closed "
+  "your application for {{applicant_name}} (reference {{case_id}}) for now. Nothing is held against "
+  "you and you are welcome to apply again whenever it suits you.", "1.0", "approved"),
 ]
 for _t in TEMPLATES:
     add("message_template", template_id=_t[0], message_type=_t[1], audience=_t[2], template_text=_t[3],
@@ -1893,6 +1903,463 @@ CASES.append({
       "Analytics Ltd and all of the documents we asked for. Your case reference is WAL-ONB-0010. "
       "Your application is now with our onboarding team and we will let you know as soon as the "
       "review is complete."}],
+})
+
+# --------------------------------------------------------------- Case 11 ----
+# Eligibility failure rather than a risk finding: the register says the company
+# no longer exists, which no amount of clean paperwork can cure.
+CASES.append({
+ "case_id": "WAL-ONB-0011", "applicant_id": "APP-0011",
+ "start": datetime(2026, 9, 23, 9, 10, 0),
+ "applicant_type": "sme_corporate", "jurisdiction": "UK", "entity_scope": "wallester_uk_ltd",
+ "source_channel": "portal", "status": "rejected", "next_action_owner": "system",
+ "assigned_owner": "analyst.j.okoro",
+ "applicant": {"legal_name": "Ardenhall Joinery Ltd", "trading_name": "Ardenhall",
+   "registration_number": "UK-99031147", "entity_type": "private_limited_company", "country": "GB",
+   "business_activity": "Bespoke joinery and shopfitting for retail interiors",
+   "expected_usage": "Up to 10 cards; around 18000 GBP per month on timber and fixings",
+   "vat_registered": True,
+   "risk_segment": "unassessed"},
+ "individuals": [
+   {"id": "IND-0024", "role": "director", "full_name": "Rowan Feathersby", "dob": "1972-03-08",
+    "nationality": "GB", "residence": "GB", "relationship": "Managing director"},
+   {"id": "IND-0025", "role": "director", "full_name": "Delia Ormsby-Crane", "dob": "1980-11-26",
+    "nationality": "GB", "residence": "GB", "relationship": "Finance director"},
+   {"id": "IND-0026", "role": "ubo", "full_name": "Wilhelmina Tarrant", "dob": "1965-07-14",
+    "nationality": "GB", "residence": "GB",
+    "relationship": "Holds 65 percent of the issued share capital directly"}],
+ "ubos": [{"id": "UBO-0009", "individual_id": "IND-0026", "pct": 65.0,
+   "control_type": "direct_shareholding", "ownership_path": "Ardenhall Joinery Ltd",
+   "verification_status": "verified"}],
+ "documents": [
+   doc("certificate_of_incorporation", "cert_incorporation_ardenhall.pdf", issue_country="GB",
+       fields=[("company_name", "Ardenhall Joinery Ltd", 0.95, 1, False),
+               ("registration_number", "UK-99031147", 0.94, 1, False)]),
+   doc("registry_extract", "registry_extract_ardenhall.pdf", issue_country="GB", fields=[
+     ("company_name", "Ardenhall Joinery Ltd", 0.94, 1, False),
+     ("registration_number", "UK-99031147", 0.93, 1, False),
+     ("registered_address", "Ardenhall Works, 6 Kiln Row, Derby DE1 3QF, United Kingdom",
+      0.92, 1, False),
+     ("entity_status", "active", 0.71, 1, False)]),
+   doc("tax_registration_certificate", "vat_certificate_ardenhall.pdf", fields=[
+     ("vat_number", "GB-VAT-771903442", 0.92, 1, False)]),
+   doc("director_register", "director_register_ardenhall.pdf", fields=[
+     ("director_name", "Rowan Feathersby", 0.94, 1, False),
+     ("director_name_2", "Delia Ormsby-Crane", 0.93, 1, False)]),
+   doc("authorised_signatory_list", "signatory_list_ardenhall.pdf", fields=[
+     ("signatory_name", "Rowan Feathersby", 0.91, 1, False)]),
+   doc("ubo_declaration", "ubo_declaration_ardenhall.pdf", fields=[
+     ("ubo_name", "Wilhelmina Tarrant", 0.93, 1, False),
+     ("ownership_percentage", "65.0", 0.92, 1, False)]),
+   doc("id_document", "passport_feathersby_r.jpg", subject="IND-0024", expiry="2030-06-30",
+       issue_country="GB", fields=[("full_name", "Rowan Feathersby", 0.95, 1, False)]),
+   doc("id_document", "passport_ormsby_crane_d.jpg", subject="IND-0025", expiry="2029-09-19",
+       issue_country="GB", fields=[("full_name", "Delia Ormsby-Crane", 0.94, 1, False)]),
+   doc("id_document", "passport_tarrant_w.jpg", subject="IND-0026", expiry="2031-01-22",
+       issue_country="GB", fields=[("full_name", "Wilhelmina Tarrant", 0.93, 1, False)]),
+   doc("proof_of_address", "poa_feathersby_sep2026.pdf", subject="IND-0024", issue_country="GB",
+       fields=[("document_date", "2026-09-04", 0.92, 1, False)]),
+   doc("proof_of_address", "poa_ormsby_crane_sep2026.pdf", subject="IND-0025", issue_country="GB",
+       fields=[("document_date", "2026-09-02", 0.91, 1, False)]),
+   doc("proof_of_address", "poa_tarrant_aug2026.pdf", subject="IND-0026", issue_country="GB",
+       fields=[("document_date", "2026-08-27", 0.90, 1, False)]),
+   doc("source_of_funds_declaration", "source_of_funds_ardenhall.pdf", fields=[
+     ("declared_source", "Contract joinery revenue from retail fit-out clients", 0.89, 1, False)]),
+   doc("business_activity_description", "business_activity_ardenhall.pdf", fields=[
+     ("declared_industry", "Joinery and shopfitting", 0.91, 1, False)]),
+ ],
+ "triggered_conditionals": [find_rule("sme_corporate", "UK", "tax_registration_certificate")],
+ "registry": {"provider": "MockRegistryHub UK", "company_status": "dissolved",
+   "name_match": "match", "number_match": "match", "address_match": "match",
+   "director_match": "match", "ubo_supported": True, "high_risk": False, "confidence": 0.97,
+   "result": "fail"},
+ "identity_checks": [idcheck("IND-0024"), idcheck("IND-0025"), idcheck("IND-0026")],
+ "screenings": [screen("applicant"), screen("individual", "IND-0024"),
+                screen("individual", "IND-0025"), screen("individual", "IND-0026")],
+ "risk": {"score": 88, "band": "high", "recommended_action": "reject", "confidence": 0.95,
+   "insufficient_evidence_flag": False, "requires_human_signoff": True, "factors": [
+     ("entity_status", 0.95,
+      "The register records the company as dissolved. A dissolved entity cannot hold a card "
+      "programme, and no document supplied by the applicant can change that.", "{REG}"),
+     ("document_quality", 0.00,
+      "All fourteen documents passed the pre-screen at the first attempt.", "{PACK}"),
+     ("screening_outcome", 0.00,
+      "No sanctions, PEP or adverse-media findings for the entity or any of the three "
+      "individuals.",
+      "{SCR:applicant}|{SCR:IND-0024}|{SCR:IND-0025}|{SCR:IND-0026}")]},
+ "evidence": {
+   "applicant_summary": "Ardenhall Joinery Ltd, UK private limited company UK-99031147, bespoke "
+     "joinery, two directors, one 65 percent direct beneficial owner, 10 cards requested at "
+     "around 18000 GBP per month.",
+   "missing_or_conflicting_evidence": "The registry extract supplied by the applicant shows the "
+     "entity as active; the live register returns dissolved. The applicant's copy is the older "
+     "record.",
+   "recommended_next_action": "reject",
+   "draft_compliance_narrative": "The paperwork is complete and internally consistent: name, "
+     "number, address and directors all match the register, identity verification passed for all "
+     "three individuals and screening returned nothing. The blocker is eligibility rather than "
+     "risk. The live register records Ardenhall Joinery Ltd as dissolved, while the extract the "
+     "applicant supplied shows it as active, which indicates the applicant is working from an "
+     "older copy. A dissolved entity cannot be onboarded, so the recommendation is to reject and "
+     "invite a fresh application if the company is restored to the register.",
+ },
+ "decisions": [
+   {"reviewer": "J. Okoro", "reviewer_role": "analyst", "decision": "reject",
+    "reason_code": "entity_not_active_on_register",
+    "rationale": "The register records the applicant as dissolved. This is an eligibility failure "
+      "and not a judgement about the people involved: identity and screening were clean "
+      "throughout. Rejecting with the door left open to a new application if the company is "
+      "restored.",
+    "evidence_relied_on": "{REG}|{DOC:registry_extract}|{RSK}",
+    "override_flag": False, "customer_template_id": "TPL-0011"}],
+ "communications": [
+   {"template_id": "TPL-0011", "audience": "applicant", "message_type": "application_declined",
+    "approval_status": "approved", "sent_status": "sent", "approver_role": "analyst",
+    "approver": "analyst.j.okoro",
+    "rendered_text": "Hello Rowan Feathersby, thank you for your application for Ardenhall "
+      "Joinery Ltd. We are not able to open an account at this time because the company register "
+      "shows the company as dissolved. If the company is restored to the register, please do "
+      "apply again and we will be glad to look at it afresh."}],
+})
+
+# --------------------------------------------------------------- Case 12 ----
+# The one unambiguous sanctions hit in the set. Nothing automated may clear it:
+# it goes to compliance and waits for a person.
+CASES.append({
+ "case_id": "WAL-ONB-0012", "applicant_id": "APP-0012",
+ "start": datetime(2026, 9, 24, 8, 30, 0),
+ "applicant_type": "sme_corporate", "jurisdiction": "EE", "entity_scope": "wallester_as",
+ "source_channel": "portal", "status": "analyst_review_required", "next_action_owner": "compliance",
+ "assigned_owner": "compliance.k.ohtla",
+ "applicant": {"legal_name": "Solvarn Baltic OU", "trading_name": "Solvarn",
+   "registration_number": "EE-90021455", "entity_type": "private_limited_company", "country": "EE",
+   "business_activity": "Industrial valve distribution and maintenance",
+   "expected_usage": "Up to 16 cards; around 30000 EUR per month on parts and travel",
+   "vat_registered": True,
+   "risk_segment": "elevated"},
+ "individuals": [
+   {"id": "IND-0027", "role": "director", "full_name": "Taavi Ruumet", "dob": "1979-05-30",
+    "nationality": "EE", "residence": "EE", "relationship": "Managing director"},
+   {"id": "IND-0028", "role": "ubo", "full_name": "Ivar Kolmsaar", "dob": "1968-02-17",
+    "nationality": "EE", "residence": "EE",
+    "relationship": "Holds 80 percent of the issued share capital directly"}],
+ "ubos": [{"id": "UBO-0010", "individual_id": "IND-0028", "pct": 80.0,
+   "control_type": "direct_shareholding", "ownership_path": "Solvarn Baltic OU",
+   "verification_status": "verified"}],
+ "documents": [
+   doc("certificate_of_incorporation", "cert_incorporation_solvarn.pdf", issue_country="EE",
+       fields=[("company_name", "Solvarn Baltic OU", 0.96, 1, False),
+               ("registration_number", "EE-90021455", 0.95, 1, False)]),
+   doc("registry_extract", "registry_extract_solvarn.pdf", issue_country="EE", fields=[
+     ("company_name", "Solvarn Baltic OU", 0.95, 1, False),
+     ("registration_number", "EE-90021455", 0.94, 1, False),
+     ("registered_address", "Punane 18, 13619 Tallinn, Estonia", 0.93, 1, False),
+     ("entity_status", "active", 0.95, 1, False)]),
+   doc("tax_registration_certificate", "tax_registration_solvarn.pdf", fields=[
+     ("tax_number", "EE-TAX-90021455", 0.92, 1, False)]),
+   doc("director_register", "director_register_solvarn.pdf", fields=[
+     ("director_name", "Taavi Ruumet", 0.94, 1, False)]),
+   doc("authorised_signatory_list", "signatory_list_solvarn.pdf", fields=[
+     ("signatory_name", "Taavi Ruumet", 0.92, 1, False)]),
+   doc("ubo_declaration", "ubo_declaration_solvarn.pdf", fields=[
+     ("ubo_name", "Ivar Kolmsaar", 0.93, 1, False),
+     ("ownership_percentage", "80.0", 0.92, 1, False)]),
+   doc("id_document", "id_card_ruumet_t.jpg", subject="IND-0027", expiry="2030-04-11",
+       issue_country="EE", fields=[("full_name", "Taavi Ruumet", 0.95, 1, False)]),
+   doc("id_document", "id_card_kolmsaar_i.jpg", subject="IND-0028", expiry="2029-08-05",
+       issue_country="EE", fields=[("full_name", "Ivar Kolmsaar", 0.94, 1, False)]),
+   doc("proof_of_address", "poa_ruumet_sep2026.pdf", subject="IND-0027", issue_country="EE",
+       fields=[("document_date", "2026-09-06", 0.93, 1, False)]),
+   doc("proof_of_address", "poa_kolmsaar_sep2026.pdf", subject="IND-0028", issue_country="EE",
+       fields=[("document_date", "2026-09-01", 0.92, 1, False)]),
+   doc("source_of_funds_declaration", "source_of_funds_solvarn.pdf", fields=[
+     ("declared_source", "Distribution margin on industrial valve sales", 0.90, 1, False)]),
+   doc("business_activity_description", "business_activity_solvarn.pdf", fields=[
+     ("declared_industry", "Industrial equipment distribution", 0.91, 1, False)]),
+ ],
+ "triggered_conditionals": [],
+ "registry": {"provider": "MockRegistryHub EE", "company_status": "active", "name_match": "match",
+   "number_match": "match", "address_match": "match", "director_match": "match",
+   "ubo_supported": True, "high_risk": False, "confidence": 0.94, "result": "pass"},
+ "identity_checks": [idcheck("IND-0027"), idcheck("IND-0028")],
+ "screenings": [screen("applicant"), screen("individual", "IND-0027"),
+                screen("individual", "IND-0028", sanctions="clear_match", pep="no_match",
+                       adverse_media="none", severity="critical",
+                       evidence_refs="SCREEN-REF-SAN-7714")],
+ "risk": {"score": 96, "band": "critical", "recommended_action": "escalate", "confidence": 0.91,
+   "insufficient_evidence_flag": False, "requires_human_signoff": True, "factors": [
+     ("sanctions_exposure", 0.95,
+      "The 80 percent beneficial owner returned a confirmed sanctions match. Configured policy "
+      "routes this to compliance without any automated clearance, and the orchestration layer has "
+      "not cleared or downgraded the finding.", "{SCR:IND-0028}"),
+     ("ownership_concentration", 0.30,
+      "A single owner holds 80 percent, so the finding attaches to effective control of the "
+      "applicant rather than to a minority holding.", "{DOC:ubo_declaration}"),
+     ("document_quality", 0.00,
+      "All twelve documents passed the pre-screen at the first attempt.", "{PACK}")]},
+ "evidence": {
+   "applicant_summary": "Solvarn Baltic OU, Estonian private limited company EE-90021455, "
+     "industrial valve distribution, one director, one 80 percent direct beneficial owner, 16 "
+     "cards requested at around 30000 EUR per month.",
+   "missing_or_conflicting_evidence": "None on the documents. The open question is the sanctions "
+     "match on the beneficial owner, which only a compliance officer can resolve.",
+   "recommended_next_action": "escalate",
+   "draft_compliance_narrative": "Internal compliance narrative, not for disclosure to the "
+     "applicant. Entity verification is clean: the register returns active status with name, "
+     "number, address and director matches and supports the declared ownership. Both identity "
+     "checks passed. Screening on the 80 percent beneficial owner IND-0028 returned a confirmed "
+     "sanctions match under provider reference SCREEN-REF-SAN-7714. Under the configured matrix "
+     "this is critical and mandates compliance sign-off. No automated step has cleared, "
+     "downgraded or re-run the match, and none may: only a compliance decision can resolve it. "
+     "The case is escalated to the MLRO queue. Customer-facing communication is limited to the "
+     "generic manual-review template and states no reason.",
+ },
+ "decisions": [
+   {"reviewer": "K. Ohtla", "reviewer_role": "compliance", "decision": "escalate",
+    "reason_code": "confirmed_sanctions_match_on_ubo",
+    "rationale": "Confirmed sanctions match on the majority beneficial owner. This is outside the "
+      "analyst mandate and is referred to the MLRO for a reporting decision. No customer contact "
+      "beyond the generic acknowledgement until that decision is taken.",
+    "evidence_relied_on": "{SCR:IND-0028}|{IDC:IND-0028}|{DOC:ubo_declaration}|{RSK}",
+    "escalation_target": "mlro.queue",
+    "override_flag": False, "customer_template_id": "TPL-0004"}],
+ "communications": [
+   {"template_id": "TPL-0004", "audience": "applicant", "message_type": "manual_review_underway",
+    "approval_status": "approved", "sent_status": "sent", "approver_role": "compliance",
+    "approver": "compliance.k.ohtla",
+    "rendered_text": "Hello Taavi Ruumet, your application for Solvarn Baltic OU (reference "
+      "WAL-ONB-0012) is with our onboarding team for an additional manual review step. No further "
+      "documents are needed from you at this time. We will contact you as soon as this step is "
+      "complete."},
+   {"template_id": "TPL-0008", "audience": "compliance", "message_type": "internal_case_summary",
+    "approval_status": "approved", "sent_status": "sent", "approver_role": "compliance",
+    "approver": "compliance.k.ohtla",
+    "rendered_text": "Internal case summary for WAL-ONB-0012 (Solvarn Baltic OU). Confirmed "
+      "sanctions match on the 80 percent beneficial owner, provider reference "
+      "SCREEN-REF-SAN-7714. Escalated to the MLRO queue. No automated clearance was applied. "
+      "Applicant contact is limited to the generic manual-review template. Not for disclosure to "
+      "the applicant."}],
+})
+
+# --------------------------------------------------------------- Case 13 ----
+# Two independent gaps at once: an identity check that failed outright and a
+# media provider that did not answer. Neither is an adverse finding; together
+# they mean the file simply does not support a decision.
+CASES.append({
+ "case_id": "WAL-ONB-0013", "applicant_id": "APP-0013",
+ "start": datetime(2026, 9, 25, 10, 5, 0),
+ "applicant_type": "sme_corporate", "jurisdiction": "UK", "entity_scope": "wallester_uk_ltd",
+ "source_channel": "email", "status": "analyst_review_required", "next_action_owner": "analyst",
+ "assigned_owner": "analyst.r.toome",
+ "applicant": {"legal_name": "Pemberly Tooling Ltd", "trading_name": "Pemberly",
+   "registration_number": "UK-99034820", "entity_type": "private_limited_company", "country": "GB",
+   "business_activity": "Precision tooling and machine parts for light manufacturing",
+   "expected_usage": "Up to 14 cards; around 21000 GBP per month on materials and freight",
+   "vat_registered": True,
+   "risk_segment": "unassessed"},
+ "individuals": [
+   {"id": "IND-0029", "role": "director", "full_name": "Hadley Winstock", "dob": "1976-10-03",
+    "nationality": "GB", "residence": "GB", "relationship": "Managing director"},
+   {"id": "IND-0030", "role": "director", "full_name": "Marguerite Ellcott", "dob": "1983-06-21",
+    "nationality": "GB", "residence": "GB", "relationship": "Operations director"},
+   {"id": "IND-0031", "role": "ubo", "full_name": "Oswin Prattley", "dob": "1970-12-09",
+    "nationality": "GB", "residence": "GB",
+    "relationship": "Holds 55 percent of the issued share capital directly"}],
+ "ubos": [{"id": "UBO-0011", "individual_id": "IND-0031", "pct": 55.0,
+   "control_type": "direct_shareholding", "ownership_path": "Pemberly Tooling Ltd",
+   "verification_status": "verified"}],
+ "documents": [
+   doc("certificate_of_incorporation", "cert_incorporation_pemberly.pdf", issue_country="GB",
+       fields=[("company_name", "Pemberly Tooling Ltd", 0.95, 1, False),
+               ("registration_number", "UK-99034820", 0.94, 1, False)]),
+   doc("registry_extract", "registry_extract_pemberly.pdf", issue_country="GB", fields=[
+     ("company_name", "Pemberly Tooling Ltd", 0.94, 1, False),
+     ("registration_number", "UK-99034820", 0.93, 1, False),
+     ("registered_address", "Unit 12 Pemberly Trading Estate, Coventry CV6 5NN, United Kingdom",
+      0.92, 1, False),
+     ("entity_status", "active", 0.94, 1, False)]),
+   doc("tax_registration_certificate", "vat_certificate_pemberly.pdf", fields=[
+     ("vat_number", "GB-VAT-903155721", 0.91, 1, False)]),
+   doc("director_register", "director_register_pemberly.pdf", fields=[
+     ("director_name", "Hadley Winstock", 0.93, 1, False),
+     ("director_name_2", "Marguerite Ellcott", 0.92, 1, False)]),
+   doc("authorised_signatory_list", "signatory_list_pemberly.pdf", fields=[
+     ("signatory_name", "Hadley Winstock", 0.90, 1, False)]),
+   doc("ubo_declaration", "ubo_declaration_pemberly.pdf", fields=[
+     ("ubo_name", "Oswin Prattley", 0.92, 1, False),
+     ("ownership_percentage", "55.0", 0.91, 1, False)]),
+   doc("id_document", "passport_winstock_h.jpg", subject="IND-0029", expiry="2029-02-14",
+       issue_country="GB", fields=[("full_name", "Hadley Winstock", 0.88, 1, False)]),
+   doc("id_document", "passport_ellcott_m.jpg", subject="IND-0030", expiry="2031-07-08",
+       issue_country="GB", fields=[("full_name", "Marguerite Ellcott", 0.94, 1, False)]),
+   doc("id_document", "passport_prattley_o.jpg", subject="IND-0031", expiry="2030-05-26",
+       issue_country="GB", fields=[("full_name", "Oswin Prattley", 0.93, 1, False)]),
+   doc("proof_of_address", "poa_winstock_sep2026.pdf", subject="IND-0029", issue_country="GB",
+       fields=[("document_date", "2026-09-07", 0.91, 1, False)]),
+   doc("proof_of_address", "poa_ellcott_sep2026.pdf", subject="IND-0030", issue_country="GB",
+       fields=[("document_date", "2026-09-03", 0.92, 1, False)]),
+   doc("proof_of_address", "poa_prattley_aug2026.pdf", subject="IND-0031", issue_country="GB",
+       fields=[("document_date", "2026-08-30", 0.90, 1, False)]),
+   doc("source_of_funds_declaration", "source_of_funds_pemberly.pdf", fields=[
+     ("declared_source", "Tooling contracts with light manufacturing customers", 0.89, 1, False)]),
+   doc("business_activity_description", "business_activity_pemberly.pdf", fields=[
+     ("declared_industry", "Precision engineering and tooling", 0.90, 1, False)]),
+ ],
+ "triggered_conditionals": [find_rule("sme_corporate", "UK", "tax_registration_certificate")],
+ "registry": {"provider": "MockRegistryHub UK", "company_status": "active", "name_match": "match",
+   "number_match": "match", "address_match": "match", "director_match": "match",
+   "ubo_supported": True, "high_risk": False, "confidence": 0.91, "result": "pass"},
+ "identity_checks": [
+   idcheck("IND-0029", document_result="fail", liveness="pass", biometric="fail",
+           address="pass", name_dob="mismatch", result="fail"),
+   idcheck("IND-0030"), idcheck("IND-0031")],
+ "screenings": [screen("applicant"), screen("individual", "IND-0030"),
+                screen("individual", "IND-0031"),
+                screen("individual", "IND-0029", sanctions="no_match", pep="no_match",
+                       adverse_media="unavailable", severity="medium",
+                       evidence_refs="SCREEN-REF-MEDIA-UNAVAILABLE-3301")],
+ "risk": {"score": 0, "band": "insufficient_evidence",
+   "recommended_action": "insufficient_evidence", "confidence": 0.42,
+   "insufficient_evidence_flag": True, "requires_human_signoff": True, "factors": [
+     ("identity_verification", 0.00,
+      "The identity check on director IND-0029 failed on the document and biometric components "
+      "and the name and date of birth did not match. That is a gap in the evidence, not a finding "
+      "about the person.", "{IDC:IND-0029}"),
+     ("media_coverage", 0.00,
+      "The adverse-media provider did not return a result for the same director, so the file "
+      "cannot be said to be clear on that point either.", "{SCR:IND-0029}"),
+     ("document_quality", 0.00,
+      "All fourteen documents passed the pre-screen at the first attempt.", "{PACK}")]},
+ "evidence": {
+   "applicant_summary": "Pemberly Tooling Ltd, UK private limited company UK-99034820, precision "
+     "tooling, two directors, one 55 percent direct beneficial owner, 14 cards requested at "
+     "around 21000 GBP per month.",
+   "missing_or_conflicting_evidence": "Identity verification for director IND-0029 failed on the "
+     "document and biometric components with a name and date-of-birth mismatch, and the "
+     "adverse-media provider returned no result for the same individual. Neither gap has been "
+     "filled, so no risk band can be assigned.",
+   "recommended_next_action": "insufficient_evidence",
+   "draft_compliance_narrative": "Internal compliance narrative, not for disclosure to the "
+     "applicant. This case is scored as insufficient evidence rather than high risk, and the "
+     "distinction matters: nothing adverse was found about anyone. The register corroborates the "
+     "entity on every compared field and two of the three identity checks passed cleanly. The "
+     "identity check on director IND-0029 failed on the document and biometric components with a "
+     "name and date-of-birth mismatch, which most often means a poor or mismatched identity "
+     "document rather than an impersonation attempt. Separately the adverse-media provider did "
+     "not answer for that individual under reference SCREEN-REF-MEDIA-UNAVAILABLE-3301, so an "
+     "absence of findings cannot be relied on. A provider non-answer is not a pass. The case "
+     "needs a fresh identity document from that director and a re-run of the media check before "
+     "any decision is possible.",
+ },
+ "decisions": [
+   {"reviewer": "R. Toome", "reviewer_role": "analyst", "decision": "insufficient_evidence",
+    "reason_code": "identity_failure_and_provider_non_answer",
+    "rationale": "One identity check failed and one media check did not return. Neither is an "
+      "adverse finding and neither can be treated as a pass. Holding the case as insufficient "
+      "evidence and requesting a current identity document from the director concerned.",
+    "evidence_relied_on": "{IDC:IND-0029}|{SCR:IND-0029}|{REG}|{RSK}",
+    "override_flag": False, "customer_template_id": "TPL-0002"}],
+ "communications": [
+   {"template_id": "TPL-0002", "audience": "applicant", "message_type": "document_request",
+    "approval_status": "approved", "sent_status": "sent", "approver_role": "analyst",
+    "approver": "analyst.r.toome",
+    "rendered_text": "Hello Hadley Winstock, thank you for your application for Pemberly Tooling "
+      "Ltd. To continue we need a current identity document for you. A passport or photocard "
+      "driving licence works well, photographed in good light with all four corners visible. "
+      "Once we have it we will pick the review straight back up."}],
+})
+
+# --------------------------------------------------------------- Case 14 ----
+# The quiet ending: a resubmission was asked for, chased once, and never came.
+# The case closes without any judgement being made about the applicant.
+CASES.append({
+ "case_id": "WAL-ONB-0014", "applicant_id": "APP-0014",
+ "start": datetime(2026, 9, 26, 11, 40, 0),
+ "applicant_type": "freelancer_sole_trader", "jurisdiction": "EE", "entity_scope": "wallester_as",
+ "source_channel": "portal", "status": "closed_withdrawn", "next_action_owner": "system",
+ "assigned_owner": "ops.tiina.kask",
+ "applicant": {"legal_name": "Elise Kaarma", "trading_name": "Kaarma Ceramics",
+   "registration_number": "EE-FIE-4471208", "entity_type": "sole_trader", "country": "EE",
+   "business_activity": "Studio ceramics and small-batch tableware",
+   "expected_usage": "One card; up to 1500 EUR per month on clay, glazes and kiln hire",
+   "vat_registered": False,
+   "risk_segment": "unassessed"},
+ "individuals": [
+   {"id": "IND-0032", "role": "sole_trader", "full_name": "Elise Kaarma", "dob": "1994-08-23",
+    "nationality": "EE", "residence": "EE",
+    "relationship": "Registered sole trader and sole beneficial owner"}],
+ "ubos": [],
+ "documents": [
+   doc("registry_extract", "ee_fie_registry_extract_kaarma.pdf", issue_country="EE", fields=[
+     ("company_name", "Elise Kaarma", 0.96, 1, False),
+     ("registration_number", "EE-FIE-4471208", 0.95, 1, False),
+     ("registered_address", "Vabriku 31-2, 10411 Tallinn, Estonia", 0.93, 1, False),
+     ("entity_status", "active", 0.94, 1, False)]),
+   doc("id_document", "id_card_kaarma_e.jpg", subject="IND-0032", expiry="2032-03-19",
+       issue_country="EE", fields=[("full_name", "Elise Kaarma", 0.95, 1, False)]),
+   doc("proof_of_address", "poa_kaarma_screenshot.jpg", quality="resubmission_required",
+       subject="IND-0032", flags="screenshot_not_original", reasons="document_unreadable",
+       issue_country="EE"),
+   doc("source_of_funds_declaration", "source_of_funds_kaarma.pdf", fields=[
+     ("declared_source", "Studio sales and commissioned tableware", 0.90, 1, False)]),
+   doc("business_activity_description", "business_activity_kaarma.pdf", fields=[
+     ("declared_industry", "Studio ceramics", 0.92, 1, False)]),
+ ],
+ "triggered_conditionals": [],
+ "audit_after_quality": [
+   {"actor_type": "system", "actor_id": "step.document_quality", "action": "resubmission_requested",
+    "summary": "Proof of address returned as a screenshot rather than the original document; "
+               "resubmission requested from the applicant"},
+   {"actor_type": "system", "actor_id": "step.communication", "action": "applicant_chased",
+    "summary": "No response after 14 days; single reminder sent under the approved template"},
+   {"actor_type": "system", "actor_id": "step.communication", "action": "case_closed_no_response",
+    "summary": "No response 30 days after the original request; case closed as withdrawn with no "
+               "assessment made and no provider checks commissioned"}],
+ "risk": {"score": 0, "band": "insufficient_evidence",
+   "recommended_action": "withdrawn", "confidence": 0.30,
+   "insufficient_evidence_flag": True, "requires_human_signoff": False, "factors": [
+     ("document_completeness", 0.00,
+      "The proof of address was a screenshot rather than the original and was never replaced, so "
+      "the mandatory checklist was never completed.", "{PACK}"),
+     ("applicant_engagement", 0.00,
+      "One request and one reminder were sent and neither was answered within 30 days.",
+      "{PACK}")]},
+ "evidence": {
+   "applicant_summary": "Elise Kaarma, Estonian sole trader EE-FIE-4471208, studio ceramics, one "
+     "card requested at up to 1500 EUR per month.",
+   "missing_or_conflicting_evidence": "Proof of address was supplied as a screenshot and was "
+     "never replaced. No other item was outstanding.",
+   "recommended_next_action": "withdrawn",
+   "draft_compliance_narrative": "The case closed for want of one document. The proof of address "
+     "was a screenshot of an online billing page rather than the original statement, which the "
+     "pre-screen returned for resubmission. One request and one reminder were sent under approved "
+     "templates and neither was answered. No registry, identity or screening check was ever "
+     "commissioned, so no money was spent and nothing was assessed about the applicant. The case "
+     "is closed as withdrawn and carries no adverse inference; a fresh application would start "
+     "clean.",
+ },
+ "decisions": [
+   {"reviewer": "T. Kask", "reviewer_role": "analyst", "decision": "withdrawn",
+    "reason_code": "no_response_to_resubmission_request",
+    "rationale": "The outstanding proof of address was requested and chased and did not arrive "
+      "within 30 days. Closing as withdrawn. No assessment was made about the applicant and no "
+      "provider checks were commissioned.",
+    "evidence_relied_on": "{PACK}",
+    "override_flag": False, "customer_template_id": "TPL-0012"}],
+ "communications": [
+   {"template_id": "TPL-0002", "audience": "applicant", "message_type": "document_request",
+    "approval_status": "approved", "sent_status": "sent", "approver_role": "analyst",
+    "approver": "ops.tiina.kask",
+    "rendered_text": "Hello Elise Kaarma, thank you for your application. The proof of address "
+      "you sent is a screenshot, and we need the original document itself. A PDF downloaded from "
+      "your bank or utility provider, or a photograph of the paper copy with all four corners "
+      "visible, works well."},
+   {"template_id": "TPL-0012", "audience": "applicant", "message_type": "case_closed",
+    "approval_status": "approved", "sent_status": "sent", "approver_role": "analyst",
+    "approver": "ops.tiina.kask",
+    "rendered_text": "Hello Elise Kaarma, we have not heard back about the proof of address we "
+      "asked for, so we have closed your application for now. Nothing is held against you and you "
+      "are very welcome to apply again whenever it suits you."}],
 })
 
 for _c in CASES:

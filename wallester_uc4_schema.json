@@ -1,0 +1,3474 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Wallester UC4 dataset and orchestrator database",
+  "type": "object",
+  "properties": {
+    "dataset": {
+      "type": "object",
+      "properties": {
+        "applicant": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "applicant_id": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "legal_name": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "trading_name": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "registration_number": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "entity_type": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "enum": [
+                  "private_limited_company",
+                  "sole_trader",
+                  ""
+                ]
+              },
+              "country": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "business_activity": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "expected_usage": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "vat_registered": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "enum": [
+                  "false",
+                  "true",
+                  ""
+                ]
+              },
+              "risk_segment": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "enum": [
+                  "elevated",
+                  "low",
+                  "standard",
+                  "unassessed",
+                  ""
+                ]
+              }
+            },
+            "required": [
+              "applicant_id",
+              "legal_name",
+              "trading_name",
+              "registration_number",
+              "entity_type",
+              "country",
+              "business_activity",
+              "expected_usage",
+              "vat_registered",
+              "risk_segment"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "audit_event": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "event_id": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "case_id": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "actor_type": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "enum": [
+                  "ai_agent",
+                  "analyst",
+                  "applicant",
+                  "compliance",
+                  "external_provider",
+                  "system",
+                  ""
+                ]
+              },
+              "actor_id": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "action": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "payload_summary": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "model_or_prompt_version": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "timestamp": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            },
+            "required": [
+              "event_id",
+              "case_id",
+              "actor_type",
+              "actor_id",
+              "action",
+              "payload_summary",
+              "model_or_prompt_version",
+              "timestamp"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "case_map": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "case_id": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "case_label": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "brief_section": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "applicant_id": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "applicant_name": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "applicant_type": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "jurisdiction_path": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "entity_scope": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "source_channel": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "expected_status": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "expected_risk_band": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "next_action_owner": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "what_it_demonstrates": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "key_evidence_ids": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            },
+            "required": [
+              "case_id",
+              "case_label",
+              "brief_section",
+              "applicant_id",
+              "applicant_name",
+              "applicant_type",
+              "jurisdiction_path",
+              "entity_scope",
+              "source_channel",
+              "expected_status",
+              "expected_risk_band",
+              "next_action_owner",
+              "what_it_demonstrates",
+              "key_evidence_ids"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "checklist_item": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "item_id": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "pack_id": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "rule_id": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "subject_individual_id": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "document_type": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "level": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "enum": [
+                  "conditional",
+                  "optional",
+                  "required",
+                  ""
+                ]
+              },
+              "status": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "enum": [
+                  "accepted",
+                  "manual_review",
+                  "pending",
+                  "received",
+                  "resubmission_requested",
+                  "waived",
+                  ""
+                ]
+              },
+              "resubmission_attempts": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            },
+            "required": [
+              "item_id",
+              "pack_id",
+              "rule_id",
+              "subject_individual_id",
+              "document_type",
+              "level",
+              "status",
+              "resubmission_attempts"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "checklist_item_document": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "item_id": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "document_id": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            },
+            "required": [
+              "item_id",
+              "document_id"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "communication": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "communication_id": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "case_id": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "template_id": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "audience": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "enum": [
+                  "analyst",
+                  "applicant",
+                  "compliance",
+                  ""
+                ]
+              },
+              "message_type": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "approval_status": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "enum": [
+                  "approved",
+                  "pending_approval",
+                  "rejected",
+                  ""
+                ]
+              },
+              "sent_status": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "enum": [
+                  "failed",
+                  "not_sent",
+                  "sent",
+                  ""
+                ]
+              },
+              "rendered_text": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "created_at": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            },
+            "required": [
+              "communication_id",
+              "case_id",
+              "template_id",
+              "audience",
+              "message_type",
+              "approval_status",
+              "sent_status",
+              "rendered_text",
+              "created_at"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "document": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "document_id": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "case_id": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "subject_individual_id": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "document_type": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "file_name": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "upload_time": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "quality_status": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "enum": [
+                  "accepted_for_checks",
+                  "manual_review_required",
+                  "pending",
+                  "resubmission_required",
+                  ""
+                ]
+              },
+              "quality_flags": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "enum": [
+                  "blurred_unreadable",
+                  "cut_off_pages",
+                  "document_too_old",
+                  "expired",
+                  "missing_pages",
+                  "name_mismatch",
+                  "screenshot_not_original",
+                  "tampering_indicator",
+                  "unsupported_file_type",
+                  "wrong_document_type",
+                  ""
+                ]
+              },
+              "expiry_date": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "issue_country": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "resubmission_required": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "enum": [
+                  "false",
+                  "true",
+                  ""
+                ]
+              },
+              "resubmission_reasons": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "enum": [
+                  "director_identity_missing",
+                  "document_expired",
+                  "document_unreadable",
+                  "ownership_structure_unclear",
+                  "proof_of_address_too_old",
+                  "registered_address_mismatch",
+                  "source_of_funds_clarification",
+                  "ubo_declaration_missing",
+                  ""
+                ]
+              }
+            },
+            "required": [
+              "document_id",
+              "case_id",
+              "subject_individual_id",
+              "document_type",
+              "file_name",
+              "upload_time",
+              "quality_status",
+              "quality_flags",
+              "expiry_date",
+              "issue_country",
+              "resubmission_required",
+              "resubmission_reasons"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "evidence_pack": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "evidence_pack_id": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "case_id": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "assessment_id": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "decision_id": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "generated_at": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "applicant_summary": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "missing_or_conflicting_evidence": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "recommended_next_action": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "enum": [
+                  "approve",
+                  "conditional_approve",
+                  "enhanced_due_diligence",
+                  "escalate",
+                  "insufficient_evidence",
+                  "reject",
+                  "request_more_information",
+                  "withdrawn",
+                  ""
+                ]
+              },
+              "draft_compliance_narrative": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            },
+            "required": [
+              "evidence_pack_id",
+              "case_id",
+              "assessment_id",
+              "decision_id",
+              "generated_at",
+              "applicant_summary",
+              "missing_or_conflicting_evidence",
+              "recommended_next_action",
+              "draft_compliance_narrative"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "extracted_field": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "field_id": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "document_id": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "name": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "value": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "confidence": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "source_page": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "corrected_by_analyst": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "enum": [
+                  "false",
+                  "true",
+                  ""
+                ]
+              }
+            },
+            "required": [
+              "field_id",
+              "document_id",
+              "name",
+              "value",
+              "confidence",
+              "source_page",
+              "corrected_by_analyst"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "human_decision": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "decision_id": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "case_id": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "reviewer": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "reviewer_role": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "enum": [
+                  "analyst",
+                  "compliance",
+                  ""
+                ]
+              },
+              "decision": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "enum": [
+                  "approve",
+                  "conditional_approve",
+                  "enhanced_due_diligence",
+                  "escalate",
+                  "insufficient_evidence",
+                  "reject",
+                  "request_more_information",
+                  "withdrawn",
+                  ""
+                ]
+              },
+              "reason_code": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "rationale": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "evidence_relied_on": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "override_flag": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "enum": [
+                  "false",
+                  "true",
+                  ""
+                ]
+              },
+              "override_reason": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "escalation_target": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "customer_template_id": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "timestamp": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            },
+            "required": [
+              "decision_id",
+              "case_id",
+              "reviewer",
+              "reviewer_role",
+              "decision",
+              "reason_code",
+              "rationale",
+              "evidence_relied_on",
+              "override_flag",
+              "override_reason",
+              "escalation_target",
+              "customer_template_id",
+              "timestamp"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "identity_check": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "check_id": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "case_id": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "individual_id": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "provider_name": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "document_result": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "enum": [
+                  "fail",
+                  "pass",
+                  "review",
+                  "unavailable",
+                  ""
+                ]
+              },
+              "liveness_result": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "enum": [
+                  "fail",
+                  "pass",
+                  "review",
+                  "unavailable",
+                  ""
+                ]
+              },
+              "biometric_result": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "enum": [
+                  "fail",
+                  "pass",
+                  "review",
+                  "unavailable",
+                  ""
+                ]
+              },
+              "address_result": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "enum": [
+                  "fail",
+                  "pass",
+                  "review",
+                  "unavailable",
+                  ""
+                ]
+              },
+              "name_dob_match": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "enum": [
+                  "match",
+                  "mismatch",
+                  "unavailable",
+                  ""
+                ]
+              },
+              "document_expired": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "enum": [
+                  "false",
+                  "true",
+                  ""
+                ]
+              },
+              "duplicate_individual_detected": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "enum": [
+                  "false",
+                  "true",
+                  ""
+                ]
+              },
+              "result": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "enum": [
+                  "fail",
+                  "pass",
+                  "review",
+                  "unavailable",
+                  ""
+                ]
+              }
+            },
+            "required": [
+              "check_id",
+              "case_id",
+              "individual_id",
+              "provider_name",
+              "document_result",
+              "liveness_result",
+              "biometric_result",
+              "address_result",
+              "name_dob_match",
+              "document_expired",
+              "duplicate_individual_detected",
+              "result"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "individual": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "individual_id": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "applicant_id": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "role": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "enum": [
+                  "authorised_signatory",
+                  "authorised_user",
+                  "director",
+                  "sole_trader",
+                  "ubo",
+                  ""
+                ]
+              },
+              "full_name": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "date_of_birth": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "nationality": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "residence_country": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "id_document_id": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "relationship_to_entity": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            },
+            "required": [
+              "individual_id",
+              "applicant_id",
+              "role",
+              "full_name",
+              "date_of_birth",
+              "nationality",
+              "residence_country",
+              "id_document_id",
+              "relationship_to_entity"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "message_template": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "template_id": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "message_type": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "audience": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "enum": [
+                  "analyst",
+                  "applicant",
+                  "compliance",
+                  ""
+                ]
+              },
+              "template_text": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "version": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "approval_status": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "enum": [
+                  "approved",
+                  "pending_approval",
+                  "rejected",
+                  ""
+                ]
+              }
+            },
+            "required": [
+              "template_id",
+              "message_type",
+              "audience",
+              "template_text",
+              "version",
+              "approval_status"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "onboarding_case": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "case_id": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "applicant_id": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "applicant_type": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "enum": [
+                  "complex_corporate_ubo",
+                  "freelancer_sole_trader",
+                  "sme_corporate",
+                  "white_label_partner",
+                  ""
+                ]
+              },
+              "jurisdiction_path": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "enum": [
+                  "EE",
+                  "UK",
+                  ""
+                ]
+              },
+              "entity_scope": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "enum": [
+                  "undetermined",
+                  "wallester_as",
+                  "wallester_uk_ltd",
+                  ""
+                ]
+              },
+              "source_channel": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "enum": [
+                  "email",
+                  "portal",
+                  ""
+                ]
+              },
+              "status": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "enum": [
+                  "analyst_review_required",
+                  "approved",
+                  "closed_withdrawn",
+                  "document_quality_review",
+                  "enhanced_due_diligence",
+                  "ready_for_decision",
+                  "rejected",
+                  "resubmission_required",
+                  "submitted",
+                  "verification_in_progress",
+                  ""
+                ]
+              },
+              "assigned_owner": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "next_action_owner": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "enum": [
+                  "analyst",
+                  "compliance",
+                  "customer",
+                  "external_provider",
+                  "system",
+                  ""
+                ]
+              },
+              "white_label_branch_flag": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "enum": [
+                  "false",
+                  "true",
+                  ""
+                ]
+              },
+              "created_at": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "updated_at": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            },
+            "required": [
+              "case_id",
+              "applicant_id",
+              "applicant_type",
+              "jurisdiction_path",
+              "entity_scope",
+              "source_channel",
+              "status",
+              "assigned_owner",
+              "next_action_owner",
+              "white_label_branch_flag",
+              "created_at",
+              "updated_at"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "registry_check": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "check_id": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "case_id": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "applicant_id": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "provider_name": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "company_status": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "enum": [
+                  "active",
+                  "dissolved",
+                  "not_found",
+                  "struck_off",
+                  "suspended",
+                  "unavailable",
+                  ""
+                ]
+              },
+              "registry_legal_name": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "registry_number": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "registry_address": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "registry_directors": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "name_match": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "enum": [
+                  "match",
+                  "mismatch",
+                  "unavailable",
+                  ""
+                ]
+              },
+              "number_match": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "enum": [
+                  "match",
+                  "mismatch",
+                  "unavailable",
+                  ""
+                ]
+              },
+              "address_match": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "enum": [
+                  "match",
+                  "mismatch",
+                  "unavailable",
+                  ""
+                ]
+              },
+              "director_match": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "enum": [
+                  "match",
+                  "mismatch",
+                  "unavailable",
+                  ""
+                ]
+              },
+              "ubo_supported_by_registry": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "enum": [
+                  "false",
+                  "true",
+                  ""
+                ]
+              },
+              "high_risk_jurisdiction_or_industry": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "enum": [
+                  "false",
+                  "true",
+                  ""
+                ]
+              },
+              "confidence": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "result": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "enum": [
+                  "fail",
+                  "pass",
+                  "review",
+                  "unavailable",
+                  ""
+                ]
+              }
+            },
+            "required": [
+              "check_id",
+              "case_id",
+              "applicant_id",
+              "provider_name",
+              "company_status",
+              "registry_legal_name",
+              "registry_number",
+              "registry_address",
+              "registry_directors",
+              "name_match",
+              "number_match",
+              "address_match",
+              "director_match",
+              "ubo_supported_by_registry",
+              "high_risk_jurisdiction_or_industry",
+              "confidence",
+              "result"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "requirement_pack": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "pack_id": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "case_id": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "applicant_type": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "enum": [
+                  "complex_corporate_ubo",
+                  "freelancer_sole_trader",
+                  "sme_corporate",
+                  "white_label_partner",
+                  ""
+                ]
+              },
+              "jurisdiction": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "enum": [
+                  "EE",
+                  "UK",
+                  ""
+                ]
+              },
+              "entity_type": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "kb_version": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            },
+            "required": [
+              "pack_id",
+              "case_id",
+              "applicant_type",
+              "jurisdiction",
+              "entity_type",
+              "kb_version"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "requirement_rule": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "rule_id": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "applicant_type": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "enum": [
+                  "complex_corporate_ubo",
+                  "freelancer_sole_trader",
+                  "sme_corporate",
+                  "white_label_partner",
+                  ""
+                ]
+              },
+              "jurisdiction": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "enum": [
+                  "EE",
+                  "UK",
+                  ""
+                ]
+              },
+              "entity_type": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "requirement_area": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "document_type": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "level": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "enum": [
+                  "conditional",
+                  "optional",
+                  "required",
+                  ""
+                ]
+              },
+              "condition": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "condition_key": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "applies_per_individual_role": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "max_age_days": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            },
+            "required": [
+              "rule_id",
+              "applicant_type",
+              "jurisdiction",
+              "entity_type",
+              "requirement_area",
+              "document_type",
+              "level",
+              "condition",
+              "condition_key",
+              "applies_per_individual_role",
+              "max_age_days"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "risk_assessment": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "assessment_id": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "case_id": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "risk_score": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "risk_band": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "enum": [
+                  "critical",
+                  "high",
+                  "insufficient_evidence",
+                  "low",
+                  "medium",
+                  ""
+                ]
+              },
+              "recommended_action": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "enum": [
+                  "approve",
+                  "conditional_approve",
+                  "enhanced_due_diligence",
+                  "escalate",
+                  "insufficient_evidence",
+                  "reject",
+                  "request_more_information",
+                  "withdrawn",
+                  ""
+                ]
+              },
+              "confidence": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "insufficient_evidence_flag": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "enum": [
+                  "false",
+                  "true",
+                  ""
+                ]
+              },
+              "requires_human_signoff": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "enum": [
+                  "false",
+                  "true",
+                  ""
+                ]
+              },
+              "risk_matrix_version": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            },
+            "required": [
+              "assessment_id",
+              "case_id",
+              "risk_score",
+              "risk_band",
+              "recommended_action",
+              "confidence",
+              "insufficient_evidence_flag",
+              "requires_human_signoff",
+              "risk_matrix_version"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "risk_factor": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "factor_id": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "assessment_id": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "factor": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "weight": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "explanation": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "evidence_refs": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            },
+            "required": [
+              "factor_id",
+              "assessment_id",
+              "factor",
+              "weight",
+              "explanation",
+              "evidence_refs"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "screening_check": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "check_id": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "case_id": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "subject_type": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "enum": [
+                  "applicant",
+                  "individual",
+                  ""
+                ]
+              },
+              "applicant_id": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "individual_id": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "sanctions_result": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "enum": [
+                  "clear_match",
+                  "no_match",
+                  "possible_match",
+                  "unavailable",
+                  ""
+                ]
+              },
+              "pep_result": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "enum": [
+                  "close_associate_family",
+                  "no_match",
+                  "pep_match",
+                  "unavailable",
+                  ""
+                ]
+              },
+              "adverse_media_result": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "enum": [
+                  "low_relevance",
+                  "moderate",
+                  "none",
+                  "serious",
+                  "unavailable",
+                  ""
+                ]
+              },
+              "severity": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "enum": [
+                  "critical",
+                  "high",
+                  "low",
+                  "medium",
+                  "none",
+                  ""
+                ]
+              },
+              "evidence_refs": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            },
+            "required": [
+              "check_id",
+              "case_id",
+              "subject_type",
+              "applicant_id",
+              "individual_id",
+              "sanctions_result",
+              "pep_result",
+              "adverse_media_result",
+              "severity",
+              "evidence_refs"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "ubo": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "ubo_id": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "applicant_id": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "individual_id": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "ownership_percentage": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "ownership_chain_percentages": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "control_type": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "enum": [
+                  "direct_shareholding",
+                  "indirect_shareholding",
+                  "other_control",
+                  "voting_rights",
+                  ""
+                ]
+              },
+              "ownership_path": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "verification_status": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "enum": [
+                  "pending",
+                  "unverified",
+                  "verified",
+                  ""
+                ]
+              }
+            },
+            "required": [
+              "ubo_id",
+              "applicant_id",
+              "individual_id",
+              "ownership_percentage",
+              "ownership_chain_percentages",
+              "control_type",
+              "ownership_path",
+              "verification_status"
+            ],
+            "additionalProperties": false
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "database": {
+      "type": "object",
+      "properties": {
+        "applicant": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "applicant_id": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "legal_name": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "trading_name": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "registration_number": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "entity_type": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "enum": [
+                  "private_limited_company",
+                  "sole_trader",
+                  ""
+                ]
+              },
+              "country": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "business_activity": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "expected_usage": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "risk_segment": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "enum": [
+                  "elevated",
+                  "low",
+                  "standard",
+                  "unassessed",
+                  ""
+                ]
+              }
+            },
+            "required": [
+              "applicant_id",
+              "legal_name",
+              "trading_name",
+              "registration_number",
+              "entity_type",
+              "country",
+              "business_activity",
+              "expected_usage",
+              "risk_segment"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "audit_event": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "event_id": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "case_id": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "actor_type": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "enum": [
+                  "ai_agent",
+                  "analyst",
+                  "applicant",
+                  "compliance",
+                  "external_provider",
+                  "system",
+                  ""
+                ]
+              },
+              "actor_id": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "action": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "payload_summary": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "model_or_prompt_version": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "timestamp": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            },
+            "required": [
+              "event_id",
+              "case_id",
+              "actor_type",
+              "actor_id",
+              "action",
+              "payload_summary",
+              "model_or_prompt_version",
+              "timestamp"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "checklist_item": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "item_id": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "pack_id": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "rule_id": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "subject_individual_id": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "document_type": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "level": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "enum": [
+                  "conditional",
+                  "optional",
+                  "required",
+                  ""
+                ]
+              },
+              "status": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "enum": [
+                  "accepted",
+                  "manual_review",
+                  "pending",
+                  "received",
+                  "resubmission_requested",
+                  "waived",
+                  ""
+                ]
+              },
+              "resubmission_attempts": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "note": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            },
+            "required": [
+              "item_id",
+              "pack_id",
+              "rule_id",
+              "subject_individual_id",
+              "document_type",
+              "level",
+              "status",
+              "resubmission_attempts",
+              "note"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "checklist_item_document": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "item_id": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "document_id": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            },
+            "required": [
+              "item_id",
+              "document_id"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "document": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "document_id": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "case_id": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "subject_individual_id": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "document_type": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "file_name": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "upload_time": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "quality_status": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "enum": [
+                  "accepted_for_checks",
+                  "manual_review_required",
+                  "pending",
+                  "resubmission_required",
+                  ""
+                ]
+              },
+              "quality_status_at_screen": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "enum": [
+                  "accepted_for_checks",
+                  "manual_review_required",
+                  "pending",
+                  "resubmission_required",
+                  ""
+                ]
+              },
+              "quality_flags": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "enum": [
+                  "blurred_unreadable",
+                  "cut_off_pages",
+                  "document_too_old",
+                  "expired",
+                  "missing_pages",
+                  "name_mismatch",
+                  "screenshot_not_original",
+                  "tampering_indicator",
+                  "unsupported_file_type",
+                  "wrong_document_type",
+                  ""
+                ]
+              },
+              "expiry_date": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "document_date": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "issue_country": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "resubmission_required": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "enum": [
+                  "false",
+                  "true",
+                  ""
+                ]
+              },
+              "resubmission_reasons": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "enum": [
+                  "director_identity_missing",
+                  "document_expired",
+                  "document_unreadable",
+                  "ownership_structure_unclear",
+                  "proof_of_address_too_old",
+                  "registered_address_mismatch",
+                  "source_of_funds_clarification",
+                  "ubo_declaration_missing",
+                  ""
+                ]
+              },
+              "released_by": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "release_reason": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            },
+            "required": [
+              "document_id",
+              "case_id",
+              "subject_individual_id",
+              "document_type",
+              "file_name",
+              "upload_time",
+              "quality_status",
+              "quality_status_at_screen",
+              "quality_flags",
+              "expiry_date",
+              "document_date",
+              "issue_country",
+              "resubmission_required",
+              "resubmission_reasons",
+              "released_by",
+              "release_reason"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "extracted_field": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "field_id": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "document_id": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "name": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "value": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "confidence": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "source_page": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "corrected_by_analyst": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "enum": [
+                  "false",
+                  "true",
+                  ""
+                ]
+              },
+              "needs_analyst_correction": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            },
+            "required": [
+              "field_id",
+              "document_id",
+              "name",
+              "value",
+              "confidence",
+              "source_page",
+              "corrected_by_analyst",
+              "needs_analyst_correction"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "finding": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "finding_id": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "case_id": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "source": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "enum": [
+                  "identity",
+                  "registry",
+                  "ubo",
+                  ""
+                ]
+              },
+              "rule_id": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "summary": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "evidence_refs": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "blocking": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "created_at": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            },
+            "required": [
+              "finding_id",
+              "case_id",
+              "source",
+              "rule_id",
+              "summary",
+              "evidence_refs",
+              "blocking",
+              "created_at"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "identity_check": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "check_id": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "case_id": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "individual_id": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "provider_name": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "document_result": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "enum": [
+                  "fail",
+                  "pass",
+                  "review",
+                  "unavailable",
+                  ""
+                ]
+              },
+              "liveness_result": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "enum": [
+                  "fail",
+                  "pass",
+                  "review",
+                  "unavailable",
+                  ""
+                ]
+              },
+              "biometric_result": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "enum": [
+                  "fail",
+                  "pass",
+                  "review",
+                  "unavailable",
+                  ""
+                ]
+              },
+              "address_result": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "enum": [
+                  "fail",
+                  "pass",
+                  "review",
+                  "unavailable",
+                  ""
+                ]
+              },
+              "name_dob_match": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "enum": [
+                  "match",
+                  "mismatch",
+                  "unavailable",
+                  ""
+                ]
+              },
+              "document_expired": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "enum": [
+                  "false",
+                  "true",
+                  ""
+                ]
+              },
+              "duplicate_individual_detected": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "enum": [
+                  "false",
+                  "true",
+                  ""
+                ]
+              },
+              "result": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "enum": [
+                  "fail",
+                  "pass",
+                  "review",
+                  "unavailable",
+                  ""
+                ]
+              }
+            },
+            "required": [
+              "check_id",
+              "case_id",
+              "individual_id",
+              "provider_name",
+              "document_result",
+              "liveness_result",
+              "biometric_result",
+              "address_result",
+              "name_dob_match",
+              "document_expired",
+              "duplicate_individual_detected",
+              "result"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "individual": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "individual_id": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "applicant_id": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "role": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "enum": [
+                  "authorised_signatory",
+                  "authorised_user",
+                  "director",
+                  "sole_trader",
+                  "ubo",
+                  ""
+                ]
+              },
+              "full_name": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "date_of_birth": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "nationality": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "residence_country": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "id_document_id": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "relationship_to_entity": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            },
+            "required": [
+              "individual_id",
+              "applicant_id",
+              "role",
+              "full_name",
+              "date_of_birth",
+              "nationality",
+              "residence_country",
+              "id_document_id",
+              "relationship_to_entity"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "onboarding_case": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "case_id": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "applicant_id": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "applicant_type": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "enum": [
+                  "complex_corporate_ubo",
+                  "freelancer_sole_trader",
+                  "sme_corporate",
+                  "white_label_partner",
+                  ""
+                ]
+              },
+              "jurisdiction_path": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "enum": [
+                  "EE",
+                  "UK",
+                  ""
+                ]
+              },
+              "entity_scope": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "enum": [
+                  "undetermined",
+                  "wallester_as",
+                  "wallester_uk_ltd",
+                  ""
+                ]
+              },
+              "source_channel": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "enum": [
+                  "email",
+                  "portal",
+                  ""
+                ]
+              },
+              "status": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "enum": [
+                  "analyst_review_required",
+                  "approved",
+                  "closed_withdrawn",
+                  "document_quality_review",
+                  "enhanced_due_diligence",
+                  "ready_for_decision",
+                  "rejected",
+                  "resubmission_required",
+                  "submitted",
+                  "verification_in_progress",
+                  ""
+                ]
+              },
+              "assigned_owner": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "next_action_owner": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "enum": [
+                  "analyst",
+                  "compliance",
+                  "customer",
+                  "external_provider",
+                  "system",
+                  ""
+                ]
+              },
+              "white_label_branch_flag": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "enum": [
+                  "false",
+                  "true",
+                  ""
+                ]
+              },
+              "restricted_finding": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "requires_human_signoff": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "created_at": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "updated_at": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            },
+            "required": [
+              "case_id",
+              "applicant_id",
+              "applicant_type",
+              "jurisdiction_path",
+              "entity_scope",
+              "source_channel",
+              "status",
+              "assigned_owner",
+              "next_action_owner",
+              "white_label_branch_flag",
+              "restricted_finding",
+              "requires_human_signoff",
+              "created_at",
+              "updated_at"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "registry_check": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "check_id": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "case_id": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "applicant_id": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "provider_name": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "company_status": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "enum": [
+                  "active",
+                  "dissolved",
+                  "not_found",
+                  "struck_off",
+                  "suspended",
+                  "unavailable",
+                  ""
+                ]
+              },
+              "registry_legal_name": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "registry_number": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "registry_address": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "registry_directors": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "name_match": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "enum": [
+                  "match",
+                  "mismatch",
+                  "unavailable",
+                  ""
+                ]
+              },
+              "number_match": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "enum": [
+                  "match",
+                  "mismatch",
+                  "unavailable",
+                  ""
+                ]
+              },
+              "address_match": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "enum": [
+                  "match",
+                  "mismatch",
+                  "unavailable",
+                  ""
+                ]
+              },
+              "director_match": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "enum": [
+                  "match",
+                  "mismatch",
+                  "unavailable",
+                  ""
+                ]
+              },
+              "ubo_supported_by_registry": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "enum": [
+                  "false",
+                  "true",
+                  ""
+                ]
+              },
+              "high_risk_jurisdiction_or_industry": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "enum": [
+                  "false",
+                  "true",
+                  ""
+                ]
+              },
+              "confidence": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "result": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "enum": [
+                  "fail",
+                  "pass",
+                  "review",
+                  "unavailable",
+                  ""
+                ]
+              },
+              "attempts": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            },
+            "required": [
+              "check_id",
+              "case_id",
+              "applicant_id",
+              "provider_name",
+              "company_status",
+              "registry_legal_name",
+              "registry_number",
+              "registry_address",
+              "registry_directors",
+              "name_match",
+              "number_match",
+              "address_match",
+              "director_match",
+              "ubo_supported_by_registry",
+              "high_risk_jurisdiction_or_industry",
+              "confidence",
+              "result",
+              "attempts"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "requirement_pack": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "pack_id": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "case_id": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "applicant_type": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "enum": [
+                  "complex_corporate_ubo",
+                  "freelancer_sole_trader",
+                  "sme_corporate",
+                  "white_label_partner",
+                  ""
+                ]
+              },
+              "jurisdiction": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "enum": [
+                  "EE",
+                  "UK",
+                  ""
+                ]
+              },
+              "entity_type": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "kb_version": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            },
+            "required": [
+              "pack_id",
+              "case_id",
+              "applicant_type",
+              "jurisdiction",
+              "entity_type",
+              "kb_version"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "screening_check": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "check_id": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "case_id": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "subject_type": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "enum": [
+                  "applicant",
+                  "individual",
+                  ""
+                ]
+              },
+              "applicant_id": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "individual_id": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "provider_name": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "sanctions_result": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "enum": [
+                  "clear_match",
+                  "no_match",
+                  "possible_match",
+                  "unavailable",
+                  ""
+                ]
+              },
+              "pep_result": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "enum": [
+                  "close_associate_family",
+                  "no_match",
+                  "pep_match",
+                  "unavailable",
+                  ""
+                ]
+              },
+              "adverse_media_result": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "enum": [
+                  "low_relevance",
+                  "moderate",
+                  "none",
+                  "serious",
+                  "unavailable",
+                  ""
+                ]
+              },
+              "severity": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "enum": [
+                  "critical",
+                  "high",
+                  "low",
+                  "medium",
+                  "none",
+                  ""
+                ]
+              },
+              "evidence_refs": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "attempts": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            },
+            "required": [
+              "check_id",
+              "case_id",
+              "subject_type",
+              "applicant_id",
+              "individual_id",
+              "provider_name",
+              "sanctions_result",
+              "pep_result",
+              "adverse_media_result",
+              "severity",
+              "evidence_refs",
+              "attempts"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "ubo": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "ubo_id": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "applicant_id": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "individual_id": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "ownership_percentage": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "control_type": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "enum": [
+                  "direct_shareholding",
+                  "indirect_shareholding",
+                  "other_control",
+                  "voting_rights",
+                  ""
+                ]
+              },
+              "ownership_path": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "verification_status": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "enum": [
+                  "pending",
+                  "unverified",
+                  "verified",
+                  ""
+                ]
+              }
+            },
+            "required": [
+              "ubo_id",
+              "applicant_id",
+              "individual_id",
+              "ownership_percentage",
+              "control_type",
+              "ownership_path",
+              "verification_status"
+            ],
+            "additionalProperties": false
+          }
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

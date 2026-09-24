@@ -254,6 +254,10 @@ EXPECTED = {
  "WAL-ONB-0008": ("submitted", None),
  "WAL-ONB-0009": ("approved", "low"),
  "WAL-ONB-0010": ("ready_for_decision", "low"),
+ "WAL-ONB-0011": ("rejected", "high"),
+ "WAL-ONB-0012": ("analyst_review_required", "critical"),
+ "WAL-ONB-0013": ("analyst_review_required", "insufficient_evidence"),
+ "WAL-ONB-0014": ("closed_withdrawn", "insufficient_evidence"),
 }
 band = dict((r["case_id"], r["risk_band"]) for r in T["risk_assessment"])
 case_rows = []
@@ -265,7 +269,7 @@ for cid, (st, bd) in sorted(EXPECTED.items()):
     case_rows.append((cid, st, actual_st, bd or "(none)", actual_bd or "(none)", ok))
     if not ok:
         mismatch.append("%s: expected %s/%s got %s/%s" % (cid, st, bd, actual_st, actual_bd))
-result("4. Case outcomes (10 cases)", not mismatch,
+result("4. Case outcomes (%d cases)" % len(EXPECTED), not mismatch,
        "every case reaches its scripted status and risk band" if not mismatch
        else "; ".join(mismatch), len(EXPECTED))
 

@@ -30,6 +30,14 @@ META = {
    "Baseline for the problem cases: complete SME submission, clean results throughout, analyst approval recorded."),
  "WAL-ONB-0010": ("Control B - clean corporate on the complex-ownership path", "control",
    "Negative control for Case 4: same complex-corporate requirement pack, but a single-layer registry-supported 70 percent owner."),
+ "WAL-ONB-0011": ("Case 11 - SME dissolved on the register", "5.5 registry rules",
+   "Eligibility failure rather than a risk finding: complete paperwork and clean screening, but the register returns dissolved, which is blocking and ends in a reject."),
+ "WAL-ONB-0012": ("Case 12 - confirmed sanctions match on a UBO", "5.7 screening",
+   "The one unambiguous sanctions hit: critical severity, escalated to compliance, no automated clearance anywhere in the pipeline and no reason disclosed to the customer."),
+ "WAL-ONB-0013": ("Case 13 - identity failure plus an unanswered media check", "5.7 screening",
+   "Insufficient evidence, not high risk: one identity check failed and one media provider did not answer, and a non-answer is never treated as a pass."),
+ "WAL-ONB-0014": ("Case 14 - freelancer stops responding", "5.3 resubmission",
+   "The quiet ending: one document requested, one reminder sent, no reply, case closed as withdrawn with no provider checks commissioned and no adverse inference recorded."),
 }
 rows = []
 for c in cases:
