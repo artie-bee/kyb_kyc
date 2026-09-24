@@ -55,7 +55,7 @@ TABLES = {
     "human_decision": [
         "decision_id", "case_id", "reviewer", "reviewer_role", "decision", "reason_code",
         "rationale", "evidence_relied_on", "override_flag", "override_reason",
-        "escalation_target", "customer_template_id", "timestamp",
+        "override_direction", "escalation_target", "customer_template_id", "timestamp",
     ],
     "identity_check": [
         "check_id", "case_id", "individual_id", "provider_name", "document_result",
@@ -362,7 +362,7 @@ DB_TABLES = {
     "human_decision": [
         "decision_id", "case_id", "reviewer", "reviewer_role", "decision", "reason_code",
         "rationale", "evidence_relied_on", "override_flag", "override_reason",
-        "escalation_target", "customer_template_id", "timestamp",
+        "override_direction", "escalation_target", "customer_template_id", "timestamp",
     ],
     "identity_check": [
         "check_id", "case_id", "individual_id", "provider_name", "document_result",

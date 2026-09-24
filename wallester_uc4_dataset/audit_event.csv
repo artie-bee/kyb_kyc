@@ -11,7 +11,7 @@ EVT-0009,WAL-ONB-0001,external_provider,ScreenMock Global,screening_checks_compl
 EVT-0010,WAL-ONB-0001,ai_agent,risk-classification-agent,risk_assessment_completed,"RSK-0001 -> band low, score 0, recommended action approve, requires_human_signoff false",risk-explainer-v1.6,2026-09-01T09:27:00Z
 EVT-0011,WAL-ONB-0001,ai_agent,evidence-pack-agent,evidence_pack_generated,Evidence pack prepared for human review; recommended next action approve,evidence-pack-writer-v1.2,2026-09-01T09:30:00Z
 EVT-0012,WAL-ONB-0001,ai_agent,communication-agent,communication_drafted,COM-0001 drafted from template TPL-0005 for audience applicant,comms-drafter-v1.3,2026-09-01T09:34:00Z
-EVT-0013,WAL-ONB-0001,analyst,ops.tiina.kask,communication_approved,COM-0001 approved for release under template TPL-0005,,2026-09-01T09:36:00Z
+EVT-0013,WAL-ONB-0001,analyst,ops.tiina.kask,customer_communication_approved,COM-0001 approved for release to applicant under template TPL-0005,,2026-09-01T09:36:00Z
 EVT-0014,WAL-ONB-0001,system,notification-service,communication_sent,COM-0001 sent to applicant,,2026-09-01T09:37:00Z
 EVT-0015,WAL-ONB-0001,system,case-state-machine,status_changed,Case status set to ready_for_decision; next action owner analyst,,2026-09-01T09:38:00Z
 EVT-0016,WAL-ONB-0002,system,portal-intake-service,case_created,Onboarding case created from portal intake for Northbridge Craft Supplies Ltd,,2026-09-02T09:40:00Z
@@ -26,7 +26,7 @@ EVT-0024,WAL-ONB-0002,ai_agent,orchestration-controller,paid_checks_suppressed,"
 EVT-0025,WAL-ONB-0002,ai_agent,risk-classification-agent,risk_assessment_completed,"RSK-0002 -> band insufficient_evidence, score , recommended action insufficient_evidence, requires_human_signoff true",risk-explainer-v1.6,2026-09-02T10:48:00Z
 EVT-0026,WAL-ONB-0002,ai_agent,evidence-pack-agent,evidence_pack_generated,Evidence pack prepared for human review; recommended next action request_more_information,evidence-pack-writer-v1.2,2026-09-02T10:51:00Z
 EVT-0027,WAL-ONB-0002,ai_agent,communication-agent,communication_drafted,COM-0002 drafted from template TPL-0001 for audience applicant,comms-drafter-v1.3,2026-09-02T10:55:00Z
-EVT-0028,WAL-ONB-0002,analyst,ops.james.corrin,communication_approved,COM-0002 approved for release under template TPL-0001,,2026-09-02T10:57:00Z
+EVT-0028,WAL-ONB-0002,analyst,ops.james.corrin,customer_communication_approved,COM-0002 approved for release to applicant under template TPL-0001,,2026-09-02T10:57:00Z
 EVT-0029,WAL-ONB-0002,system,notification-service,communication_sent,COM-0002 sent to applicant,,2026-09-02T10:58:00Z
 EVT-0030,WAL-ONB-0002,system,case-state-machine,status_changed,Case status set to resubmission_required; next action owner customer,,2026-09-02T10:59:00Z
 EVT-0031,WAL-ONB-0003,system,portal-intake-service,case_created,Onboarding case created from email intake for Calderwick Logistics Ltd,,2026-09-03T11:05:00Z
@@ -43,10 +43,10 @@ EVT-0041,WAL-ONB-0003,ai_agent,risk-classification-agent,risk_assessment_complet
 EVT-0042,WAL-ONB-0003,ai_agent,evidence-pack-agent,evidence_pack_generated,Evidence pack prepared for human review; recommended next action request_more_information,evidence-pack-writer-v1.2,2026-09-03T12:44:00Z
 EVT-0043,WAL-ONB-0003,analyst,R. Toome,human_decision_recorded,DEC-0001 -> request_more_information (reason registered_address_mismatch),,2026-09-03T13:19:00Z
 EVT-0044,WAL-ONB-0003,ai_agent,communication-agent,communication_drafted,COM-0003 drafted from template TPL-0002 for audience applicant,comms-drafter-v1.3,2026-09-03T13:23:00Z
-EVT-0045,WAL-ONB-0003,analyst,analyst.r.toome,communication_approved,COM-0003 approved for release under template TPL-0002,,2026-09-03T13:25:00Z
+EVT-0045,WAL-ONB-0003,analyst,analyst.r.toome,customer_communication_approved,COM-0003 approved for release to applicant under template TPL-0002,,2026-09-03T13:25:00Z
 EVT-0046,WAL-ONB-0003,system,notification-service,communication_sent,COM-0003 sent to applicant,,2026-09-03T13:26:00Z
 EVT-0047,WAL-ONB-0003,ai_agent,communication-agent,communication_drafted,COM-0004 drafted from template TPL-0008 for audience analyst,comms-drafter-v1.3,2026-09-03T13:30:00Z
-EVT-0048,WAL-ONB-0003,analyst,analyst.r.toome,communication_approved,COM-0004 approved for release under template TPL-0008,,2026-09-03T13:32:00Z
+EVT-0048,WAL-ONB-0003,analyst,analyst.r.toome,communication_approved,COM-0004 approved for release to analyst under template TPL-0008,,2026-09-03T13:32:00Z
 EVT-0049,WAL-ONB-0003,system,notification-service,communication_sent,COM-0004 sent to analyst,,2026-09-03T13:33:00Z
 EVT-0050,WAL-ONB-0003,system,case-state-machine,status_changed,Case status set to analyst_review_required; next action owner customer,,2026-09-03T13:34:00Z
 EVT-0051,WAL-ONB-0004,system,portal-intake-service,case_created,Onboarding case created from portal intake for Vestmark Nordic OU,,2026-09-07T10:00:00Z
@@ -66,7 +66,7 @@ EVT-0064,WAL-ONB-0004,ai_agent,risk-classification-agent,risk_assessment_complet
 EVT-0065,WAL-ONB-0004,ai_agent,evidence-pack-agent,evidence_pack_generated,Evidence pack prepared for human review; recommended next action enhanced_due_diligence,evidence-pack-writer-v1.2,2026-09-07T11:42:00Z
 EVT-0066,WAL-ONB-0004,analyst,M. Sild,human_decision_recorded,DEC-0002 -> enhanced_due_diligence (reason ownership_structure_unclear),,2026-09-07T12:17:00Z
 EVT-0067,WAL-ONB-0004,ai_agent,communication-agent,communication_drafted,COM-0005 drafted from template TPL-0004 for audience applicant,comms-drafter-v1.3,2026-09-07T12:21:00Z
-EVT-0068,WAL-ONB-0004,analyst,analyst.m.sild,communication_approved,COM-0005 approved for release under template TPL-0004,,2026-09-07T12:23:00Z
+EVT-0068,WAL-ONB-0004,analyst,analyst.m.sild,customer_communication_approved,COM-0005 approved for release to applicant under template TPL-0004,,2026-09-07T12:23:00Z
 EVT-0069,WAL-ONB-0004,system,notification-service,communication_sent,COM-0005 sent to applicant,,2026-09-07T12:24:00Z
 EVT-0070,WAL-ONB-0004,system,case-state-machine,status_changed,Case status set to enhanced_due_diligence; next action owner compliance,,2026-09-07T12:25:00Z
 EVT-0071,WAL-ONB-0005,system,portal-intake-service,case_created,Onboarding case created from portal intake for Quillon Marine Services Ltd,,2026-09-10T08:50:00Z
@@ -81,10 +81,10 @@ EVT-0079,WAL-ONB-0005,external_provider,ScreenMock Global,screening_checks_compl
 EVT-0080,WAL-ONB-0005,ai_agent,risk-classification-agent,risk_assessment_completed,"RSK-0005 -> band high, score 66, recommended action enhanced_due_diligence, requires_human_signoff true",risk-explainer-v1.6,2026-09-10T10:20:00Z
 EVT-0081,WAL-ONB-0005,ai_agent,evidence-pack-agent,evidence_pack_generated,Evidence pack prepared for human review; recommended next action enhanced_due_diligence,evidence-pack-writer-v1.2,2026-09-10T10:23:00Z
 EVT-0082,WAL-ONB-0005,ai_agent,communication-agent,communication_drafted,COM-0006 drafted from template TPL-0004 for audience applicant,comms-drafter-v1.3,2026-09-10T10:27:00Z
-EVT-0083,WAL-ONB-0005,compliance,compliance.h.laur,communication_approved,COM-0006 approved for release under template TPL-0004,,2026-09-10T10:29:00Z
+EVT-0083,WAL-ONB-0005,compliance,compliance.h.laur,customer_communication_approved,COM-0006 approved for release to applicant under template TPL-0004,,2026-09-10T10:29:00Z
 EVT-0084,WAL-ONB-0005,system,notification-service,communication_sent,COM-0006 sent to applicant,,2026-09-10T10:30:00Z
 EVT-0085,WAL-ONB-0005,ai_agent,communication-agent,communication_drafted,COM-0007 drafted from template TPL-0008 for audience analyst,comms-drafter-v1.3,2026-09-10T10:34:00Z
-EVT-0086,WAL-ONB-0005,compliance,compliance.h.laur,communication_approved,COM-0007 approved for release under template TPL-0008,,2026-09-10T10:36:00Z
+EVT-0086,WAL-ONB-0005,compliance,compliance.h.laur,communication_approved,COM-0007 approved for release to analyst under template TPL-0008,,2026-09-10T10:36:00Z
 EVT-0087,WAL-ONB-0005,system,notification-service,communication_sent,COM-0007 sent to analyst,,2026-09-10T10:37:00Z
 EVT-0088,WAL-ONB-0005,compliance,H. Laur,human_decision_recorded,DEC-0003 -> enhanced_due_diligence (reason pep_match_edd_required),,2026-09-10T11:12:00Z
 EVT-0089,WAL-ONB-0005,system,case-state-machine,status_changed,Case status set to enhanced_due_diligence; next action owner compliance,,2026-09-10T11:13:00Z
@@ -100,10 +100,10 @@ EVT-0098,WAL-ONB-0006,external_provider,ScreenMock Global,screening_checks_compl
 EVT-0099,WAL-ONB-0006,ai_agent,risk-classification-agent,risk_assessment_completed,"RSK-0006 -> band critical, score 60, recommended action escalate, requires_human_signoff true",risk-explainer-v1.6,2026-09-14T10:48:00Z
 EVT-0100,WAL-ONB-0006,ai_agent,evidence-pack-agent,evidence_pack_generated,Evidence pack prepared for human review; recommended next action escalate,evidence-pack-writer-v1.2,2026-09-14T10:51:00Z
 EVT-0101,WAL-ONB-0006,ai_agent,communication-agent,communication_drafted,COM-0008 drafted from template TPL-0004 for audience applicant,comms-drafter-v1.3,2026-09-14T10:55:00Z
-EVT-0102,WAL-ONB-0006,compliance,compliance.k.ohtla,communication_approved,COM-0008 approved for release under template TPL-0004,,2026-09-14T10:57:00Z
+EVT-0102,WAL-ONB-0006,compliance,compliance.k.ohtla,customer_communication_approved,COM-0008 approved for release to applicant under template TPL-0004,,2026-09-14T10:57:00Z
 EVT-0103,WAL-ONB-0006,system,notification-service,communication_sent,COM-0008 sent to applicant,,2026-09-14T10:58:00Z
 EVT-0104,WAL-ONB-0006,ai_agent,communication-agent,communication_drafted,COM-0009 drafted from template TPL-0009 for audience compliance,comms-drafter-v1.3,2026-09-14T11:02:00Z
-EVT-0105,WAL-ONB-0006,compliance,compliance.k.ohtla,communication_approved,COM-0009 approved for release under template TPL-0009,,2026-09-14T11:04:00Z
+EVT-0105,WAL-ONB-0006,compliance,compliance.k.ohtla,communication_approved,COM-0009 approved for release to compliance under template TPL-0009,,2026-09-14T11:04:00Z
 EVT-0106,WAL-ONB-0006,system,notification-service,communication_sent,COM-0009 sent to compliance,,2026-09-14T11:05:00Z
 EVT-0107,WAL-ONB-0006,compliance,K. Ohtla,human_decision_recorded,DEC-0004 -> escalate (reason possible_sanctions_match),,2026-09-14T11:40:00Z
 EVT-0108,WAL-ONB-0006,system,case-state-machine,status_changed,Case status set to analyst_review_required; next action owner compliance,,2026-09-14T11:41:00Z
@@ -120,10 +120,10 @@ EVT-0118,WAL-ONB-0007,external_provider,ScreenMock Global,screening_checks_compl
 EVT-0119,WAL-ONB-0007,ai_agent,risk-classification-agent,risk_assessment_completed,"RSK-0007 -> band high, score 54, recommended action enhanced_due_diligence, requires_human_signoff true",risk-explainer-v1.6,2026-09-16T14:58:00Z
 EVT-0120,WAL-ONB-0007,ai_agent,evidence-pack-agent,evidence_pack_generated,Evidence pack prepared for human review; recommended next action escalate,evidence-pack-writer-v1.2,2026-09-16T15:01:00Z
 EVT-0121,WAL-ONB-0007,ai_agent,communication-agent,communication_drafted,COM-0010 drafted from template TPL-0004 for audience applicant,comms-drafter-v1.3,2026-09-16T15:05:00Z
-EVT-0122,WAL-ONB-0007,compliance,compliance.d.ferreira,communication_approved,COM-0010 approved for release under template TPL-0004,,2026-09-16T15:07:00Z
+EVT-0122,WAL-ONB-0007,compliance,compliance.d.ferreira,customer_communication_approved,COM-0010 approved for release to applicant under template TPL-0004,,2026-09-16T15:07:00Z
 EVT-0123,WAL-ONB-0007,system,notification-service,communication_sent,COM-0010 sent to applicant,,2026-09-16T15:08:00Z
 EVT-0124,WAL-ONB-0007,ai_agent,communication-agent,communication_drafted,COM-0011 drafted from template TPL-0009 for audience compliance,comms-drafter-v1.3,2026-09-16T15:12:00Z
-EVT-0125,WAL-ONB-0007,compliance,compliance.d.ferreira,communication_approved,COM-0011 approved for release under template TPL-0009,,2026-09-16T15:14:00Z
+EVT-0125,WAL-ONB-0007,compliance,compliance.d.ferreira,communication_approved,COM-0011 approved for release to compliance under template TPL-0009,,2026-09-16T15:14:00Z
 EVT-0126,WAL-ONB-0007,system,notification-service,communication_sent,COM-0011 sent to compliance,,2026-09-16T15:15:00Z
 EVT-0127,WAL-ONB-0007,compliance,D. Ferreira,human_decision_recorded,DEC-0005 -> escalate (reason serious_adverse_media),,2026-09-16T15:50:00Z
 EVT-0128,WAL-ONB-0007,system,case-state-machine,status_changed,Case status set to analyst_review_required; next action owner compliance,,2026-09-16T15:51:00Z
@@ -135,7 +135,7 @@ EVT-0133,WAL-ONB-0008,ai_agent,document-quality-agent,document_quality_prescreen
 EVT-0134,WAL-ONB-0008,ai_agent,applicant-router,routed_to_white_label_future_phase,"Applicant type white_label_partner. Case routed to the white-label programme onboarding branch, which is a future phase and outside the primary POC decision path. Future-phase steps: partner KYB tracking, API integration checklist, Visa co-brand approval, BIN and 3DS configuration, go-live testing readiness. No risk assessment, registry, identity, screening or decision records are produced for this branch.",wallester-uc4-intake-prompt-v0.9,2026-09-18T11:00:00Z
 EVT-0135,WAL-ONB-0008,system,case-state-machine,entity_scope_deferred,"Entity scope left as undetermined: the Wallester AS or Wallester UK Ltd perimeter for a partner programme is decided during programme design, not at KYB intake.",,2026-09-18T11:02:00Z
 EVT-0136,WAL-ONB-0008,ai_agent,communication-agent,communication_drafted,COM-0012 drafted from template TPL-0010 for audience applicant,comms-drafter-v1.3,2026-09-18T11:06:00Z
-EVT-0137,WAL-ONB-0008,analyst,partner.delivery.queue,communication_approved,COM-0012 approved for release under template TPL-0010,,2026-09-18T11:08:00Z
+EVT-0137,WAL-ONB-0008,analyst,partner.delivery.queue,customer_communication_approved,COM-0012 approved for release to applicant under template TPL-0010,,2026-09-18T11:08:00Z
 EVT-0138,WAL-ONB-0008,system,notification-service,communication_sent,COM-0012 sent to applicant,,2026-09-18T11:09:00Z
 EVT-0139,WAL-ONB-0008,system,case-state-machine,status_changed,Case status set to submitted; next action owner system,,2026-09-18T11:10:00Z
 EVT-0140,WAL-ONB-0009,system,portal-intake-service,case_created,Onboarding case created from portal intake for Parnu Kohviubade OU,,2026-09-19T09:00:00Z
@@ -151,7 +151,7 @@ EVT-0149,WAL-ONB-0009,ai_agent,risk-classification-agent,risk_assessment_complet
 EVT-0150,WAL-ONB-0009,ai_agent,evidence-pack-agent,evidence_pack_generated,Evidence pack prepared for human review; recommended next action approve,evidence-pack-writer-v1.2,2026-09-19T10:27:00Z
 EVT-0151,WAL-ONB-0009,analyst,R. Toome,human_decision_recorded,DEC-0006 -> approve (reason all_mandatory_checks_passed),,2026-09-19T11:02:00Z
 EVT-0152,WAL-ONB-0009,ai_agent,communication-agent,communication_drafted,COM-0013 drafted from template TPL-0007 for audience applicant,comms-drafter-v1.3,2026-09-19T11:06:00Z
-EVT-0153,WAL-ONB-0009,analyst,analyst.r.toome,communication_approved,COM-0013 approved for release under template TPL-0007,,2026-09-19T11:08:00Z
+EVT-0153,WAL-ONB-0009,analyst,analyst.r.toome,customer_communication_approved,COM-0013 approved for release to applicant under template TPL-0007,,2026-09-19T11:08:00Z
 EVT-0154,WAL-ONB-0009,system,notification-service,communication_sent,COM-0013 sent to applicant,,2026-09-19T11:09:00Z
 EVT-0155,WAL-ONB-0009,system,case-state-machine,status_changed,Case status set to approved; next action owner system,,2026-09-19T11:10:00Z
 EVT-0156,WAL-ONB-0010,system,portal-intake-service,case_created,Onboarding case created from portal intake for Thornbury Analytics Ltd,,2026-09-21T14:00:00Z
@@ -166,7 +166,7 @@ EVT-0164,WAL-ONB-0010,external_provider,ScreenMock Global,screening_checks_compl
 EVT-0165,WAL-ONB-0010,ai_agent,risk-classification-agent,risk_assessment_completed,"RSK-0009 -> band low, score 15, recommended action approve, requires_human_signoff false",risk-explainer-v1.6,2026-09-21T15:32:00Z
 EVT-0166,WAL-ONB-0010,ai_agent,evidence-pack-agent,evidence_pack_generated,Evidence pack prepared for human review; recommended next action approve,evidence-pack-writer-v1.2,2026-09-21T15:35:00Z
 EVT-0167,WAL-ONB-0010,ai_agent,communication-agent,communication_drafted,COM-0014 drafted from template TPL-0005 for audience applicant,comms-drafter-v1.3,2026-09-21T15:39:00Z
-EVT-0168,WAL-ONB-0010,analyst,analyst.j.okoro,communication_approved,COM-0014 approved for release under template TPL-0005,,2026-09-21T15:41:00Z
+EVT-0168,WAL-ONB-0010,analyst,analyst.j.okoro,customer_communication_approved,COM-0014 approved for release to applicant under template TPL-0005,,2026-09-21T15:41:00Z
 EVT-0169,WAL-ONB-0010,system,notification-service,communication_sent,COM-0014 sent to applicant,,2026-09-21T15:42:00Z
 EVT-0170,WAL-ONB-0010,system,case-state-machine,status_changed,Case status set to ready_for_decision; next action owner analyst,,2026-09-21T15:43:00Z
 EVT-0171,WAL-ONB-0011,system,portal-intake-service,case_created,Onboarding case created from portal intake for Ardenhall Joinery Ltd,,2026-09-23T09:10:00Z
@@ -181,7 +181,7 @@ EVT-0179,WAL-ONB-0011,external_provider,ScreenMock Global,screening_checks_compl
 EVT-0180,WAL-ONB-0011,ai_agent,risk-classification-agent,risk_assessment_completed,"RSK-0010 -> band high, score 60, recommended action reject, requires_human_signoff true",risk-explainer-v1.6,2026-09-23T10:38:00Z
 EVT-0181,WAL-ONB-0011,ai_agent,evidence-pack-agent,evidence_pack_generated,Evidence pack prepared for human review; recommended next action reject,evidence-pack-writer-v1.2,2026-09-23T10:41:00Z
 EVT-0182,WAL-ONB-0011,ai_agent,communication-agent,communication_drafted,COM-0015 drafted from template TPL-0011 for audience applicant,comms-drafter-v1.3,2026-09-23T10:45:00Z
-EVT-0183,WAL-ONB-0011,analyst,analyst.j.okoro,communication_approved,COM-0015 approved for release under template TPL-0011,,2026-09-23T10:47:00Z
+EVT-0183,WAL-ONB-0011,analyst,analyst.j.okoro,customer_communication_approved,COM-0015 approved for release to applicant under template TPL-0011,,2026-09-23T10:47:00Z
 EVT-0184,WAL-ONB-0011,system,notification-service,communication_sent,COM-0015 sent to applicant,,2026-09-23T10:48:00Z
 EVT-0185,WAL-ONB-0011,analyst,J. Okoro,human_decision_recorded,DEC-0007 -> reject (reason entity_not_active_on_register),,2026-09-23T11:23:00Z
 EVT-0186,WAL-ONB-0011,system,case-state-machine,status_changed,Case status set to rejected; next action owner system,,2026-09-23T11:24:00Z
@@ -197,10 +197,10 @@ EVT-0195,WAL-ONB-0012,external_provider,ScreenMock Global,screening_checks_compl
 EVT-0196,WAL-ONB-0012,ai_agent,risk-classification-agent,risk_assessment_completed,"RSK-0011 -> band critical, score 70, recommended action escalate, requires_human_signoff true",risk-explainer-v1.6,2026-09-24T09:54:00Z
 EVT-0197,WAL-ONB-0012,ai_agent,evidence-pack-agent,evidence_pack_generated,Evidence pack prepared for human review; recommended next action escalate,evidence-pack-writer-v1.2,2026-09-24T09:57:00Z
 EVT-0198,WAL-ONB-0012,ai_agent,communication-agent,communication_drafted,COM-0016 drafted from template TPL-0004 for audience applicant,comms-drafter-v1.3,2026-09-24T10:01:00Z
-EVT-0199,WAL-ONB-0012,compliance,compliance.k.ohtla,communication_approved,COM-0016 approved for release under template TPL-0004,,2026-09-24T10:03:00Z
+EVT-0199,WAL-ONB-0012,compliance,compliance.k.ohtla,customer_communication_approved,COM-0016 approved for release to applicant under template TPL-0004,,2026-09-24T10:03:00Z
 EVT-0200,WAL-ONB-0012,system,notification-service,communication_sent,COM-0016 sent to applicant,,2026-09-24T10:04:00Z
 EVT-0201,WAL-ONB-0012,ai_agent,communication-agent,communication_drafted,COM-0017 drafted from template TPL-0008 for audience compliance,comms-drafter-v1.3,2026-09-24T10:08:00Z
-EVT-0202,WAL-ONB-0012,compliance,compliance.k.ohtla,communication_approved,COM-0017 approved for release under template TPL-0008,,2026-09-24T10:10:00Z
+EVT-0202,WAL-ONB-0012,compliance,compliance.k.ohtla,communication_approved,COM-0017 approved for release to compliance under template TPL-0008,,2026-09-24T10:10:00Z
 EVT-0203,WAL-ONB-0012,system,notification-service,communication_sent,COM-0017 sent to compliance,,2026-09-24T10:11:00Z
 EVT-0204,WAL-ONB-0012,compliance,K. Ohtla,human_decision_recorded,DEC-0008 -> escalate (reason confirmed_sanctions_match_on_ubo),,2026-09-24T10:46:00Z
 EVT-0205,WAL-ONB-0012,system,case-state-machine,status_changed,Case status set to analyst_review_required; next action owner compliance,,2026-09-24T10:47:00Z
@@ -216,7 +216,7 @@ EVT-0214,WAL-ONB-0013,external_provider,ScreenMock Global,screening_checks_compl
 EVT-0215,WAL-ONB-0013,ai_agent,risk-classification-agent,risk_assessment_completed,"RSK-0012 -> band insufficient_evidence, score , recommended action insufficient_evidence, requires_human_signoff true",risk-explainer-v1.6,2026-09-25T11:33:00Z
 EVT-0216,WAL-ONB-0013,ai_agent,evidence-pack-agent,evidence_pack_generated,Evidence pack prepared for human review; recommended next action insufficient_evidence,evidence-pack-writer-v1.2,2026-09-25T11:36:00Z
 EVT-0217,WAL-ONB-0013,ai_agent,communication-agent,communication_drafted,COM-0018 drafted from template TPL-0002 for audience applicant,comms-drafter-v1.3,2026-09-25T11:40:00Z
-EVT-0218,WAL-ONB-0013,analyst,analyst.r.toome,communication_approved,COM-0018 approved for release under template TPL-0002,,2026-09-25T11:42:00Z
+EVT-0218,WAL-ONB-0013,analyst,analyst.r.toome,customer_communication_approved,COM-0018 approved for release to applicant under template TPL-0002,,2026-09-25T11:42:00Z
 EVT-0219,WAL-ONB-0013,system,notification-service,communication_sent,COM-0018 sent to applicant,,2026-09-25T11:43:00Z
 EVT-0220,WAL-ONB-0013,analyst,R. Toome,human_decision_recorded,DEC-0009 -> insufficient_evidence (reason identity_failure_and_provider_non_answer),,2026-09-25T12:18:00Z
 EVT-0221,WAL-ONB-0013,system,case-state-machine,status_changed,Case status set to analyst_review_required; next action owner analyst,,2026-09-25T12:19:00Z
@@ -233,13 +233,12 @@ EVT-0231,WAL-ONB-0014,system,step.communication,case_closed_no_response,No respo
 EVT-0232,WAL-ONB-0014,ai_agent,risk-classification-agent,risk_assessment_completed,"RSK-0013 -> band insufficient_evidence, score , recommended action insufficient_evidence, requires_human_signoff true",risk-explainer-v1.6,2026-09-26T12:39:00Z
 EVT-0233,WAL-ONB-0014,ai_agent,evidence-pack-agent,evidence_pack_generated,Evidence pack prepared for human review; recommended next action withdrawn,evidence-pack-writer-v1.2,2026-09-26T12:42:00Z
 EVT-0234,WAL-ONB-0014,ai_agent,communication-agent,communication_drafted,COM-0019 drafted from template TPL-0001 for audience applicant,comms-drafter-v1.3,2026-09-26T12:46:00Z
-EVT-0235,WAL-ONB-0014,analyst,ops.tiina.kask,communication_approved,COM-0019 approved for release under template TPL-0001,,2026-09-26T12:48:00Z
+EVT-0235,WAL-ONB-0014,analyst,ops.tiina.kask,customer_communication_approved,COM-0019 approved for release to applicant under template TPL-0001,,2026-09-26T12:48:00Z
 EVT-0236,WAL-ONB-0014,system,notification-service,communication_sent,COM-0019 sent to applicant,,2026-09-26T12:49:00Z
 EVT-0237,WAL-ONB-0014,ai_agent,communication-agent,communication_drafted,COM-0020 drafted from template TPL-0005 for audience applicant,comms-drafter-v1.3,2026-09-26T12:53:00Z
-EVT-0238,WAL-ONB-0014,analyst,ops.tiina.kask,communication_approved,COM-0020 approved for release under template TPL-0005,,2026-09-26T12:55:00Z
+EVT-0238,WAL-ONB-0014,analyst,ops.tiina.kask,customer_communication_approved,COM-0020 approved for release to applicant under template TPL-0005,,2026-09-26T12:55:00Z
 EVT-0239,WAL-ONB-0014,system,notification-service,communication_sent,COM-0020 sent to applicant,,2026-09-26T12:56:00Z
 EVT-0240,WAL-ONB-0014,ai_agent,communication-agent,communication_drafted,COM-0021 drafted from template TPL-0012 for audience applicant,comms-drafter-v1.3,2026-09-26T13:00:00Z
-EVT-0241,WAL-ONB-0014,analyst,ops.tiina.kask,communication_approved,COM-0021 approved for release under template TPL-0012,,2026-09-26T13:02:00Z
+EVT-0241,WAL-ONB-0014,analyst,ops.tiina.kask,customer_communication_approved,COM-0021 approved for release to applicant under template TPL-0012,,2026-09-26T13:02:00Z
 EVT-0242,WAL-ONB-0014,system,notification-service,communication_sent,COM-0021 sent to applicant,,2026-09-26T13:03:00Z
-EVT-0243,WAL-ONB-0014,analyst,T. Kask,human_decision_recorded,DEC-0010 -> withdrawn (reason no_response_to_resubmission_request),,2026-09-26T13:38:00Z
-EVT-0244,WAL-ONB-0014,system,case-state-machine,status_changed,Case status set to closed_withdrawn; next action owner system,,2026-09-26T13:39:00Z
+EVT-0243,WAL-ONB-0014,system,case-state-machine,status_changed,Case status set to closed_withdrawn; next action owner system,,2026-09-26T13:04:00Z

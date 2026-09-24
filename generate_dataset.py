@@ -17,6 +17,19 @@ if not os.path.isdir(OUT):
 KB_VERSION = "WAL-KB-2026.09"
 RISK_MATRIX = "WAL-RM-2026.03"
 RECOMMENDED_ACTION = {}
+# How strict each outcome is. Mirrors kb/analyst_decision_taxonomy.csv.
+SEVERITY_RANK = {"approve": 1, "conditional_approve": 2, "withdrawn": 3,
+                 "request_more_information": 4, "insufficient_evidence": 5,
+                 "enhanced_due_diligence": 6, "escalate": 7, "reject": 8}
+
+
+def override_direction(decision, recommended):
+    if recommended is None or decision == recommended:
+        return ""
+    taken, advised = SEVERITY_RANK.get(decision), SEVERITY_RANK.get(recommended)
+    if taken is None or advised is None:
+        return "stricter"
+    return "stricter" if taken > advised else "more_lenient"
 V_INTAKE = "wallester-uc4-intake-prompt-v0.9"
 V_QUALITY = "doc-quality-classifier-v1.4"
 V_OCR = "ocr-extract-v2.3"
@@ -51,7 +64,7 @@ SCHEMA = {
  "communication": ["communication_id", "case_id", "template_id", "audience", "message_type", "approval_status",
     "sent_status", "rendered_text", "created_at"],
  "human_decision": ["decision_id", "case_id", "reviewer", "reviewer_role", "decision", "reason_code",
-    "rationale", "evidence_relied_on", "override_flag", "override_reason", "escalation_target",
+    "rationale", "evidence_relied_on", "override_flag", "override_reason", "override_direction", "escalation_target",
     "customer_template_id", "timestamp"],
  "audit_event": ["event_id", "case_id", "actor_type", "actor_id", "action", "payload_summary",
     "model_or_prompt_version", "timestamp"],
@@ -358,9 +371,12 @@ def emit_communications(spec, case_id, clk):
               % (comm_id, c["template_id"], c["audience"]), created, V_COMMS)
         if c["approval_status"] == "approved":
             t = clk.tick(2)
+            action = ("customer_communication_approved" if c["audience"] == "applicant"
+                      else "communication_approved")
             audit(case_id, c.get("approver_role", "analyst"),
-                  c.get("approver", spec["assigned_owner"]), "communication_approved",
-                  "%s approved for release under template %s" % (comm_id, c["template_id"]), t)
+                  c.get("approver", spec["assigned_owner"]), action,
+                  "%s approved for release to %s under template %s"
+                  % (comm_id, c["audience"], c["template_id"]), t)
         else:
             t = clk.tick(2)
             audit(case_id, "system", "communication-gate", "communication_held",
@@ -386,6 +402,7 @@ def emit_decisions(spec, case_id, clk):
             rationale=hd["rationale"], evidence_relied_on=hd["evidence_relied_on"],
             override_flag=is_override,
             override_reason=hd["rationale"] if is_override else "",
+            override_direction=override_direction(hd["decision"], recommended),
             escalation_target=hd.get("escalation_target", ""),
             customer_template_id=hd.get("customer_template_id", ""), timestamp=t)
         audit(case_id, hd["reviewer_role"], hd["reviewer"], "human_decision_recorded",
@@ -2531,14 +2548,9 @@ CASES.append({
      "is closed as withdrawn and carries no adverse inference; a fresh application would start "
      "clean.",
  },
- "decisions": [
-   {"reviewer": "T. Kask", "reviewer_role": "analyst", "decision": "withdrawn",
-    "reason_code": "no_response_to_resubmission_request",
-    "rationale": "The outstanding proof of address was requested and chased and did not arrive "
-      "within 30 days. Closing as withdrawn. No assessment was made about the applicant and no "
-      "provider checks were commissioned.",
-    "evidence_relied_on": "{PACK}",
-    "override_flag": False, "customer_template_id": "TPL-0012"}],
+ # No decision row: the case closed itself when the chase expired. A system
+ # closure is not a judgement about the applicant and is not recorded as one;
+ # the closure is in the audit trail instead.
  "communications": [
    {"template_id": "TPL-0001", "audience": "applicant", "message_type": "resubmission_request",
     "approval_status": "approved", "sent_status": "sent", "approver_role": "analyst",

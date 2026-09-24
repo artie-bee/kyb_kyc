@@ -855,6 +855,12 @@
                   "null"
                 ]
               },
+              "override_direction": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
               "escalation_target": {
                 "type": [
                   "string",
@@ -885,6 +891,7 @@
               "evidence_relied_on",
               "override_flag",
               "override_reason",
+              "override_direction",
               "escalation_target",
               "customer_template_id",
               "timestamp"
@@ -3212,6 +3219,12 @@
                   "null"
                 ]
               },
+              "override_direction": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
               "escalation_target": {
                 "type": [
                   "string",
@@ -3242,6 +3255,7 @@
               "evidence_relied_on",
               "override_flag",
               "override_reason",
+              "override_direction",
               "escalation_target",
               "customer_template_id",
               "timestamp"
