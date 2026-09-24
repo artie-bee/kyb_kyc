@@ -70,7 +70,27 @@
       "expiry_date": null,
       "document_date": null,
       "issue_country": "GB",
-      "scripted_quality_flags": []
+      "scripted_quality_flags": [],
+      "scripted_fields": [
+        {
+          "field_id": "FLD-0167",
+          "document_id": "DOC-0108",
+          "name": "company_name",
+          "value": "Thornbury Analytics Ltd",
+          "confidence": "0.96",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        },
+        {
+          "field_id": "FLD-0168",
+          "document_id": "DOC-0108",
+          "name": "registration_number",
+          "value": "UK-99025819",
+          "confidence": "0.95",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        }
+      ]
     },
     {
       "document_type": "registry_extract",
@@ -80,7 +100,27 @@
       "expiry_date": null,
       "document_date": null,
       "issue_country": "GB",
-      "scripted_quality_flags": []
+      "scripted_quality_flags": [],
+      "scripted_fields": [
+        {
+          "field_id": "FLD-0169",
+          "document_id": "DOC-0109",
+          "name": "registered_address",
+          "value": "5 Wraysbury Mews, Bristol BS1 6TT, United Kingdom",
+          "confidence": "0.93",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        },
+        {
+          "field_id": "FLD-0170",
+          "document_id": "DOC-0109",
+          "name": "entity_status",
+          "value": "active",
+          "confidence": "0.95",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        }
+      ]
     },
     {
       "document_type": "director_register",
@@ -90,7 +130,27 @@
       "expiry_date": null,
       "document_date": null,
       "issue_country": null,
-      "scripted_quality_flags": []
+      "scripted_quality_flags": [],
+      "scripted_fields": [
+        {
+          "field_id": "FLD-0171",
+          "document_id": "DOC-0110",
+          "name": "director_name",
+          "value": "Imogen Skellow",
+          "confidence": "0.94",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        },
+        {
+          "field_id": "FLD-0172",
+          "document_id": "DOC-0110",
+          "name": "director_name_2",
+          "value": "Callum Pryde-Nash",
+          "confidence": "0.93",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        }
+      ]
     },
     {
       "document_type": "authorised_signatory_list",
@@ -100,7 +160,18 @@
       "expiry_date": null,
       "document_date": null,
       "issue_country": null,
-      "scripted_quality_flags": []
+      "scripted_quality_flags": [],
+      "scripted_fields": [
+        {
+          "field_id": "FLD-0173",
+          "document_id": "DOC-0111",
+          "name": "signatory_name",
+          "value": "Imogen Skellow",
+          "confidence": "0.92",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        }
+      ]
     },
     {
       "document_type": "ubo_declaration",
@@ -110,7 +181,36 @@
       "expiry_date": null,
       "document_date": null,
       "issue_country": null,
-      "scripted_quality_flags": []
+      "scripted_quality_flags": [],
+      "scripted_fields": [
+        {
+          "field_id": "FLD-0174",
+          "document_id": "DOC-0112",
+          "name": "ubo_name",
+          "value": "Helena Marchbank",
+          "confidence": "0.94",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        },
+        {
+          "field_id": "FLD-0175",
+          "document_id": "DOC-0112",
+          "name": "ownership_percentage",
+          "value": "70.0",
+          "confidence": "0.93",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        },
+        {
+          "field_id": "FLD-0176",
+          "document_id": "DOC-0112",
+          "name": "control_basis",
+          "value": "indirect shareholding through Marchbank Holdings Ltd",
+          "confidence": "0.91",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        }
+      ]
     },
     {
       "document_type": "ownership_chart",
@@ -120,7 +220,27 @@
       "expiry_date": null,
       "document_date": null,
       "issue_country": null,
-      "scripted_quality_flags": []
+      "scripted_quality_flags": [],
+      "scripted_fields": [
+        {
+          "field_id": "FLD-0177",
+          "document_id": "DOC-0113",
+          "name": "chart_summary",
+          "value": "Two layers: Helena Marchbank 100 percent of Marchbank Holdings Ltd (UK-99026440), which holds 70 percent of Thornbury Analytics Ltd; two directors hold 15 percent each directly",
+          "confidence": "0.9",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        },
+        {
+          "field_id": "FLD-0178",
+          "document_id": "DOC-0113",
+          "name": "intermediate_entity",
+          "value": "Marchbank Holdings Ltd (UK-99026440), active on the UK register",
+          "confidence": "0.92",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        }
+      ]
     },
     {
       "document_type": "shareholder_register",
@@ -130,7 +250,27 @@
       "expiry_date": null,
       "document_date": null,
       "issue_country": null,
-      "scripted_quality_flags": []
+      "scripted_quality_flags": [],
+      "scripted_fields": [
+        {
+          "field_id": "FLD-0179",
+          "document_id": "DOC-0114",
+          "name": "shareholder_name",
+          "value": "Marchbank Holdings Ltd",
+          "confidence": "0.92",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        },
+        {
+          "field_id": "FLD-0180",
+          "document_id": "DOC-0114",
+          "name": "shareholder_name_2",
+          "value": "Helena Marchbank (sole shareholder of Marchbank Holdings Ltd)",
+          "confidence": "0.91",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        }
+      ]
     },
     {
       "document_type": "id_document",
@@ -140,7 +280,18 @@
       "expiry_date": "2031-05-16",
       "document_date": null,
       "issue_country": "GB",
-      "scripted_quality_flags": []
+      "scripted_quality_flags": [],
+      "scripted_fields": [
+        {
+          "field_id": "FLD-0181",
+          "document_id": "DOC-0115",
+          "name": "full_name",
+          "value": "Imogen Skellow",
+          "confidence": "0.96",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        }
+      ]
     },
     {
       "document_type": "id_document",
@@ -150,7 +301,18 @@
       "expiry_date": "2029-04-27",
       "document_date": null,
       "issue_country": "GB",
-      "scripted_quality_flags": []
+      "scripted_quality_flags": [],
+      "scripted_fields": [
+        {
+          "field_id": "FLD-0182",
+          "document_id": "DOC-0116",
+          "name": "full_name",
+          "value": "Callum Pryde-Nash",
+          "confidence": "0.95",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        }
+      ]
     },
     {
       "document_type": "id_document",
@@ -160,7 +322,18 @@
       "expiry_date": "2030-02-09",
       "document_date": null,
       "issue_country": "GB",
-      "scripted_quality_flags": []
+      "scripted_quality_flags": [],
+      "scripted_fields": [
+        {
+          "field_id": "FLD-0183",
+          "document_id": "DOC-0117",
+          "name": "full_name",
+          "value": "Helena Marchbank",
+          "confidence": "0.94",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        }
+      ]
     },
     {
       "document_type": "proof_of_address",
@@ -170,7 +343,18 @@
       "expiry_date": null,
       "document_date": "2026-09-08",
       "issue_country": "GB",
-      "scripted_quality_flags": []
+      "scripted_quality_flags": [],
+      "scripted_fields": [
+        {
+          "field_id": "FLD-0184",
+          "document_id": "DOC-0118",
+          "name": "document_date",
+          "value": "2026-09-08",
+          "confidence": "0.93",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        }
+      ]
     },
     {
       "document_type": "proof_of_address",
@@ -180,7 +364,18 @@
       "expiry_date": null,
       "document_date": "2026-08-31",
       "issue_country": "GB",
-      "scripted_quality_flags": []
+      "scripted_quality_flags": [],
+      "scripted_fields": [
+        {
+          "field_id": "FLD-0185",
+          "document_id": "DOC-0119",
+          "name": "document_date",
+          "value": "2026-08-31",
+          "confidence": "0.92",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        }
+      ]
     },
     {
       "document_type": "proof_of_address",
@@ -190,7 +385,18 @@
       "expiry_date": null,
       "document_date": "2026-09-02",
       "issue_country": "GB",
-      "scripted_quality_flags": []
+      "scripted_quality_flags": [],
+      "scripted_fields": [
+        {
+          "field_id": "FLD-0186",
+          "document_id": "DOC-0120",
+          "name": "document_date",
+          "value": "2026-09-02",
+          "confidence": "0.92",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        }
+      ]
     },
     {
       "document_type": "source_of_funds_declaration",
@@ -200,7 +406,18 @@
       "expiry_date": null,
       "document_date": null,
       "issue_country": null,
-      "scripted_quality_flags": []
+      "scripted_quality_flags": [],
+      "scripted_fields": [
+        {
+          "field_id": "FLD-0187",
+          "document_id": "DOC-0121",
+          "name": "declared_source",
+          "value": "Consultancy fees under annual retainer contracts",
+          "confidence": "0.9",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        }
+      ]
     },
     {
       "document_type": "business_activity_description",
@@ -210,7 +427,18 @@
       "expiry_date": null,
       "document_date": null,
       "issue_country": null,
-      "scripted_quality_flags": []
+      "scripted_quality_flags": [],
+      "scripted_fields": [
+        {
+          "field_id": "FLD-0188",
+          "document_id": "DOC-0122",
+          "name": "declared_industry",
+          "value": "Management and data analytics consultancy",
+          "confidence": "0.92",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        }
+      ]
     },
     {
       "document_type": "source_of_wealth_statement",
@@ -220,7 +448,20 @@
       "expiry_date": null,
       "document_date": null,
       "issue_country": null,
-      "scripted_quality_flags": []
+      "scripted_quality_flags": [],
+      "scripted_fields": [
+        {
+          "field_id": "FLD-0189",
+          "document_id": "DOC-0123",
+          "name": "declared_source_of_wealth",
+          "value": "Proceeds of the founder's earlier consultancy sale, held through Marchbank Holdings Ltd",
+          "confidence": "0.91",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        }
+      ]
     }
-  ]
+  ],
+  "analyst_releases": [],
+  "field_corrections": []
 }

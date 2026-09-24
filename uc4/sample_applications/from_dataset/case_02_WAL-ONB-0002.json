@@ -54,7 +54,36 @@
       "expiry_date": null,
       "document_date": null,
       "issue_country": "GB",
-      "scripted_quality_flags": []
+      "scripted_quality_flags": [],
+      "scripted_fields": [
+        {
+          "field_id": "FLD-0017",
+          "document_id": "DOC-0007",
+          "name": "company_name",
+          "value": "Northbridge Craft Supplies Ltd",
+          "confidence": "0.96",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        },
+        {
+          "field_id": "FLD-0018",
+          "document_id": "DOC-0007",
+          "name": "registration_number",
+          "value": "UK-99010288",
+          "confidence": "0.95",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        },
+        {
+          "field_id": "FLD-0019",
+          "document_id": "DOC-0007",
+          "name": "incorporation_date",
+          "value": "2019-04-11",
+          "confidence": "0.93",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        }
+      ]
     },
     {
       "document_type": "registry_extract",
@@ -64,7 +93,36 @@
       "expiry_date": null,
       "document_date": null,
       "issue_country": "GB",
-      "scripted_quality_flags": []
+      "scripted_quality_flags": [],
+      "scripted_fields": [
+        {
+          "field_id": "FLD-0020",
+          "document_id": "DOC-0008",
+          "name": "registered_address",
+          "value": "Suite 3, 88 Fettlers Row, Sheffield S3 8PQ, United Kingdom",
+          "confidence": "0.91",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        },
+        {
+          "field_id": "FLD-0021",
+          "document_id": "DOC-0008",
+          "name": "entity_status",
+          "value": "active",
+          "confidence": "0.94",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        },
+        {
+          "field_id": "FLD-0022",
+          "document_id": "DOC-0008",
+          "name": "registration_number",
+          "value": "UK-99010288",
+          "confidence": "0.95",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        }
+      ]
     },
     {
       "document_type": "director_register",
@@ -74,7 +132,27 @@
       "expiry_date": null,
       "document_date": null,
       "issue_country": null,
-      "scripted_quality_flags": []
+      "scripted_quality_flags": [],
+      "scripted_fields": [
+        {
+          "field_id": "FLD-0023",
+          "document_id": "DOC-0009",
+          "name": "director_name",
+          "value": "Denton Halliwell",
+          "confidence": "0.92",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        },
+        {
+          "field_id": "FLD-0024",
+          "document_id": "DOC-0009",
+          "name": "director_name_2",
+          "value": "Priya Nankivell",
+          "confidence": "0.9",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        }
+      ]
     },
     {
       "document_type": "authorised_signatory_list",
@@ -84,7 +162,18 @@
       "expiry_date": null,
       "document_date": null,
       "issue_country": null,
-      "scripted_quality_flags": []
+      "scripted_quality_flags": [],
+      "scripted_fields": [
+        {
+          "field_id": "FLD-0025",
+          "document_id": "DOC-0010",
+          "name": "signatory_name",
+          "value": "Priya Nankivell",
+          "confidence": "0.89",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        }
+      ]
     },
     {
       "document_type": "id_document",
@@ -96,7 +185,8 @@
       "issue_country": null,
       "scripted_quality_flags": [
         "blurred_unreadable"
-      ]
+      ],
+      "scripted_fields": []
     },
     {
       "document_type": "id_document",
@@ -106,7 +196,36 @@
       "expiry_date": "2029-09-30",
       "document_date": null,
       "issue_country": "GB",
-      "scripted_quality_flags": []
+      "scripted_quality_flags": [],
+      "scripted_fields": [
+        {
+          "field_id": "FLD-0026",
+          "document_id": "DOC-0012",
+          "name": "full_name",
+          "value": "Priya Nankivell",
+          "confidence": "0.96",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        },
+        {
+          "field_id": "FLD-0027",
+          "document_id": "DOC-0012",
+          "name": "date_of_birth",
+          "value": "1985-11-19",
+          "confidence": "0.95",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        },
+        {
+          "field_id": "FLD-0028",
+          "document_id": "DOC-0012",
+          "name": "expiry_date",
+          "value": "2029-09-30",
+          "confidence": "0.94",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        }
+      ]
     },
     {
       "document_type": "proof_of_address",
@@ -116,7 +235,27 @@
       "expiry_date": null,
       "document_date": "2026-07-28",
       "issue_country": "GB",
-      "scripted_quality_flags": []
+      "scripted_quality_flags": [],
+      "scripted_fields": [
+        {
+          "field_id": "FLD-0029",
+          "document_id": "DOC-0013",
+          "name": "address",
+          "value": "12 Sowerby Lane, Sheffield S7 2LT, United Kingdom",
+          "confidence": "0.9",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        },
+        {
+          "field_id": "FLD-0030",
+          "document_id": "DOC-0013",
+          "name": "document_date",
+          "value": "2026-07-28",
+          "confidence": "0.92",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        }
+      ]
     },
     {
       "document_type": "proof_of_address",
@@ -126,7 +265,27 @@
       "expiry_date": null,
       "document_date": "2026-08-05",
       "issue_country": "GB",
-      "scripted_quality_flags": []
+      "scripted_quality_flags": [],
+      "scripted_fields": [
+        {
+          "field_id": "FLD-0031",
+          "document_id": "DOC-0014",
+          "name": "address",
+          "value": "4 Carrowbrook Court, Sheffield S11 9DD, United Kingdom",
+          "confidence": "0.91",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        },
+        {
+          "field_id": "FLD-0032",
+          "document_id": "DOC-0014",
+          "name": "document_date",
+          "value": "2026-08-05",
+          "confidence": "0.93",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        }
+      ]
     },
     {
       "document_type": "source_of_funds_declaration",
@@ -136,7 +295,18 @@
       "expiry_date": null,
       "document_date": null,
       "issue_country": null,
-      "scripted_quality_flags": []
+      "scripted_quality_flags": [],
+      "scripted_fields": [
+        {
+          "field_id": "FLD-0033",
+          "document_id": "DOC-0015",
+          "name": "declared_source",
+          "value": "Trading revenue from wholesale supply contracts",
+          "confidence": "0.88",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        }
+      ]
     },
     {
       "document_type": "business_activity_description",
@@ -146,7 +316,20 @@
       "expiry_date": null,
       "document_date": null,
       "issue_country": null,
-      "scripted_quality_flags": []
+      "scripted_quality_flags": [],
+      "scripted_fields": [
+        {
+          "field_id": "FLD-0034",
+          "document_id": "DOC-0016",
+          "name": "declared_industry",
+          "value": "Wholesale of craft and hobby goods",
+          "confidence": "0.9",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        }
+      ]
     }
-  ]
+  ],
+  "analyst_releases": [],
+  "field_corrections": []
 }

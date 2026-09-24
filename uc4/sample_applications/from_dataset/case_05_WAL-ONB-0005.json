@@ -70,7 +70,27 @@
       "expiry_date": null,
       "document_date": null,
       "issue_country": "GB",
-      "scripted_quality_flags": []
+      "scripted_quality_flags": [],
+      "scripted_fields": [
+        {
+          "field_id": "FLD-0085",
+          "document_id": "DOC-0048",
+          "name": "company_name",
+          "value": "Quillon Marine Services Ltd",
+          "confidence": "0.96",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        },
+        {
+          "field_id": "FLD-0086",
+          "document_id": "DOC-0048",
+          "name": "registration_number",
+          "value": "UK-99017733",
+          "confidence": "0.95",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        }
+      ]
     },
     {
       "document_type": "registry_extract",
@@ -80,7 +100,27 @@
       "expiry_date": null,
       "document_date": null,
       "issue_country": "GB",
-      "scripted_quality_flags": []
+      "scripted_quality_flags": [],
+      "scripted_fields": [
+        {
+          "field_id": "FLD-0087",
+          "document_id": "DOC-0049",
+          "name": "registered_address",
+          "value": "Harbour House, 2 Dockside Walk, Aberdeen AB11 5QT, United Kingdom",
+          "confidence": "0.92",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        },
+        {
+          "field_id": "FLD-0088",
+          "document_id": "DOC-0049",
+          "name": "entity_status",
+          "value": "active",
+          "confidence": "0.94",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        }
+      ]
     },
     {
       "document_type": "tax_registration_certificate",
@@ -90,7 +130,18 @@
       "expiry_date": null,
       "document_date": null,
       "issue_country": null,
-      "scripted_quality_flags": []
+      "scripted_quality_flags": [],
+      "scripted_fields": [
+        {
+          "field_id": "FLD-0089",
+          "document_id": "DOC-0050",
+          "name": "vat_number",
+          "value": "GB-VAT-882014577",
+          "confidence": "0.91",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        }
+      ]
     },
     {
       "document_type": "director_register",
@@ -100,7 +151,27 @@
       "expiry_date": null,
       "document_date": null,
       "issue_country": null,
-      "scripted_quality_flags": []
+      "scripted_quality_flags": [],
+      "scripted_fields": [
+        {
+          "field_id": "FLD-0090",
+          "document_id": "DOC-0051",
+          "name": "director_name",
+          "value": "Gareth Pennyfold",
+          "confidence": "0.93",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        },
+        {
+          "field_id": "FLD-0091",
+          "document_id": "DOC-0051",
+          "name": "director_name_2",
+          "value": "Ines Carrasco-Bell",
+          "confidence": "0.92",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        }
+      ]
     },
     {
       "document_type": "authorised_signatory_list",
@@ -110,7 +181,18 @@
       "expiry_date": null,
       "document_date": null,
       "issue_country": null,
-      "scripted_quality_flags": []
+      "scripted_quality_flags": [],
+      "scripted_fields": [
+        {
+          "field_id": "FLD-0092",
+          "document_id": "DOC-0052",
+          "name": "signatory_name",
+          "value": "Gareth Pennyfold",
+          "confidence": "0.9",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        }
+      ]
     },
     {
       "document_type": "ubo_declaration",
@@ -120,7 +202,36 @@
       "expiry_date": null,
       "document_date": null,
       "issue_country": null,
-      "scripted_quality_flags": []
+      "scripted_quality_flags": [],
+      "scripted_fields": [
+        {
+          "field_id": "FLD-0093",
+          "document_id": "DOC-0053",
+          "name": "ubo_name",
+          "value": "Aurelio Vantano",
+          "confidence": "0.92",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        },
+        {
+          "field_id": "FLD-0094",
+          "document_id": "DOC-0053",
+          "name": "ownership_percentage",
+          "value": "55.0",
+          "confidence": "0.91",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        },
+        {
+          "field_id": "FLD-0095",
+          "document_id": "DOC-0053",
+          "name": "control_basis",
+          "value": "direct shareholding",
+          "confidence": "0.89",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        }
+      ]
     },
     {
       "document_type": "id_document",
@@ -130,7 +241,18 @@
       "expiry_date": "2029-12-04",
       "document_date": null,
       "issue_country": "GB",
-      "scripted_quality_flags": []
+      "scripted_quality_flags": [],
+      "scripted_fields": [
+        {
+          "field_id": "FLD-0096",
+          "document_id": "DOC-0054",
+          "name": "full_name",
+          "value": "Gareth Pennyfold",
+          "confidence": "0.96",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        }
+      ]
     },
     {
       "document_type": "id_document",
@@ -140,7 +262,18 @@
       "expiry_date": "2031-03-21",
       "document_date": null,
       "issue_country": "ES",
-      "scripted_quality_flags": []
+      "scripted_quality_flags": [],
+      "scripted_fields": [
+        {
+          "field_id": "FLD-0097",
+          "document_id": "DOC-0055",
+          "name": "full_name",
+          "value": "Ines Carrasco-Bell",
+          "confidence": "0.94",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        }
+      ]
     },
     {
       "document_type": "id_document",
@@ -150,7 +283,18 @@
       "expiry_date": "2028-06-19",
       "document_date": null,
       "issue_country": "IT",
-      "scripted_quality_flags": []
+      "scripted_quality_flags": [],
+      "scripted_fields": [
+        {
+          "field_id": "FLD-0098",
+          "document_id": "DOC-0056",
+          "name": "full_name",
+          "value": "Aurelio Vantano",
+          "confidence": "0.93",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        }
+      ]
     },
     {
       "document_type": "proof_of_address",
@@ -160,7 +304,18 @@
       "expiry_date": null,
       "document_date": "2026-08-30",
       "issue_country": "GB",
-      "scripted_quality_flags": []
+      "scripted_quality_flags": [],
+      "scripted_fields": [
+        {
+          "field_id": "FLD-0099",
+          "document_id": "DOC-0057",
+          "name": "document_date",
+          "value": "2026-08-30",
+          "confidence": "0.92",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        }
+      ]
     },
     {
       "document_type": "proof_of_address",
@@ -170,7 +325,18 @@
       "expiry_date": null,
       "document_date": "2026-08-28",
       "issue_country": "GB",
-      "scripted_quality_flags": []
+      "scripted_quality_flags": [],
+      "scripted_fields": [
+        {
+          "field_id": "FLD-0100",
+          "document_id": "DOC-0058",
+          "name": "document_date",
+          "value": "2026-08-28",
+          "confidence": "0.91",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        }
+      ]
     },
     {
       "document_type": "proof_of_address",
@@ -180,7 +346,18 @@
       "expiry_date": null,
       "document_date": "2026-08-11",
       "issue_country": "MT",
-      "scripted_quality_flags": []
+      "scripted_quality_flags": [],
+      "scripted_fields": [
+        {
+          "field_id": "FLD-0101",
+          "document_id": "DOC-0059",
+          "name": "document_date",
+          "value": "2026-08-11",
+          "confidence": "0.87",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        }
+      ]
     },
     {
       "document_type": "source_of_funds_declaration",
@@ -190,7 +367,18 @@
       "expiry_date": null,
       "document_date": null,
       "issue_country": null,
-      "scripted_quality_flags": []
+      "scripted_quality_flags": [],
+      "scripted_fields": [
+        {
+          "field_id": "FLD-0102",
+          "document_id": "DOC-0060",
+          "name": "declared_source",
+          "value": "Charter revenue under long-term vessel contracts",
+          "confidence": "0.88",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        }
+      ]
     },
     {
       "document_type": "business_activity_description",
@@ -200,7 +388,18 @@
       "expiry_date": null,
       "document_date": null,
       "issue_country": null,
-      "scripted_quality_flags": []
+      "scripted_quality_flags": [],
+      "scripted_fields": [
+        {
+          "field_id": "FLD-0103",
+          "document_id": "DOC-0061",
+          "name": "declared_industry",
+          "value": "Offshore marine chartering",
+          "confidence": "0.9",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        }
+      ]
     },
     {
       "document_type": "bank_statement",
@@ -210,7 +409,20 @@
       "expiry_date": null,
       "document_date": null,
       "issue_country": null,
-      "scripted_quality_flags": []
+      "scripted_quality_flags": [],
+      "scripted_fields": [
+        {
+          "field_id": "FLD-0104",
+          "document_id": "DOC-0062",
+          "name": "account_holder",
+          "value": "Quillon Marine Services Ltd",
+          "confidence": "0.89",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        }
+      ]
     }
-  ]
+  ],
+  "analyst_releases": [],
+  "field_corrections": []
 }

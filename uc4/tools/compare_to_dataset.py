@@ -97,9 +97,11 @@ def compare(conn: sqlite3.Connection, dataset: Path = DEFAULT_DATASET) -> list[t
 def compare_documents(conn: sqlite3.Connection, dataset: Path = DEFAULT_DATASET) -> list[tuple]:
     """One row per document the orchestrator assessed, matched by (case, file name).
 
-    Step 3 outcomes only: quality_status, quality_flags, resubmission_reasons and
-    the resubmission flag. Documents on cases that stop before Step 3 - the
-    white-label branch - are not assessed and so are not compared.
+    Compares the Step 3 screening verdict, which is what document.csv records.
+    quality_status_at_screen is used rather than quality_status: an analyst
+    release moves the live status afterwards, and the dataset has no column for
+    that, so comparing the live status would make case 4 look like a mismatch
+    when in fact it screened exactly as scripted and was then released.
     """
     ds = {(r["case_id"], r["file_name"]):
           (r["quality_status"], r["quality_flags"], r["resubmission_reasons"],
@@ -108,12 +110,43 @@ def compare_documents(conn: sqlite3.Connection, dataset: Path = DEFAULT_DATASET)
     rows = []
     for r in conn.execute("SELECT * FROM document ORDER BY document_id"):
         key = (r["case_id"], r["file_name"])
-        got = (r["quality_status"], r["quality_flags"] or "", r["resubmission_reasons"] or "",
-               str(bool(r["resubmission_required"])).lower())
+        screened = r["quality_status_at_screen"]
+        got = (screened, r["quality_flags"] or "", r["resubmission_reasons"] or "",
+               str(screened == "resubmission_required").lower())
         want = ds.get(key)
         rows.append((r["case_id"], r["file_name"],
                      " / ".join(want) if want else "(no dataset row)",
                      " / ".join(got), "YES" if want == got else "NO"))
+    return rows
+
+
+def compare_fields(conn: sqlite3.Connection, dataset: Path = DEFAULT_DATASET) -> list[tuple]:
+    """One row per field extracted, matched by (case, file name, field name).
+
+    Compares value, confidence and corrected_by_analyst. Only fields the
+    orchestrator actually extracted are compared: cases that stop before Step 4
+    (case 2 awaiting resubmission, case 8 on the white-label branch) have dataset
+    fields with no counterpart here, which test_extraction_coverage pins down.
+    """
+    docs = {r["document_id"]: r for r in read_csv(dataset / "document.csv")}
+    ds = {}
+    for r in read_csv(dataset / "extracted_field.csv"):
+        d = docs[r["document_id"]]
+        ds[(d["case_id"], d["file_name"], r["name"])] = (
+            r["value"], f'{float(r["confidence"]):.2f}', r["corrected_by_analyst"])
+
+    rows = []
+    for r in conn.execute(
+            "SELECT d.case_id, d.file_name, f.name, f.value, f.confidence,"
+            " f.corrected_by_analyst FROM extracted_field f JOIN document d USING (document_id)"
+            " ORDER BY f.field_id"):
+        key = (r["case_id"], r["file_name"], r["name"])
+        got = (r["value"] or "", f'{float(r["confidence"]):.2f}',
+               "true" if r["corrected_by_analyst"] else "false")
+        want = ds.get(key)
+        rows.append((r["case_id"], f"{r['file_name']} / {r['name']}",
+                     " | ".join(want) if want else "(no dataset row)",
+                     " | ".join(got), "YES" if want == got else "NO"))
     return rows
 
 
@@ -149,12 +182,13 @@ def main() -> None:
     ok, total = score(rows)
     print(f"\n{ok}/{total} case field checks match")
 
-    docs = compare_documents(conn, args.dataset)
-    dok, dtotal = score(docs)
-    print(f"{dok}/{dtotal} document quality checks match")
-    for r in docs:
-        if r[4] == "NO":
-            print(f"  MISMATCH {r[0]} {r[1]}\n    dataset: {r[2]}\n    ours   : {r[3]}")
+    for label, fn in (("document quality", compare_documents), ("extracted field", compare_fields)):
+        rows = fn(conn, args.dataset)
+        ok, total = score(rows)
+        print(f"{ok}/{total} {label} checks match")
+        for r in rows:
+            if r[4] == "NO":
+                print(f"  MISMATCH {r[0]} {r[1]}\n    dataset: {r[2]}\n    ours   : {r[3]}")
 
 
 if __name__ == "__main__":

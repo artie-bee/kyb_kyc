@@ -81,7 +81,22 @@ ASSUMPTIONS = [
     ("D4", "page_count / expected_page_count are absent from the dataset, so the deterministic "
            "missing-pages rule never fires here; DOC-0038's missing_pages flag arrives as a "
            "scripted verdict instead."),
+    ("D5", "analyst_releases[] is parsed from the audit_event rows with action "
+           "document_released_after_review. Mock mode replays them so a case held at Step 3 "
+           "moves on exactly as the dataset says an analyst moved it."),
+    # --- extraction, for Step 4 ------------------------------------------------
+    ("E1", "scripted_fields carries extracted_field.csv (name, value, confidence, "
+           "source_page) through to the mock extractor, so the low-confidence path runs on "
+           "the same numbers the dataset scripted. A live extractor ignores it."),
+    ("E2", "extracted_field rows whose corrected_by_analyst is true are replayed as scripted "
+           "analyst corrections (field_corrections[]), not as the value OCR read - otherwise "
+           "the correction would look like a confident first reading."),
 ]
+
+# "DOC-0038 (ownership_chart) released by a.name; decision accept; reason: ..."
+RELEASE_RE = re.compile(
+    r"^(?P<doc>DOC-\d+).*?released by (?P<analyst>\S+); "
+    r"decision (?P<decision>\w+); reason: (?P<reason>.+)$", re.S)
 
 # Rule-of-thumb monthly spend threshold, in the rule's own currency terms (F1).
 SPEND_THRESHOLD = 50000
@@ -152,7 +167,8 @@ def derive_flags(applicant: dict, people: list[dict], ubos: list[dict]) -> dict:
     return flags
 
 
-def build_documents(case_docs: list[dict], doc_dates: dict[str, str]) -> list[dict]:
+def build_documents(case_docs: list[dict], doc_dates: dict[str, str],
+                    fields_by_doc: dict[str, list[dict]]) -> list[dict]:
     """D1-D4: what the customer uploaded, as Step 3 receives it."""
     return [
         {"document_type": d["document_type"],
@@ -162,13 +178,43 @@ def build_documents(case_docs: list[dict], doc_dates: dict[str, str]) -> list[di
          "expiry_date": d["expiry_date"] or None,
          "document_date": doc_dates.get(d["document_id"]),          # D2
          "issue_country": d["issue_country"] or None,
-         "scripted_quality_flags": [f for f in d["quality_flags"].split("|") if f]}   # D3
+         "scripted_quality_flags": [f for f in d["quality_flags"].split("|") if f],   # D3
+         "scripted_fields": fields_by_doc.get(d["document_id"], [])}                  # E1
         for d in case_docs
     ]
 
 
+def build_corrections(case_fields: list[dict], docs: dict[str, str],
+                      correction_events: dict[str, dict]) -> list[dict]:
+    """E2: the analyst corrections the dataset scripted, matched to their audit row."""
+    out = []
+    for f in case_fields:
+        if f["corrected_by_analyst"].lower() != "true":
+            continue
+        event = correction_events.get(f["field_id"])
+        out.append({"file_name": docs[f["document_id"]], "name": f["name"],
+                    "value": f["value"],
+                    "analyst_id": event["actor_id"] if event else "analyst.unknown",
+                    "reason": event["payload_summary"] if event
+                              else "scripted correction with no audit row in the dataset"})
+    return out
+
+
+def build_releases(events: list[dict], file_names: dict[str, str]) -> list[dict]:
+    """D5: the analyst releases the dataset scripted for this case."""
+    out = []
+    for e in events:
+        m = RELEASE_RE.match(e["payload_summary"].strip())
+        if not m:
+            raise ValueError("cannot parse release audit row: " + e["payload_summary"][:80])
+        out.append({"file_name": file_names[m["doc"]], "analyst_id": m["analyst"],
+                    "decision": m["decision"], "reason": m["reason"].strip()})
+    return out
+
+
 def build_application(case: dict, applicant: dict, people: list[dict], ubos: list[dict],
-                      documents: list[dict]) -> dict:
+                      documents: list[dict], releases: list[dict],
+                      corrections: list[dict]) -> dict:
     return {
         "application_id": f"{case['source_channel'].upper()}-{case['case_id']}",
         "source_channel": case["source_channel"],
@@ -203,6 +249,8 @@ def build_application(case: dict, applicant: dict, people: list[dict], ubos: lis
         ],
         "flags": derive_flags(applicant, people, ubos),         # F1-F7
         "documents": documents,                                 # D1-D4
+        "analyst_releases": releases,                           # D5
+        "field_corrections": corrections,                       # E2
     }
 
 
@@ -223,9 +271,28 @@ def main() -> None:
     docs_by_case = defaultdict(list)
     for r in read_csv(args.dataset / "document.csv"):
         docs_by_case[r["case_id"]].append(r)
+    all_fields = read_csv(args.dataset / "extracted_field.csv")
     doc_dates = {r["document_id"]: r["value"]
-                 for r in read_csv(args.dataset / "extracted_field.csv")
-                 if r["name"] == "document_date"}
+                 for r in all_fields if r["name"] == "document_date"}
+    fields_by_doc = defaultdict(list)
+    for r in all_fields:
+        fields_by_doc[r["document_id"]].append(r)
+    file_names = {r["document_id"]: r["file_name"]
+                  for case_rows in docs_by_case.values() for r in case_rows}
+    releases_by_case = defaultdict(list)
+    correction_events = {}
+    for r in read_csv(args.dataset / "audit_event.csv"):
+        if r["action"] == "document_released_after_review":
+            releases_by_case[r["case_id"]].append(r)
+        elif r["action"] == "extracted_field_corrected":
+            m = re.search(r"(FLD-\d+)", r["payload_summary"])
+            if m:
+                correction_events[m.group(1)] = r
+    doc_case = {r["document_id"]: r["case_id"]
+                for rows in docs_by_case.values() for r in rows}
+    fields_by_case = defaultdict(list)
+    for r in all_fields:
+        fields_by_case[doc_case[r["document_id"]]].append(r)
 
     args.out.mkdir(parents=True, exist_ok=True)
     for stale in args.out.glob("*.json"):
@@ -235,7 +302,10 @@ def main() -> None:
         aid = case["applicant_id"]
         app = build_application(
             case, applicants[aid], people_by_applicant[aid], ubos_by_applicant[aid],
-            build_documents(docs_by_case[case["case_id"]], doc_dates))
+            build_documents(docs_by_case[case["case_id"]], doc_dates, fields_by_doc),
+            build_releases(releases_by_case[case["case_id"]], file_names),
+            build_corrections(fields_by_case[case["case_id"]], file_names,
+                              correction_events))
         out = args.out / f"case_{n:02d}_{case['case_id']}.json"
         out.write_text(json.dumps(app, indent=2, ensure_ascii=False), encoding="utf-8")
         own = app["ownership"]
@@ -244,7 +314,8 @@ def main() -> None:
               f" layers={own['ownership_layers']}"
               f" corp={str(own['has_corporate_shareholder']):<5}"
               f" people={len(app['individuals'])} ubos={len(app['ubos'])}"
-              f" docs={len(app['documents'])}")
+              f" docs={len(app['documents'])}"
+              f" releases={len(app['analyst_releases'])}")
 
     print(f"\nWrote {len(cases)} applications to {args.out}")
     print("\nAssumptions made (fields the application format needs but the dataset lacks):")

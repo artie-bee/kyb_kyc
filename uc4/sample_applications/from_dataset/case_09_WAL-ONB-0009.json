@@ -61,7 +61,27 @@
       "expiry_date": null,
       "document_date": null,
       "issue_country": "EE",
-      "scripted_quality_flags": []
+      "scripted_quality_flags": [],
+      "scripted_fields": [
+        {
+          "field_id": "FLD-0152",
+          "document_id": "DOC-0096",
+          "name": "company_name",
+          "value": "Parnu Kohviubade OU",
+          "confidence": "0.96",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        },
+        {
+          "field_id": "FLD-0153",
+          "document_id": "DOC-0096",
+          "name": "registration_number",
+          "value": "EE-90018321",
+          "confidence": "0.95",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        }
+      ]
     },
     {
       "document_type": "registry_extract",
@@ -71,7 +91,27 @@
       "expiry_date": null,
       "document_date": null,
       "issue_country": "EE",
-      "scripted_quality_flags": []
+      "scripted_quality_flags": [],
+      "scripted_fields": [
+        {
+          "field_id": "FLD-0154",
+          "document_id": "DOC-0097",
+          "name": "registered_address",
+          "value": "Ringi 42, 80010 Parnu, Estonia",
+          "confidence": "0.94",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        },
+        {
+          "field_id": "FLD-0155",
+          "document_id": "DOC-0097",
+          "name": "entity_status",
+          "value": "active",
+          "confidence": "0.96",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        }
+      ]
     },
     {
       "document_type": "tax_registration_certificate",
@@ -81,7 +121,18 @@
       "expiry_date": null,
       "document_date": null,
       "issue_country": null,
-      "scripted_quality_flags": []
+      "scripted_quality_flags": [],
+      "scripted_fields": [
+        {
+          "field_id": "FLD-0156",
+          "document_id": "DOC-0098",
+          "name": "tax_number",
+          "value": "EE-TAX-90018321",
+          "confidence": "0.93",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        }
+      ]
     },
     {
       "document_type": "director_register",
@@ -91,7 +142,18 @@
       "expiry_date": null,
       "document_date": null,
       "issue_country": null,
-      "scripted_quality_flags": []
+      "scripted_quality_flags": [],
+      "scripted_fields": [
+        {
+          "field_id": "FLD-0157",
+          "document_id": "DOC-0099",
+          "name": "director_name",
+          "value": "Katrin Ilves",
+          "confidence": "0.95",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        }
+      ]
     },
     {
       "document_type": "authorised_signatory_list",
@@ -101,7 +163,18 @@
       "expiry_date": null,
       "document_date": null,
       "issue_country": null,
-      "scripted_quality_flags": []
+      "scripted_quality_flags": [],
+      "scripted_fields": [
+        {
+          "field_id": "FLD-0158",
+          "document_id": "DOC-0100",
+          "name": "signatory_name",
+          "value": "Katrin Ilves",
+          "confidence": "0.93",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        }
+      ]
     },
     {
       "document_type": "ubo_declaration",
@@ -111,7 +184,27 @@
       "expiry_date": null,
       "document_date": null,
       "issue_country": null,
-      "scripted_quality_flags": []
+      "scripted_quality_flags": [],
+      "scripted_fields": [
+        {
+          "field_id": "FLD-0159",
+          "document_id": "DOC-0101",
+          "name": "ubo_name",
+          "value": "Mihkel Roosaar",
+          "confidence": "0.94",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        },
+        {
+          "field_id": "FLD-0160",
+          "document_id": "DOC-0101",
+          "name": "ownership_percentage",
+          "value": "70.0",
+          "confidence": "0.93",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        }
+      ]
     },
     {
       "document_type": "id_document",
@@ -121,7 +214,18 @@
       "expiry_date": "2030-09-12",
       "document_date": null,
       "issue_country": "EE",
-      "scripted_quality_flags": []
+      "scripted_quality_flags": [],
+      "scripted_fields": [
+        {
+          "field_id": "FLD-0161",
+          "document_id": "DOC-0102",
+          "name": "full_name",
+          "value": "Katrin Ilves",
+          "confidence": "0.96",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        }
+      ]
     },
     {
       "document_type": "id_document",
@@ -131,7 +235,18 @@
       "expiry_date": "2029-11-03",
       "document_date": null,
       "issue_country": "EE",
-      "scripted_quality_flags": []
+      "scripted_quality_flags": [],
+      "scripted_fields": [
+        {
+          "field_id": "FLD-0162",
+          "document_id": "DOC-0103",
+          "name": "full_name",
+          "value": "Mihkel Roosaar",
+          "confidence": "0.95",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        }
+      ]
     },
     {
       "document_type": "proof_of_address",
@@ -141,7 +256,18 @@
       "expiry_date": null,
       "document_date": "2026-09-05",
       "issue_country": "EE",
-      "scripted_quality_flags": []
+      "scripted_quality_flags": [],
+      "scripted_fields": [
+        {
+          "field_id": "FLD-0163",
+          "document_id": "DOC-0104",
+          "name": "document_date",
+          "value": "2026-09-05",
+          "confidence": "0.93",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        }
+      ]
     },
     {
       "document_type": "proof_of_address",
@@ -151,7 +277,18 @@
       "expiry_date": null,
       "document_date": "2026-08-29",
       "issue_country": "EE",
-      "scripted_quality_flags": []
+      "scripted_quality_flags": [],
+      "scripted_fields": [
+        {
+          "field_id": "FLD-0164",
+          "document_id": "DOC-0105",
+          "name": "document_date",
+          "value": "2026-08-29",
+          "confidence": "0.92",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        }
+      ]
     },
     {
       "document_type": "source_of_funds_declaration",
@@ -161,7 +298,18 @@
       "expiry_date": null,
       "document_date": null,
       "issue_country": null,
-      "scripted_quality_flags": []
+      "scripted_quality_flags": [],
+      "scripted_fields": [
+        {
+          "field_id": "FLD-0165",
+          "document_id": "DOC-0106",
+          "name": "declared_source",
+          "value": "Wholesale coffee sales to cafe customers",
+          "confidence": "0.9",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        }
+      ]
     },
     {
       "document_type": "business_activity_description",
@@ -171,7 +319,20 @@
       "expiry_date": null,
       "document_date": null,
       "issue_country": null,
-      "scripted_quality_flags": []
+      "scripted_quality_flags": [],
+      "scripted_fields": [
+        {
+          "field_id": "FLD-0166",
+          "document_id": "DOC-0107",
+          "name": "declared_industry",
+          "value": "Coffee roasting and wholesale",
+          "confidence": "0.92",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        }
+      ]
     }
-  ]
+  ],
+  "analyst_releases": [],
+  "field_corrections": []
 }

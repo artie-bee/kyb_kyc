@@ -70,7 +70,27 @@
       "expiry_date": null,
       "document_date": null,
       "issue_country": "EE",
-      "scripted_quality_flags": []
+      "scripted_quality_flags": [],
+      "scripted_fields": [
+        {
+          "field_id": "FLD-0105",
+          "document_id": "DOC-0063",
+          "name": "company_name",
+          "value": "Saarvik Metall OU",
+          "confidence": "0.95",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        },
+        {
+          "field_id": "FLD-0106",
+          "document_id": "DOC-0063",
+          "name": "registration_number",
+          "value": "EE-90014782",
+          "confidence": "0.94",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        }
+      ]
     },
     {
       "document_type": "registry_extract",
@@ -80,7 +100,27 @@
       "expiry_date": null,
       "document_date": null,
       "issue_country": "EE",
-      "scripted_quality_flags": []
+      "scripted_quality_flags": [],
+      "scripted_fields": [
+        {
+          "field_id": "FLD-0107",
+          "document_id": "DOC-0064",
+          "name": "registered_address",
+          "value": "Tehnika 27, 76505 Saue, Estonia",
+          "confidence": "0.93",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        },
+        {
+          "field_id": "FLD-0108",
+          "document_id": "DOC-0064",
+          "name": "entity_status",
+          "value": "active",
+          "confidence": "0.95",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        }
+      ]
     },
     {
       "document_type": "tax_registration_certificate",
@@ -90,7 +130,18 @@
       "expiry_date": null,
       "document_date": null,
       "issue_country": null,
-      "scripted_quality_flags": []
+      "scripted_quality_flags": [],
+      "scripted_fields": [
+        {
+          "field_id": "FLD-0109",
+          "document_id": "DOC-0065",
+          "name": "tax_number",
+          "value": "EE-TAX-90014782",
+          "confidence": "0.92",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        }
+      ]
     },
     {
       "document_type": "director_register",
@@ -100,7 +151,27 @@
       "expiry_date": null,
       "document_date": null,
       "issue_country": null,
-      "scripted_quality_flags": []
+      "scripted_quality_flags": [],
+      "scripted_fields": [
+        {
+          "field_id": "FLD-0110",
+          "document_id": "DOC-0066",
+          "name": "director_name",
+          "value": "Rasmus Kalda",
+          "confidence": "0.94",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        },
+        {
+          "field_id": "FLD-0111",
+          "document_id": "DOC-0066",
+          "name": "director_name_2",
+          "value": "Triin Lepik",
+          "confidence": "0.92",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        }
+      ]
     },
     {
       "document_type": "authorised_signatory_list",
@@ -110,7 +181,18 @@
       "expiry_date": null,
       "document_date": null,
       "issue_country": null,
-      "scripted_quality_flags": []
+      "scripted_quality_flags": [],
+      "scripted_fields": [
+        {
+          "field_id": "FLD-0112",
+          "document_id": "DOC-0067",
+          "name": "signatory_name",
+          "value": "Rasmus Kalda",
+          "confidence": "0.91",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        }
+      ]
     },
     {
       "document_type": "ubo_declaration",
@@ -120,7 +202,27 @@
       "expiry_date": null,
       "document_date": null,
       "issue_country": null,
-      "scripted_quality_flags": []
+      "scripted_quality_flags": [],
+      "scripted_fields": [
+        {
+          "field_id": "FLD-0113",
+          "document_id": "DOC-0068",
+          "name": "ubo_name",
+          "value": "Oskar Magiste",
+          "confidence": "0.93",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        },
+        {
+          "field_id": "FLD-0114",
+          "document_id": "DOC-0068",
+          "name": "ownership_percentage",
+          "value": "80.0",
+          "confidence": "0.92",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        }
+      ]
     },
     {
       "document_type": "id_document",
@@ -130,7 +232,27 @@
       "expiry_date": "2030-04-02",
       "document_date": null,
       "issue_country": "EE",
-      "scripted_quality_flags": []
+      "scripted_quality_flags": [],
+      "scripted_fields": [
+        {
+          "field_id": "FLD-0115",
+          "document_id": "DOC-0069",
+          "name": "full_name",
+          "value": "Rasmus Kalda",
+          "confidence": "0.95",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        },
+        {
+          "field_id": "FLD-0116",
+          "document_id": "DOC-0069",
+          "name": "date_of_birth",
+          "value": "1977-05-21",
+          "confidence": "0.94",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        }
+      ]
     },
     {
       "document_type": "id_document",
@@ -140,7 +262,18 @@
       "expiry_date": "2029-08-14",
       "document_date": null,
       "issue_country": "EE",
-      "scripted_quality_flags": []
+      "scripted_quality_flags": [],
+      "scripted_fields": [
+        {
+          "field_id": "FLD-0117",
+          "document_id": "DOC-0070",
+          "name": "full_name",
+          "value": "Triin Lepik",
+          "confidence": "0.94",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        }
+      ]
     },
     {
       "document_type": "id_document",
@@ -150,7 +283,18 @@
       "expiry_date": "2031-06-25",
       "document_date": null,
       "issue_country": "EE",
-      "scripted_quality_flags": []
+      "scripted_quality_flags": [],
+      "scripted_fields": [
+        {
+          "field_id": "FLD-0118",
+          "document_id": "DOC-0071",
+          "name": "full_name",
+          "value": "Oskar Magiste",
+          "confidence": "0.93",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        }
+      ]
     },
     {
       "document_type": "proof_of_address",
@@ -160,7 +304,18 @@
       "expiry_date": null,
       "document_date": "2026-09-02",
       "issue_country": "EE",
-      "scripted_quality_flags": []
+      "scripted_quality_flags": [],
+      "scripted_fields": [
+        {
+          "field_id": "FLD-0119",
+          "document_id": "DOC-0072",
+          "name": "document_date",
+          "value": "2026-09-02",
+          "confidence": "0.92",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        }
+      ]
     },
     {
       "document_type": "proof_of_address",
@@ -170,7 +325,18 @@
       "expiry_date": null,
       "document_date": "2026-08-21",
       "issue_country": "EE",
-      "scripted_quality_flags": []
+      "scripted_quality_flags": [],
+      "scripted_fields": [
+        {
+          "field_id": "FLD-0120",
+          "document_id": "DOC-0073",
+          "name": "document_date",
+          "value": "2026-08-21",
+          "confidence": "0.91",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        }
+      ]
     },
     {
       "document_type": "proof_of_address",
@@ -180,7 +346,18 @@
       "expiry_date": null,
       "document_date": "2026-08-18",
       "issue_country": "EE",
-      "scripted_quality_flags": []
+      "scripted_quality_flags": [],
+      "scripted_fields": [
+        {
+          "field_id": "FLD-0121",
+          "document_id": "DOC-0074",
+          "name": "document_date",
+          "value": "2026-08-18",
+          "confidence": "0.9",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        }
+      ]
     },
     {
       "document_type": "source_of_funds_declaration",
@@ -190,7 +367,18 @@
       "expiry_date": null,
       "document_date": null,
       "issue_country": null,
-      "scripted_quality_flags": []
+      "scripted_quality_flags": [],
+      "scripted_fields": [
+        {
+          "field_id": "FLD-0122",
+          "document_id": "DOC-0075",
+          "name": "declared_source",
+          "value": "Subcontracting revenue from industrial clients",
+          "confidence": "0.88",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        }
+      ]
     },
     {
       "document_type": "business_activity_description",
@@ -200,7 +388,20 @@
       "expiry_date": null,
       "document_date": null,
       "issue_country": null,
-      "scripted_quality_flags": []
+      "scripted_quality_flags": [],
+      "scripted_fields": [
+        {
+          "field_id": "FLD-0123",
+          "document_id": "DOC-0076",
+          "name": "declared_industry",
+          "value": "Metal fabrication",
+          "confidence": "0.91",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        }
+      ]
     }
-  ]
+  ],
+  "analyst_releases": [],
+  "field_corrections": []
 }

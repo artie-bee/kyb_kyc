@@ -70,7 +70,36 @@
       "expiry_date": null,
       "document_date": null,
       "issue_country": "GB",
-      "scripted_quality_flags": []
+      "scripted_quality_flags": [],
+      "scripted_fields": [
+        {
+          "field_id": "FLD-0035",
+          "document_id": "DOC-0017",
+          "name": "company_name",
+          "value": "Calderwick Logistics Ltd",
+          "confidence": "0.96",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        },
+        {
+          "field_id": "FLD-0036",
+          "document_id": "DOC-0017",
+          "name": "registration_number",
+          "value": "UK-99014477",
+          "confidence": "0.95",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        },
+        {
+          "field_id": "FLD-0037",
+          "document_id": "DOC-0017",
+          "name": "registered_address",
+          "value": "14 Marlow Court, Leeds LS11 9RB, United Kingdom",
+          "confidence": "0.91",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        }
+      ]
     },
     {
       "document_type": "registry_extract",
@@ -80,7 +109,45 @@
       "expiry_date": null,
       "document_date": null,
       "issue_country": "GB",
-      "scripted_quality_flags": []
+      "scripted_quality_flags": [],
+      "scripted_fields": [
+        {
+          "field_id": "FLD-0038",
+          "document_id": "DOC-0018",
+          "name": "company_name",
+          "value": "Calderwick Logistics Ltd",
+          "confidence": "0.94",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        },
+        {
+          "field_id": "FLD-0039",
+          "document_id": "DOC-0018",
+          "name": "registration_number",
+          "value": "UK-99014477",
+          "confidence": "0.95",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        },
+        {
+          "field_id": "FLD-0040",
+          "document_id": "DOC-0018",
+          "name": "registered_address",
+          "value": "Unit 7 Calderwick Way, Leeds LS12 4QT, United Kingdom",
+          "confidence": "0.58",
+          "source_page": "1",
+          "corrected_by_analyst": "true"
+        },
+        {
+          "field_id": "FLD-0041",
+          "document_id": "DOC-0018",
+          "name": "entity_status",
+          "value": "active",
+          "confidence": "0.93",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        }
+      ]
     },
     {
       "document_type": "tax_registration_certificate",
@@ -90,7 +157,18 @@
       "expiry_date": null,
       "document_date": null,
       "issue_country": null,
-      "scripted_quality_flags": []
+      "scripted_quality_flags": [],
+      "scripted_fields": [
+        {
+          "field_id": "FLD-0042",
+          "document_id": "DOC-0019",
+          "name": "vat_number",
+          "value": "GB-VAT-771902845",
+          "confidence": "0.9",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        }
+      ]
     },
     {
       "document_type": "director_register",
@@ -100,7 +178,27 @@
       "expiry_date": null,
       "document_date": null,
       "issue_country": null,
-      "scripted_quality_flags": []
+      "scripted_quality_flags": [],
+      "scripted_fields": [
+        {
+          "field_id": "FLD-0043",
+          "document_id": "DOC-0020",
+          "name": "director_name",
+          "value": "Marcus Ellersby",
+          "confidence": "0.93",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        },
+        {
+          "field_id": "FLD-0044",
+          "document_id": "DOC-0020",
+          "name": "director_name_2",
+          "value": "Roisin Delamere",
+          "confidence": "0.92",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        }
+      ]
     },
     {
       "document_type": "authorised_signatory_list",
@@ -110,7 +208,18 @@
       "expiry_date": null,
       "document_date": null,
       "issue_country": null,
-      "scripted_quality_flags": []
+      "scripted_quality_flags": [],
+      "scripted_fields": [
+        {
+          "field_id": "FLD-0045",
+          "document_id": "DOC-0021",
+          "name": "signatory_name",
+          "value": "Marcus Ellersby",
+          "confidence": "0.91",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        }
+      ]
     },
     {
       "document_type": "ubo_declaration",
@@ -120,7 +229,36 @@
       "expiry_date": null,
       "document_date": null,
       "issue_country": null,
-      "scripted_quality_flags": []
+      "scripted_quality_flags": [],
+      "scripted_fields": [
+        {
+          "field_id": "FLD-0046",
+          "document_id": "DOC-0022",
+          "name": "ubo_name",
+          "value": "Torvald Kellingray",
+          "confidence": "0.93",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        },
+        {
+          "field_id": "FLD-0047",
+          "document_id": "DOC-0022",
+          "name": "ownership_percentage",
+          "value": "60.0",
+          "confidence": "0.92",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        },
+        {
+          "field_id": "FLD-0048",
+          "document_id": "DOC-0022",
+          "name": "control_basis",
+          "value": "direct shareholding",
+          "confidence": "0.89",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        }
+      ]
     },
     {
       "document_type": "id_document",
@@ -130,7 +268,27 @@
       "expiry_date": "2030-02-14",
       "document_date": null,
       "issue_country": "GB",
-      "scripted_quality_flags": []
+      "scripted_quality_flags": [],
+      "scripted_fields": [
+        {
+          "field_id": "FLD-0049",
+          "document_id": "DOC-0023",
+          "name": "full_name",
+          "value": "Marcus Ellersby",
+          "confidence": "0.96",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        },
+        {
+          "field_id": "FLD-0050",
+          "document_id": "DOC-0023",
+          "name": "expiry_date",
+          "value": "2030-02-14",
+          "confidence": "0.94",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        }
+      ]
     },
     {
       "document_type": "id_document",
@@ -140,7 +298,27 @@
       "expiry_date": "2032-07-06",
       "document_date": null,
       "issue_country": "IE",
-      "scripted_quality_flags": []
+      "scripted_quality_flags": [],
+      "scripted_fields": [
+        {
+          "field_id": "FLD-0051",
+          "document_id": "DOC-0024",
+          "name": "full_name",
+          "value": "Roisin Delamere",
+          "confidence": "0.95",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        },
+        {
+          "field_id": "FLD-0052",
+          "document_id": "DOC-0024",
+          "name": "expiry_date",
+          "value": "2032-07-06",
+          "confidence": "0.93",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        }
+      ]
     },
     {
       "document_type": "id_document",
@@ -150,7 +328,27 @@
       "expiry_date": "2028-11-30",
       "document_date": null,
       "issue_country": "GB",
-      "scripted_quality_flags": []
+      "scripted_quality_flags": [],
+      "scripted_fields": [
+        {
+          "field_id": "FLD-0053",
+          "document_id": "DOC-0025",
+          "name": "full_name",
+          "value": "Torvald Kellingray",
+          "confidence": "0.94",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        },
+        {
+          "field_id": "FLD-0054",
+          "document_id": "DOC-0025",
+          "name": "expiry_date",
+          "value": "2028-11-30",
+          "confidence": "0.92",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        }
+      ]
     },
     {
       "document_type": "proof_of_address",
@@ -160,7 +358,18 @@
       "expiry_date": null,
       "document_date": "2026-08-19",
       "issue_country": "GB",
-      "scripted_quality_flags": []
+      "scripted_quality_flags": [],
+      "scripted_fields": [
+        {
+          "field_id": "FLD-0055",
+          "document_id": "DOC-0026",
+          "name": "document_date",
+          "value": "2026-08-19",
+          "confidence": "0.92",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        }
+      ]
     },
     {
       "document_type": "proof_of_address",
@@ -170,7 +379,18 @@
       "expiry_date": null,
       "document_date": "2026-08-22",
       "issue_country": "GB",
-      "scripted_quality_flags": []
+      "scripted_quality_flags": [],
+      "scripted_fields": [
+        {
+          "field_id": "FLD-0056",
+          "document_id": "DOC-0027",
+          "name": "document_date",
+          "value": "2026-08-22",
+          "confidence": "0.91",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        }
+      ]
     },
     {
       "document_type": "proof_of_address",
@@ -180,7 +400,18 @@
       "expiry_date": null,
       "document_date": "2026-07-30",
       "issue_country": "GB",
-      "scripted_quality_flags": []
+      "scripted_quality_flags": [],
+      "scripted_fields": [
+        {
+          "field_id": "FLD-0057",
+          "document_id": "DOC-0028",
+          "name": "document_date",
+          "value": "2026-07-30",
+          "confidence": "0.9",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        }
+      ]
     },
     {
       "document_type": "source_of_funds_declaration",
@@ -190,7 +421,18 @@
       "expiry_date": null,
       "document_date": null,
       "issue_country": null,
-      "scripted_quality_flags": []
+      "scripted_quality_flags": [],
+      "scripted_fields": [
+        {
+          "field_id": "FLD-0058",
+          "document_id": "DOC-0029",
+          "name": "declared_source",
+          "value": "Haulage contract revenue from three national retail clients",
+          "confidence": "0.88",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        }
+      ]
     },
     {
       "document_type": "business_activity_description",
@@ -200,7 +442,18 @@
       "expiry_date": null,
       "document_date": null,
       "issue_country": null,
-      "scripted_quality_flags": []
+      "scripted_quality_flags": [],
+      "scripted_fields": [
+        {
+          "field_id": "FLD-0059",
+          "document_id": "DOC-0030",
+          "name": "declared_industry",
+          "value": "Road freight transport",
+          "confidence": "0.91",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        }
+      ]
     },
     {
       "document_type": "bank_statement",
@@ -210,7 +463,28 @@
       "expiry_date": null,
       "document_date": null,
       "issue_country": null,
-      "scripted_quality_flags": []
+      "scripted_quality_flags": [],
+      "scripted_fields": [
+        {
+          "field_id": "FLD-0060",
+          "document_id": "DOC-0031",
+          "name": "account_holder",
+          "value": "Calderwick Logistics Ltd",
+          "confidence": "0.89",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        }
+      ]
+    }
+  ],
+  "analyst_releases": [],
+  "field_corrections": [
+    {
+      "file_name": "registry_extract_calderwick.pdf",
+      "name": "registered_address",
+      "value": "Unit 7 Calderwick Way, Leeds LS12 4QT, United Kingdom",
+      "analyst_id": "analyst.r.toome",
+      "reason": "Analyst corrected low-confidence field FLD-0040 (registered_address) on document DOC-0018"
     }
   ]
 }

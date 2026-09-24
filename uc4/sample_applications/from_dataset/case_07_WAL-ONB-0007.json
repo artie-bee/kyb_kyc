@@ -61,7 +61,27 @@
       "expiry_date": null,
       "document_date": null,
       "issue_country": "GB",
-      "scripted_quality_flags": []
+      "scripted_quality_flags": [],
+      "scripted_fields": [
+        {
+          "field_id": "FLD-0124",
+          "document_id": "DOC-0077",
+          "name": "company_name",
+          "value": "Bramforth Aggregates Ltd",
+          "confidence": "0.95",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        },
+        {
+          "field_id": "FLD-0125",
+          "document_id": "DOC-0077",
+          "name": "registration_number",
+          "value": "UK-99021560",
+          "confidence": "0.94",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        }
+      ]
     },
     {
       "document_type": "registry_extract",
@@ -71,7 +91,27 @@
       "expiry_date": null,
       "document_date": null,
       "issue_country": "GB",
-      "scripted_quality_flags": []
+      "scripted_quality_flags": [],
+      "scripted_fields": [
+        {
+          "field_id": "FLD-0126",
+          "document_id": "DOC-0078",
+          "name": "registered_address",
+          "value": "Bramforth Yard, Pinfold Lane, Doncaster DN4 6RS, United Kingdom",
+          "confidence": "0.9",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        },
+        {
+          "field_id": "FLD-0127",
+          "document_id": "DOC-0078",
+          "name": "entity_status",
+          "value": "active",
+          "confidence": "0.93",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        }
+      ]
     },
     {
       "document_type": "tax_registration_certificate",
@@ -81,7 +121,18 @@
       "expiry_date": null,
       "document_date": null,
       "issue_country": null,
-      "scripted_quality_flags": []
+      "scripted_quality_flags": [],
+      "scripted_fields": [
+        {
+          "field_id": "FLD-0128",
+          "document_id": "DOC-0079",
+          "name": "vat_number",
+          "value": "GB-VAT-664120933",
+          "confidence": "0.89",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        }
+      ]
     },
     {
       "document_type": "director_register",
@@ -91,7 +142,27 @@
       "expiry_date": null,
       "document_date": null,
       "issue_country": null,
-      "scripted_quality_flags": []
+      "scripted_quality_flags": [],
+      "scripted_fields": [
+        {
+          "field_id": "FLD-0129",
+          "document_id": "DOC-0080",
+          "name": "director_name",
+          "value": "Nigel Braithwaite-Cole",
+          "confidence": "0.64",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        },
+        {
+          "field_id": "FLD-0130",
+          "document_id": "DOC-0080",
+          "name": "appointment_date",
+          "value": "2015-02-03",
+          "confidence": "0.81",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        }
+      ]
     },
     {
       "document_type": "authorised_signatory_list",
@@ -101,7 +172,18 @@
       "expiry_date": null,
       "document_date": null,
       "issue_country": null,
-      "scripted_quality_flags": []
+      "scripted_quality_flags": [],
+      "scripted_fields": [
+        {
+          "field_id": "FLD-0131",
+          "document_id": "DOC-0081",
+          "name": "signatory_name",
+          "value": "Nigel Braithwaite-Cole",
+          "confidence": "0.88",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        }
+      ]
     },
     {
       "document_type": "ubo_declaration",
@@ -111,7 +193,27 @@
       "expiry_date": null,
       "document_date": null,
       "issue_country": null,
-      "scripted_quality_flags": []
+      "scripted_quality_flags": [],
+      "scripted_fields": [
+        {
+          "field_id": "FLD-0132",
+          "document_id": "DOC-0082",
+          "name": "ubo_name",
+          "value": "Fenella Quist",
+          "confidence": "0.91",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        },
+        {
+          "field_id": "FLD-0133",
+          "document_id": "DOC-0082",
+          "name": "ownership_percentage",
+          "value": "45.0",
+          "confidence": "0.9",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        }
+      ]
     },
     {
       "document_type": "id_document",
@@ -121,7 +223,27 @@
       "expiry_date": "2030-10-08",
       "document_date": null,
       "issue_country": "GB",
-      "scripted_quality_flags": []
+      "scripted_quality_flags": [],
+      "scripted_fields": [
+        {
+          "field_id": "FLD-0134",
+          "document_id": "DOC-0083",
+          "name": "full_name",
+          "value": "Nigel Braithwaite-Cole",
+          "confidence": "0.93",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        },
+        {
+          "field_id": "FLD-0135",
+          "document_id": "DOC-0083",
+          "name": "date_of_birth",
+          "value": "1968-04-12",
+          "confidence": "0.92",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        }
+      ]
     },
     {
       "document_type": "id_document",
@@ -131,7 +253,18 @@
       "expiry_date": "2032-01-30",
       "document_date": null,
       "issue_country": "GB",
-      "scripted_quality_flags": []
+      "scripted_quality_flags": [],
+      "scripted_fields": [
+        {
+          "field_id": "FLD-0136",
+          "document_id": "DOC-0084",
+          "name": "full_name",
+          "value": "Fenella Quist",
+          "confidence": "0.94",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        }
+      ]
     },
     {
       "document_type": "proof_of_address",
@@ -141,7 +274,18 @@
       "expiry_date": null,
       "document_date": "2026-08-09",
       "issue_country": "GB",
-      "scripted_quality_flags": []
+      "scripted_quality_flags": [],
+      "scripted_fields": [
+        {
+          "field_id": "FLD-0137",
+          "document_id": "DOC-0085",
+          "name": "document_date",
+          "value": "2026-08-09",
+          "confidence": "0.9",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        }
+      ]
     },
     {
       "document_type": "proof_of_address",
@@ -151,7 +295,18 @@
       "expiry_date": null,
       "document_date": "2026-08-15",
       "issue_country": "GB",
-      "scripted_quality_flags": []
+      "scripted_quality_flags": [],
+      "scripted_fields": [
+        {
+          "field_id": "FLD-0138",
+          "document_id": "DOC-0086",
+          "name": "document_date",
+          "value": "2026-08-15",
+          "confidence": "0.91",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        }
+      ]
     },
     {
       "document_type": "source_of_funds_declaration",
@@ -161,7 +316,18 @@
       "expiry_date": null,
       "document_date": null,
       "issue_country": null,
-      "scripted_quality_flags": []
+      "scripted_quality_flags": [],
+      "scripted_fields": [
+        {
+          "field_id": "FLD-0139",
+          "document_id": "DOC-0087",
+          "name": "declared_source",
+          "value": "Aggregate supply contracts with regional construction firms",
+          "confidence": "0.87",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        }
+      ]
     },
     {
       "document_type": "business_activity_description",
@@ -171,7 +337,18 @@
       "expiry_date": null,
       "document_date": null,
       "issue_country": null,
-      "scripted_quality_flags": []
+      "scripted_quality_flags": [],
+      "scripted_fields": [
+        {
+          "field_id": "FLD-0140",
+          "document_id": "DOC-0088",
+          "name": "declared_industry",
+          "value": "Construction aggregates and haulage",
+          "confidence": "0.9",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        }
+      ]
     },
     {
       "document_type": "bank_statement",
@@ -181,7 +358,20 @@
       "expiry_date": null,
       "document_date": null,
       "issue_country": null,
-      "scripted_quality_flags": []
+      "scripted_quality_flags": [],
+      "scripted_fields": [
+        {
+          "field_id": "FLD-0141",
+          "document_id": "DOC-0089",
+          "name": "account_holder",
+          "value": "Bramforth Aggregates Ltd",
+          "confidence": "0.88",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        }
+      ]
     }
-  ]
+  ],
+  "analyst_releases": [],
+  "field_corrections": []
 }

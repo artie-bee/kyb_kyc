@@ -59,9 +59,15 @@ CREATE TABLE IF NOT EXISTS document (
     case_id TEXT NOT NULL REFERENCES onboarding_case(case_id),
     subject_individual_id TEXT REFERENCES individual(individual_id),
     document_type TEXT NOT NULL, file_name TEXT NOT NULL, upload_time TEXT,
-    quality_status TEXT NOT NULL DEFAULT 'pending', quality_flags TEXT,
+    -- quality_status is the live status and an analyst release can change it.
+    -- quality_status_at_screen is what Step 3 decided and is never rewritten, so
+    -- the screening verdict stays auditable after a human overrides it.
+    quality_status TEXT NOT NULL DEFAULT 'pending',
+    quality_status_at_screen TEXT,
+    quality_flags TEXT,
     expiry_date TEXT, document_date TEXT, issue_country TEXT,
-    resubmission_required INTEGER NOT NULL DEFAULT 0, resubmission_reasons TEXT
+    resubmission_required INTEGER NOT NULL DEFAULT 0, resubmission_reasons TEXT,
+    released_by TEXT, release_reason TEXT
 );
 -- Which uploaded file satisfies which checklist item (a rule asking for two
 -- director IDs produces two items, each with its own document).
@@ -69,6 +75,15 @@ CREATE TABLE IF NOT EXISTS checklist_item_document (
     item_id TEXT NOT NULL REFERENCES checklist_item(item_id),
     document_id TEXT NOT NULL REFERENCES document(document_id),
     PRIMARY KEY (item_id, document_id)
+);
+CREATE TABLE IF NOT EXISTS extracted_field (
+    field_id TEXT PRIMARY KEY,
+    document_id TEXT NOT NULL REFERENCES document(document_id),
+    name TEXT NOT NULL, value TEXT, confidence REAL NOT NULL, source_page INTEGER,
+    corrected_by_analyst INTEGER NOT NULL DEFAULT 0,
+    -- set when the value is unusable as read: missing, or below the confidence
+    -- floor. An analyst supplies the value; the orchestrator never guesses it.
+    needs_analyst_correction INTEGER NOT NULL DEFAULT 0
 );
 CREATE TABLE IF NOT EXISTS audit_event (
     event_id TEXT PRIMARY KEY,
@@ -92,6 +107,7 @@ ID_PREFIX = {
     "requirement_pack": ("pack_id", "PACK-"),
     "checklist_item": ("item_id", "CHK-"),
     "document": ("document_id", "DOC-"),
+    "extracted_field": ("field_id", "FLD-"),
     "audit_event": ("event_id", "EVT-"),
 }
 

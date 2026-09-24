@@ -28,6 +28,15 @@ class KnowledgeBase:
         self.jurisdiction_routing = {r["country_code"]: r for r in _read_csv("jurisdiction_routing.csv")}
         self.requirement_rules = _read_csv("requirement_rule.csv")
         self.document_quality_rules = _read_csv("document_quality_rules.csv")
+        self.extraction_fields = _read_csv("extraction_fields.csv")
+
+    def fields_for(self, document_type: str) -> list[dict]:
+        """Every field this document type should yield, required ones included."""
+        return [r for r in self.extraction_fields if r["document_type"] == document_type]
+
+    def required_fields_for(self, document_type: str) -> list[str]:
+        return [r["field_name"] for r in self.fields_for(document_type)
+                if r["required"].lower() == "true"]
 
     def quality_rules_for(self, document_type: str) -> list[dict]:
         """Rules that apply to a document type, most specific first.

@@ -45,7 +45,45 @@
       "expiry_date": null,
       "document_date": null,
       "issue_country": "EE",
-      "scripted_quality_flags": []
+      "scripted_quality_flags": [],
+      "scripted_fields": [
+        {
+          "field_id": "FLD-0001",
+          "document_id": "DOC-0001",
+          "name": "legal_name",
+          "value": "Kaari Mets",
+          "confidence": "0.97",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        },
+        {
+          "field_id": "FLD-0002",
+          "document_id": "DOC-0001",
+          "name": "registration_number",
+          "value": "EE-FIE-4410932",
+          "confidence": "0.96",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        },
+        {
+          "field_id": "FLD-0003",
+          "document_id": "DOC-0001",
+          "name": "registered_address",
+          "value": "Kastani 12-4, 51006 Tartu, Estonia",
+          "confidence": "0.93",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        },
+        {
+          "field_id": "FLD-0004",
+          "document_id": "DOC-0001",
+          "name": "entity_status",
+          "value": "active",
+          "confidence": "0.95",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        }
+      ]
     },
     {
       "document_type": "id_document",
@@ -55,7 +93,45 @@
       "expiry_date": "2031-04-18",
       "document_date": null,
       "issue_country": "EE",
-      "scripted_quality_flags": []
+      "scripted_quality_flags": [],
+      "scripted_fields": [
+        {
+          "field_id": "FLD-0005",
+          "document_id": "DOC-0002",
+          "name": "full_name",
+          "value": "Kaari Mets",
+          "confidence": "0.98",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        },
+        {
+          "field_id": "FLD-0006",
+          "document_id": "DOC-0002",
+          "name": "date_of_birth",
+          "value": "1991-03-14",
+          "confidence": "0.97",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        },
+        {
+          "field_id": "FLD-0007",
+          "document_id": "DOC-0002",
+          "name": "document_number",
+          "value": "EE-P-3391842",
+          "confidence": "0.94",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        },
+        {
+          "field_id": "FLD-0008",
+          "document_id": "DOC-0002",
+          "name": "expiry_date",
+          "value": "2031-04-18",
+          "confidence": "0.96",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        }
+      ]
     },
     {
       "document_type": "proof_of_address",
@@ -65,7 +141,45 @@
       "expiry_date": null,
       "document_date": "2026-08-12",
       "issue_country": "EE",
-      "scripted_quality_flags": []
+      "scripted_quality_flags": [],
+      "scripted_fields": [
+        {
+          "field_id": "FLD-0009",
+          "document_id": "DOC-0003",
+          "name": "full_name",
+          "value": "Kaari Mets",
+          "confidence": "0.95",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        },
+        {
+          "field_id": "FLD-0010",
+          "document_id": "DOC-0003",
+          "name": "address",
+          "value": "Kastani 12-4, 51006 Tartu, Estonia",
+          "confidence": "0.92",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        },
+        {
+          "field_id": "FLD-0011",
+          "document_id": "DOC-0003",
+          "name": "document_date",
+          "value": "2026-08-12",
+          "confidence": "0.94",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        },
+        {
+          "field_id": "FLD-0012",
+          "document_id": "DOC-0003",
+          "name": "issuer",
+          "value": "Tartu Energia AS",
+          "confidence": "0.91",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        }
+      ]
     },
     {
       "document_type": "liveness_selfie",
@@ -75,7 +189,8 @@
       "expiry_date": null,
       "document_date": null,
       "issue_country": null,
-      "scripted_quality_flags": []
+      "scripted_quality_flags": [],
+      "scripted_fields": []
     },
     {
       "document_type": "source_of_funds_declaration",
@@ -85,7 +200,27 @@
       "expiry_date": null,
       "document_date": null,
       "issue_country": null,
-      "scripted_quality_flags": []
+      "scripted_quality_flags": [],
+      "scripted_fields": [
+        {
+          "field_id": "FLD-0013",
+          "document_id": "DOC-0005",
+          "name": "declared_source",
+          "value": "Client invoices from retained design work",
+          "confidence": "0.89",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        },
+        {
+          "field_id": "FLD-0014",
+          "document_id": "DOC-0005",
+          "name": "expected_monthly_volume",
+          "value": "4000 EUR",
+          "confidence": "0.88",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        }
+      ]
     },
     {
       "document_type": "business_activity_description",
@@ -95,7 +230,29 @@
       "expiry_date": null,
       "document_date": null,
       "issue_country": null,
-      "scripted_quality_flags": []
+      "scripted_quality_flags": [],
+      "scripted_fields": [
+        {
+          "field_id": "FLD-0015",
+          "document_id": "DOC-0006",
+          "name": "declared_industry",
+          "value": "Graphic design services",
+          "confidence": "0.9",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        },
+        {
+          "field_id": "FLD-0016",
+          "document_id": "DOC-0006",
+          "name": "expected_card_usage",
+          "value": "Software subscriptions, print suppliers, travel",
+          "confidence": "0.87",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        }
+      ]
     }
-  ]
+  ],
+  "analyst_releases": [],
+  "field_corrections": []
 }

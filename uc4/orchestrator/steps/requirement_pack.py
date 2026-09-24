@@ -111,16 +111,8 @@ def run(conn, case_id: str, application: dict, kb: KnowledgeBase) -> PackResult:
     for p in problems:
         db.audit(conn, case_id, "system", ACTOR, "requirement_gap_flagged", p, kb.version)
 
-    # White-label partners get the KYB checklist but no further processing in this
-    # POC: the programme phase owns everything after intake.
-    if case["white_label_branch_flag"]:
-        db.update_case(conn, case_id, next_action_owner="system")
-        db.audit(conn, case_id, "system", ACTOR, "white_label_kyb_intake_only",
-                 f"{pack_id} built for the white-label KYB intake; no further steps run in this "
-                 f"phase", kb.version)
-        return PackResult(case_id, pack_id, counts["required"], counts["optional"],
-                          counts["conditional"], None, problems)
-
+    # White-label partners get the KYB checklist and their documents are screened,
+    # but the case stops after Step 3 - document_quality.route_case() ends it.
     # Customer now owes documents; the next step runs when files arrive.
     db.update_case(conn, case_id, next_action_owner="customer")
     return PackResult(case_id, pack_id, counts["required"], counts["optional"],
