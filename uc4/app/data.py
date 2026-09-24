@@ -114,69 +114,71 @@ def dashboard(conn) -> list[dict]:
 # already does, what Wallester changes, and the KB file that carries the change.
 # Every override lives in a CSV rather than in code, which is the whole claim -
 # reuse the agent, configure the policy.
+# The six components the brief names in Section 10.9. The "generic" and
+# "override" strings are the brief's own wording and are quoted verbatim - this
+# screen reports the split, it does not paraphrase it. "notes" is this POC's
+# own commentary on how the override is realised, kept separate so the two are
+# never confused.
+REUSE_CAPTION = ("This POC is a standalone build that represents the generic-agent / "
+                 "Wallester-variant split. It does not run on an existing agent.")
+
 REUSE_COMPONENTS = [
     {
         "component": "Document quality rules",
-        "reused": "Reading a document image and spotting the usual faults: out of "
-                  "focus, cropped, a screenshot of a screen, signs of alteration, an "
-                  "expiry date that has passed.",
-        "override": "Which fault does what. Wallester decides that an incomplete "
-                    "ownership chart goes to an analyst while an incomplete anything "
-                    "else goes back to the customer, that suspected tampering is never "
-                    "sent back as a resubmission, and which reason code each failure "
-                    "carries.",
+        "generic": "Reused",
+        "override": "Wallester thresholds and accepted document types",
+        "notes": "Which fault does what: an incomplete ownership chart goes to an "
+                 "analyst while an incomplete anything else goes back to the customer, "
+                 "suspected tampering is never sent back as a resubmission, and each "
+                 "failure carries a Wallester reason code.",
         "kb_files": ["document_quality_rules.csv"],
     },
     {
         "component": "OCR extraction",
-        "reused": "Transcribing printed values off a page and reporting how confident "
-                  "it is in each one.",
-        "override": "Which fields each document type must yield, which of them are "
-                    "required, and what each value is used for downstream. Wallester "
-                    "also sets the 0.70 confidence floor below which a value goes to a "
-                    "person rather than into a decision.",
+        "generic": "Reused",
+        "override": "Wallester field map and required fields",
+        "notes": "Which fields each document type must yield, which are required, and "
+                 "what each is used for downstream, plus the 0.70 confidence floor "
+                 "below which a value goes to a person rather than into a decision.",
         "kb_files": ["extraction_fields.csv"],
     },
     {
         "component": "Registry validation",
-        "reused": "Looking a company up on a national register and returning what the "
-                  "register holds.",
-        "override": "What the answers mean. Wallester decides that a dissolved or "
-                    "struck-off company blocks the case outright while an address "
-                    "mismatch is a finding that travels to the risk step, and that a "
-                    "provider which does not answer is retried once and then stops the "
-                    "case rather than counting as a pass.",
+        "generic": "Reused pattern",
+        "override": "Configurable registry providers, not Companies House-only",
+        "notes": "The provider is an interface, and the EE and UK registers are "
+                 "selected by jurisdiction. What the answers mean is Wallester's: a "
+                 "dissolved company blocks, an address mismatch is a finding, and a "
+                 "provider that does not answer is retried once and then stops the case.",
         "kb_files": ["registry_rules.csv", "ubo_policy.csv"],
     },
     {
         "component": "Risk scoring",
-        "reused": "Adding up weighted factors into a score and turning the score into "
-                  "a band.",
-        "override": "Every factor, every weight and every threshold, plus the hard "
-                    "floors that override the arithmetic - a confirmed sanctions match "
-                    "is critical whatever it scores. All weights are POC placeholders "
-                    "for Wallester to confirm; the brief does not state them.",
+        "generic": "Reused pattern",
+        "override": "Wallester-specific policy matrix",
+        "notes": "Every factor, weight and threshold, plus the hard floors that "
+                 "override the arithmetic. All weights are POC placeholders for "
+                 "Wallester to confirm; the brief does not state them.",
         "kb_files": ["risk_scoring_matrix.csv", "risk_bands.csv"],
     },
     {
         "component": "Customer communications",
-        "reused": "Filling an approved template and holding it for approval before it "
-                  "is sent.",
-        "override": "The approved library itself, which template fits which situation, "
-                    "and the two rules that matter most: a case with a restricted "
-                    "finding gets only the generic templates, and a confirmed sanctions "
-                    "match produces no automatic message at all - a compliance task "
-                    "instead.",
+        "generic": "Partially reused",
+        "override": "Wallester-approved templates required",
+        "notes": "Only the approved library may be used. A case with a restricted "
+                 "finding gets the generic templates alone, and a confirmed sanctions "
+                 "match produces no automatic message at all - a compliance task "
+                 "instead.",
         "kb_files": ["message_template.csv", "communication_rules.csv",
                      "communication_schedule.csv"],
     },
     {
         "component": "Audit summary",
-        "reused": "An append-only trail of who did what, when, and under which model "
-                  "or prompt version.",
-        "override": "Which actions every case must carry for each step it passed "
-                    "through, so a gap is detectable rather than merely unlikely, and "
-                    "the export bundle a reviewer receives.",
+        "generic": "Reused",
+        "override": "Wallester case fields and decision taxonomy",
+        "notes": "Which actions every case must carry for each step it passed through, "
+                 "who may take which decision at which band, and the export bundle a "
+                 "reviewer receives.",
         "kb_files": ["audit_log_standard.csv", "analyst_decision_taxonomy.csv"],
     },
 ]

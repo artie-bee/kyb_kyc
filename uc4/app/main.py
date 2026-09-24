@@ -454,18 +454,20 @@ def screen_customer(conn, case_id):
 
 def screen_reuse():
     st.header("Agent reuse (10.9)")
-    st.caption("What comes from the generic KYC/KYB agent, and what Wallester changes. "
-               "Every override is a CSV in the knowledge base rather than code, which "
-               "is the point: reuse the agent, configure the policy.")
+    st.info(data.REUSE_CAPTION)
+    st.caption("The two columns below are the brief's own wording. The notes under "
+               "each component are this POC's commentary on how the override is "
+               "realised, and are not from the brief.")
 
     table = data.reuse_table()
     st.write(f"Knowledge base in force: **{table['kb_version']}**")
 
     st.dataframe(
         [{"Component": row["component"],
-          "Reused from the generic agent": row["reused"],
-          "Wallester override": row["override"],
-          "Implemented by": ", ".join(f["file"] for f in row["files"])}
+          "Generic agent": row["generic"],
+          "Wallester variant override": row["override"],
+          "Implemented by": ", ".join(f"{f['file']} (v{f['version']})"
+                                      for f in row["files"])}
          for row in table["rows"]],
         width="stretch", hide_index=True)
 
@@ -473,8 +475,9 @@ def screen_reuse():
     for row in table["rows"]:
         with st.expander(f"{row['component']} - "
                          f"{', '.join(f['file'] for f in row['files'])}"):
-            st.write(f"**Reused:** {row['reused']}")
-            st.write(f"**Wallester override:** {row['override']}")
+            st.write(f"**Generic agent:** {row['generic']}")
+            st.write(f"**Wallester variant override:** {row['override']}")
+            st.caption(f"How this POC realises it: {row['notes']}")
             for f in row["files"]:
                 cols = st.columns([3, 1, 1])
                 cols[0].write(f"`{f['file']}`")

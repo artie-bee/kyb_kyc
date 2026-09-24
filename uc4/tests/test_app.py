@@ -170,13 +170,29 @@ def test_the_reuse_screen_names_a_real_kb_file_for_every_override():
     manifest = json.loads((ROOT / "kb" / "kb_manifest.json").read_text(encoding="utf-8"))
     assert table["kb_version"] == manifest["kb_version"]
 
-    components = [r["component"] for r in table["rows"]]
-    assert components == ["Document quality rules", "OCR extraction", "Registry validation",
-                          "Risk scoring", "Customer communications", "Audit summary"]
+    # The brief's own wording, quoted verbatim. A paraphrase here would be this
+    # POC quietly restating what the split is.
+    assert [(r["component"], r["generic"], r["override"]) for r in table["rows"]] == [
+        ("Document quality rules", "Reused",
+         "Wallester thresholds and accepted document types"),
+        ("OCR extraction", "Reused",
+         "Wallester field map and required fields"),
+        ("Registry validation", "Reused pattern",
+         "Configurable registry providers, not Companies House-only"),
+        ("Risk scoring", "Reused pattern",
+         "Wallester-specific policy matrix"),
+        ("Customer communications", "Partially reused",
+         "Wallester-approved templates required"),
+        ("Audit summary", "Reused",
+         "Wallester case fields and decision taxonomy"),
+    ]
+    assert data.REUSE_CAPTION == (
+        "This POC is a standalone build that represents the generic-agent / "
+        "Wallester-variant split. It does not run on an existing agent.")
 
     versions = {f"kb/{i['file']}": i["version"] for i in manifest["items"].values()}
     for row in table["rows"]:
-        assert row["reused"] and row["override"], f"{row['component']} says nothing"
+        assert row["generic"] and row["override"], f"{row['component']} says nothing"
         assert row["files"], f"{row['component']} names no KB file"
         for f in row["files"]:
             assert f["exists"], f"{row['component']} points at missing {f['file']}"
