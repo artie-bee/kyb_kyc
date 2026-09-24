@@ -62,9 +62,32 @@ tests/test_against_dataset.py 65 tests - full match against the 14-case dataset:
 tests/test_step8_end_to_end.py 17 tests - all 14 cases through Steps 1-8:
                               14/14 final statuses, 14/14 applicant communications
 tests/test_sample_documents.py 5 tests - printed values match extracted_field
-tests/test_live_mode.py       9 tests - live mode stays opt-in and never passes on failure
+tests/test_live_mode.py       10 tests - live mode stays opt-in and never passes on failure
+tests/test_app.py             18 tests - no SQL writes in app/, every screen renders,
+                              the customer view leaks nothing
 tests/test_schema_sync.py     6 tests - fails if the dataset or database gains a
                               column or enum value the schema file does not describe
+
+## Demo screens (brief Section 10)
+
+```
+pip install -r requirements.txt
+streamlit run app/main.py
+```
+
+Ten screens: operations dashboard, case detail (timeline, checklist, documents
+and extraction, people and ownership, checks, risk and evidence pack, decision,
+communications), a separate customer view, and the audit export.
+
+The sidebar carries a role switch (analyst / compliance), a mode badge showing
+**MOCK**, and a "Reset demo" button that rebuilds the database to the demo start
+state - every case run as far as the pipeline can take it alone, with the
+releases and decisions left to make on screen.
+
+**The app never writes to the database.** Every action calls the orchestrator's
+own function, so a refusal you see - "cannot approve while holds are open",
+"compliance role required" - is the real rule refusing. `tests/test_app.py`
+scans `app/` for SQL writes and fails if it finds any.
 
 ## Run
 # On Windows PowerShell the shell does not expand the glob, so expand it explicitly:

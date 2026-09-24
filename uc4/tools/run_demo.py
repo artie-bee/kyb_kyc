@@ -57,8 +57,17 @@ def scripted_silence(dataset: Path) -> set:
             if r["action"] == "case_closed_no_response"}
 
 
+# Human actions the dataset scripts, which -stop-before-human-actions withholds.
+SCRIPTED_HUMAN_ACTIONS = ("analyst_releases", "field_corrections", "field_acceptances")
+
+
 def run(conn, dataset: Path = DEFAULT_DATASET, app_dir: Path = DEFAULT_OUT,
-        clock: communication.Clock | None = None, verbose: bool = True) -> dict:
+        clock: communication.Clock | None = None, verbose: bool = True,
+        stop_before_human_actions: bool = False) -> dict:
+    """Run every case. With stop_before_human_actions, each one runs as far as
+    the pipeline can take it on its own and then stops, leaving the releases,
+    corrections and decisions for a person to make - which is what the demo app
+    is for."""
     kb = KnowledgeBase()
     # Holds are stamped with the real clock, so the demo clock starts there and
     # then runs forward; otherwise no time appears to pass at all.
@@ -69,6 +78,9 @@ def run(conn, dataset: Path = DEFAULT_DATASET, app_dir: Path = DEFAULT_OUT,
 
     for path in sorted(app_dir.glob("*.json")):
         application = json.loads(path.read_text(encoding="utf-8"))
+        if stop_before_human_actions:
+            application = dict(application,
+                               **{k: [] for k in SCRIPTED_HUMAN_ACTIONS})
         trace = process_application(conn, application, kb)
         case_id = trace["intake"]["case_id"]
         results[case_id] = {"trace": trace, "decision": None, "closed": False}
@@ -83,7 +95,9 @@ def run(conn, dataset: Path = DEFAULT_DATASET, app_dir: Path = DEFAULT_OUT,
         status_now = conn.execute("SELECT status, white_label_branch_flag FROM onboarding_case"
                                   " WHERE case_id = ?", (case_id,)).fetchone()
         situation = None
-        if status_now["white_label_branch_flag"]:
+        if stop_before_human_actions:
+            situation = None        # the presenter sends the messages
+        elif status_now["white_label_branch_flag"]:
             situation = "white_label_intake"
         elif customer_hold:
             situation = "resubmission"
@@ -93,7 +107,7 @@ def run(conn, dataset: Path = DEFAULT_DATASET, app_dir: Path = DEFAULT_OUT,
             communication.send_required_message(conn, case_id, situation, kb,
                                                 approver="ops.queue")
 
-        if customer_hold and case_id in silent:
+        if customer_hold and case_id in silent and not stop_before_human_actions:
             for _ in range(7):
                 communication.chase(conn, case_id, kb, clock)
                 clock.advance(5)
@@ -101,7 +115,7 @@ def run(conn, dataset: Path = DEFAULT_DATASET, app_dir: Path = DEFAULT_OUT,
 
         # ---- the scripted human decision ---------------------------------
         scripted = decisions.get(case_id)
-        if scripted and not results[case_id]["closed"]:
+        if scripted and not results[case_id]["closed"] and not stop_before_human_actions:
             assessment = conn.execute(
                 "SELECT recommended_action FROM risk_assessment WHERE case_id = ?",
                 (case_id,)).fetchone()
@@ -146,12 +160,15 @@ def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--db", type=Path, default=UC4 / "onboarding.db")
     ap.add_argument("--keep", action="store_true", help="keep an existing database")
+    ap.add_argument("--stop-before-human-actions", action="store_true",
+                    help="run each case up to its first human action and stop, so the "
+                         "releases and decisions can be made live in the demo app")
     args = ap.parse_args()
 
     if args.db.exists() and not args.keep:
         args.db.unlink()
     conn = db.connect(args.db)
-    run(conn)
+    run(conn, stop_before_human_actions=args.stop_before_human_actions)
 
     print()
     for label, sql in (("communications", "SELECT COUNT(*) FROM communication"),

@@ -245,8 +245,16 @@ ID_PREFIX = {
 }
 
 
-def connect(path: str | Path = "onboarding.db") -> sqlite3.Connection:
-    conn = sqlite3.connect(path)
+def connect(path: str | Path = "onboarding.db",
+            same_thread_only: bool = True) -> sqlite3.Connection:
+    """Open the store.
+
+    same_thread_only=False is for the Streamlit app, which reruns its script in
+    a new thread each time and would otherwise be refused the connection. Safe
+    there because Streamlit runs one script at a time per session; not something
+    to reach for elsewhere.
+    """
+    conn = sqlite3.connect(path, check_same_thread=same_thread_only)
     conn.row_factory = sqlite3.Row
     conn.execute("PRAGMA foreign_keys = ON")
     conn.executescript(SCHEMA)

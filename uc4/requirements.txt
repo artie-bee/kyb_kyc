@@ -1,0 +1,11 @@
+# Runtime
+streamlit>=1.36
+
+# Sample document generation (tools/make_sample_documents.py)
+pillow>=10.0
+
+# Live mode only - see README.md, "Live mode (pending)". Not needed for mock.
+anthropic>=0.40
+
+# Tests
+pytest>=8.0
