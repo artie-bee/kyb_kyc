@@ -31,14 +31,15 @@ SCHEMA = {
     "business_activity", "expected_usage", "vat_registered", "risk_segment"],
  "individual": ["individual_id", "applicant_id", "role", "full_name", "date_of_birth", "nationality",
     "residence_country", "id_document_id", "relationship_to_entity"],
- "ubo": ["ubo_id", "applicant_id", "individual_id", "ownership_percentage", "control_type", "ownership_path",
+ "ubo": ["ubo_id", "applicant_id", "individual_id", "ownership_percentage", "ownership_chain_percentages", "control_type", "ownership_path",
     "verification_status"],
  "document": ["document_id", "case_id", "subject_individual_id", "document_type", "file_name", "upload_time",
     "quality_status", "quality_flags", "expiry_date", "issue_country", "resubmission_required",
     "resubmission_reasons"],
- "registry_check": ["check_id", "case_id", "applicant_id", "provider_name", "company_status", "name_match",
-    "number_match", "address_match", "director_match", "ubo_supported_by_registry",
-    "high_risk_jurisdiction_or_industry", "confidence", "result"],
+ "registry_check": ["check_id", "case_id", "applicant_id", "provider_name", "company_status",
+    "registry_legal_name", "registry_number", "registry_address", "registry_directors",
+    "name_match", "number_match", "address_match", "director_match",
+    "ubo_supported_by_registry", "high_risk_jurisdiction_or_industry", "confidence", "result"],
  "identity_check": ["check_id", "case_id", "individual_id", "provider_name", "document_result",
     "liveness_result", "biometric_result", "address_result", "name_dob_match", "document_expired",
     "duplicate_individual_detected", "result"],
@@ -398,7 +399,9 @@ def build_case(spec):
 
     for u in spec.get("ubos", []):
         add("ubo", ubo_id=u["id"], applicant_id=app_id, individual_id=u["individual_id"],
-            ownership_percentage=u["pct"], control_type=u["control_type"],
+            ownership_percentage=u["pct"],
+            ownership_chain_percentages="|".join(
+                str(c) for c in u.get("chain", [u["pct"]])), control_type=u["control_type"],
             ownership_path=u["ownership_path"], verification_status=u["verification_status"])
 
     audit(case_id, "system", "portal-intake-service", "case_created",
@@ -526,8 +529,23 @@ def build_case(spec):
         t = clk.tick(5)
         cid = nid("REG")
         refmap["REG"] = cid
+        def _field(dtype, fname):
+            for d in docs:
+                if d["type"] == dtype:
+                    for f in d.get("fields", []):
+                        if f[0] == fname:
+                            return f[1]
+            return ""
+        directors = [v for v in (_field("director_register", "director_name"),
+                                 _field("director_register", "director_name_2")) if v]
+        if not directors:
+            directors = [i["full_name"] for i in inds if i["role"] in ("director", "sole_trader")]
         add("registry_check", check_id=cid, case_id=case_id, applicant_id=app_id,
             provider_name=reg["provider"], company_status=reg["company_status"],
+            registry_legal_name=reg.get("legal_name", a["legal_name"]),
+            registry_number=reg.get("number", a["registration_number"]),
+            registry_address=reg.get("address", _field("registry_extract", "registered_address")),
+            registry_directors="|".join(reg.get("directors", directors)),
             name_match=reg["name_match"], number_match=reg["number_match"],
             address_match=reg["address_match"], director_match=reg["director_match"],
             ubo_supported_by_registry=reg["ubo_supported"],
@@ -698,7 +716,7 @@ CASES.append({
     "relationship": "Registered sole trader and sole beneficial owner"}],
  "documents": [
    doc("registry_extract", "ee_fie_registry_extract_mets.pdf", issue_country="EE", fields=[
-     ("legal_name", "Kaari Mets", 0.97, 1, False),
+     ("company_name", "Kaari Mets", 0.97, 1, False),
      ("registration_number", "EE-FIE-4410932", 0.96, 1, False),
      ("registered_address", "Kastani 12-4, 51006 Tartu, Estonia", 0.93, 1, False),
      ("entity_status", "active", 0.95, 1, False)]),
@@ -794,6 +812,7 @@ CASES.append({
      ("registration_number", "UK-99010288", 0.95, 1, False),
      ("incorporation_date", "2019-04-11", 0.93, 1, False)]),
    doc("registry_extract", "registry_extract_northbridge.pdf", issue_country="GB", fields=[
+     ("company_name", "Northbridge Craft Supplies Ltd", 0.95, 1, False),
      ("registered_address", "Suite 3, 88 Fettlers Row, Sheffield S3 8PQ, United Kingdom", 0.91, 1,
       False),
      ("entity_status", "active", 0.94, 1, False),
@@ -944,6 +963,7 @@ CASES.append({
  "triggered_conditionals": [find_rule("sme_corporate", "UK", "tax_registration_certificate"),
                             find_rule("sme_corporate", "UK", "bank_statement")],
  "registry": {"provider": "MockRegistryHub UK", "company_status": "active", "name_match": "match",
+   "address": "Enterprise House, 14 Bell Lane, Leeds LS11 9PT, United Kingdom",
    "number_match": "match", "address_match": "mismatch", "director_match": "match",
    "ubo_supported": True, "high_risk": False, "confidence": 0.88, "result": "review"},
  "identity_checks": [idcheck("IND-0004"), idcheck("IND-0005"), idcheck("IND-0006")],
@@ -1036,7 +1056,7 @@ CASES.append({
    {"id": "UBO-0002", "individual_id": "IND-0008", "pct": 24.5,
     "control_type": "direct_shareholding", "ownership_path": "Vestmark Nordic OU",
     "verification_status": "verified"},
-   {"id": "UBO-0003", "individual_id": "IND-0009", "pct": 31.5,
+   {"id": "UBO-0003", "individual_id": "IND-0009", "pct": 31.5, "chain": [70, 45],
     "control_type": "indirect_shareholding",
     "ownership_path": "Harboe Holdings OU > Lindval Mid Holdings SA > Vestmark Nordic OU",
     "verification_status": "unverified"}],
@@ -1045,6 +1065,8 @@ CASES.append({
        fields=[("company_name", "Vestmark Nordic OU", 0.95, 1, False),
                ("registration_number", "EE-90012345", 0.94, 1, False)]),
    doc("registry_extract", "registry_extract_vestmark.pdf", issue_country="EE", fields=[
+     ("company_name", "Vestmark Nordic OU", 0.95, 1, False),
+     ("registration_number", "EE-90012345", 0.94, 1, False),
      ("registered_address", "Sadama 14, 10111 Tallinn, Estonia", 0.92, 1, False),
      ("entity_status", "active", 0.94, 1, False),
      ("registered_shareholder", "Lindval Mid Holdings SA", 0.86, 2, False)]),
@@ -1093,7 +1115,20 @@ CASES.append({
    {"actor_type": "analyst", "actor_id": "analyst.m.sild", "action": "document_released_after_review",
     "summary": "DOC-0038 (ownership_chart) released by analyst.m.sild; decision accept; reason: "
                "the missing annex lists dormant subsidiaries only and does not affect the "
-               "beneficial ownership chain, which is legible on the pages supplied"}],
+               "beneficial ownership chain, which is legible on the pages supplied"},
+   # Two values came off the page too faintly to act on unread. The analyst read
+   # the originals, found them correct as extracted and accepted them rather than
+   # retyping them - recorded so the low confidence is not silently ignored.
+   {"actor_type": "analyst", "actor_id": "analyst.m.sild",
+    "action": "extracted_field_accepted_as_read",
+    "summary": "indirect_ownership_path on ubo_declaration_vestmark.pdf accepted as read by "
+               "analyst.m.sild; reason: checked against the original declaration, the chain is "
+               "transcribed correctly despite the low OCR confidence"},
+   {"actor_type": "analyst", "actor_id": "analyst.m.sild",
+    "action": "extracted_field_accepted_as_read",
+    "summary": "intermediate_entity on ownership_chart_vestmark.pdf accepted as read by "
+               "analyst.m.sild; reason: the entity name matches the shareholder register and the "
+               "UBO declaration, so the faint scan is corroborated"}],
  "registry": {"provider": "MockRegistryHub EE", "company_status": "active", "name_match": "match",
    "number_match": "match", "address_match": "match", "director_match": "match",
    "ubo_supported": False, "high_risk": False, "confidence": 0.52, "result": "review"},
@@ -1195,6 +1230,8 @@ CASES.append({
        fields=[("company_name", "Quillon Marine Services Ltd", 0.96, 1, False),
                ("registration_number", "UK-99017733", 0.95, 1, False)]),
    doc("registry_extract", "registry_extract_quillon.pdf", issue_country="GB", fields=[
+     ("company_name", "Quillon Marine Services Ltd", 0.95, 1, False),
+     ("registration_number", "UK-99017733", 0.94, 1, False),
      ("registered_address", "Harbour House, 2 Dockside Walk, Aberdeen AB11 5QT, United Kingdom",
       0.92, 1, False),
      ("entity_status", "active", 0.94, 1, False)]),
@@ -1334,6 +1371,8 @@ CASES.append({
        fields=[("company_name", "Saarvik Metall OU", 0.95, 1, False),
                ("registration_number", "EE-90014782", 0.94, 1, False)]),
    doc("registry_extract", "registry_extract_saarvik.pdf", issue_country="EE", fields=[
+     ("company_name", "Saarvik Metall OU", 0.95, 1, False),
+     ("registration_number", "EE-90014782", 0.94, 1, False),
      ("registered_address", "Tehnika 27, 76505 Saue, Estonia", 0.93, 1, False),
      ("entity_status", "active", 0.95, 1, False)]),
    doc("tax_registration_certificate", "tax_registration_saarvik.pdf", fields=[
@@ -1458,6 +1497,8 @@ CASES.append({
        fields=[("company_name", "Bramforth Aggregates Ltd", 0.95, 1, False),
                ("registration_number", "UK-99021560", 0.94, 1, False)]),
    doc("registry_extract", "registry_extract_bramforth.pdf", issue_country="GB", fields=[
+     ("company_name", "Bramforth Aggregates Ltd", 0.95, 1, False),
+     ("registration_number", "UK-99021560", 0.94, 1, False),
      ("registered_address", "Bramforth Yard, Pinfold Lane, Doncaster DN4 6RS, United Kingdom",
       0.90, 1, False),
      ("entity_status", "active", 0.93, 1, False)]),
@@ -1490,6 +1531,12 @@ CASES.append({
  ],
  "triggered_conditionals": [find_rule("sme_corporate", "UK", "tax_registration_certificate"),
                             find_rule("sme_corporate", "UK", "bank_statement")],
+ "audit_after_quality": [
+   {"actor_type": "analyst", "actor_id": "compliance.d.ferreira",
+    "action": "extracted_field_accepted_as_read",
+    "summary": "director_name on director_register_bramforth_scan.pdf accepted as read by "
+               "compliance.d.ferreira; reason: the name matches the signatory list and the "
+               "director's passport, so the faint scan is corroborated"}],
  "registry": {"provider": "MockRegistryHub UK", "company_status": "active", "name_match": "match",
    "number_match": "match", "address_match": "match", "director_match": "match",
    "ubo_supported": True, "high_risk": False, "confidence": 0.90, "result": "pass"},
@@ -1585,22 +1632,12 @@ CASES.append({
     "nationality": "EE", "residence": "EE",
     "relationship": "Registered director and programme contact"}],
  "documents": [
-   doc("certificate_of_incorporation", "cert_incorporation_kestrel.pdf", issue_country="EE",
-       fields=[("company_name", "Kestrel Pay Partners OU", 0.95, 1, False),
-               ("registration_number", "EE-90016004", 0.94, 1, False)]),
-   doc("registry_extract", "registry_extract_kestrel.pdf", issue_country="EE", fields=[
-     ("registered_address", "Valukoja 8, 11415 Tallinn, Estonia", 0.92, 1, False),
-     ("entity_status", "active", 0.94, 1, False)]),
-   doc("director_register", "director_register_kestrel.pdf", fields=[
-     ("director_name", "Marek Tonisson", 0.93, 1, False)]),
-   doc("ubo_declaration", "ubo_declaration_kestrel.pdf", fields=[
-     ("ubo_name", "Marek Tonisson", 0.91, 1, False),
-     ("ownership_percentage", "100.0", 0.90, 1, False)]),
-   doc("programme_business_plan", "programme_business_plan_kestrel.pdf", fields=[
-     ("target_segment", "SME expense management in the Baltics", 0.86, 1, False),
-     ("expected_card_volume", "15000 cards in year one", 0.83, 2, False)]),
-   doc("website_or_platform_details", "platform_details_kestrel.pdf", fields=[
-     ("platform_url", "kestrelpay.example", 0.88, 1, False)]),
+   doc("certificate_of_incorporation", "cert_incorporation_kestrel.pdf", issue_country="EE"),
+   doc("registry_extract", "registry_extract_kestrel.pdf", issue_country="EE"),
+   doc("director_register", "director_register_kestrel.pdf"),
+   doc("ubo_declaration", "ubo_declaration_kestrel.pdf"),
+   doc("programme_business_plan", "programme_business_plan_kestrel.pdf"),
+   doc("website_or_platform_details", "platform_details_kestrel.pdf"),
  ],
  "triggered_conditionals": [],
  "audit_after_quality": [
@@ -1654,6 +1691,8 @@ CASES.append({
        fields=[("company_name", "Parnu Kohviubade OU", 0.96, 1, False),
                ("registration_number", "EE-90018321", 0.95, 1, False)]),
    doc("registry_extract", "registry_extract_parnu.pdf", issue_country="EE", fields=[
+     ("company_name", "Parnu Kohviubade OU", 0.95, 1, False),
+     ("registration_number", "EE-90018321", 0.94, 1, False),
      ("registered_address", "Ringi 42, 80010 Parnu, Estonia", 0.94, 1, False),
      ("entity_status", "active", 0.96, 1, False)]),
    doc("tax_registration_certificate", "tax_registration_parnu.pdf", fields=[
@@ -1753,6 +1792,7 @@ CASES.append({
  # Two-layer but fully transparent: one UK holding company, both tiers on the
  # register. The negative control for WAL-ONB-0004's unsupported indirect chain.
  "ubos": [{"id": "UBO-0008", "individual_id": "IND-0023", "pct": 70.0,
+   "chain": [100, 70],
    "control_type": "indirect_shareholding",
    "ownership_path": "Marchbank Holdings Ltd > Thornbury Analytics Ltd",
    "verification_status": "verified"}],
@@ -1761,6 +1801,8 @@ CASES.append({
        fields=[("company_name", "Thornbury Analytics Ltd", 0.96, 1, False),
                ("registration_number", "UK-99025819", 0.95, 1, False)]),
    doc("registry_extract", "registry_extract_thornbury.pdf", issue_country="GB", fields=[
+     ("company_name", "Thornbury Analytics Ltd", 0.95, 1, False),
+     ("registration_number", "UK-99025819", 0.94, 1, False),
      ("registered_address", "5 Wraysbury Mews, Bristol BS1 6TT, United Kingdom", 0.93, 1, False),
      ("entity_status", "active", 0.95, 1, False)]),
    doc("director_register", "director_register_thornbury.pdf", fields=[

@@ -1,9 +1,9 @@
-check_id,case_id,applicant_id,provider_name,company_status,name_match,number_match,address_match,director_match,ubo_supported_by_registry,high_risk_jurisdiction_or_industry,confidence,result
-REG-0001,WAL-ONB-0001,APP-0001,MockRegistryHub EE,active,match,match,match,match,true,false,0.96,pass
-REG-0002,WAL-ONB-0003,APP-0003,MockRegistryHub UK,active,match,match,mismatch,match,true,false,0.88,review
-REG-0003,WAL-ONB-0004,APP-0004,MockRegistryHub EE,active,match,match,match,match,false,false,0.52,review
-REG-0004,WAL-ONB-0005,APP-0005,MockRegistryHub UK,active,match,match,match,match,true,false,0.93,pass
-REG-0005,WAL-ONB-0006,APP-0006,MockRegistryHub EE,active,match,match,match,match,true,false,0.94,pass
-REG-0006,WAL-ONB-0007,APP-0007,MockRegistryHub UK,active,match,match,match,match,true,false,0.9,pass
-REG-0007,WAL-ONB-0009,APP-0009,MockRegistryHub EE,active,match,match,match,match,true,false,0.97,pass
-REG-0008,WAL-ONB-0010,APP-0010,MockRegistryHub UK,active,match,match,match,match,true,false,0.95,pass
+check_id,case_id,applicant_id,provider_name,company_status,registry_legal_name,registry_number,registry_address,registry_directors,name_match,number_match,address_match,director_match,ubo_supported_by_registry,high_risk_jurisdiction_or_industry,confidence,result
+REG-0001,WAL-ONB-0001,APP-0001,MockRegistryHub EE,active,Kaari Mets,EE-FIE-4410932,"Kastani 12-4, 51006 Tartu, Estonia",Kaari Mets,match,match,match,match,true,false,0.96,pass
+REG-0002,WAL-ONB-0003,APP-0003,MockRegistryHub UK,active,Calderwick Logistics Ltd,UK-99014477,"Enterprise House, 14 Bell Lane, Leeds LS11 9PT, United Kingdom",Marcus Ellersby|Roisin Delamere,match,match,mismatch,match,true,false,0.88,review
+REG-0003,WAL-ONB-0004,APP-0004,MockRegistryHub EE,active,Vestmark Nordic OU,EE-90012345,"Sadama 14, 10111 Tallinn, Estonia",Lembit Vaher|Anneli Sormus,match,match,match,match,false,false,0.52,review
+REG-0004,WAL-ONB-0005,APP-0005,MockRegistryHub UK,active,Quillon Marine Services Ltd,UK-99017733,"Harbour House, 2 Dockside Walk, Aberdeen AB11 5QT, United Kingdom",Gareth Pennyfold|Ines Carrasco-Bell,match,match,match,match,true,false,0.93,pass
+REG-0005,WAL-ONB-0006,APP-0006,MockRegistryHub EE,active,Saarvik Metall OU,EE-90014782,"Tehnika 27, 76505 Saue, Estonia",Rasmus Kalda|Triin Lepik,match,match,match,match,true,false,0.94,pass
+REG-0006,WAL-ONB-0007,APP-0007,MockRegistryHub UK,active,Bramforth Aggregates Ltd,UK-99021560,"Bramforth Yard, Pinfold Lane, Doncaster DN4 6RS, United Kingdom",Nigel Braithwaite-Cole,match,match,match,match,true,false,0.9,pass
+REG-0007,WAL-ONB-0009,APP-0009,MockRegistryHub EE,active,Parnu Kohviubade OU,EE-90018321,"Ringi 42, 80010 Parnu, Estonia",Katrin Ilves,match,match,match,match,true,false,0.97,pass
+REG-0008,WAL-ONB-0010,APP-0010,MockRegistryHub UK,active,Thornbury Analytics Ltd,UK-99025819,"5 Wraysbury Mews, Bristol BS1 6TT, United Kingdom",Imogen Skellow|Callum Pryde-Nash,match,match,match,match,true,false,0.95,pass

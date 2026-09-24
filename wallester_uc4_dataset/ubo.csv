@@ -1,9 +1,9 @@
-ubo_id,applicant_id,individual_id,ownership_percentage,control_type,ownership_path,verification_status
-UBO-0001,APP-0003,IND-0006,60.0,direct_shareholding,Calderwick Logistics Ltd,verified
-UBO-0002,APP-0004,IND-0008,24.5,direct_shareholding,Vestmark Nordic OU,verified
-UBO-0003,APP-0004,IND-0009,31.5,indirect_shareholding,Harboe Holdings OU > Lindval Mid Holdings SA > Vestmark Nordic OU,unverified
-UBO-0004,APP-0005,IND-0012,55.0,direct_shareholding,Quillon Marine Services Ltd,verified
-UBO-0005,APP-0006,IND-0015,80.0,direct_shareholding,Saarvik Metall OU,verified
-UBO-0006,APP-0007,IND-0017,45.0,direct_shareholding,Bramforth Aggregates Ltd,verified
-UBO-0007,APP-0009,IND-0020,70.0,direct_shareholding,Parnu Kohviubade OU,verified
-UBO-0008,APP-0010,IND-0023,70.0,indirect_shareholding,Marchbank Holdings Ltd > Thornbury Analytics Ltd,verified
+ubo_id,applicant_id,individual_id,ownership_percentage,ownership_chain_percentages,control_type,ownership_path,verification_status
+UBO-0001,APP-0003,IND-0006,60.0,60.0,direct_shareholding,Calderwick Logistics Ltd,verified
+UBO-0002,APP-0004,IND-0008,24.5,24.5,direct_shareholding,Vestmark Nordic OU,verified
+UBO-0003,APP-0004,IND-0009,31.5,70|45,indirect_shareholding,Harboe Holdings OU > Lindval Mid Holdings SA > Vestmark Nordic OU,unverified
+UBO-0004,APP-0005,IND-0012,55.0,55.0,direct_shareholding,Quillon Marine Services Ltd,verified
+UBO-0005,APP-0006,IND-0015,80.0,80.0,direct_shareholding,Saarvik Metall OU,verified
+UBO-0006,APP-0007,IND-0017,45.0,45.0,direct_shareholding,Bramforth Aggregates Ltd,verified
+UBO-0007,APP-0009,IND-0020,70.0,70.0,direct_shareholding,Parnu Kohviubade OU,verified
+UBO-0008,APP-0010,IND-0023,70.0,100|70,indirect_shareholding,Marchbank Holdings Ltd > Thornbury Analytics Ltd,verified

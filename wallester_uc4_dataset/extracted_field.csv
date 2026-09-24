@@ -1,5 +1,5 @@
 field_id,document_id,name,value,confidence,source_page,corrected_by_analyst
-FLD-0001,DOC-0001,legal_name,Kaari Mets,0.97,1,false
+FLD-0001,DOC-0001,company_name,Kaari Mets,0.97,1,false
 FLD-0002,DOC-0001,registration_number,EE-FIE-4410932,0.96,1,false
 FLD-0003,DOC-0001,registered_address,"Kastani 12-4, 51006 Tartu, Estonia",0.93,1,false
 FLD-0004,DOC-0001,entity_status,active,0.95,1,false
@@ -18,173 +18,176 @@ FLD-0016,DOC-0006,expected_card_usage,"Software subscriptions, print suppliers, 
 FLD-0017,DOC-0007,company_name,Northbridge Craft Supplies Ltd,0.96,1,false
 FLD-0018,DOC-0007,registration_number,UK-99010288,0.95,1,false
 FLD-0019,DOC-0007,incorporation_date,2019-04-11,0.93,1,false
-FLD-0020,DOC-0008,registered_address,"Suite 3, 88 Fettlers Row, Sheffield S3 8PQ, United Kingdom",0.91,1,false
-FLD-0021,DOC-0008,entity_status,active,0.94,1,false
-FLD-0022,DOC-0008,registration_number,UK-99010288,0.95,1,false
-FLD-0023,DOC-0009,director_name,Denton Halliwell,0.92,1,false
-FLD-0024,DOC-0009,director_name_2,Priya Nankivell,0.9,1,false
-FLD-0025,DOC-0010,signatory_name,Priya Nankivell,0.89,1,false
-FLD-0026,DOC-0012,full_name,Priya Nankivell,0.96,1,false
-FLD-0027,DOC-0012,date_of_birth,1985-11-19,0.95,1,false
-FLD-0028,DOC-0012,expiry_date,2029-09-30,0.94,1,false
-FLD-0029,DOC-0013,address,"12 Sowerby Lane, Sheffield S7 2LT, United Kingdom",0.9,1,false
-FLD-0030,DOC-0013,document_date,2026-07-28,0.92,1,false
-FLD-0031,DOC-0014,address,"4 Carrowbrook Court, Sheffield S11 9DD, United Kingdom",0.91,1,false
-FLD-0032,DOC-0014,document_date,2026-08-05,0.93,1,false
-FLD-0033,DOC-0015,declared_source,Trading revenue from wholesale supply contracts,0.88,1,false
-FLD-0034,DOC-0016,declared_industry,Wholesale of craft and hobby goods,0.9,1,false
-FLD-0035,DOC-0017,company_name,Calderwick Logistics Ltd,0.96,1,false
-FLD-0036,DOC-0017,registration_number,UK-99014477,0.95,1,false
-FLD-0037,DOC-0017,registered_address,"14 Marlow Court, Leeds LS11 9RB, United Kingdom",0.91,1,false
-FLD-0038,DOC-0018,company_name,Calderwick Logistics Ltd,0.94,1,false
-FLD-0039,DOC-0018,registration_number,UK-99014477,0.95,1,false
-FLD-0040,DOC-0018,registered_address,"Unit 7 Calderwick Way, Leeds LS12 4QT, United Kingdom",0.58,1,true
-FLD-0041,DOC-0018,entity_status,active,0.93,1,false
-FLD-0042,DOC-0019,vat_number,GB-VAT-771902845,0.9,1,false
-FLD-0043,DOC-0020,director_name,Marcus Ellersby,0.93,1,false
-FLD-0044,DOC-0020,director_name_2,Roisin Delamere,0.92,1,false
-FLD-0045,DOC-0021,signatory_name,Marcus Ellersby,0.91,1,false
-FLD-0046,DOC-0022,ubo_name,Torvald Kellingray,0.93,1,false
-FLD-0047,DOC-0022,ownership_percentage,60.0,0.92,1,false
-FLD-0048,DOC-0022,control_basis,direct shareholding,0.89,1,false
-FLD-0049,DOC-0023,full_name,Marcus Ellersby,0.96,1,false
-FLD-0050,DOC-0023,expiry_date,2030-02-14,0.94,1,false
-FLD-0051,DOC-0024,full_name,Roisin Delamere,0.95,1,false
-FLD-0052,DOC-0024,expiry_date,2032-07-06,0.93,1,false
-FLD-0053,DOC-0025,full_name,Torvald Kellingray,0.94,1,false
-FLD-0054,DOC-0025,expiry_date,2028-11-30,0.92,1,false
-FLD-0055,DOC-0026,document_date,2026-08-19,0.92,1,false
-FLD-0056,DOC-0027,document_date,2026-08-22,0.91,1,false
-FLD-0057,DOC-0028,document_date,2026-07-30,0.9,1,false
-FLD-0058,DOC-0029,declared_source,Haulage contract revenue from three national retail clients,0.88,1,false
-FLD-0059,DOC-0030,declared_industry,Road freight transport,0.91,1,false
-FLD-0060,DOC-0031,account_holder,Calderwick Logistics Ltd,0.89,1,false
-FLD-0061,DOC-0032,company_name,Vestmark Nordic OU,0.95,1,false
-FLD-0062,DOC-0032,registration_number,EE-90012345,0.94,1,false
-FLD-0063,DOC-0033,registered_address,"Sadama 14, 10111 Tallinn, Estonia",0.92,1,false
-FLD-0064,DOC-0033,entity_status,active,0.94,1,false
-FLD-0065,DOC-0033,registered_shareholder,Lindval Mid Holdings SA,0.86,2,false
-FLD-0066,DOC-0034,tax_number,EE-TAX-90012345,0.91,1,false
-FLD-0067,DOC-0035,director_name,Lembit Vaher,0.93,1,false
-FLD-0068,DOC-0035,director_name_2,Anneli Sormus,0.91,1,false
-FLD-0069,DOC-0036,signatory_name,Lembit Vaher,0.9,1,false
-FLD-0070,DOC-0037,ubo_name,Ruben Halvorsen,0.88,1,false
-FLD-0071,DOC-0037,ownership_percentage,31.5,0.74,1,false
-FLD-0072,DOC-0037,indirect_ownership_path,Harboe Holdings OU > Lindval Mid Holdings SA > Vestmark Nordic OU,0.41,2,false
-FLD-0073,DOC-0037,ubo_name_2,Anneli Sormus,0.87,1,false
-FLD-0074,DOC-0038,intermediate_entity,Lindval Mid Holdings SA,0.55,1,false
-FLD-0075,DOC-0039,shareholder_name,Lindval Mid Holdings SA,0.87,1,false
-FLD-0076,DOC-0039,shareholder_name_2,Anneli Sormus,0.89,1,false
-FLD-0077,DOC-0040,full_name,Lembit Vaher,0.95,1,false
-FLD-0078,DOC-0041,full_name,Anneli Sormus,0.94,1,false
-FLD-0079,DOC-0042,full_name,Ruben Halvorsen,0.93,1,false
-FLD-0080,DOC-0043,document_date,2026-08-25,0.92,1,false
-FLD-0081,DOC-0044,document_date,2026-08-27,0.91,1,false
-FLD-0082,DOC-0045,document_date,2026-07-15,0.88,1,false
-FLD-0083,DOC-0046,declared_source,Distribution margin on marine equipment imports,0.86,1,false
-FLD-0084,DOC-0047,declared_industry,Wholesale of marine equipment,0.9,1,false
-FLD-0085,DOC-0048,company_name,Quillon Marine Services Ltd,0.96,1,false
-FLD-0086,DOC-0048,registration_number,UK-99017733,0.95,1,false
-FLD-0087,DOC-0049,registered_address,"Harbour House, 2 Dockside Walk, Aberdeen AB11 5QT, United Kingdom",0.92,1,false
-FLD-0088,DOC-0049,entity_status,active,0.94,1,false
-FLD-0089,DOC-0050,vat_number,GB-VAT-882014577,0.91,1,false
-FLD-0090,DOC-0051,director_name,Gareth Pennyfold,0.93,1,false
-FLD-0091,DOC-0051,director_name_2,Ines Carrasco-Bell,0.92,1,false
-FLD-0092,DOC-0052,signatory_name,Gareth Pennyfold,0.9,1,false
-FLD-0093,DOC-0053,ubo_name,Aurelio Vantano,0.92,1,false
-FLD-0094,DOC-0053,ownership_percentage,55.0,0.91,1,false
-FLD-0095,DOC-0053,control_basis,direct shareholding,0.89,1,false
-FLD-0096,DOC-0054,full_name,Gareth Pennyfold,0.96,1,false
-FLD-0097,DOC-0055,full_name,Ines Carrasco-Bell,0.94,1,false
-FLD-0098,DOC-0056,full_name,Aurelio Vantano,0.93,1,false
-FLD-0099,DOC-0057,document_date,2026-08-30,0.92,1,false
-FLD-0100,DOC-0058,document_date,2026-08-28,0.91,1,false
-FLD-0101,DOC-0059,document_date,2026-08-11,0.87,1,false
-FLD-0102,DOC-0060,declared_source,Charter revenue under long-term vessel contracts,0.88,1,false
-FLD-0103,DOC-0061,declared_industry,Offshore marine chartering,0.9,1,false
-FLD-0104,DOC-0062,account_holder,Quillon Marine Services Ltd,0.89,1,false
-FLD-0105,DOC-0063,company_name,Saarvik Metall OU,0.95,1,false
-FLD-0106,DOC-0063,registration_number,EE-90014782,0.94,1,false
-FLD-0107,DOC-0064,registered_address,"Tehnika 27, 76505 Saue, Estonia",0.93,1,false
-FLD-0108,DOC-0064,entity_status,active,0.95,1,false
-FLD-0109,DOC-0065,tax_number,EE-TAX-90014782,0.92,1,false
-FLD-0110,DOC-0066,director_name,Rasmus Kalda,0.94,1,false
-FLD-0111,DOC-0066,director_name_2,Triin Lepik,0.92,1,false
-FLD-0112,DOC-0067,signatory_name,Rasmus Kalda,0.91,1,false
-FLD-0113,DOC-0068,ubo_name,Oskar Magiste,0.93,1,false
-FLD-0114,DOC-0068,ownership_percentage,80.0,0.92,1,false
-FLD-0115,DOC-0069,full_name,Rasmus Kalda,0.95,1,false
-FLD-0116,DOC-0069,date_of_birth,1977-05-21,0.94,1,false
-FLD-0117,DOC-0070,full_name,Triin Lepik,0.94,1,false
-FLD-0118,DOC-0071,full_name,Oskar Magiste,0.93,1,false
-FLD-0119,DOC-0072,document_date,2026-09-02,0.92,1,false
-FLD-0120,DOC-0073,document_date,2026-08-21,0.91,1,false
-FLD-0121,DOC-0074,document_date,2026-08-18,0.9,1,false
-FLD-0122,DOC-0075,declared_source,Subcontracting revenue from industrial clients,0.88,1,false
-FLD-0123,DOC-0076,declared_industry,Metal fabrication,0.91,1,false
-FLD-0124,DOC-0077,company_name,Bramforth Aggregates Ltd,0.95,1,false
-FLD-0125,DOC-0077,registration_number,UK-99021560,0.94,1,false
-FLD-0126,DOC-0078,registered_address,"Bramforth Yard, Pinfold Lane, Doncaster DN4 6RS, United Kingdom",0.9,1,false
-FLD-0127,DOC-0078,entity_status,active,0.93,1,false
-FLD-0128,DOC-0079,vat_number,GB-VAT-664120933,0.89,1,false
-FLD-0129,DOC-0080,director_name,Nigel Braithwaite-Cole,0.64,1,false
-FLD-0130,DOC-0080,appointment_date,2015-02-03,0.81,1,false
-FLD-0131,DOC-0081,signatory_name,Nigel Braithwaite-Cole,0.88,1,false
-FLD-0132,DOC-0082,ubo_name,Fenella Quist,0.91,1,false
-FLD-0133,DOC-0082,ownership_percentage,45.0,0.9,1,false
-FLD-0134,DOC-0083,full_name,Nigel Braithwaite-Cole,0.93,1,false
-FLD-0135,DOC-0083,date_of_birth,1968-04-12,0.92,1,false
-FLD-0136,DOC-0084,full_name,Fenella Quist,0.94,1,false
-FLD-0137,DOC-0085,document_date,2026-08-09,0.9,1,false
-FLD-0138,DOC-0086,document_date,2026-08-15,0.91,1,false
-FLD-0139,DOC-0087,declared_source,Aggregate supply contracts with regional construction firms,0.87,1,false
-FLD-0140,DOC-0088,declared_industry,Construction aggregates and haulage,0.9,1,false
-FLD-0141,DOC-0089,account_holder,Bramforth Aggregates Ltd,0.88,1,false
-FLD-0142,DOC-0090,company_name,Kestrel Pay Partners OU,0.95,1,false
-FLD-0143,DOC-0090,registration_number,EE-90016004,0.94,1,false
-FLD-0144,DOC-0091,registered_address,"Valukoja 8, 11415 Tallinn, Estonia",0.92,1,false
-FLD-0145,DOC-0091,entity_status,active,0.94,1,false
-FLD-0146,DOC-0092,director_name,Marek Tonisson,0.93,1,false
-FLD-0147,DOC-0093,ubo_name,Marek Tonisson,0.91,1,false
-FLD-0148,DOC-0093,ownership_percentage,100.0,0.9,1,false
-FLD-0149,DOC-0094,target_segment,SME expense management in the Baltics,0.86,1,false
-FLD-0150,DOC-0094,expected_card_volume,15000 cards in year one,0.83,2,false
-FLD-0151,DOC-0095,platform_url,kestrelpay.example,0.88,1,false
-FLD-0152,DOC-0096,company_name,Parnu Kohviubade OU,0.96,1,false
-FLD-0153,DOC-0096,registration_number,EE-90018321,0.95,1,false
-FLD-0154,DOC-0097,registered_address,"Ringi 42, 80010 Parnu, Estonia",0.94,1,false
-FLD-0155,DOC-0097,entity_status,active,0.96,1,false
-FLD-0156,DOC-0098,tax_number,EE-TAX-90018321,0.93,1,false
-FLD-0157,DOC-0099,director_name,Katrin Ilves,0.95,1,false
-FLD-0158,DOC-0100,signatory_name,Katrin Ilves,0.93,1,false
-FLD-0159,DOC-0101,ubo_name,Mihkel Roosaar,0.94,1,false
-FLD-0160,DOC-0101,ownership_percentage,70.0,0.93,1,false
-FLD-0161,DOC-0102,full_name,Katrin Ilves,0.96,1,false
-FLD-0162,DOC-0103,full_name,Mihkel Roosaar,0.95,1,false
-FLD-0163,DOC-0104,document_date,2026-09-05,0.93,1,false
-FLD-0164,DOC-0105,document_date,2026-08-29,0.92,1,false
-FLD-0165,DOC-0106,declared_source,Wholesale coffee sales to cafe customers,0.9,1,false
-FLD-0166,DOC-0107,declared_industry,Coffee roasting and wholesale,0.92,1,false
-FLD-0167,DOC-0108,company_name,Thornbury Analytics Ltd,0.96,1,false
-FLD-0168,DOC-0108,registration_number,UK-99025819,0.95,1,false
-FLD-0169,DOC-0109,registered_address,"5 Wraysbury Mews, Bristol BS1 6TT, United Kingdom",0.93,1,false
-FLD-0170,DOC-0109,entity_status,active,0.95,1,false
-FLD-0171,DOC-0110,director_name,Imogen Skellow,0.94,1,false
-FLD-0172,DOC-0110,director_name_2,Callum Pryde-Nash,0.93,1,false
-FLD-0173,DOC-0111,signatory_name,Imogen Skellow,0.92,1,false
-FLD-0174,DOC-0112,ubo_name,Helena Marchbank,0.94,1,false
-FLD-0175,DOC-0112,ownership_percentage,70.0,0.93,1,false
-FLD-0176,DOC-0112,control_basis,indirect shareholding through Marchbank Holdings Ltd,0.91,1,false
-FLD-0177,DOC-0113,chart_summary,"Two layers: Helena Marchbank 100 percent of Marchbank Holdings Ltd (UK-99026440), which holds 70 percent of Thornbury Analytics Ltd; two directors hold 15 percent each directly",0.9,1,false
-FLD-0178,DOC-0113,intermediate_entity,"Marchbank Holdings Ltd (UK-99026440), active on the UK register",0.92,1,false
-FLD-0179,DOC-0114,shareholder_name,Marchbank Holdings Ltd,0.92,1,false
-FLD-0180,DOC-0114,shareholder_name_2,Helena Marchbank (sole shareholder of Marchbank Holdings Ltd),0.91,1,false
-FLD-0181,DOC-0115,full_name,Imogen Skellow,0.96,1,false
-FLD-0182,DOC-0116,full_name,Callum Pryde-Nash,0.95,1,false
-FLD-0183,DOC-0117,full_name,Helena Marchbank,0.94,1,false
-FLD-0184,DOC-0118,document_date,2026-09-08,0.93,1,false
-FLD-0185,DOC-0119,document_date,2026-08-31,0.92,1,false
-FLD-0186,DOC-0120,document_date,2026-09-02,0.92,1,false
-FLD-0187,DOC-0121,declared_source,Consultancy fees under annual retainer contracts,0.9,1,false
-FLD-0188,DOC-0122,declared_industry,Management and data analytics consultancy,0.92,1,false
-FLD-0189,DOC-0123,declared_source_of_wealth,"Proceeds of the founder's earlier consultancy sale, held through Marchbank Holdings Ltd",0.91,1,false
+FLD-0020,DOC-0008,company_name,Northbridge Craft Supplies Ltd,0.95,1,false
+FLD-0021,DOC-0008,registered_address,"Suite 3, 88 Fettlers Row, Sheffield S3 8PQ, United Kingdom",0.91,1,false
+FLD-0022,DOC-0008,entity_status,active,0.94,1,false
+FLD-0023,DOC-0008,registration_number,UK-99010288,0.95,1,false
+FLD-0024,DOC-0009,director_name,Denton Halliwell,0.92,1,false
+FLD-0025,DOC-0009,director_name_2,Priya Nankivell,0.9,1,false
+FLD-0026,DOC-0010,signatory_name,Priya Nankivell,0.89,1,false
+FLD-0027,DOC-0012,full_name,Priya Nankivell,0.96,1,false
+FLD-0028,DOC-0012,date_of_birth,1985-11-19,0.95,1,false
+FLD-0029,DOC-0012,expiry_date,2029-09-30,0.94,1,false
+FLD-0030,DOC-0013,address,"12 Sowerby Lane, Sheffield S7 2LT, United Kingdom",0.9,1,false
+FLD-0031,DOC-0013,document_date,2026-07-28,0.92,1,false
+FLD-0032,DOC-0014,address,"4 Carrowbrook Court, Sheffield S11 9DD, United Kingdom",0.91,1,false
+FLD-0033,DOC-0014,document_date,2026-08-05,0.93,1,false
+FLD-0034,DOC-0015,declared_source,Trading revenue from wholesale supply contracts,0.88,1,false
+FLD-0035,DOC-0016,declared_industry,Wholesale of craft and hobby goods,0.9,1,false
+FLD-0036,DOC-0017,company_name,Calderwick Logistics Ltd,0.96,1,false
+FLD-0037,DOC-0017,registration_number,UK-99014477,0.95,1,false
+FLD-0038,DOC-0017,registered_address,"14 Marlow Court, Leeds LS11 9RB, United Kingdom",0.91,1,false
+FLD-0039,DOC-0018,company_name,Calderwick Logistics Ltd,0.94,1,false
+FLD-0040,DOC-0018,registration_number,UK-99014477,0.95,1,false
+FLD-0041,DOC-0018,registered_address,"Unit 7 Calderwick Way, Leeds LS12 4QT, United Kingdom",0.58,1,true
+FLD-0042,DOC-0018,entity_status,active,0.93,1,false
+FLD-0043,DOC-0019,vat_number,GB-VAT-771902845,0.9,1,false
+FLD-0044,DOC-0020,director_name,Marcus Ellersby,0.93,1,false
+FLD-0045,DOC-0020,director_name_2,Roisin Delamere,0.92,1,false
+FLD-0046,DOC-0021,signatory_name,Marcus Ellersby,0.91,1,false
+FLD-0047,DOC-0022,ubo_name,Torvald Kellingray,0.93,1,false
+FLD-0048,DOC-0022,ownership_percentage,60.0,0.92,1,false
+FLD-0049,DOC-0022,control_basis,direct shareholding,0.89,1,false
+FLD-0050,DOC-0023,full_name,Marcus Ellersby,0.96,1,false
+FLD-0051,DOC-0023,expiry_date,2030-02-14,0.94,1,false
+FLD-0052,DOC-0024,full_name,Roisin Delamere,0.95,1,false
+FLD-0053,DOC-0024,expiry_date,2032-07-06,0.93,1,false
+FLD-0054,DOC-0025,full_name,Torvald Kellingray,0.94,1,false
+FLD-0055,DOC-0025,expiry_date,2028-11-30,0.92,1,false
+FLD-0056,DOC-0026,document_date,2026-08-19,0.92,1,false
+FLD-0057,DOC-0027,document_date,2026-08-22,0.91,1,false
+FLD-0058,DOC-0028,document_date,2026-07-30,0.9,1,false
+FLD-0059,DOC-0029,declared_source,Haulage contract revenue from three national retail clients,0.88,1,false
+FLD-0060,DOC-0030,declared_industry,Road freight transport,0.91,1,false
+FLD-0061,DOC-0031,account_holder,Calderwick Logistics Ltd,0.89,1,false
+FLD-0062,DOC-0032,company_name,Vestmark Nordic OU,0.95,1,false
+FLD-0063,DOC-0032,registration_number,EE-90012345,0.94,1,false
+FLD-0064,DOC-0033,company_name,Vestmark Nordic OU,0.95,1,false
+FLD-0065,DOC-0033,registration_number,EE-90012345,0.94,1,false
+FLD-0066,DOC-0033,registered_address,"Sadama 14, 10111 Tallinn, Estonia",0.92,1,false
+FLD-0067,DOC-0033,entity_status,active,0.94,1,false
+FLD-0068,DOC-0033,registered_shareholder,Lindval Mid Holdings SA,0.86,2,false
+FLD-0069,DOC-0034,tax_number,EE-TAX-90012345,0.91,1,false
+FLD-0070,DOC-0035,director_name,Lembit Vaher,0.93,1,false
+FLD-0071,DOC-0035,director_name_2,Anneli Sormus,0.91,1,false
+FLD-0072,DOC-0036,signatory_name,Lembit Vaher,0.9,1,false
+FLD-0073,DOC-0037,ubo_name,Ruben Halvorsen,0.88,1,false
+FLD-0074,DOC-0037,ownership_percentage,31.5,0.74,1,false
+FLD-0075,DOC-0037,indirect_ownership_path,Harboe Holdings OU > Lindval Mid Holdings SA > Vestmark Nordic OU,0.41,2,false
+FLD-0076,DOC-0037,ubo_name_2,Anneli Sormus,0.87,1,false
+FLD-0077,DOC-0038,intermediate_entity,Lindval Mid Holdings SA,0.55,1,false
+FLD-0078,DOC-0039,shareholder_name,Lindval Mid Holdings SA,0.87,1,false
+FLD-0079,DOC-0039,shareholder_name_2,Anneli Sormus,0.89,1,false
+FLD-0080,DOC-0040,full_name,Lembit Vaher,0.95,1,false
+FLD-0081,DOC-0041,full_name,Anneli Sormus,0.94,1,false
+FLD-0082,DOC-0042,full_name,Ruben Halvorsen,0.93,1,false
+FLD-0083,DOC-0043,document_date,2026-08-25,0.92,1,false
+FLD-0084,DOC-0044,document_date,2026-08-27,0.91,1,false
+FLD-0085,DOC-0045,document_date,2026-07-15,0.88,1,false
+FLD-0086,DOC-0046,declared_source,Distribution margin on marine equipment imports,0.86,1,false
+FLD-0087,DOC-0047,declared_industry,Wholesale of marine equipment,0.9,1,false
+FLD-0088,DOC-0048,company_name,Quillon Marine Services Ltd,0.96,1,false
+FLD-0089,DOC-0048,registration_number,UK-99017733,0.95,1,false
+FLD-0090,DOC-0049,company_name,Quillon Marine Services Ltd,0.95,1,false
+FLD-0091,DOC-0049,registration_number,UK-99017733,0.94,1,false
+FLD-0092,DOC-0049,registered_address,"Harbour House, 2 Dockside Walk, Aberdeen AB11 5QT, United Kingdom",0.92,1,false
+FLD-0093,DOC-0049,entity_status,active,0.94,1,false
+FLD-0094,DOC-0050,vat_number,GB-VAT-882014577,0.91,1,false
+FLD-0095,DOC-0051,director_name,Gareth Pennyfold,0.93,1,false
+FLD-0096,DOC-0051,director_name_2,Ines Carrasco-Bell,0.92,1,false
+FLD-0097,DOC-0052,signatory_name,Gareth Pennyfold,0.9,1,false
+FLD-0098,DOC-0053,ubo_name,Aurelio Vantano,0.92,1,false
+FLD-0099,DOC-0053,ownership_percentage,55.0,0.91,1,false
+FLD-0100,DOC-0053,control_basis,direct shareholding,0.89,1,false
+FLD-0101,DOC-0054,full_name,Gareth Pennyfold,0.96,1,false
+FLD-0102,DOC-0055,full_name,Ines Carrasco-Bell,0.94,1,false
+FLD-0103,DOC-0056,full_name,Aurelio Vantano,0.93,1,false
+FLD-0104,DOC-0057,document_date,2026-08-30,0.92,1,false
+FLD-0105,DOC-0058,document_date,2026-08-28,0.91,1,false
+FLD-0106,DOC-0059,document_date,2026-08-11,0.87,1,false
+FLD-0107,DOC-0060,declared_source,Charter revenue under long-term vessel contracts,0.88,1,false
+FLD-0108,DOC-0061,declared_industry,Offshore marine chartering,0.9,1,false
+FLD-0109,DOC-0062,account_holder,Quillon Marine Services Ltd,0.89,1,false
+FLD-0110,DOC-0063,company_name,Saarvik Metall OU,0.95,1,false
+FLD-0111,DOC-0063,registration_number,EE-90014782,0.94,1,false
+FLD-0112,DOC-0064,company_name,Saarvik Metall OU,0.95,1,false
+FLD-0113,DOC-0064,registration_number,EE-90014782,0.94,1,false
+FLD-0114,DOC-0064,registered_address,"Tehnika 27, 76505 Saue, Estonia",0.93,1,false
+FLD-0115,DOC-0064,entity_status,active,0.95,1,false
+FLD-0116,DOC-0065,tax_number,EE-TAX-90014782,0.92,1,false
+FLD-0117,DOC-0066,director_name,Rasmus Kalda,0.94,1,false
+FLD-0118,DOC-0066,director_name_2,Triin Lepik,0.92,1,false
+FLD-0119,DOC-0067,signatory_name,Rasmus Kalda,0.91,1,false
+FLD-0120,DOC-0068,ubo_name,Oskar Magiste,0.93,1,false
+FLD-0121,DOC-0068,ownership_percentage,80.0,0.92,1,false
+FLD-0122,DOC-0069,full_name,Rasmus Kalda,0.95,1,false
+FLD-0123,DOC-0069,date_of_birth,1977-05-21,0.94,1,false
+FLD-0124,DOC-0070,full_name,Triin Lepik,0.94,1,false
+FLD-0125,DOC-0071,full_name,Oskar Magiste,0.93,1,false
+FLD-0126,DOC-0072,document_date,2026-09-02,0.92,1,false
+FLD-0127,DOC-0073,document_date,2026-08-21,0.91,1,false
+FLD-0128,DOC-0074,document_date,2026-08-18,0.9,1,false
+FLD-0129,DOC-0075,declared_source,Subcontracting revenue from industrial clients,0.88,1,false
+FLD-0130,DOC-0076,declared_industry,Metal fabrication,0.91,1,false
+FLD-0131,DOC-0077,company_name,Bramforth Aggregates Ltd,0.95,1,false
+FLD-0132,DOC-0077,registration_number,UK-99021560,0.94,1,false
+FLD-0133,DOC-0078,company_name,Bramforth Aggregates Ltd,0.95,1,false
+FLD-0134,DOC-0078,registration_number,UK-99021560,0.94,1,false
+FLD-0135,DOC-0078,registered_address,"Bramforth Yard, Pinfold Lane, Doncaster DN4 6RS, United Kingdom",0.9,1,false
+FLD-0136,DOC-0078,entity_status,active,0.93,1,false
+FLD-0137,DOC-0079,vat_number,GB-VAT-664120933,0.89,1,false
+FLD-0138,DOC-0080,director_name,Nigel Braithwaite-Cole,0.64,1,false
+FLD-0139,DOC-0080,appointment_date,2015-02-03,0.81,1,false
+FLD-0140,DOC-0081,signatory_name,Nigel Braithwaite-Cole,0.88,1,false
+FLD-0141,DOC-0082,ubo_name,Fenella Quist,0.91,1,false
+FLD-0142,DOC-0082,ownership_percentage,45.0,0.9,1,false
+FLD-0143,DOC-0083,full_name,Nigel Braithwaite-Cole,0.93,1,false
+FLD-0144,DOC-0083,date_of_birth,1968-04-12,0.92,1,false
+FLD-0145,DOC-0084,full_name,Fenella Quist,0.94,1,false
+FLD-0146,DOC-0085,document_date,2026-08-09,0.9,1,false
+FLD-0147,DOC-0086,document_date,2026-08-15,0.91,1,false
+FLD-0148,DOC-0087,declared_source,Aggregate supply contracts with regional construction firms,0.87,1,false
+FLD-0149,DOC-0088,declared_industry,Construction aggregates and haulage,0.9,1,false
+FLD-0150,DOC-0089,account_holder,Bramforth Aggregates Ltd,0.88,1,false
+FLD-0151,DOC-0096,company_name,Parnu Kohviubade OU,0.96,1,false
+FLD-0152,DOC-0096,registration_number,EE-90018321,0.95,1,false
+FLD-0153,DOC-0097,company_name,Parnu Kohviubade OU,0.95,1,false
+FLD-0154,DOC-0097,registration_number,EE-90018321,0.94,1,false
+FLD-0155,DOC-0097,registered_address,"Ringi 42, 80010 Parnu, Estonia",0.94,1,false
+FLD-0156,DOC-0097,entity_status,active,0.96,1,false
+FLD-0157,DOC-0098,tax_number,EE-TAX-90018321,0.93,1,false
+FLD-0158,DOC-0099,director_name,Katrin Ilves,0.95,1,false
+FLD-0159,DOC-0100,signatory_name,Katrin Ilves,0.93,1,false
+FLD-0160,DOC-0101,ubo_name,Mihkel Roosaar,0.94,1,false
+FLD-0161,DOC-0101,ownership_percentage,70.0,0.93,1,false
+FLD-0162,DOC-0102,full_name,Katrin Ilves,0.96,1,false
+FLD-0163,DOC-0103,full_name,Mihkel Roosaar,0.95,1,false
+FLD-0164,DOC-0104,document_date,2026-09-05,0.93,1,false
+FLD-0165,DOC-0105,document_date,2026-08-29,0.92,1,false
+FLD-0166,DOC-0106,declared_source,Wholesale coffee sales to cafe customers,0.9,1,false
+FLD-0167,DOC-0107,declared_industry,Coffee roasting and wholesale,0.92,1,false
+FLD-0168,DOC-0108,company_name,Thornbury Analytics Ltd,0.96,1,false
+FLD-0169,DOC-0108,registration_number,UK-99025819,0.95,1,false
+FLD-0170,DOC-0109,company_name,Thornbury Analytics Ltd,0.95,1,false
+FLD-0171,DOC-0109,registration_number,UK-99025819,0.94,1,false
+FLD-0172,DOC-0109,registered_address,"5 Wraysbury Mews, Bristol BS1 6TT, United Kingdom",0.93,1,false
+FLD-0173,DOC-0109,entity_status,active,0.95,1,false
+FLD-0174,DOC-0110,director_name,Imogen Skellow,0.94,1,false
+FLD-0175,DOC-0110,director_name_2,Callum Pryde-Nash,0.93,1,false
+FLD-0176,DOC-0111,signatory_name,Imogen Skellow,0.92,1,false
+FLD-0177,DOC-0112,ubo_name,Helena Marchbank,0.94,1,false
+FLD-0178,DOC-0112,ownership_percentage,70.0,0.93,1,false
+FLD-0179,DOC-0112,control_basis,indirect shareholding through Marchbank Holdings Ltd,0.91,1,false
+FLD-0180,DOC-0113,chart_summary,"Two layers: Helena Marchbank 100 percent of Marchbank Holdings Ltd (UK-99026440), which holds 70 percent of Thornbury Analytics Ltd; two directors hold 15 percent each directly",0.9,1,false
+FLD-0181,DOC-0113,intermediate_entity,"Marchbank Holdings Ltd (UK-99026440), active on the UK register",0.92,1,false
+FLD-0182,DOC-0114,shareholder_name,Marchbank Holdings Ltd,0.92,1,false
+FLD-0183,DOC-0114,shareholder_name_2,Helena Marchbank (sole shareholder of Marchbank Holdings Ltd),0.91,1,false
+FLD-0184,DOC-0115,full_name,Imogen Skellow,0.96,1,false
+FLD-0185,DOC-0116,full_name,Callum Pryde-Nash,0.95,1,false
+FLD-0186,DOC-0117,full_name,Helena Marchbank,0.94,1,false
+FLD-0187,DOC-0118,document_date,2026-09-08,0.93,1,false
+FLD-0188,DOC-0119,document_date,2026-08-31,0.92,1,false
+FLD-0189,DOC-0120,document_date,2026-09-02,0.92,1,false
+FLD-0190,DOC-0121,declared_source,Consultancy fees under annual retainer contracts,0.9,1,false
+FLD-0191,DOC-0122,declared_industry,Management and data analytics consultancy,0.92,1,false
+FLD-0192,DOC-0123,declared_source_of_wealth,"Proceeds of the founder's earlier consultancy sale, held through Marchbank Holdings Ltd",0.91,1,false
