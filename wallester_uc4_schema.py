@@ -331,6 +331,14 @@ DB_TABLES = {
     "checklist_item_document": [
         "item_id", "document_id",
     ],
+    "communication": [
+        "communication_id", "case_id", "template_id", "audience", "message_type", "situation",
+        "approval_status", "approved_by", "sent_status", "rendered_text", "created_at",
+    ],
+    "compliance_task": [
+        "task_id", "case_id", "task", "reason", "owner", "created_at", "completed_by",
+        "completed_at",
+    ],
     "document": [
         "document_id", "case_id", "subject_individual_id", "document_type", "file_name",
         "upload_time", "quality_status", "quality_status_at_screen", "quality_flags",
@@ -351,6 +359,11 @@ DB_TABLES = {
         "finding_id", "case_id", "source", "rule_id", "summary", "evidence_refs", "blocking",
         "created_at",
     ],
+    "human_decision": [
+        "decision_id", "case_id", "reviewer", "reviewer_role", "decision", "reason_code",
+        "rationale", "evidence_relied_on", "override_flag", "override_reason",
+        "escalation_target", "customer_template_id", "timestamp",
+    ],
     "identity_check": [
         "check_id", "case_id", "individual_id", "provider_name", "document_result",
         "liveness_result", "biometric_result", "address_result", "name_dob_match",
@@ -365,6 +378,9 @@ DB_TABLES = {
         "source_channel", "status", "assigned_owner", "next_action_owner",
         "white_label_branch_flag", "restricted_finding", "requires_human_signoff", "created_at",
         "updated_at",
+    ],
+    "outbox": [
+        "outbox_id", "communication_id", "case_id", "audience", "body", "sent_at",
     ],
     "registry_check": [
         "check_id", "case_id", "applicant_id", "provider_name", "company_status",

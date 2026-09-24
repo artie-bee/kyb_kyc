@@ -4,9 +4,9 @@ Generated from `wallester_uc4_dataset/` by `validate_dataset.py`.
 
 | # | Check | Result | Detail |
 |---|-------|--------|--------|
-| 1 | Referential integrity (31 FK relationships, 1980 non-null values) | PASS | no orphans |
-| 2 | Enum values (60 enum columns, 2440 values incl. pipe-list members) | PASS | all values in range; no N/A placeholders |
-| 3 | Timestamp ordering (14 cases, 455 timestamps) | PASS | every case ordered: created -> upload -> quality/extraction -> provider checks -> risk -> evidence pack -> communication/decision -> updated_at |
+| 1 | Referential integrity (31 FK relationships, 1981 non-null values) | PASS | no orphans |
+| 2 | Enum values (60 enum columns, 2441 values incl. pipe-list members) | PASS | all values in range; no N/A placeholders |
+| 3 | Timestamp ordering (14 cases, 456 timestamps) | PASS | every case ordered: created -> upload -> quality/extraction -> provider checks -> risk -> evidence pack -> communication/decision -> updated_at |
 | 4 | Case outcomes (14 cases) | PASS | every case reaches its scripted status and risk band |
 | 5 | Case 2 stopped before paid checks (bad-ID director IND-0002) | PASS | no registry, identity or screening rows exist for WAL-ONB-0002; UBO declaration checklist item is pending |
 | 6 | No restricted wording in applicant-facing text (16 applicant messages, 1 on case 6) | PASS | no message mentions sanctions, screening, AML, PEP, adverse media, matches, escalation or risk scoring |
@@ -22,7 +22,7 @@ Generated from `wallester_uc4_dataset/` by `validate_dataset.py`.
 | WAL-ONB-0004 | enhanced_due_diligence | enhanced_due_diligence | high | high | PASS |
 | WAL-ONB-0005 | enhanced_due_diligence | enhanced_due_diligence | high | high | PASS |
 | WAL-ONB-0006 | analyst_review_required | analyst_review_required | critical | critical | PASS |
-| WAL-ONB-0007 | enhanced_due_diligence | enhanced_due_diligence | high | high | PASS |
+| WAL-ONB-0007 | analyst_review_required | analyst_review_required | high | high | PASS |
 | WAL-ONB-0008 | submitted | submitted | (none) | (none) | PASS |
 | WAL-ONB-0009 | approved | approved | low | low | PASS |
 | WAL-ONB-0010 | ready_for_decision | ready_for_decision | low | low | PASS |
@@ -36,7 +36,7 @@ Generated from `wallester_uc4_dataset/` by `validate_dataset.py`.
 | Table | Rows |
 |-------|------|
 | applicant.csv | 14 |
-| audit_event.csv | 243 |
+| audit_event.csv | 244 |
 | case_map.csv | 14 |
 | checklist_item.csv | 215 |
 | checklist_item_document.csv | 168 |
@@ -53,7 +53,7 @@ Generated from `wallester_uc4_dataset/` by `validate_dataset.py`.
 | requirement_pack.csv | 14 |
 | requirement_rule.csv | 86 |
 | risk_assessment.csv | 13 |
-| risk_bands.csv | 9 |
+| risk_bands.csv | 10 |
 | risk_factor.csv | 22 |
 | risk_scoring_matrix.csv | 19 |
 | screening_check.csv | 39 |

@@ -250,7 +250,7 @@ EXPECTED = {
  "WAL-ONB-0004": ("enhanced_due_diligence", "high"),
  "WAL-ONB-0005": ("enhanced_due_diligence", "high"),
  "WAL-ONB-0006": ("analyst_review_required", "critical"),
- "WAL-ONB-0007": ("enhanced_due_diligence", "high"),
+ "WAL-ONB-0007": ("analyst_review_required", "high"),
  "WAL-ONB-0008": ("submitted", None),
  "WAL-ONB-0009": ("approved", "low"),
  "WAL-ONB-0010": ("ready_for_decision", "low"),

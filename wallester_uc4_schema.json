@@ -2508,6 +2508,179 @@
             "additionalProperties": false
           }
         },
+        "communication": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "communication_id": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "case_id": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "template_id": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "audience": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "enum": [
+                  "analyst",
+                  "applicant",
+                  "compliance",
+                  ""
+                ]
+              },
+              "message_type": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "situation": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "approval_status": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "enum": [
+                  "approved",
+                  "pending_approval",
+                  "rejected",
+                  ""
+                ]
+              },
+              "approved_by": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "sent_status": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "enum": [
+                  "failed",
+                  "not_sent",
+                  "sent",
+                  ""
+                ]
+              },
+              "rendered_text": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "created_at": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            },
+            "required": [
+              "communication_id",
+              "case_id",
+              "template_id",
+              "audience",
+              "message_type",
+              "situation",
+              "approval_status",
+              "approved_by",
+              "sent_status",
+              "rendered_text",
+              "created_at"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "compliance_task": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "task_id": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "case_id": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "task": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "reason": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "owner": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "created_at": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "completed_by": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "completed_at": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            },
+            "required": [
+              "task_id",
+              "case_id",
+              "task",
+              "reason",
+              "owner",
+              "created_at",
+              "completed_by",
+              "completed_at"
+            ],
+            "additionalProperties": false
+          }
+        },
         "document": {
           "type": "array",
           "items": {
@@ -2953,6 +3126,129 @@
             "additionalProperties": false
           }
         },
+        "human_decision": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "decision_id": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "case_id": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "reviewer": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "reviewer_role": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "enum": [
+                  "analyst",
+                  "compliance",
+                  ""
+                ]
+              },
+              "decision": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "enum": [
+                  "approve",
+                  "conditional_approve",
+                  "enhanced_due_diligence",
+                  "escalate",
+                  "insufficient_evidence",
+                  "reject",
+                  "request_more_information",
+                  "withdrawn",
+                  ""
+                ]
+              },
+              "reason_code": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "rationale": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "evidence_relied_on": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "override_flag": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "enum": [
+                  "false",
+                  "true",
+                  ""
+                ]
+              },
+              "override_reason": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "escalation_target": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "customer_template_id": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "timestamp": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            },
+            "required": [
+              "decision_id",
+              "case_id",
+              "reviewer",
+              "reviewer_role",
+              "decision",
+              "reason_code",
+              "rationale",
+              "evidence_relied_on",
+              "override_flag",
+              "override_reason",
+              "escalation_target",
+              "customer_template_id",
+              "timestamp"
+            ],
+            "additionalProperties": false
+          }
+        },
         "identity_check": {
           "type": "array",
           "items": {
@@ -3335,6 +3631,59 @@
               "requires_human_signoff",
               "created_at",
               "updated_at"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "outbox": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "outbox_id": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "communication_id": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "case_id": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "audience": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "body": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "sent_at": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            },
+            "required": [
+              "outbox_id",
+              "communication_id",
+              "case_id",
+              "audience",
+              "body",
+              "sent_at"
             ],
             "additionalProperties": false
           }

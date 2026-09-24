@@ -16,6 +16,7 @@ if not os.path.isdir(OUT):
 
 KB_VERSION = "WAL-KB-2026.09"
 RISK_MATRIX = "WAL-RM-2026.03"
+RECOMMENDED_ACTION = {}
 V_INTAKE = "wallester-uc4-intake-prompt-v0.9"
 V_QUALITY = "doc-quality-classifier-v1.4"
 V_OCR = "ocr-extract-v2.3"
@@ -376,10 +377,15 @@ def emit_decisions(spec, case_id, clk):
     for hd in spec.get("decisions", []):
         decision_id = nid("DEC")
         t = clk.tick(35)
+        # An override is the decision differing from the recommendation. Computed
+        # from the two, never asserted by the case script.
+        recommended = RECOMMENDED_ACTION.get(case_id)
+        is_override = recommended is not None and hd["decision"] != recommended
         add("human_decision", decision_id=decision_id, case_id=case_id, reviewer=hd["reviewer"],
             reviewer_role=hd["reviewer_role"], decision=hd["decision"], reason_code=hd["reason_code"],
             rationale=hd["rationale"], evidence_relied_on=hd["evidence_relied_on"],
-            override_flag=hd["override_flag"], override_reason=hd.get("override_reason", ""),
+            override_flag=is_override,
+            override_reason=hd["rationale"] if is_override else "",
             escalation_target=hd.get("escalation_target", ""),
             customer_template_id=hd.get("customer_template_id", ""), timestamp=t)
         audit(case_id, hd["reviewer_role"], hd["reviewer"], "human_decision_recorded",
@@ -654,9 +660,11 @@ def build_case(spec):
         }
         # Not enough to go on: a document never replaced, a provider that did not
         # answer, or an identity check that failed. The case is not scored.
+        # Insufficient evidence means "could not be determined": a provider that
+        # did not answer, or required evidence still outstanding. A failed
+        # identity check is neither - it is a result, and it scores.
         facts["insufficient_evidence_hold"] = (
             facts["document_resubmission_required"]
-            or facts["identity_check_failed"]
             or any(s["adverse_media"] == "unavailable" or s["sanctions"] == "unavailable"
                    for s in screens))
 
@@ -667,6 +675,10 @@ def build_case(spec):
         band = apply_floors(band_for_score(score), facts)
         insufficient = band == "insufficient_evidence"
         action = BAND_ACTION[band]
+        for _cond, _act in ACTION_FLOORS:          # first match wins
+            if facts.get(_cond):
+                action = _act
+                break
         human = band in ("medium", "high", "critical") or facts["pep_match"] \
             or facts["adverse_media_moderate"] or facts["adverse_media_serious"] \
             or facts["sanctions_possible_match"] or facts["sanctions_clear_match"] \
@@ -681,6 +693,7 @@ def build_case(spec):
           "individual": "{DOC:ubo_declaration}",
         }
 
+        RECOMMENDED_ACTION[case_id] = action
         add("risk_assessment", assessment_id=assessment_id, case_id=case_id,
             risk_score="" if insufficient else score, risk_band=band,
             recommended_action=action, confidence=risk.get("confidence", 0.9),
@@ -815,6 +828,9 @@ RISK_BANDS = [
   "Enhanced due diligence before any decision"),
  ("RB-04", "critical", 80, 100, "", "escalate",
   "Compliance decision required"),
+ ("RB-10", "high", "", "", "entity_not_active", "reject",
+  "A blocking registry failure is an eligibility failure: no amount of further diligence "
+  "changes the answer, so the recommendation is to reject whatever the score"),
  ("RB-05", "critical", "", "", "sanctions_clear_match", "escalate",
   "A confirmed sanctions match is critical whatever the score"),
  ("RB-06", "critical", "", "", "sanctions_possible_match", "escalate",
@@ -835,6 +851,7 @@ POINTS = dict((f[3], f[4]) for f in RISK_FACTORS)
 FACTOR_BY_CONDITION = dict((f[3], f) for f in RISK_FACTORS)
 # Floors in the order they are applied: the first one whose condition holds wins.
 FLOORS = [(b[4], b[1]) for b in RISK_BANDS if b[4]]
+ACTION_FLOORS = [(b[4], b[5]) for b in RISK_BANDS if b[4]]
 BAND_ACTION = dict((b[1], b[5]) for b in RISK_BANDS)
 SCORE_BANDS = [(b[1], b[2], b[3]) for b in RISK_BANDS if b[2] != ""]
 
@@ -1373,21 +1390,15 @@ CASES.append({
       "complete chart and a source-of-wealth statement. No adverse screening finding is present, "
       "so this is an evidence-quality escalation, not a financial-crime referral.",
     "evidence_relied_on": "{REG}|{DOC:ubo_declaration}|{DOC:ownership_chart}|{RSK}",
-    "override_flag": False, "customer_template_id": "TPL-0003"}],
+    "customer_template_id": "TPL-0004"}],
  "communications": [
-   {"template_id": "TPL-0003", "audience": "applicant",
-    "message_type": "additional_information_request", "approval_status": "approved",
-    "sent_status": "sent", "approver_role": "analyst",
-    "rendered_text": "Hello Lembit Vaher, to complete the company verification for Vestmark Nordic "
-      "OU (reference WAL-ONB-0004) we need a clearer picture of the ownership structure. Please "
-      "upload a complete ownership chart showing every intermediate company and the individuals who "
-      "ultimately own or control Vestmark Nordic OU, together with a source-of-wealth statement for "
-      "the individual holding shares through those companies."},
-   {"template_id": "TPL-0006", "audience": "applicant", "message_type": "verification_delay",
-    "approval_status": "pending_approval", "sent_status": "not_sent",
-    "rendered_text": "Hello Lembit Vaher, the checks on your application for Vestmark Nordic OU "
-      "(reference WAL-ONB-0004) are taking a little longer than usual. No action is needed from "
-      "you. We will update you again within three working days."}],
+   {"template_id": "TPL-0004", "audience": "applicant", "message_type": "manual_review_underway",
+    "approval_status": "approved", "sent_status": "sent", "approver_role": "analyst",
+    "approver": "analyst.m.sild",
+    "rendered_text": "Hello Lembit Vaher, your application for Vestmark Nordic OU (reference "
+      "WAL-ONB-0004) is with our onboarding team for an additional manual review step. No "
+      "further documents are needed from you at this time. We will contact you as soon as this "
+      "step is complete."}],
 })
 
 # ---------------------------------------------------------------- Case 5 ----
@@ -1666,7 +1677,7 @@ CASES.append({
  "case_id": "WAL-ONB-0007", "applicant_id": "APP-0007",
  "start": datetime(2026, 9, 16, 13, 30, 0),
  "applicant_type": "sme_corporate", "jurisdiction": "UK", "entity_scope": "wallester_uk_ltd",
- "source_channel": "email", "status": "enhanced_due_diligence", "next_action_owner": "compliance",
+ "source_channel": "email", "status": "analyst_review_required", "next_action_owner": "compliance",
  "assigned_owner": "compliance.d.ferreira",
  "applicant": {"legal_name": "Bramforth Aggregates Ltd", "trading_name": "Bramforth",
    "registration_number": "UK-99021560", "entity_type": "private_limited_company", "country": "GB",
@@ -2193,11 +2204,7 @@ CASES.append({
       "throughout. Rejecting with the door left open to a new application if the company is "
       "restored.",
     "evidence_relied_on": "{REG}|{DOC:registry_extract}|{RSK}",
-    "override_flag": True,
-    "override_reason": "The scored recommendation was enhanced due diligence. A dissolved "
-      "entity is an eligibility failure rather than a due-diligence question, so no amount of "
-      "further diligence would change the answer; rejecting instead.",
-    "customer_template_id": "TPL-0011"}],
+    "override_flag": False, "customer_template_id": "TPL-0011"}],
  "communications": [
    {"template_id": "TPL-0011", "audience": "applicant", "message_type": "application_declined",
     "approval_status": "approved", "sent_status": "sent", "approver_role": "analyst",
@@ -2533,13 +2540,19 @@ CASES.append({
     "evidence_relied_on": "{PACK}",
     "override_flag": False, "customer_template_id": "TPL-0012"}],
  "communications": [
-   {"template_id": "TPL-0002", "audience": "applicant", "message_type": "document_request",
+   {"template_id": "TPL-0001", "audience": "applicant", "message_type": "resubmission_request",
     "approval_status": "approved", "sent_status": "sent", "approver_role": "analyst",
     "approver": "ops.tiina.kask",
     "rendered_text": "Hello Elise Kaarma, thank you for your application. The proof of address "
       "you sent is a screenshot, and we need the original document itself. A PDF downloaded from "
       "your bank or utility provider, or a photograph of the paper copy with all four corners "
       "visible, works well."},
+   {"template_id": "TPL-0005", "audience": "applicant", "message_type": "status_update",
+    "approval_status": "approved", "sent_status": "sent", "approver_role": "analyst",
+    "approver": "ops.tiina.kask",
+    "rendered_text": "Hello Elise Kaarma, we are still waiting for the proof of address we asked "
+      "for. Your application for Kaarma Ceramics (reference WAL-ONB-0014) is on hold until it "
+      "arrives."},
    {"template_id": "TPL-0012", "audience": "applicant", "message_type": "case_closed",
     "approval_status": "approved", "sent_status": "sent", "approver_role": "analyst",
     "approver": "ops.tiina.kask",

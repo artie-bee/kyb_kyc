@@ -8,7 +8,7 @@ RSK-0006,WAL-ONB-0006,60,critical,escalate,0.85,false,true,WAL-RM-2026.03
 RSK-0007,WAL-ONB-0007,54,high,enhanced_due_diligence,0.8,false,true,WAL-RM-2026.03
 RSK-0008,WAL-ONB-0009,0,low,approve,0.93,false,false,WAL-RM-2026.03
 RSK-0009,WAL-ONB-0010,15,low,approve,0.9,false,false,WAL-RM-2026.03
-RSK-0010,WAL-ONB-0011,60,high,enhanced_due_diligence,0.95,false,true,WAL-RM-2026.03
+RSK-0010,WAL-ONB-0011,60,high,reject,0.95,false,true,WAL-RM-2026.03
 RSK-0011,WAL-ONB-0012,70,critical,escalate,0.91,false,true,WAL-RM-2026.03
 RSK-0012,WAL-ONB-0013,,insufficient_evidence,insufficient_evidence,0.42,true,true,WAL-RM-2026.03
 RSK-0013,WAL-ONB-0014,,insufficient_evidence,insufficient_evidence,0.3,true,true,WAL-RM-2026.03

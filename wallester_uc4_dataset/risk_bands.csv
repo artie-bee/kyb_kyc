@@ -3,6 +3,7 @@ RB-01,low,0,24,,approve,Nothing outstanding. Still requires a human decision; th
 RB-02,medium,25,49,,conditional_approve,"Something to resolve, but nothing that stops the application"
 RB-03,high,50,79,,enhanced_due_diligence,Enhanced due diligence before any decision
 RB-04,critical,80,100,,escalate,Compliance decision required
+RB-10,high,,,entity_not_active,reject,"A blocking registry failure is an eligibility failure: no amount of further diligence changes the answer, so the recommendation is to reject whatever the score"
 RB-05,critical,,,sanctions_clear_match,escalate,A confirmed sanctions match is critical whatever the score
 RB-06,critical,,,sanctions_possible_match,escalate,An unresolved possible sanctions match is critical whatever the score
 RB-07,high,,,pep_match,enhanced_due_diligence,A PEP match is at least high whatever the score
