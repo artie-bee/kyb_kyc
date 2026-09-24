@@ -101,6 +101,10 @@ ASSUMPTIONS = [
            "rather than being handed them."),
     ("V2", "ownership_chain_percentages is carried onto each UBO so effective ownership can "
            "be multiplied along the chain and cross-checked against the declared total."),
+    ("S1", "scripted_screening[] is screening_check.csv, replayed by the mock screening "
+           "provider. Sanctions and PEP are provider list results, so they are replayed; the "
+           "adverse-media CATEGORY is replayed too and stands in for what the relevance model "
+           "would decide."),
 ]
 
 # "DOC-0038 (ownership_chart) released by a.name; decision accept; reason: ..."
@@ -230,7 +234,8 @@ def build_releases(events: list[dict], file_names: dict[str, str]) -> list[dict]
 def build_application(case: dict, applicant: dict, people: list[dict], ubos: list[dict],
                       documents: list[dict], releases: list[dict],
                       corrections: list[dict], acceptances: list[dict],
-                      registry: list[dict], identity: list[dict]) -> dict:
+                      registry: list[dict], identity: list[dict],
+                      screening: list[dict]) -> dict:
     return {
         "application_id": f"{case['source_channel'].upper()}-{case['case_id']}",
         "source_channel": case["source_channel"],
@@ -273,6 +278,7 @@ def build_application(case: dict, applicant: dict, people: list[dict], ubos: lis
         "field_acceptances": acceptances,                       # E3
         "scripted_registry": registry,                          # V1
         "scripted_identity": identity,                          # V1
+        "scripted_screening": screening,                        # S1
     }
 
 
@@ -310,6 +316,9 @@ def main() -> None:
     identity_by_case = defaultdict(list)
     for r in read_csv(args.dataset / "identity_check.csv"):
         identity_by_case[r["case_id"]].append(r)
+    screening_by_case = defaultdict(list)
+    for r in read_csv(args.dataset / "screening_check.csv"):
+        screening_by_case[r["case_id"]].append(r)
     for r in read_csv(args.dataset / "audit_event.csv"):
         if r["action"] == "document_released_after_review":
             releases_by_case[r["case_id"]].append(r)
@@ -343,7 +352,8 @@ def main() -> None:
             build_corrections(fields_by_case[case["case_id"]], file_names,
                               correction_events),
             acceptances_by_case[case["case_id"]],
-            registry_by_case[case["case_id"]], identity_by_case[case["case_id"]])
+            registry_by_case[case["case_id"]], identity_by_case[case["case_id"]],
+            screening_by_case[case["case_id"]])
         out = args.out / f"case_{n:02d}_{case['case_id']}.json"
         out.write_text(json.dumps(app, indent=2, ensure_ascii=False), encoding="utf-8")
         own = app["ownership"]

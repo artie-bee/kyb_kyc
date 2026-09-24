@@ -1,15 +1,15 @@
 {
-  "application_id": "PORTAL-WAL-ONB-0006",
+  "application_id": "PORTAL-WAL-ONB-0012",
   "source_channel": "portal",
   "programme_type": "direct",
   "applicant": {
-    "legal_name": "Saarvik Metall OU",
-    "trading_name": "Saarvik",
-    "registration_number": "EE-90014782",
+    "legal_name": "Solvarn Baltic OU",
+    "trading_name": "Solvarn",
+    "registration_number": "EE-90021455",
     "entity_type": "private_limited_company",
     "country": "EE",
-    "business_activity": "Metal fabrication and industrial subcontracting",
-    "expected_usage": "Up to 20 cards; around 45000 EUR per month on materials and fuel",
+    "business_activity": "Industrial valve distribution and maintenance",
+    "expected_usage": "Up to 16 cards; around 30000 EUR per month on parts and travel",
     "vat_registered": true
   },
   "ownership": {
@@ -19,28 +19,19 @@
   },
   "individuals": [
     {
-      "ref": "IND-0013",
+      "ref": "IND-0027",
       "role": "director",
-      "full_name": "Rasmus Kalda",
-      "date_of_birth": "1977-05-21",
+      "full_name": "Taavi Ruumet",
+      "date_of_birth": "1979-05-30",
       "nationality": "EE",
       "residence_country": "EE",
-      "relationship_to_entity": "Registered director with sole signing authority"
+      "relationship_to_entity": "Managing director"
     },
     {
-      "ref": "IND-0014",
-      "role": "director",
-      "full_name": "Triin Lepik",
-      "date_of_birth": "1986-10-08",
-      "nationality": "EE",
-      "residence_country": "EE",
-      "relationship_to_entity": "Registered director"
-    },
-    {
-      "ref": "IND-0015",
+      "ref": "IND-0028",
       "role": "ubo",
-      "full_name": "Oskar Magiste",
-      "date_of_birth": "1970-03-16",
+      "full_name": "Ivar Kolmsaar",
+      "date_of_birth": "1968-02-17",
       "nationality": "EE",
       "residence_country": "EE",
       "relationship_to_entity": "Holds 80 percent of the issued share capital directly"
@@ -48,13 +39,13 @@
   ],
   "ubos": [
     {
-      "individual_ref": "IND-0015",
+      "individual_ref": "IND-0028",
       "ownership_percentage": 80.0,
       "ownership_chain_percentages": [
         80.0
       ],
       "control_type": "direct_shareholding",
-      "ownership_path": "Saarvik Metall OU"
+      "ownership_path": "Solvarn Baltic OU"
     }
   ],
   "flags": {
@@ -67,29 +58,29 @@
   "documents": [
     {
       "document_type": "certificate_of_incorporation",
-      "file_name": "cert_incorporation_saarvik.pdf",
+      "file_name": "cert_incorporation_solvarn.pdf",
       "subject_ref": null,
-      "upload_time": "2026-09-14T09:52:00Z",
+      "upload_time": "2026-09-24T09:02:00Z",
       "expiry_date": null,
       "document_date": null,
       "issue_country": "EE",
       "scripted_quality_flags": [],
       "scripted_fields": [
         {
-          "field_id": "FLD-0110",
-          "document_id": "DOC-0063",
+          "field_id": "FLD-0213",
+          "document_id": "DOC-0138",
           "name": "company_name",
-          "value": "Saarvik Metall OU",
-          "confidence": "0.95",
+          "value": "Solvarn Baltic OU",
+          "confidence": "0.96",
           "source_page": "1",
           "corrected_by_analyst": "false"
         },
         {
-          "field_id": "FLD-0111",
-          "document_id": "DOC-0063",
+          "field_id": "FLD-0214",
+          "document_id": "DOC-0138",
           "name": "registration_number",
-          "value": "EE-90014782",
-          "confidence": "0.94",
+          "value": "EE-90021455",
+          "confidence": "0.95",
           "source_page": "1",
           "corrected_by_analyst": "false"
         }
@@ -97,44 +88,44 @@
     },
     {
       "document_type": "registry_extract",
-      "file_name": "registry_extract_saarvik.pdf",
+      "file_name": "registry_extract_solvarn.pdf",
       "subject_ref": null,
-      "upload_time": "2026-09-14T09:54:00Z",
+      "upload_time": "2026-09-24T09:04:00Z",
       "expiry_date": null,
       "document_date": null,
       "issue_country": "EE",
       "scripted_quality_flags": [],
       "scripted_fields": [
         {
-          "field_id": "FLD-0112",
-          "document_id": "DOC-0064",
+          "field_id": "FLD-0215",
+          "document_id": "DOC-0139",
           "name": "company_name",
-          "value": "Saarvik Metall OU",
+          "value": "Solvarn Baltic OU",
           "confidence": "0.95",
           "source_page": "1",
           "corrected_by_analyst": "false"
         },
         {
-          "field_id": "FLD-0113",
-          "document_id": "DOC-0064",
+          "field_id": "FLD-0216",
+          "document_id": "DOC-0139",
           "name": "registration_number",
-          "value": "EE-90014782",
+          "value": "EE-90021455",
           "confidence": "0.94",
           "source_page": "1",
           "corrected_by_analyst": "false"
         },
         {
-          "field_id": "FLD-0114",
-          "document_id": "DOC-0064",
+          "field_id": "FLD-0217",
+          "document_id": "DOC-0139",
           "name": "registered_address",
-          "value": "Tehnika 27, 76505 Saue, Estonia",
+          "value": "Punane 18, 13619 Tallinn, Estonia",
           "confidence": "0.93",
           "source_page": "1",
           "corrected_by_analyst": "false"
         },
         {
-          "field_id": "FLD-0115",
-          "document_id": "DOC-0064",
+          "field_id": "FLD-0218",
+          "document_id": "DOC-0139",
           "name": "entity_status",
           "value": "active",
           "confidence": "0.95",
@@ -145,19 +136,19 @@
     },
     {
       "document_type": "tax_registration_certificate",
-      "file_name": "tax_registration_saarvik.pdf",
+      "file_name": "tax_registration_solvarn.pdf",
       "subject_ref": null,
-      "upload_time": "2026-09-14T09:56:00Z",
+      "upload_time": "2026-09-24T09:06:00Z",
       "expiry_date": null,
       "document_date": null,
       "issue_country": null,
       "scripted_quality_flags": [],
       "scripted_fields": [
         {
-          "field_id": "FLD-0116",
-          "document_id": "DOC-0065",
+          "field_id": "FLD-0219",
+          "document_id": "DOC-0140",
           "name": "tax_number",
-          "value": "EE-TAX-90014782",
+          "value": "EE-TAX-90021455",
           "confidence": "0.92",
           "source_page": "1",
           "corrected_by_analyst": "false"
@@ -166,29 +157,20 @@
     },
     {
       "document_type": "director_register",
-      "file_name": "director_register_saarvik.pdf",
+      "file_name": "director_register_solvarn.pdf",
       "subject_ref": null,
-      "upload_time": "2026-09-14T09:58:00Z",
+      "upload_time": "2026-09-24T09:08:00Z",
       "expiry_date": null,
       "document_date": null,
       "issue_country": null,
       "scripted_quality_flags": [],
       "scripted_fields": [
         {
-          "field_id": "FLD-0117",
-          "document_id": "DOC-0066",
+          "field_id": "FLD-0220",
+          "document_id": "DOC-0141",
           "name": "director_name",
-          "value": "Rasmus Kalda",
+          "value": "Taavi Ruumet",
           "confidence": "0.94",
-          "source_page": "1",
-          "corrected_by_analyst": "false"
-        },
-        {
-          "field_id": "FLD-0118",
-          "document_id": "DOC-0066",
-          "name": "director_name_2",
-          "value": "Triin Lepik",
-          "confidence": "0.92",
           "source_page": "1",
           "corrected_by_analyst": "false"
         }
@@ -196,20 +178,20 @@
     },
     {
       "document_type": "authorised_signatory_list",
-      "file_name": "signatory_list_saarvik.pdf",
+      "file_name": "signatory_list_solvarn.pdf",
       "subject_ref": null,
-      "upload_time": "2026-09-14T10:00:00Z",
+      "upload_time": "2026-09-24T09:10:00Z",
       "expiry_date": null,
       "document_date": null,
       "issue_country": null,
       "scripted_quality_flags": [],
       "scripted_fields": [
         {
-          "field_id": "FLD-0119",
-          "document_id": "DOC-0067",
+          "field_id": "FLD-0221",
+          "document_id": "DOC-0142",
           "name": "signatory_name",
-          "value": "Rasmus Kalda",
-          "confidence": "0.91",
+          "value": "Taavi Ruumet",
+          "confidence": "0.92",
           "source_page": "1",
           "corrected_by_analyst": "false"
         }
@@ -217,26 +199,26 @@
     },
     {
       "document_type": "ubo_declaration",
-      "file_name": "ubo_declaration_saarvik.pdf",
+      "file_name": "ubo_declaration_solvarn.pdf",
       "subject_ref": null,
-      "upload_time": "2026-09-14T10:02:00Z",
+      "upload_time": "2026-09-24T09:12:00Z",
       "expiry_date": null,
       "document_date": null,
       "issue_country": null,
       "scripted_quality_flags": [],
       "scripted_fields": [
         {
-          "field_id": "FLD-0120",
-          "document_id": "DOC-0068",
+          "field_id": "FLD-0222",
+          "document_id": "DOC-0143",
           "name": "ubo_name",
-          "value": "Oskar Magiste",
+          "value": "Ivar Kolmsaar",
           "confidence": "0.93",
           "source_page": "1",
           "corrected_by_analyst": "false"
         },
         {
-          "field_id": "FLD-0121",
-          "document_id": "DOC-0068",
+          "field_id": "FLD-0223",
+          "document_id": "DOC-0143",
           "name": "ownership_percentage",
           "value": "80.0",
           "confidence": "0.92",
@@ -247,28 +229,40 @@
     },
     {
       "document_type": "id_document",
-      "file_name": "id_card_kalda_r.jpg",
-      "subject_ref": "IND-0013",
-      "upload_time": "2026-09-14T10:04:00Z",
-      "expiry_date": "2030-04-02",
+      "file_name": "id_card_ruumet_t.jpg",
+      "subject_ref": "IND-0027",
+      "upload_time": "2026-09-24T09:14:00Z",
+      "expiry_date": "2030-04-11",
       "document_date": null,
       "issue_country": "EE",
       "scripted_quality_flags": [],
       "scripted_fields": [
         {
-          "field_id": "FLD-0122",
-          "document_id": "DOC-0069",
+          "field_id": "FLD-0224",
+          "document_id": "DOC-0144",
           "name": "full_name",
-          "value": "Rasmus Kalda",
+          "value": "Taavi Ruumet",
           "confidence": "0.95",
           "source_page": "1",
           "corrected_by_analyst": "false"
-        },
+        }
+      ]
+    },
+    {
+      "document_type": "id_document",
+      "file_name": "id_card_kolmsaar_i.jpg",
+      "subject_ref": "IND-0028",
+      "upload_time": "2026-09-24T09:16:00Z",
+      "expiry_date": "2029-08-05",
+      "document_date": null,
+      "issue_country": "EE",
+      "scripted_quality_flags": [],
+      "scripted_fields": [
         {
-          "field_id": "FLD-0123",
-          "document_id": "DOC-0069",
-          "name": "date_of_birth",
-          "value": "1977-05-21",
+          "field_id": "FLD-0225",
+          "document_id": "DOC-0145",
+          "name": "full_name",
+          "value": "Ivar Kolmsaar",
           "confidence": "0.94",
           "source_page": "1",
           "corrected_by_analyst": "false"
@@ -276,41 +270,20 @@
       ]
     },
     {
-      "document_type": "id_document",
-      "file_name": "id_card_lepik_t.jpg",
-      "subject_ref": "IND-0014",
-      "upload_time": "2026-09-14T10:06:00Z",
-      "expiry_date": "2029-08-14",
-      "document_date": null,
+      "document_type": "proof_of_address",
+      "file_name": "poa_ruumet_sep2026.pdf",
+      "subject_ref": "IND-0027",
+      "upload_time": "2026-09-24T09:18:00Z",
+      "expiry_date": null,
+      "document_date": "2026-09-06",
       "issue_country": "EE",
       "scripted_quality_flags": [],
       "scripted_fields": [
         {
-          "field_id": "FLD-0124",
-          "document_id": "DOC-0070",
-          "name": "full_name",
-          "value": "Triin Lepik",
-          "confidence": "0.94",
-          "source_page": "1",
-          "corrected_by_analyst": "false"
-        }
-      ]
-    },
-    {
-      "document_type": "id_document",
-      "file_name": "id_card_magiste_o.jpg",
-      "subject_ref": "IND-0015",
-      "upload_time": "2026-09-14T10:08:00Z",
-      "expiry_date": "2031-06-25",
-      "document_date": null,
-      "issue_country": "EE",
-      "scripted_quality_flags": [],
-      "scripted_fields": [
-        {
-          "field_id": "FLD-0125",
-          "document_id": "DOC-0071",
-          "name": "full_name",
-          "value": "Oskar Magiste",
+          "field_id": "FLD-0226",
+          "document_id": "DOC-0146",
+          "name": "document_date",
+          "value": "2026-09-06",
           "confidence": "0.93",
           "source_page": "1",
           "corrected_by_analyst": "false"
@@ -319,19 +292,19 @@
     },
     {
       "document_type": "proof_of_address",
-      "file_name": "poa_kalda_sep2026.pdf",
-      "subject_ref": "IND-0013",
-      "upload_time": "2026-09-14T10:10:00Z",
+      "file_name": "poa_kolmsaar_sep2026.pdf",
+      "subject_ref": "IND-0028",
+      "upload_time": "2026-09-24T09:20:00Z",
       "expiry_date": null,
-      "document_date": "2026-09-02",
+      "document_date": "2026-09-01",
       "issue_country": "EE",
       "scripted_quality_flags": [],
       "scripted_fields": [
         {
-          "field_id": "FLD-0126",
-          "document_id": "DOC-0072",
+          "field_id": "FLD-0227",
+          "document_id": "DOC-0147",
           "name": "document_date",
-          "value": "2026-09-02",
+          "value": "2026-09-01",
           "confidence": "0.92",
           "source_page": "1",
           "corrected_by_analyst": "false"
@@ -339,41 +312,20 @@
       ]
     },
     {
-      "document_type": "proof_of_address",
-      "file_name": "poa_lepik_aug2026.pdf",
-      "subject_ref": "IND-0014",
-      "upload_time": "2026-09-14T10:12:00Z",
+      "document_type": "source_of_funds_declaration",
+      "file_name": "source_of_funds_solvarn.pdf",
+      "subject_ref": null,
+      "upload_time": "2026-09-24T09:22:00Z",
       "expiry_date": null,
-      "document_date": "2026-08-21",
-      "issue_country": "EE",
+      "document_date": null,
+      "issue_country": null,
       "scripted_quality_flags": [],
       "scripted_fields": [
         {
-          "field_id": "FLD-0127",
-          "document_id": "DOC-0073",
-          "name": "document_date",
-          "value": "2026-08-21",
-          "confidence": "0.91",
-          "source_page": "1",
-          "corrected_by_analyst": "false"
-        }
-      ]
-    },
-    {
-      "document_type": "proof_of_address",
-      "file_name": "poa_magiste_aug2026.pdf",
-      "subject_ref": "IND-0015",
-      "upload_time": "2026-09-14T10:14:00Z",
-      "expiry_date": null,
-      "document_date": "2026-08-18",
-      "issue_country": "EE",
-      "scripted_quality_flags": [],
-      "scripted_fields": [
-        {
-          "field_id": "FLD-0128",
-          "document_id": "DOC-0074",
-          "name": "document_date",
-          "value": "2026-08-18",
+          "field_id": "FLD-0228",
+          "document_id": "DOC-0148",
+          "name": "declared_source",
+          "value": "Distribution margin on industrial valve sales",
           "confidence": "0.9",
           "source_page": "1",
           "corrected_by_analyst": "false"
@@ -381,41 +333,20 @@
       ]
     },
     {
-      "document_type": "source_of_funds_declaration",
-      "file_name": "source_of_funds_saarvik.pdf",
-      "subject_ref": null,
-      "upload_time": "2026-09-14T10:16:00Z",
-      "expiry_date": null,
-      "document_date": null,
-      "issue_country": null,
-      "scripted_quality_flags": [],
-      "scripted_fields": [
-        {
-          "field_id": "FLD-0129",
-          "document_id": "DOC-0075",
-          "name": "declared_source",
-          "value": "Subcontracting revenue from industrial clients",
-          "confidence": "0.88",
-          "source_page": "1",
-          "corrected_by_analyst": "false"
-        }
-      ]
-    },
-    {
       "document_type": "business_activity_description",
-      "file_name": "business_activity_saarvik.pdf",
+      "file_name": "business_activity_solvarn.pdf",
       "subject_ref": null,
-      "upload_time": "2026-09-14T10:18:00Z",
+      "upload_time": "2026-09-24T09:24:00Z",
       "expiry_date": null,
       "document_date": null,
       "issue_country": null,
       "scripted_quality_flags": [],
       "scripted_fields": [
         {
-          "field_id": "FLD-0130",
-          "document_id": "DOC-0076",
+          "field_id": "FLD-0229",
+          "document_id": "DOC-0149",
           "name": "declared_industry",
-          "value": "Metal fabrication",
+          "value": "Industrial equipment distribution",
           "confidence": "0.91",
           "source_page": "1",
           "corrected_by_analyst": "false"
@@ -428,15 +359,15 @@
   "field_acceptances": [],
   "scripted_registry": [
     {
-      "check_id": "REG-0005",
-      "case_id": "WAL-ONB-0006",
-      "applicant_id": "APP-0006",
+      "check_id": "REG-0010",
+      "case_id": "WAL-ONB-0012",
+      "applicant_id": "APP-0012",
       "provider_name": "MockRegistryHub EE",
       "company_status": "active",
-      "registry_legal_name": "Saarvik Metall OU",
-      "registry_number": "EE-90014782",
-      "registry_address": "Tehnika 27, 76505 Saue, Estonia",
-      "registry_directors": "Rasmus Kalda|Triin Lepik",
+      "registry_legal_name": "Solvarn Baltic OU",
+      "registry_number": "EE-90021455",
+      "registry_address": "Punane 18, 13619 Tallinn, Estonia",
+      "registry_directors": "Taavi Ruumet",
       "name_match": "match",
       "number_match": "match",
       "address_match": "match",
@@ -449,9 +380,9 @@
   ],
   "scripted_identity": [
     {
-      "check_id": "IDC-0011",
-      "case_id": "WAL-ONB-0006",
-      "individual_id": "IND-0013",
+      "check_id": "IDC-0024",
+      "case_id": "WAL-ONB-0012",
+      "individual_id": "IND-0027",
       "provider_name": "VerifyMock ID",
       "document_result": "pass",
       "liveness_result": "pass",
@@ -463,23 +394,9 @@
       "result": "pass"
     },
     {
-      "check_id": "IDC-0012",
-      "case_id": "WAL-ONB-0006",
-      "individual_id": "IND-0014",
-      "provider_name": "VerifyMock ID",
-      "document_result": "pass",
-      "liveness_result": "pass",
-      "biometric_result": "pass",
-      "address_result": "pass",
-      "name_dob_match": "match",
-      "document_expired": "false",
-      "duplicate_individual_detected": "false",
-      "result": "pass"
-    },
-    {
-      "check_id": "IDC-0013",
-      "case_id": "WAL-ONB-0006",
-      "individual_id": "IND-0015",
+      "check_id": "IDC-0025",
+      "case_id": "WAL-ONB-0012",
+      "individual_id": "IND-0028",
       "provider_name": "VerifyMock ID",
       "document_result": "pass",
       "liveness_result": "pass",
@@ -493,10 +410,10 @@
   ],
   "scripted_screening": [
     {
-      "check_id": "SCR-0015",
-      "case_id": "WAL-ONB-0006",
+      "check_id": "SCR-0033",
+      "case_id": "WAL-ONB-0012",
       "subject_type": "applicant",
-      "applicant_id": "APP-0006",
+      "applicant_id": "APP-0012",
       "individual_id": "",
       "sanctions_result": "no_match",
       "pep_result": "no_match",
@@ -505,11 +422,11 @@
       "evidence_refs": ""
     },
     {
-      "check_id": "SCR-0016",
-      "case_id": "WAL-ONB-0006",
+      "check_id": "SCR-0034",
+      "case_id": "WAL-ONB-0012",
       "subject_type": "individual",
       "applicant_id": "",
-      "individual_id": "IND-0014",
+      "individual_id": "IND-0027",
       "sanctions_result": "no_match",
       "pep_result": "no_match",
       "adverse_media_result": "none",
@@ -517,28 +434,16 @@
       "evidence_refs": ""
     },
     {
-      "check_id": "SCR-0017",
-      "case_id": "WAL-ONB-0006",
+      "check_id": "SCR-0035",
+      "case_id": "WAL-ONB-0012",
       "subject_type": "individual",
       "applicant_id": "",
-      "individual_id": "IND-0015",
-      "sanctions_result": "no_match",
-      "pep_result": "no_match",
-      "adverse_media_result": "none",
-      "severity": "none",
-      "evidence_refs": ""
-    },
-    {
-      "check_id": "SCR-0018",
-      "case_id": "WAL-ONB-0006",
-      "subject_type": "individual",
-      "applicant_id": "",
-      "individual_id": "IND-0013",
-      "sanctions_result": "possible_match",
+      "individual_id": "IND-0028",
+      "sanctions_result": "clear_match",
       "pep_result": "no_match",
       "adverse_media_result": "none",
       "severity": "critical",
-      "evidence_refs": "SCREEN-REF-SAN-2281"
+      "evidence_refs": "SCREEN-REF-SAN-7714"
     }
   ]
 }

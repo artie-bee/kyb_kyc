@@ -218,9 +218,13 @@ def run(conn, case_id: str, application: dict, kb: KnowledgeBase,
         # The check's own result covers everything the register said, including a
         # failure to corroborate the beneficial ownership - that is a registry
         # outcome even though the rule that acts on it lives in the UBO policy.
-        registry_result = ("review" if (any(f["source"] == "registry" for f in findings)
-                                        or response.ubo_supported_by_registry is False)
-                           else "pass")
+        registry_findings = [f for f in findings if f["source"] == "registry"]
+        if any(f["blocking"] for f in registry_findings):
+            registry_result = "fail"           # dissolved, struck off, name/number mismatch
+        elif registry_findings or response.ubo_supported_by_registry is False:
+            registry_result = "review"
+        else:
+            registry_result = "pass"
         conn.execute(
             "INSERT INTO registry_check (check_id, case_id, applicant_id, provider_name,"
             " company_status, registry_legal_name, registry_number, registry_address,"
@@ -359,11 +363,15 @@ def run(conn, case_id: str, application: dict, kb: KnowledgeBase,
                     f"which is more than the whole", [u["ubo_id"] for u in ubos])
 
     # ---- routing ----------------------------------------------------------
+    # Screening runs either way. A case held here still gets screened, so the
+    # analyst opens one queue item with the registry, identity and screening
+    # picture together rather than being asked the same question twice.
+    next_step = "screening"
     if blocking:
-        status, owner, next_step = "analyst_review_required", "analyst", None
+        status, owner = "analyst_review_required", "analyst"
         summary = f"{len(blocking)} blocking outcome(s): " + "; ".join(blocking[:3])
     else:
-        status, owner, next_step = "verification_in_progress", "system", "screening"
+        status, owner = "verification_in_progress", "system"
         summary = (f"{len(findings)} non-blocking finding(s) carried forward"
                    if findings else "no findings")
 

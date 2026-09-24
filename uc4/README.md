@@ -11,6 +11,8 @@ kb/                         Knowledge base (read-only CSV, versioned in kb_manif
   extraction_fields.csv        Fields each document type must yield (Section 5.4)
   registry_rules.csv           Registry outcomes and what blocks (Section 5.5)
   ubo_policy.csv               Beneficial-ownership threshold and findings (Section 5.6)
+  screening_rules.csv          Sanctions and PEP outcomes (Section 5.7)
+  adverse_media_categories.csv Media relevance categories (Section 5.7)
 orchestrator/
   orchestrator.py           The orchestration layer: runs steps in order, stops cleanly
   kb.py                     Loads the KB + tiny rule engine
@@ -21,7 +23,9 @@ orchestrator/
   steps/analyst_review.py   Analyst release of a document held at Step 3
   steps/extraction.py       Step 4: OCR and structured extraction (Section 5.4)
   steps/verification.py     Step 5: registry, identity and UBO (Sections 5.5, 5.6)
-  providers.py              Registry and identity providers (mock / live stubs)
+  steps/screening.py        Step 6: sanctions, PEP and adverse media (Section 5.7)
+  providers.py              Registry, identity and screening providers (mock / live stubs)
+  media_relevance.py        AI half of Step 6 (mock / Claude stub)
   quality_checker.py        AI half of Step 3 (mock / Claude Vision stub)
   extractor.py              AI half of Step 4 (mock / Claude stub)
 sample_applications/        6 test applications (normal, complex, branch, and failure cases)
@@ -30,9 +34,11 @@ tools/
   dataset_to_applications.py  Dataset CSVs -> application JSON; prints every assumption
   compare_to_dataset.py       Runs the orchestrator and scores it against the dataset
 tests/test_first_layers.py    4 unit tests
-tests/test_against_dataset.py 36 tests - full match against the dataset:
-                              50/50 case fields, 123/123 documents,
-                              192/192 extracted fields, 36/36 verification
+tests/test_against_dataset.py 50 tests - full match against the 14-case dataset:
+                              70/70 case fields, 168/168 documents, 256/256 extracted
+                              fields, 50/50 verification, 39/39 screening
+tests/test_schema_sync.py     6 tests - fails if the dataset or database gains a
+                              column or enum value the schema file does not describe
 
 ## Run
 # On Windows PowerShell the shell does not expand the glob, so expand it explicitly:
@@ -57,8 +63,14 @@ application -> [Step 1 intake] --primary--> [Step 2 requirement pack] -> [Step 3
                     --missing / low confidence / date conflict--> analyst_review_required
                     --required checklist item outstanding--> stays with the customer
 
-[Step 5 verification] --blocking outcome--> analyst_review_required
-                      --non-blocking findings--> screening (findings travel with the case)
+[Step 5 verification] --> [Step 6 screening] either way; a blocking outcome sets
+                          analyst_review_required so the analyst sees both together
+
+[Step 6 screening] --clear sanctions match / serious media--> compliance
+                   --possible sanctions match--> analyst
+                   --PEP / moderate media--> risk_assessment, findings attached
+                   --provider silent after a retry--> insufficient evidence, analyst
+                   --nothing found--> risk_assessment (unless an earlier step held it)
 
 A document held at Step 3 waits for a named analyst: steps/analyst_review.py
 release_document(document_id, analyst_id, decision, reason) with decision
@@ -99,6 +111,24 @@ in the finding table with evidence references, and the case goes on to screening
   mock  replays registry_check.csv / identity_check.csv - the default, calls no API
   live  STUBS, raise; see orchestrator/providers.py
 Set the mode with PROVIDER_MODE in orchestrator/orchestrator.py.
+
+## Step 6 - screening (Section 5.7)
+Subjects are the entity plus every director, beneficial owner and authorised
+signatory. Sanctions and PEP are provider list results. Adverse-media relevance -
+is this article about this person, and how serious - is the AI part and sits behind
+media_relevance.py.
+Four things this step will not do:
+  1. no code path turns a sanctions possible_match or clear_match into no_match;
+     the database refuses the update, and only a human decision resolves one;
+  2. a provider that did not answer is not a pass (SC-05..SC-07 retry once, then
+     record insufficient evidence);
+  3. any human_required outcome sets requires_human_signoff and blocks approval;
+  4. findings are internal - they never reach a field the customer could be shown.
+restricted_finding is set on the case whenever there is any sanctions, PEP or
+adverse-media finding, ready for Step 8 to force generic customer wording.
+  mock    replays screening_check.csv - the default, calls no API
+  live    STUBS, raise; see orchestrator/providers.py and media_relevance.py
+Set the modes with PROVIDER_MODE and MEDIA_ASSESSOR_MODE in orchestrator.py.
 
 ## Step 3 - document quality (Section 5.3)
 Deterministic checks (file type, expiry, proof-of-address age, page count) run in code.

@@ -1,0 +1,10 @@
+rule_id,check,result,severity,outcome,human_required,description
+SC-01,sanctions,possible_match,critical,analyst_review,true,A possible sanctions match stops the case for an analyst. No automated step may clear or downgrade it; the system can neither approve nor reject the case while it stands
+SC-02,sanctions,clear_match,critical,escalate_compliance,true,A confirmed sanctions match goes straight to compliance. No automated step may clear or downgrade it
+SC-03,pep,pep_match,high,enhanced_due_diligence,true,A politically exposed person requires enhanced due diligence and human sign-off. PEP status alone is never a reason to reject
+SC-04,pep,close_associate_family,high,enhanced_due_diligence,true,A close associate or family member of a PEP is treated the same way as a PEP for due-diligence purposes
+SC-05,sanctions,unavailable,medium,insufficient_evidence,true,The sanctions provider did not answer. Retry once and then record insufficient evidence; silence is not a clear result
+SC-06,pep,unavailable,medium,insufficient_evidence,true,The PEP provider did not answer. Retry once and then record insufficient evidence
+SC-07,adverse_media,unavailable,medium,insufficient_evidence,true,The adverse-media provider did not answer. Retry once and then record insufficient evidence
+SC-08,sanctions,no_match,none,pass,false,No sanctions match for this subject
+SC-09,pep,no_match,none,pass,false,No PEP match for this subject

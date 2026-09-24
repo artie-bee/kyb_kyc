@@ -9,6 +9,7 @@ Run: python -m pytest tests -q   (or: python tests/test_against_dataset.py)
 import collections
 import copy
 import csv
+import sqlite3
 import json
 import subprocess
 import sys
@@ -25,10 +26,13 @@ from orchestrator.quality_checker import (MockQualityChecker,                  #
 from orchestrator.extractor import (ExtractedValue, ExtractionResult,        # noqa: E402
                                     UnknownExtractedField)
 from orchestrator import providers                                            # noqa: E402
+from orchestrator.media_relevance import (MediaAssessment,                    # noqa: E402
+                                          UnknownMediaCategory)
 from orchestrator.steps import (analyst_review, document_quality, extraction,  # noqa: E402
                                 verification)
 from tools.compare_to_dataset import (compare, compare_documents,              # noqa: E402
-                                      compare_fields, compare_verification, render,
+                                      compare_fields, compare_screening,
+                                      compare_verification, render,
                                       run_orchestrator, score)
 from tools.dataset_to_applications import DEFAULT_DATASET, DEFAULT_OUT         # noqa: E402
 
@@ -36,6 +40,8 @@ from tools.dataset_to_applications import DEFAULT_DATASET, DEFAULT_OUT         #
 # the status Step 3 produces. Every other case carries a status set by Steps 4-6
 # (risk, screening, decision), which are not built yet.
 TERMINAL_AT_STEP3 = {"WAL-ONB-0002": "resubmission_required"}
+# Case 14 also ends with the customer, but its dataset status (closed_withdrawn)
+# is set when the chase expires at Step 8, which is not built yet.
 
 
 def _csv(name: str) -> list[dict]:
@@ -95,7 +101,7 @@ def _rerun_verification(app: dict, registry_edit=None, identity_edit=None,
 def test_dataset_comparison_is_a_full_match():
     rows = _rows()
     ok, total = score(rows)
-    assert total == 50, f"expected 50 field checks over 10 cases, got {total}"
+    assert total == 70, f"expected 70 field checks over 14 cases, got {total}"
     assert ok == total, (
         f"{ok}/{total} field checks match; mismatches:\n"
         + render([r for r in rows if r[4] == "NO"]))
@@ -107,7 +113,7 @@ def test_every_dataset_case_produced_a_checklist_except_the_blocked_ones():
         "SELECT case_id, COUNT(*) FROM requirement_pack GROUP BY case_id"))
     # All ten dataset cases classify cleanly, including the white-label partner,
     # which gets a KYB intake pack and then stops.
-    assert len(packs) == 10, f"expected a requirement pack for all 10 cases, got {len(packs)}"
+    assert len(packs) == 14, f"expected a requirement pack for all 14 cases, got {len(packs)}"
 
 
 def test_white_label_case_is_branched_and_scoped_undetermined():
@@ -131,7 +137,7 @@ def test_white_label_case_is_branched_and_scoped_undetermined():
 def test_document_quality_matches_the_dataset_in_mock_mode():
     rows = compare_documents(run_orchestrator(DEFAULT_OUT), DEFAULT_DATASET)
     ok, total = score(rows)
-    assert total == 123, f"expected 123 assessed documents, got {total}"
+    assert total == 168, f"expected 168 assessed documents, got {total}"
     assert ok == total, (
         f"{ok}/{total} documents match; mismatches:\n"
         + render([r for r in rows if r[4] == "NO"]))
@@ -164,7 +170,8 @@ def test_case_status_after_step_3():
             # Not terminal here: Step 3 must leave it in a state a later step can
             # pick up, never in a final status it has not earned.
             assert status in ("verification_in_progress", "analyst_review_required",
-                              "document_quality_review", "submitted"), \
+                              "document_quality_review", "resubmission_required",
+                              "submitted"), \
                 f"{case_id} left Step 3 in unexpected status {status}"
 
 
@@ -382,7 +389,7 @@ def test_a_release_needs_a_reason_a_decision_and_a_held_document():
 def test_extracted_fields_match_the_dataset_in_mock_mode():
     rows = compare_fields(run_orchestrator(DEFAULT_OUT), DEFAULT_DATASET)
     ok, total = score(rows)
-    assert total == 192, f"expected 192 extracted fields, got {total}"
+    assert total == 256, f"expected 256 extracted fields, got {total}"
     assert ok == total, (
         f"{ok}/{total} fields match; mismatches:\n"
         + render([r for r in rows if r[4] == "NO"]))
@@ -406,7 +413,7 @@ def test_extraction_coverage_accounts_for_every_dataset_field():
     assert ours == ds, f"per-case field counts differ: dataset={dict(ds)} ours={dict(ours)}"
 
     rows = compare_fields(conn, DEFAULT_DATASET)
-    assert score(rows)[1] == sum(ds.values()) == 192
+    assert score(rows)[1] == sum(ds.values()) == 256
 
 
 def test_case_2_is_extracted_while_it_waits_for_a_resubmission():
@@ -537,7 +544,7 @@ def test_an_extractor_may_not_invent_a_field():
 def test_verification_matches_the_dataset_in_mock_mode():
     rows = compare_verification(run_orchestrator(DEFAULT_OUT), DEFAULT_DATASET)
     ok, total = score(rows)
-    assert total == 36, f"expected 8 registry + 20 identity + 8 UBO checks, got {total}"
+    assert total == 50, f"expected 11 registry + 28 identity + 11 UBO checks, got {total}"
     assert ok == total, (
         f"{ok}/{total} verification checks match; mismatches:\n"
         + render([r for r in rows if r[4] == "NO"]))
@@ -625,7 +632,8 @@ def test_an_unavailable_provider_is_never_a_pass():
     conn, result = _rerun_verification(app, registry_provider=SilentRegistry())
 
     assert result.registry_result == "unavailable" != "pass"
-    assert result.status == "analyst_review_required" and result.next_step is None
+    assert result.status == "analyst_review_required"
+    assert result.next_step == "screening", "a blocked case is still screened"
     assert any("RG-09" in b for b in result.blocking)
     assert SilentRegistry.calls == verification.MAX_REGISTRY_ATTEMPTS,         "RG-09 retries once, then stops rather than hammering the provider"
 
@@ -642,7 +650,8 @@ def test_blocking_registry_outcomes_stop_the_case():
             row["company_status"] = "dissolved"
 
     _, result = _rerun_verification(app, registry_edit=dissolve)
-    assert result.status == "analyst_review_required" and result.next_step is None
+    assert result.status == "analyst_review_required"
+    assert result.registry_result == "fail", "a dissolved company fails, it does not merely review"
     assert any("RG-01" in b for b in result.blocking)
 
     def rename(registry):
@@ -663,7 +672,7 @@ def test_identity_failures_route_correctly():
         return edit
 
     _, failed = _rerun_verification(app, identity_edit=first("result", "fail"))
-    assert failed.status == "analyst_review_required" and failed.next_step is None
+    assert failed.status == "analyst_review_required"
 
     _, review = _rerun_verification(app, identity_edit=first("result", "review"))
     assert review.status == "analyst_review_required", "'review' is an analyst question too"
@@ -708,6 +717,170 @@ def test_every_provider_call_is_audited_with_name_and_mode():
     assert len(events) == reg + idc
     assert all("mode=mock" in e["payload_summary"] for e in events)
     assert all("rules=" in e["payload_summary"] for e in events)
+
+
+# ---------------------------------------------------------------------------
+# Step 6 - screening
+# ---------------------------------------------------------------------------
+
+def test_screening_matches_the_dataset_in_mock_mode():
+    rows = compare_screening(run_orchestrator(DEFAULT_OUT), DEFAULT_DATASET)
+    ok, total = score(rows)
+    assert total == 39, f"expected 39 screening rows, got {total}"
+    assert ok == total, (
+        f"{ok}/{total} screening checks match; mismatches:\n"
+        + render([r for r in rows if r[4] == "NO"]))
+
+
+def _case(dataset_case_id):
+    """Cases run in dataset order, so the nth minted id matches the nth case."""
+    return dataset_case_id
+
+
+def test_screening_runs_on_every_director_ubo_and_signatory():
+    """Missing a subject is the failure that matters here, so count them all."""
+    conn = run_orchestrator(DEFAULT_OUT)
+    screened = {r["case_id"] for r in conn.execute(
+        "SELECT DISTINCT case_id FROM screening_check")}
+    assert screened, "no case was screened at all"
+    for case_id in sorted(screened):
+        people = conn.execute(
+            "SELECT COUNT(*) FROM individual WHERE applicant_id = "
+            "(SELECT applicant_id FROM onboarding_case WHERE case_id = ?) "
+            "AND role IN ('director','ubo','authorised_signatory','sole_trader')",
+            (case_id,)).fetchone()[0]
+        rows = conn.execute("SELECT subject_type, individual_id FROM screening_check "
+                            "WHERE case_id = ?", (case_id,)).fetchall()
+        entity = [r for r in rows if r["subject_type"] == "applicant"]
+        individuals = [r for r in rows if r["subject_type"] == "individual"]
+        assert len(entity) == 1, f"{case_id} must screen the entity exactly once"
+        assert len(individuals) == people, (
+            f"{case_id} has {people} screenable people but {len(individuals)} were screened")
+        assert len({r["individual_id"] for r in individuals}) == people, \
+            f"{case_id} screened a subject twice"
+
+
+def test_case_5_pep_on_ubo_goes_to_edd_and_needs_a_human():
+    conn = run_orchestrator(DEFAULT_OUT)
+    case_id = _case("WAL-ONB-0005")
+    row = conn.execute(
+        "SELECT s.* FROM screening_check s JOIN individual i USING (individual_id) "
+        "WHERE s.case_id = ? AND i.full_name = 'Aurelio Vantano'", (case_id,)).fetchone()
+    assert row["pep_result"] == "pep_match"
+
+    finding = conn.execute(
+        "SELECT * FROM finding WHERE case_id = ? AND rule_id = 'SC-03'", (case_id,)).fetchone()
+    assert finding is not None, "a PEP match must be recorded as a finding"
+    case = conn.execute("SELECT * FROM onboarding_case WHERE case_id = ?", (case_id,)).fetchone()
+    assert case["requires_human_signoff"] == 1
+    assert case["restricted_finding"] == 1
+    # PEP alone does not stop the case: it continues with the finding attached.
+    assert case["status"] == "verification_in_progress"
+
+
+def test_case_6_possible_match_holds_the_case_and_is_never_downgraded():
+    conn = run_orchestrator(DEFAULT_OUT)
+    case_id = _case("WAL-ONB-0006")
+    row = conn.execute("SELECT * FROM screening_check WHERE case_id = ? "
+                       "AND sanctions_result = 'possible_match'", (case_id,)).fetchone()
+    assert row is not None
+
+    case = conn.execute("SELECT * FROM onboarding_case WHERE case_id = ?", (case_id,)).fetchone()
+    assert case["status"] == "analyst_review_required"
+    assert case["next_action_owner"] == "analyst"
+    assert case["restricted_finding"] == 1
+    assert case["requires_human_signoff"] == 1
+
+    # No code path clears it, and the database refuses to let one try.
+    assert conn.execute(
+        "SELECT COUNT(*) FROM screening_check WHERE case_id = ? AND sanctions_result = 'no_match'",
+        (case_id,)).fetchone()[0] == 3, "only the three clean subjects are no_match"
+    try:
+        conn.execute("UPDATE screening_check SET sanctions_result = 'no_match' "
+                     "WHERE check_id = ?", (row["check_id"],))
+        raise AssertionError("a sanctions match must not be updatable to no_match")
+    except sqlite3.IntegrityError:
+        pass
+
+
+def test_case_7_serious_adverse_media_escalates_to_compliance():
+    conn = run_orchestrator(DEFAULT_OUT)
+    case_id = _case("WAL-ONB-0007")
+    row = conn.execute("SELECT * FROM screening_check WHERE case_id = ? "
+                       "AND adverse_media_result = 'serious'", (case_id,)).fetchone()
+    assert row is not None
+    case = conn.execute("SELECT * FROM onboarding_case WHERE case_id = ?", (case_id,)).fetchone()
+    assert case["status"] == "analyst_review_required"
+    assert case["next_action_owner"] == "compliance"
+    assert case["restricted_finding"] == 1 and case["requires_human_signoff"] == 1
+    finding = conn.execute("SELECT * FROM finding WHERE case_id = ? AND rule_id = 'AM-serious'",
+                           (case_id,)).fetchone()
+    assert finding["blocking"] == 1
+    assert row["evidence_refs"], "a media finding must carry its provider references"
+
+
+def test_case_12_clear_sanctions_match_goes_to_compliance():
+    conn = run_orchestrator(DEFAULT_OUT)
+    case_id = _case("WAL-ONB-0012")
+    row = conn.execute("SELECT * FROM screening_check WHERE case_id = ? "
+                       "AND sanctions_result = 'clear_match'", (case_id,)).fetchone()
+    assert row is not None and row["severity"] == "critical"
+    case = conn.execute("SELECT * FROM onboarding_case WHERE case_id = ?", (case_id,)).fetchone()
+    assert case["status"] == "analyst_review_required"
+    assert case["next_action_owner"] == "compliance"
+    assert case["requires_human_signoff"] == 1 and case["restricted_finding"] == 1
+    finding = conn.execute("SELECT * FROM finding WHERE case_id = ? AND rule_id = 'SC-02'",
+                           (case_id,)).fetchone()
+    assert finding is not None and finding["blocking"] == 1
+
+
+def test_case_13_unavailable_media_is_never_a_pass():
+    conn = run_orchestrator(DEFAULT_OUT)
+    case_id = _case("WAL-ONB-0013")
+    row = conn.execute("SELECT * FROM screening_check WHERE case_id = ? "
+                       "AND adverse_media_result = 'unavailable'", (case_id,)).fetchone()
+    assert row is not None and row["attempts"] >= 1
+    case = conn.execute("SELECT * FROM onboarding_case WHERE case_id = ?", (case_id,)).fetchone()
+    assert case["status"] == "analyst_review_required", "silence must not clear the case"
+    finding = conn.execute("SELECT * FROM finding WHERE case_id = ? AND rule_id = 'AM-unavailable'",
+                           (case_id,)).fetchone()
+    assert finding is not None
+    # An unanswered check is a gap in the evidence, not a finding about a person.
+    assert case["restricted_finding"] == 0
+
+
+def test_screening_does_not_release_a_case_verification_held():
+    """Case 11 is dissolved on the register and screens clean; it stays held."""
+    conn = run_orchestrator(DEFAULT_OUT)
+    case_id = _case("WAL-ONB-0011")
+    assert conn.execute("SELECT COUNT(*) FROM screening_check WHERE case_id = ?",
+                        (case_id,)).fetchone()[0] == 4
+    assert not conn.execute("SELECT 1 FROM finding WHERE case_id = ? AND source = 'screening'",
+                            (case_id,)).fetchone()
+    case = conn.execute("SELECT * FROM onboarding_case WHERE case_id = ?", (case_id,)).fetchone()
+    assert case["status"] == "analyst_review_required"
+    assert case["restricted_finding"] == 0, "nothing adverse was found about anyone here"
+
+
+def test_screening_findings_stay_internal():
+    """Nothing a customer could be shown carries a screening term."""
+    conn = run_orchestrator(DEFAULT_OUT)
+    restricted = ("sanction", "pep ", "politically exposed", "adverse media", "watchlist",
+                  "screening")
+    for table, column in (("checklist_item", "note"), ("document", "resubmission_reasons"),
+                          ("document", "release_reason")):
+        for row in conn.execute(f"SELECT {column} AS v FROM {table} WHERE {column} IS NOT NULL"):
+            text = (row["v"] or "").lower()
+            assert not any(word in text for word in restricted), \
+                f"{table}.{column} carries screening wording: {row['v']!r}"
+
+
+def test_a_media_assessor_may_not_invent_a_category():
+    try:
+        MediaAssessment(category="extremely_bad").validate()
+        raise AssertionError("an unknown category should be rejected")
+    except UnknownMediaCategory:
+        pass
 
 
 def test_a_checker_may_not_invent_a_flag():

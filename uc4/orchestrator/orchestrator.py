@@ -15,9 +15,10 @@ from . import db
 from .kb import KnowledgeBase
 from .extractor import get_extractor
 from .quality_checker import get_checker
-from .providers import get_providers
+from .media_relevance import get_media_assessor
+from .providers import get_providers, get_screening_provider
 from .steps import (analyst_review, document_quality, extraction, intake, requirement_pack,
-                    verification)
+                    screening, verification)
 
 # Which document-quality checker to use. "mock" replays scripted verdicts;
 # "claude_vision" is a stub and raises. Default stays mock so that running the
@@ -27,20 +28,24 @@ QUALITY_CHECKER_MODE = "mock"
 EXTRACTOR_MODE = "mock"
 # And for the paid provider calls in Step 5. "live" providers are stubs and raise.
 PROVIDER_MODE = "mock"
+# The adverse-media relevance call in Step 6. "claude" is a stub and raises.
+MEDIA_ASSESSOR_MODE = "mock"
 
 STEPS = {
     "requirement_pack": requirement_pack.run,
     "document_quality": document_quality.run,
     "extraction": extraction.run,
     "verification": verification.run,
-    # "screening": screening.run,   <- next layer
+    "screening": screening.run,
+    # "risk_assessment": risk_assessment.run,   <- next layer
 }
 
 
 def process_application(conn, application: dict, kb: KnowledgeBase,
                         checker_mode: str = QUALITY_CHECKER_MODE,
                         extractor_mode: str = EXTRACTOR_MODE,
-                        provider_mode: str = PROVIDER_MODE) -> dict:
+                        provider_mode: str = PROVIDER_MODE,
+                        media_mode: str = MEDIA_ASSESSOR_MODE) -> dict:
     trace = {"application_id": application.get("application_id")}
 
     result = intake.run(conn, application, kb)
@@ -59,6 +64,9 @@ def process_application(conn, application: dict, kb: KnowledgeBase,
         elif next_step == "verification":
             reg, ident = get_providers(provider_mode, application)
             kwargs = {"registry_provider": reg, "identity_provider": ident}
+        elif next_step == "screening":
+            kwargs = {"screening_provider": get_screening_provider(provider_mode, application),
+                      "media_assessor": get_media_assessor(media_mode)}
         step_result = STEPS[next_step](conn, result.case_id, application, kb, **kwargs)
         trace[next_step] = step_result.__dict__
 
@@ -112,6 +120,7 @@ def main(paths: list[str], db_path: str = "onboarding.db") -> None:
         pack = trace.get("requirement_pack", {})
         dq = trace.get("document_quality", {})
         ex = trace.get("extraction", {})
+        sc = trace.get("screening", {})
         print(f"{i['case_id']}  {Path(p).name:<32} type={i['applicant_type']!s:<24} "
               f"route={i['route']:<18} scope={i['entity_scope']!s:<17} "
               f"items={pack.get('items_required', '-')}/{pack.get('items_optional', '-')}/"
@@ -120,10 +129,12 @@ def main(paths: list[str], db_path: str = "onboarding.db") -> None:
               f"{dq.get('manual_review', '-')}  "
               f"fields={ex.get('fields_extracted', '-')}"
               f"/{ex.get('low_confidence', '-')}  "
-              f"status={ex.get('status') or dq.get('status') or pack.get('status') or i['status']}  "
+              f"scr={sc.get('subjects_screened', '-')}"
+              f"/{len(sc.get('findings', [])) if sc else '-'}  "
+              f"status={sc.get('status') or ex.get('status') or dq.get('status') or pack.get('status') or i['status']}  "
               f"next={trace.get('waiting_for')}")
         for prob in (i["problems"] + pack.get("problems", []) + dq.get("problems", [])
-                     + ex.get("problems", [])):
+                     + ex.get("problems", []) + sc.get("problems", [])):
             print(f"{'':12}! {prob}")
 
 

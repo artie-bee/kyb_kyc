@@ -1,0 +1,171 @@
+{
+  "application_id": "PORTAL-WAL-ONB-0014",
+  "source_channel": "portal",
+  "programme_type": "direct",
+  "applicant": {
+    "legal_name": "Elise Kaarma",
+    "trading_name": "Kaarma Ceramics",
+    "registration_number": "EE-FIE-4471208",
+    "entity_type": "sole_trader",
+    "country": "EE",
+    "business_activity": "Studio ceramics and small-batch tableware",
+    "expected_usage": "One card; up to 1500 EUR per month on clay, glazes and kiln hire",
+    "vat_registered": false
+  },
+  "ownership": {
+    "ownership_layers": 0,
+    "has_corporate_shareholder": false,
+    "has_trust_or_nominee": false
+  },
+  "individuals": [
+    {
+      "ref": "IND-0032",
+      "role": "sole_trader",
+      "full_name": "Elise Kaarma",
+      "date_of_birth": "1994-08-23",
+      "nationality": "EE",
+      "residence_country": "EE",
+      "relationship_to_entity": "Registered sole trader and sole beneficial owner"
+    }
+  ],
+  "ubos": [],
+  "flags": {
+    "spend_above_50k": false,
+    "nominee_or_trust_in_chain": false,
+    "ubo_indirect_25pct_or_more": false,
+    "signatory_not_director": false,
+    "vat_registered": false
+  },
+  "documents": [
+    {
+      "document_type": "registry_extract",
+      "file_name": "ee_fie_registry_extract_kaarma.pdf",
+      "subject_ref": null,
+      "upload_time": "2026-09-26T12:12:00Z",
+      "expiry_date": null,
+      "document_date": null,
+      "issue_country": "EE",
+      "scripted_quality_flags": [],
+      "scripted_fields": [
+        {
+          "field_id": "FLD-0250",
+          "document_id": "DOC-0164",
+          "name": "company_name",
+          "value": "Elise Kaarma",
+          "confidence": "0.96",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        },
+        {
+          "field_id": "FLD-0251",
+          "document_id": "DOC-0164",
+          "name": "registration_number",
+          "value": "EE-FIE-4471208",
+          "confidence": "0.95",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        },
+        {
+          "field_id": "FLD-0252",
+          "document_id": "DOC-0164",
+          "name": "registered_address",
+          "value": "Vabriku 31-2, 10411 Tallinn, Estonia",
+          "confidence": "0.93",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        },
+        {
+          "field_id": "FLD-0253",
+          "document_id": "DOC-0164",
+          "name": "entity_status",
+          "value": "active",
+          "confidence": "0.94",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        }
+      ]
+    },
+    {
+      "document_type": "id_document",
+      "file_name": "id_card_kaarma_e.jpg",
+      "subject_ref": "IND-0032",
+      "upload_time": "2026-09-26T12:14:00Z",
+      "expiry_date": "2032-03-19",
+      "document_date": null,
+      "issue_country": "EE",
+      "scripted_quality_flags": [],
+      "scripted_fields": [
+        {
+          "field_id": "FLD-0254",
+          "document_id": "DOC-0165",
+          "name": "full_name",
+          "value": "Elise Kaarma",
+          "confidence": "0.95",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        }
+      ]
+    },
+    {
+      "document_type": "proof_of_address",
+      "file_name": "poa_kaarma_screenshot.jpg",
+      "subject_ref": "IND-0032",
+      "upload_time": "2026-09-26T12:16:00Z",
+      "expiry_date": null,
+      "document_date": null,
+      "issue_country": "EE",
+      "scripted_quality_flags": [
+        "screenshot_not_original"
+      ],
+      "scripted_fields": []
+    },
+    {
+      "document_type": "source_of_funds_declaration",
+      "file_name": "source_of_funds_kaarma.pdf",
+      "subject_ref": null,
+      "upload_time": "2026-09-26T12:18:00Z",
+      "expiry_date": null,
+      "document_date": null,
+      "issue_country": null,
+      "scripted_quality_flags": [],
+      "scripted_fields": [
+        {
+          "field_id": "FLD-0255",
+          "document_id": "DOC-0167",
+          "name": "declared_source",
+          "value": "Studio sales and commissioned tableware",
+          "confidence": "0.9",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        }
+      ]
+    },
+    {
+      "document_type": "business_activity_description",
+      "file_name": "business_activity_kaarma.pdf",
+      "subject_ref": null,
+      "upload_time": "2026-09-26T12:20:00Z",
+      "expiry_date": null,
+      "document_date": null,
+      "issue_country": null,
+      "scripted_quality_flags": [],
+      "scripted_fields": [
+        {
+          "field_id": "FLD-0256",
+          "document_id": "DOC-0168",
+          "name": "declared_industry",
+          "value": "Studio ceramics",
+          "confidence": "0.92",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        }
+      ]
+    }
+  ],
+  "analyst_releases": [],
+  "field_corrections": [],
+  "field_acceptances": [],
+  "scripted_registry": [],
+  "scripted_identity": [],
+  "scripted_screening": []
+}

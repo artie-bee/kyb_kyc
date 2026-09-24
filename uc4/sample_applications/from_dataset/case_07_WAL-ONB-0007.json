@@ -453,5 +453,43 @@
       "duplicate_individual_detected": "false",
       "result": "pass"
     }
+  ],
+  "scripted_screening": [
+    {
+      "check_id": "SCR-0019",
+      "case_id": "WAL-ONB-0007",
+      "subject_type": "applicant",
+      "applicant_id": "APP-0007",
+      "individual_id": "",
+      "sanctions_result": "no_match",
+      "pep_result": "no_match",
+      "adverse_media_result": "none",
+      "severity": "none",
+      "evidence_refs": ""
+    },
+    {
+      "check_id": "SCR-0020",
+      "case_id": "WAL-ONB-0007",
+      "subject_type": "individual",
+      "applicant_id": "",
+      "individual_id": "IND-0017",
+      "sanctions_result": "no_match",
+      "pep_result": "no_match",
+      "adverse_media_result": "none",
+      "severity": "none",
+      "evidence_refs": ""
+    },
+    {
+      "check_id": "SCR-0021",
+      "case_id": "WAL-ONB-0007",
+      "subject_type": "individual",
+      "applicant_id": "",
+      "individual_id": "IND-0016",
+      "sanctions_result": "no_match",
+      "pep_result": "no_match",
+      "adverse_media_result": "serious",
+      "severity": "high",
+      "evidence_refs": "SCREEN-REF-MEDIA-5514|SCREEN-REF-MEDIA-5517"
+    }
   ]
 }

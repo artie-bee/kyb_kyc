@@ -56,6 +56,90 @@ class IdentityResponse:
     result: str = UNAVAILABLE
 
 
+@dataclass
+class ScreeningResponse:
+    """Sanctions, PEP and adverse-media results for one subject.
+
+    A result the provider could not give comes back as UNAVAILABLE. Nothing in
+    the pipeline may turn an unavailable into a clear result, and nothing may
+    turn a sanctions match into a no_match: only a human decision resolves one.
+    """
+
+    available: bool = True
+    provider_name: str = ""
+    subject_type: str = "individual"
+    individual_id: str | None = None
+    applicant_id: str | None = None
+    sanctions_result: str = UNAVAILABLE
+    pep_result: str = UNAVAILABLE
+    adverse_media_result: str = UNAVAILABLE
+    severity: str = "none"
+    evidence_refs: list[str] = field(default_factory=list)
+
+
+class ScreeningProvider:
+    mode = "base"
+    name = "base"
+    version: str | None = None
+
+    def screen(self, subject: dict, case: dict) -> ScreeningResponse:
+        raise NotImplementedError
+
+
+class MockScreeningProvider(ScreeningProvider):
+    """Replays the screening row scripted for each subject."""
+
+    mode = "mock"
+    name = "ScreenMock Global"
+
+    def __init__(self, scripted: dict | None = None):
+        self.scripted = scripted or {}
+
+    def screen(self, subject: dict, case: dict) -> ScreeningResponse:
+        key = (case["case_id"], subject.get("dataset_ref") or "")
+        row = self.scripted.get(key)
+        if row is None:
+            return ScreeningResponse(available=False, provider_name=self.name,
+                                     subject_type=subject["subject_type"],
+                                     individual_id=subject.get("individual_id"),
+                                     applicant_id=subject.get("applicant_id"))
+        return ScreeningResponse(
+            available=True, provider_name=self.name,
+            subject_type=subject["subject_type"],
+            individual_id=subject.get("individual_id"),
+            applicant_id=subject.get("applicant_id"),
+            sanctions_result=row["sanctions_result"], pep_result=row["pep_result"],
+            adverse_media_result=row["adverse_media_result"], severity=row["severity"],
+            evidence_refs=[e for e in (row.get("evidence_refs") or "").split("|") if e])
+
+
+class LiveScreeningProvider(ScreeningProvider):
+    """Call a real sanctions, PEP and adverse-media provider.
+
+    TODO: not wired up. No API call is made yet - calling screen() raises.
+
+    When implemented it must:
+      - be called once per subject after the Step 5 gate, never speculatively;
+      - return UNAVAILABLE rather than an optimistic no_match on any non-answer,
+        because SC-05 to SC-07 turn silence into insufficient evidence and a
+        false no_match would clear a case that was never actually screened;
+      - never be re-run to try for a cleaner answer on a subject that already
+        returned a match - that is shopping, and the match stands until a human
+        resolves it;
+      - carry the provider's own reference for every finding into evidence_refs,
+        so an analyst can look the hit up rather than take our word for it;
+      - set `version` to the provider's list version and date for the audit row.
+    """
+
+    mode = "live"
+    name = "TODO-screening"
+
+    def screen(self, subject: dict, case: dict) -> ScreeningResponse:
+        raise NotImplementedError(
+            "LiveScreeningProvider is a stub: no API call is wired up yet. "
+            "Run with the mock provider (the default) until it is.")
+
+
 class RegistryProvider:
     mode = "base"
     name = "base"
@@ -181,6 +265,7 @@ class LiveIdentityProvider(IdentityProvider):
 
 
 REGISTRY_PROVIDERS = {"mock": MockRegistryProvider, "live": LiveRegistryProvider}
+SCREENING_PROVIDERS = {"mock": MockScreeningProvider, "live": LiveScreeningProvider}
 IDENTITY_PROVIDERS = {"mock": MockIdentityProvider, "live": LiveIdentityProvider}
 
 
@@ -195,3 +280,15 @@ def get_providers(mode: str = "mock", application: dict | None = None):
                     for r in application.get("scripted_identity", [])}
         return MockRegistryProvider(registry), MockIdentityProvider(identity)
     return REGISTRY_PROVIDERS[mode](), IDENTITY_PROVIDERS[mode]()
+
+
+def get_screening_provider(mode: str = "mock", application: dict | None = None):
+    """Screening provider for a run. Default is mock; no API by accident."""
+    if mode not in SCREENING_PROVIDERS:
+        raise ValueError(f"unknown screening mode '{mode}'; "
+                         f"choose from {sorted(SCREENING_PROVIDERS)}")
+    if mode != "mock":
+        return SCREENING_PROVIDERS[mode]()
+    rows = (application or {}).get("scripted_screening", [])
+    scripted = {(r["case_id"], r["individual_id"] or ""): r for r in rows}
+    return MockScreeningProvider(scripted)

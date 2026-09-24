@@ -31,11 +31,21 @@ class KnowledgeBase:
         self.extraction_fields = _read_csv("extraction_fields.csv")
         self.registry_rules = _read_csv("registry_rules.csv")
         self.ubo_policy = {r["rule"]: r for r in _read_csv("ubo_policy.csv")}
+        self.screening_rules = _read_csv("screening_rules.csv")
+        self.adverse_media_categories = {r["category"]: r
+                                         for r in _read_csv("adverse_media_categories.csv")}
 
     @property
     def ubo_threshold(self) -> float:
         """The percentage at or above which an owner must be verified (UB-01)."""
         return float(self.ubo_policy["ubo_threshold_percent"]["parameter"])
+
+    def screening_rule(self, check: str, result: str) -> dict | None:
+        return next((r for r in self.screening_rules
+                     if r["check"] == check and r["result"] == result), None)
+
+    def media_category(self, category: str) -> dict | None:
+        return self.adverse_media_categories.get(category)
 
     def registry_rule(self, check: str, condition: str) -> dict | None:
         return next((r for r in self.registry_rules

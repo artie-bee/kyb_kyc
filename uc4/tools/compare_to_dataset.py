@@ -202,6 +202,34 @@ def compare_verification(conn: sqlite3.Connection, dataset: Path = DEFAULT_DATAS
     return [(c or "-", *rest) for c, *rest in rows]
 
 
+def compare_screening(conn: sqlite3.Connection, dataset: Path = DEFAULT_DATASET) -> list[tuple]:
+    """Screening rows against the dataset, matched by (case, subject).
+
+    Sanctions and PEP are provider list results and are replayed, so those
+    columns confirm that every subject was screened and nothing was altered on
+    the way through - in particular that no match was downgraded. The adverse
+    media category is replayed too and stands in for the relevance model.
+    """
+    name_by_ds = {r["individual_id"]: r["full_name"] for r in read_csv(dataset / "individual.csv")}
+    cmp_cols = ("subject_type", "sanctions_result", "pep_result", "adverse_media_result",
+                "severity", "evidence_refs")
+    ds = {(r["case_id"], name_by_ds.get(r["individual_id"], "")): r
+          for r in read_csv(dataset / "screening_check.csv")}
+
+    rows = []
+    for r in conn.execute(
+            "SELECT s.*, i.full_name FROM screening_check s "
+            "LEFT JOIN individual i USING (individual_id) ORDER BY s.check_id"):
+        subject = r["full_name"] or ""
+        want = ds.get((r["case_id"], subject))
+        got = tuple(str(r[c] or "") for c in cmp_cols)
+        exp = tuple(want[c] for c in cmp_cols) if want else None
+        rows.append((r["case_id"], f"screening / {subject or 'applicant entity'}",
+                     " | ".join(exp) if exp else "(no dataset row)", " | ".join(got),
+                     "YES" if exp == got else "NO"))
+    return rows
+
+
 def score(rows: list[tuple]) -> tuple[int, int]:
     scored = [r for r in rows if not r[1].startswith("  ")]
     return sum(1 for r in scored if r[4] == "YES"), len(scored)
@@ -235,7 +263,8 @@ def main() -> None:
     print(f"\n{ok}/{total} case field checks match")
 
     for label, fn in (("document quality", compare_documents), ("extracted field", compare_fields),
-                     ("verification", compare_verification)):
+                     ("verification", compare_verification),
+                     ("screening", compare_screening)):
         rows = fn(conn, args.dataset)
         ok, total = score(rows)
         print(f"{ok}/{total} {label} checks match")

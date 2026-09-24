@@ -1,0 +1,6 @@
+category,severity,outcome,description
+none,none,record_only,No adverse media found for this subject
+low_relevance,low,record_only,Coverage exists but does not relate to this subject or to conduct that bears on the application
+moderate,medium,finding_for_risk,Relevant coverage of moderate seriousness; carried to the risk step for enhanced due diligence consideration and never treated as established fact
+serious,high,escalate_compliance,Relevant coverage of serious allegations; escalated to compliance for a human decision
+unavailable,medium,insufficient_evidence,The provider returned no result; an absence of findings cannot be relied on and this is not a pass

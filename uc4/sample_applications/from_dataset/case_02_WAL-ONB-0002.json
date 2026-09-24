@@ -343,5 +343,6 @@
   "field_corrections": [],
   "field_acceptances": [],
   "scripted_registry": [],
-  "scripted_identity": []
+  "scripted_identity": [],
+  "scripted_screening": []
 }

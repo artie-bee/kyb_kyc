@@ -22,6 +22,10 @@ CREATE TABLE IF NOT EXISTS onboarding_case (
     applicant_type TEXT, jurisdiction_path TEXT, entity_scope TEXT,
     source_channel TEXT NOT NULL, status TEXT NOT NULL, assigned_owner TEXT,
     next_action_owner TEXT, white_label_branch_flag INTEGER NOT NULL DEFAULT 0,
+    -- set by Step 6 and read by Step 8: any sanctions, PEP or adverse-media
+    -- finding forces generic customer wording and blocks automatic approval.
+    restricted_finding INTEGER NOT NULL DEFAULT 0,
+    requires_human_signoff INTEGER NOT NULL DEFAULT 0,
     created_at TEXT NOT NULL, updated_at TEXT NOT NULL
 );
 CREATE TABLE IF NOT EXISTS individual (
@@ -107,6 +111,23 @@ CREATE TABLE IF NOT EXISTS identity_check (
 );
 -- Non-blocking findings: the case moves on, but these travel with it to the
 -- risk step, each pointing at the evidence it was drawn from.
+CREATE TABLE IF NOT EXISTS screening_check (
+    check_id TEXT PRIMARY KEY,
+    case_id TEXT NOT NULL REFERENCES onboarding_case(case_id),
+    subject_type TEXT NOT NULL,
+    applicant_id TEXT REFERENCES applicant(applicant_id),
+    individual_id TEXT REFERENCES individual(individual_id),
+    provider_name TEXT NOT NULL,
+    sanctions_result TEXT NOT NULL, pep_result TEXT NOT NULL,
+    adverse_media_result TEXT NOT NULL, severity TEXT NOT NULL,
+    evidence_refs TEXT, attempts INTEGER NOT NULL DEFAULT 1
+);
+-- A sanctions verdict is never rewritten in place: only a human decision can
+-- resolve one, so the row that records it is append-only like the audit trail.
+CREATE TRIGGER IF NOT EXISTS screening_sanctions_no_downgrade
+BEFORE UPDATE OF sanctions_result ON screening_check
+WHEN OLD.sanctions_result IN ('possible_match', 'clear_match')
+BEGIN SELECT RAISE(ABORT, 'a sanctions match may only be resolved by a human decision'); END;
 CREATE TABLE IF NOT EXISTS finding (
     finding_id TEXT PRIMARY KEY,
     case_id TEXT NOT NULL REFERENCES onboarding_case(case_id),
@@ -139,6 +160,7 @@ ID_PREFIX = {
     "registry_check": ("check_id", "REG-"),
     "identity_check": ("check_id", "IDC-"),
     "finding": ("finding_id", "FND-"),
+    "screening_check": ("check_id", "SCR-"),
     "audit_event": ("event_id", "EVT-"),
 }
 
