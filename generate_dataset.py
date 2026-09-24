@@ -6,7 +6,7 @@ Correlation-first synthetic dataset generator.
 Deterministic: no randomness. Every row belongs to one of 10 scripted cases.
 Run:  python generate_dataset.py
 """
-import csv, os, zipfile
+import csv, os, re, zipfile
 from datetime import datetime, timedelta
 
 BASE = os.path.dirname(os.path.abspath(__file__))
@@ -65,6 +65,10 @@ SCHEMA = {
     "draft_compliance_narrative"],
  "extracted_field": ["field_id", "document_id", "name", "value", "confidence", "source_page",
     "corrected_by_analyst"],
+ "risk_scoring_matrix": ["factor_id", "factor", "source", "condition", "points",
+    "description", "weight_status"],
+ "risk_bands": ["band_id", "band", "min_score", "max_score", "hard_floor_condition",
+    "recommended_action", "description"],
  "risk_factor": ["factor_id", "assessment_id", "factor", "weight", "explanation", "evidence_refs"],
  "checklist_item_document": ["item_id", "document_id"],
  "message_template": ["template_id", "message_type", "audience", "template_text", "version",
@@ -612,18 +616,83 @@ def build_case(spec):
         assessment_id = nid("RSK")
         refmap["RSK"] = assessment_id
         t = clk.tick(4)
+
+        # ---- facts, read off this case ------------------------------------
+        screens = spec.get("screenings", [])
+        idchecks = spec.get("identity_checks", [])
+        reg = spec.get("registry") or {}
+        ubo_specs = spec.get("ubos", [])
+        ind_by_id = dict((i["id"], i) for i in inds)
+        spend = [int(m) for m in re.findall(r"(\d{4,})\s*(?:EUR|GBP)",
+                                            a.get("expected_usage", ""))]
+        all_fields = [f for d in docs for f in d.get("fields", [])]
+
+        facts = {
+          "ubo_resident_outside_applicant_country": any(
+              ind_by_id.get(u["individual_id"], {}).get("residence") != a["country"]
+              for u in ubo_specs),
+          "high_risk_industry": bool(reg.get("high_risk")),
+          "ownership_layers_gt_1": any(len(u.get("chain", [u["pct"]])) > 1 for u in ubo_specs),
+          "ubo_not_supported_by_registry": reg.get("ubo_supported") is False,
+          "registry_address_mismatch": reg.get("address_match") == "mismatch",
+          "registry_director_mismatch": reg.get("director_match") == "mismatch",
+          "entity_not_active": bool(reg) and reg.get("company_status") != "active",
+          "identity_check_failed": any(c["result"] in ("fail", "review") for c in idchecks),
+          "identity_duplicate": any(c["duplicate"] for c in idchecks),
+          "low_confidence_accepted_as_read": any(
+              float(f[2]) < 0.70 and not f[4] for f in all_fields),
+          "field_corrected_by_analyst": any(f[4] for f in all_fields),
+          "expected_monthly_spend_above_50k": bool(spend) and max(spend) > 50000,
+          "pep_match": any(s["pep"] in ("pep_match", "close_associate_family") for s in screens),
+          "adverse_media_moderate": any(s["adverse_media"] == "moderate" for s in screens),
+          "adverse_media_serious": any(s["adverse_media"] == "serious" for s in screens),
+          "sanctions_possible_match": any(s["sanctions"] == "possible_match" for s in screens),
+          "sanctions_clear_match": any(s["sanctions"] == "clear_match" for s in screens),
+          "document_resubmission_required": any(
+              d["quality"] == "resubmission_required" for d in docs),
+          "document_manual_review": any(d["quality"] == "manual_review_required" for d in docs),
+        }
+        # Not enough to go on: a document never replaced, a provider that did not
+        # answer, or an identity check that failed. The case is not scored.
+        facts["insufficient_evidence_hold"] = (
+            facts["document_resubmission_required"]
+            or facts["identity_check_failed"]
+            or any(s["adverse_media"] == "unavailable" or s["sanctions"] == "unavailable"
+                   for s in screens))
+
+        # ---- score, then floors -------------------------------------------
+        fired = [FACTOR_BY_CONDITION[c] for c in
+                 [f[3] for f in RISK_FACTORS] if facts.get(c)]
+        score = sum(f[4] for f in fired)
+        band = apply_floors(band_for_score(score), facts)
+        insufficient = band == "insufficient_evidence"
+        action = BAND_ACTION[band]
+        human = band in ("medium", "high", "critical") or facts["pep_match"] \
+            or facts["adverse_media_moderate"] or facts["adverse_media_serious"] \
+            or facts["sanctions_possible_match"] or facts["sanctions_clear_match"] \
+            or insufficient
+
+        # Every factor points at rows that actually exist for this case.
+        evidence_for = {
+          "registry_check": "{REG}", "finding": "{REG}",
+          "screening_check": "{SCR:applicant}",
+          "identity_check": "{PACK}", "document": "{PACK}", "extracted_field": "{PACK}",
+          "applicant": "{PACK}", "ubo": "{DOC:ubo_declaration}",
+          "individual": "{DOC:ubo_declaration}",
+        }
+
         add("risk_assessment", assessment_id=assessment_id, case_id=case_id,
-            risk_score=risk.get("score", ""), risk_band=risk["band"],
-            recommended_action=risk["recommended_action"], confidence=risk["confidence"],
-            insufficient_evidence_flag=risk["insufficient_evidence_flag"],
-            requires_human_signoff=risk["requires_human_signoff"], risk_matrix_version=RISK_MATRIX)
-        for f in risk.get("factors", []):
-            add("risk_factor", factor_id=nid("RF"), assessment_id=assessment_id, factor=f[0],
-                weight=f[1], explanation=f[2], evidence_refs=f[3])
+            risk_score="" if insufficient else score, risk_band=band,
+            recommended_action=action, confidence=risk.get("confidence", 0.9),
+            insufficient_evidence_flag=insufficient,
+            requires_human_signoff=human, risk_matrix_version=RISK_MATRIX)
+        for f in fired:
+            add("risk_factor", factor_id=nid("RF"), assessment_id=assessment_id, factor=f[1],
+                weight=f[4], explanation=f[5], evidence_refs=evidence_for.get(f[2], "{PACK}"))
         audit(case_id, "ai_agent", "risk-classification-agent", "risk_assessment_completed",
               "%s -> band %s, score %s, recommended action %s, requires_human_signoff %s"
-              % (assessment_id, risk["band"], risk.get("score", ""), risk["recommended_action"],
-                 fmt(risk["requires_human_signoff"])), t, V_RISK)
+              % (assessment_id, band, "" if insufficient else score, action, fmt(human)),
+              t, V_RISK)
 
     # ---- evidence pack -----------------------------------------------------
     ev = spec.get("evidence")
@@ -677,6 +746,119 @@ def build_case(spec):
 QUALITY_FLAGS = ("blurred_unreadable", "cut_off_pages", "expired", "missing_pages",
                  "screenshot_not_original", "name_mismatch", "tampering_indicator",
                  "unsupported_file_type", "wrong_document_type", "document_too_old")
+
+
+
+# ---------------------------------------------------------------------------
+# Risk scoring matrix (brief Section 5.8)
+#
+# The brief does not state weights, so every one of these is a placeholder for
+# Wallester to confirm. They are recorded as data rather than buried in code so
+# that changing a weight is a KB edit and the dataset and the orchestrator move
+# together - the same arrangement as the requirement matrix.
+#
+# (factor_id, factor, source, condition, points, description)
+RISK_FACTORS = [
+ ("RS-01", "jurisdiction_risk", "individual", "ubo_resident_outside_applicant_country", 8,
+  "A beneficial owner lives outside the country the applicant is registered in"),
+ ("RS-02", "industry_risk", "registry_check", "high_risk_industry", 12,
+  "The register or the declared activity marks this as a higher-risk industry"),
+ ("RS-03", "ownership_complexity", "ubo", "ownership_layers_gt_1", 15,
+  "Ownership runs through at least one intermediate company"),
+ ("RS-04", "ownership_opacity", "finding", "ubo_not_supported_by_registry", 25,
+  "The register does not corroborate the declared beneficial ownership"),
+ ("RS-05", "registry_address_mismatch", "finding", "registry_address_mismatch", 30,
+  "The registered address on file does not match the register"),
+ ("RS-06", "registry_director_mismatch", "finding", "registry_director_mismatch", 12,
+  "The declared directors do not match the register"),
+ ("RS-07", "entity_status", "finding", "entity_not_active", 60,
+  "The register does not show the entity as active"),
+ ("RS-08", "identity_verification", "identity_check", "identity_check_failed", 25,
+  "An identity check returned fail or review for a director, owner or signatory"),
+ ("RS-09", "identity_verification", "identity_check", "identity_duplicate", 25,
+  "An individual appears to duplicate someone already known to us"),
+ ("RS-10", "extraction_confidence", "extracted_field", "low_confidence_accepted_as_read", 6,
+  "A value was read below the confidence floor and accepted as read by an analyst"),
+ ("RS-11", "extraction_confidence", "extracted_field", "field_corrected_by_analyst", 5,
+  "An analyst had to correct a value the system could not read reliably"),
+ ("RS-12", "usage_volume", "applicant", "expected_monthly_spend_above_50k", 8,
+  "Expected monthly card spend is above the 50000 threshold"),
+ ("RS-13", "pep_exposure", "screening_check", "pep_match", 30,
+  "A subject is a politically exposed person or a close associate"),
+ ("RS-14", "adverse_media_severity", "screening_check", "adverse_media_moderate", 20,
+  "Moderate adverse media of relevance to a subject; allegations, not established fact"),
+ ("RS-15", "adverse_media_severity", "screening_check", "adverse_media_serious", 40,
+  "Serious adverse media of relevance to a subject; allegations, not established fact"),
+ ("RS-16", "sanctions_exposure", "screening_check", "sanctions_possible_match", 60,
+  "A possible sanctions match that only a human can resolve"),
+ ("RS-17", "sanctions_exposure", "screening_check", "sanctions_clear_match", 70,
+  "A confirmed sanctions match"),
+ ("RS-18", "document_quality", "document", "document_resubmission_required", 10,
+  "A document failed the quality screen and had to be sent back"),
+ ("RS-19", "document_quality", "document", "document_manual_review", 15,
+  "A document was held for an analyst at the quality screen"),
+]
+WEIGHT_STATUS = "poc_placeholder - Wallester to confirm"
+for _f in RISK_FACTORS:
+    add("risk_scoring_matrix", factor_id=_f[0], factor=_f[1], source=_f[2], condition=_f[3],
+        points=_f[4], description=_f[5], weight_status=WEIGHT_STATUS)
+
+# Bands, plus the floors that override a score outright. A floor exists because
+# some findings are not a matter of degree: a confirmed sanctions match is
+# critical whatever else the file looks like.
+RISK_BANDS = [
+ ("RB-01", "low", 0, 24, "", "approve",
+  "Nothing outstanding. Still requires a human decision; there is no automatic approval"),
+ ("RB-02", "medium", 25, 49, "", "conditional_approve",
+  "Something to resolve, but nothing that stops the application"),
+ ("RB-03", "high", 50, 79, "", "enhanced_due_diligence",
+  "Enhanced due diligence before any decision"),
+ ("RB-04", "critical", 80, 100, "", "escalate",
+  "Compliance decision required"),
+ ("RB-05", "critical", "", "", "sanctions_clear_match", "escalate",
+  "A confirmed sanctions match is critical whatever the score"),
+ ("RB-06", "critical", "", "", "sanctions_possible_match", "escalate",
+  "An unresolved possible sanctions match is critical whatever the score"),
+ ("RB-07", "high", "", "", "pep_match", "enhanced_due_diligence",
+  "A PEP match is at least high whatever the score"),
+ ("RB-08", "high", "", "", "adverse_media_serious", "enhanced_due_diligence",
+  "Serious adverse media is at least high whatever the score"),
+ ("RB-09", "insufficient_evidence", "", "", "insufficient_evidence_hold",
+  "insufficient_evidence",
+  "An unresolved gap in the evidence. The case is not scored: there is not enough to score"),
+]
+for _b in RISK_BANDS:
+    add("risk_bands", band_id=_b[0], band=_b[1], min_score=_b[2], max_score=_b[3],
+        hard_floor_condition=_b[4], recommended_action=_b[5], description=_b[6])
+
+POINTS = dict((f[3], f[4]) for f in RISK_FACTORS)
+FACTOR_BY_CONDITION = dict((f[3], f) for f in RISK_FACTORS)
+# Floors in the order they are applied: the first one whose condition holds wins.
+FLOORS = [(b[4], b[1]) for b in RISK_BANDS if b[4]]
+BAND_ACTION = dict((b[1], b[5]) for b in RISK_BANDS)
+SCORE_BANDS = [(b[1], b[2], b[3]) for b in RISK_BANDS if b[2] != ""]
+
+
+def band_for_score(score):
+    for band, lo, hi in SCORE_BANDS:
+        if lo <= score <= hi:
+            return band
+    return "critical"
+
+
+def apply_floors(band, facts):
+    """A floor raises the band; it never lowers it."""
+    order = ["low", "medium", "high", "critical"]
+    for condition, floor_band in FLOORS:
+        if not facts.get(condition):
+            continue
+        if floor_band == "insufficient_evidence":
+            return "insufficient_evidence"
+        if band == "insufficient_evidence":
+            continue
+        if order.index(floor_band) > order.index(band):
+            band = floor_band
+    return band
 
 
 def doc(dtype, file_name, quality="accepted_for_checks", subject="", fields=None, flags="",
@@ -2011,7 +2193,11 @@ CASES.append({
       "throughout. Rejecting with the door left open to a new application if the company is "
       "restored.",
     "evidence_relied_on": "{REG}|{DOC:registry_extract}|{RSK}",
-    "override_flag": False, "customer_template_id": "TPL-0011"}],
+    "override_flag": True,
+    "override_reason": "The scored recommendation was enhanced due diligence. A dissolved "
+      "entity is an eligibility failure rather than a due-diligence question, so no amount of "
+      "further diligence would change the answer; rejecting instead.",
+    "customer_template_id": "TPL-0011"}],
  "communications": [
    {"template_id": "TPL-0011", "audience": "applicant", "message_type": "application_declined",
     "approval_status": "approved", "sent_status": "sent", "approver_role": "analyst",

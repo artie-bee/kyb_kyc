@@ -1783,6 +1783,66 @@
             "additionalProperties": false
           }
         },
+        "risk_bands": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "band_id": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "band": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "min_score": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "max_score": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "hard_floor_condition": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "recommended_action": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "description": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            },
+            "required": [
+              "band_id",
+              "band",
+              "min_score",
+              "max_score",
+              "hard_floor_condition",
+              "recommended_action",
+              "description"
+            ],
+            "additionalProperties": false
+          }
+        },
         "risk_factor": {
           "type": "array",
           "items": {
@@ -1832,6 +1892,66 @@
               "weight",
               "explanation",
               "evidence_refs"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "risk_scoring_matrix": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "factor_id": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "factor": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "source": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "condition": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "points": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "description": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "weight_status": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            },
+            "required": [
+              "factor_id",
+              "factor",
+              "source",
+              "condition",
+              "points",
+              "description",
+              "weight_status"
             ],
             "additionalProperties": false
           }
@@ -2200,6 +2320,80 @@
             "additionalProperties": false
           }
         },
+        "case_hold": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "hold_id": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "case_id": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "placed_by_step": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "reason": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "owner": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "placed_at": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "released_by": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "release_reason": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "released_at": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            },
+            "required": [
+              "hold_id",
+              "case_id",
+              "placed_by_step",
+              "reason",
+              "owner",
+              "placed_at",
+              "released_by",
+              "release_reason",
+              "released_at"
+            ],
+            "additionalProperties": false
+          }
+        },
         "checklist_item": {
           "type": "array",
           "items": {
@@ -2476,6 +2670,140 @@
               "resubmission_reasons",
               "released_by",
               "release_reason"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "evidence_pack": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "evidence_pack_id": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "case_id": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "assessment_id": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "applicant_summary": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "entity_details": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "individuals": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "ubos": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "checklist_completeness": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "provider_results": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "risk_factors": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "open_holds": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "missing_or_conflicting_evidence": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "recommended_next_action": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "enum": [
+                  "approve",
+                  "conditional_approve",
+                  "enhanced_due_diligence",
+                  "escalate",
+                  "insufficient_evidence",
+                  "reject",
+                  "request_more_information",
+                  "withdrawn",
+                  ""
+                ]
+              },
+              "draft_compliance_narrative": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "evidence_refs": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "created_at": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            },
+            "required": [
+              "evidence_pack_id",
+              "case_id",
+              "assessment_id",
+              "applicant_summary",
+              "entity_details",
+              "individuals",
+              "ubos",
+              "checklist_completeness",
+              "provider_results",
+              "risk_factors",
+              "open_holds",
+              "missing_or_conflicting_evidence",
+              "recommended_next_action",
+              "draft_compliance_narrative",
+              "evidence_refs",
+              "created_at"
             ],
             "additionalProperties": false
           }
@@ -3263,6 +3591,162 @@
             "additionalProperties": false
           }
         },
+        "risk_assessment": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "assessment_id": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "case_id": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "risk_score": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "risk_band": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "enum": [
+                  "critical",
+                  "high",
+                  "insufficient_evidence",
+                  "low",
+                  "medium",
+                  ""
+                ]
+              },
+              "recommended_action": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "enum": [
+                  "approve",
+                  "conditional_approve",
+                  "enhanced_due_diligence",
+                  "escalate",
+                  "insufficient_evidence",
+                  "reject",
+                  "request_more_information",
+                  "withdrawn",
+                  ""
+                ]
+              },
+              "confidence": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "insufficient_evidence_flag": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "enum": [
+                  "false",
+                  "true",
+                  ""
+                ]
+              },
+              "requires_human_signoff": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "enum": [
+                  "false",
+                  "true",
+                  ""
+                ]
+              },
+              "risk_matrix_version": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            },
+            "required": [
+              "assessment_id",
+              "case_id",
+              "risk_score",
+              "risk_band",
+              "recommended_action",
+              "confidence",
+              "insufficient_evidence_flag",
+              "requires_human_signoff",
+              "risk_matrix_version"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "risk_factor": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "factor_id": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "assessment_id": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "factor": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "weight": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "explanation": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "evidence_refs": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            },
+            "required": [
+              "factor_id",
+              "assessment_id",
+              "factor",
+              "weight",
+              "explanation",
+              "evidence_refs"
+            ],
+            "additionalProperties": false
+          }
+        },
         "screening_check": {
           "type": "array",
           "items": {
@@ -3422,6 +3906,12 @@
                   "null"
                 ]
               },
+              "ownership_chain_percentages": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
               "control_type": {
                 "type": [
                   "string",
@@ -3459,6 +3949,7 @@
               "applicant_id",
               "individual_id",
               "ownership_percentage",
+              "ownership_chain_percentages",
               "control_type",
               "ownership_path",
               "verification_status"

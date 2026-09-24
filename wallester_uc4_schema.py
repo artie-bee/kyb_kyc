@@ -95,8 +95,15 @@ TABLES = {
         "confidence", "insufficient_evidence_flag", "requires_human_signoff",
         "risk_matrix_version",
     ],
+    "risk_bands": [
+        "band_id", "band", "min_score", "max_score", "hard_floor_condition",
+        "recommended_action", "description",
+    ],
     "risk_factor": [
         "factor_id", "assessment_id", "factor", "weight", "explanation", "evidence_refs",
+    ],
+    "risk_scoring_matrix": [
+        "factor_id", "factor", "source", "condition", "points", "description", "weight_status",
     ],
     "screening_check": [
         "check_id", "case_id", "subject_type", "applicant_id", "individual_id",
@@ -313,6 +320,10 @@ DB_TABLES = {
         "event_id", "case_id", "actor_type", "actor_id", "action", "payload_summary",
         "model_or_prompt_version", "timestamp",
     ],
+    "case_hold": [
+        "hold_id", "case_id", "placed_by_step", "reason", "owner", "placed_at", "released_by",
+        "release_reason", "released_at",
+    ],
     "checklist_item": [
         "item_id", "pack_id", "rule_id", "subject_individual_id", "document_type", "level",
         "status", "resubmission_attempts", "note",
@@ -325,6 +336,12 @@ DB_TABLES = {
         "upload_time", "quality_status", "quality_status_at_screen", "quality_flags",
         "expiry_date", "document_date", "issue_country", "resubmission_required",
         "resubmission_reasons", "released_by", "release_reason",
+    ],
+    "evidence_pack": [
+        "evidence_pack_id", "case_id", "assessment_id", "applicant_summary", "entity_details",
+        "individuals", "ubos", "checklist_completeness", "provider_results", "risk_factors",
+        "open_holds", "missing_or_conflicting_evidence", "recommended_next_action",
+        "draft_compliance_narrative", "evidence_refs", "created_at",
     ],
     "extracted_field": [
         "field_id", "document_id", "name", "value", "confidence", "source_page",
@@ -359,14 +376,22 @@ DB_TABLES = {
     "requirement_pack": [
         "pack_id", "case_id", "applicant_type", "jurisdiction", "entity_type", "kb_version",
     ],
+    "risk_assessment": [
+        "assessment_id", "case_id", "risk_score", "risk_band", "recommended_action",
+        "confidence", "insufficient_evidence_flag", "requires_human_signoff",
+        "risk_matrix_version",
+    ],
+    "risk_factor": [
+        "factor_id", "assessment_id", "factor", "weight", "explanation", "evidence_refs",
+    ],
     "screening_check": [
         "check_id", "case_id", "subject_type", "applicant_id", "individual_id", "provider_name",
         "sanctions_result", "pep_result", "adverse_media_result", "severity", "evidence_refs",
         "attempts",
     ],
     "ubo": [
-        "ubo_id", "applicant_id", "individual_id", "ownership_percentage", "control_type",
-        "ownership_path", "verification_status",
+        "ubo_id", "applicant_id", "individual_id", "ownership_percentage",
+        "ownership_chain_percentages", "control_type", "ownership_path", "verification_status",
     ],
 }
 

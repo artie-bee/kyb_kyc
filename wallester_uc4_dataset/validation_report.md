@@ -4,7 +4,7 @@ Generated from `wallester_uc4_dataset/` by `validate_dataset.py`.
 
 | # | Check | Result | Detail |
 |---|-------|--------|--------|
-| 1 | Referential integrity (31 FK relationships, 2011 non-null values) | PASS | no orphans |
+| 1 | Referential integrity (31 FK relationships, 1980 non-null values) | PASS | no orphans |
 | 2 | Enum values (60 enum columns, 2440 values incl. pipe-list members) | PASS | all values in range; no N/A placeholders |
 | 3 | Timestamp ordering (14 cases, 455 timestamps) | PASS | every case ordered: created -> upload -> quality/extraction -> provider checks -> risk -> evidence pack -> communication/decision -> updated_at |
 | 4 | Case outcomes (14 cases) | PASS | every case reaches its scripted status and risk band |
@@ -53,7 +53,9 @@ Generated from `wallester_uc4_dataset/` by `validate_dataset.py`.
 | requirement_pack.csv | 14 |
 | requirement_rule.csv | 86 |
 | risk_assessment.csv | 13 |
-| risk_factor.csv | 53 |
+| risk_bands.csv | 9 |
+| risk_factor.csv | 22 |
+| risk_scoring_matrix.csv | 19 |
 | screening_check.csv | 39 |
 | ubo.csv | 11 |
 

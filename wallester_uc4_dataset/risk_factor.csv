@@ -1,54 +1,23 @@
 factor_id,assessment_id,factor,weight,explanation,evidence_refs
-RF-0001,RSK-0001,jurisdiction_risk,0.05,Estonia is a home-market jurisdiction under Wallester AS with no elevated country weighting in the configured risk matrix.,REG-0001
-RF-0002,RSK-0001,industry_risk,0.1,Freelance graphic design is a low-risk service activity with no restricted merchant category.,DOC-0006
-RF-0003,RSK-0001,document_quality,0.0,All six submitted documents passed the pre-screen at the first attempt.,PACK-0001
-RF-0004,RSK-0001,screening_outcome,0.0,"No sanctions, PEP or adverse-media findings for the entity or the sole trader.",SCR-0001|SCR-0002
-RF-0005,RSK-0001,source_of_funds_clarity,0.1,"Declared source of funds is client invoicing, consistent with the declared activity and the 4000 EUR expected monthly spend.",DOC-0005
-RF-0006,RSK-0002,document_quality,0.4,"The director identity document was rejected at pre-screen as unreadable, so no usable identity evidence exists for IND-0002.",DOC-0011
-RF-0007,RSK-0002,ownership_transparency,0.35,"No UBO declaration has been submitted, so beneficial ownership of the applicant is undetermined.",PACK-0002
-RF-0008,RSK-0002,evidence_completeness,0.25,"No registry, identity or screening evidence exists because provider calls were suppressed until the mandatory document set is complete.",PACK-0002
-RF-0009,RSK-0003,registry_address_mismatch,0.6,The registered address held on the company register differs from the address on the certificate of incorporation supplied by the applicant.,REG-0002|DOC-0018|DOC-0017
-RF-0010,RSK-0003,extraction_confidence,0.15,The registered-address field was extracted at 0.58 confidence and was corrected by an analyst before the comparison was relied on.,DOC-0018
-RF-0011,RSK-0003,jurisdiction_risk,0.05,United Kingdom under Wallester UK Ltd; no elevated country weighting.,REG-0002
-RF-0012,RSK-0003,industry_risk,0.15,Road freight is a standard-risk industry with routine cross-border fuel spend.,DOC-0030
-RF-0013,RSK-0003,screening_outcome,0.0,"No sanctions, PEP or adverse-media findings for the entity, either director or the beneficial owner.",SCR-0003|SCR-0004|SCR-0005|SCR-0006
-RF-0014,RSK-0004,ownership_complexity,0.55,Beneficial ownership reaches the applicant through a two-layer chain: Harboe Holdings OU > Lindval Mid Holdings SA > Vestmark Nordic OU.,DOC-0037|DOC-0038
-RF-0015,RSK-0004,ubo_opacity,0.5,"The declared 31.5 percent indirect holding is not supported by the registry record, which shows only the immediate corporate shareholder.",REG-0003
-RF-0016,RSK-0004,document_quality,0.3,The ownership chart was routed to manual review because pages of the structure are missing.,DOC-0038
-RF-0017,RSK-0004,extraction_confidence,0.2,The indirect ownership path was extracted at 0.41 confidence and is not corroborated by a second source.,DOC-0037
-RF-0018,RSK-0004,screening_outcome,0.0,"No sanctions, PEP or adverse-media findings for the entity or any listed individual.",SCR-0007|SCR-0010
-RF-0019,RSK-0005,pep_exposure,0.7,The 55 percent beneficial owner returned a PEP match. Configured policy routes PEP findings to enhanced due diligence; PEP status alone is not a rejection reason.,SCR-0014
-RF-0020,RSK-0005,adverse_media_severity,0.45,Moderate-relevance adverse media was returned for the same individual. The findings are unverified reporting and are not treated as established fact.,SCR-0014
-RF-0021,RSK-0005,industry_risk,0.3,Offshore chartering with cross-border crew payments carries an elevated industry weighting.,DOC-0061
-RF-0022,RSK-0005,jurisdiction_risk,0.2,"The beneficial owner is resident outside the applicant jurisdiction, which adds a cross-border factor.",DOC-0053
-RF-0023,RSK-0005,document_quality,0.0,All fifteen documents passed the pre-screen at the first attempt.,PACK-0005
-RF-0024,RSK-0006,sanctions_screening_outcome,0.9,A possible sanctions match was returned for a registered director. Automated progression is blocked and the orchestration layer may not clear or dismiss the match.,SCR-0018
-RF-0025,RSK-0006,control_exposure,0.35,The subject of the possible match is a registered director with sole signing authority.,DOC-0066|DOC-0067
-RF-0026,RSK-0006,jurisdiction_risk,0.05,Estonia under Wallester AS; no elevated country weighting.,REG-0005
-RF-0027,RSK-0006,document_quality,0.0,All fourteen documents passed the pre-screen at the first attempt.,PACK-0006
-RF-0028,RSK-0007,adverse_media_severity,0.75,"Serious adverse media was returned for the sole registered director, concerning alleged conduct in the applicant's own sector. The reporting is unverified allegation and is not treated as established fact.",SCR-0021
-RF-0029,RSK-0007,control_exposure,0.35,"The subject of the media findings is the sole registered director and the only authorised signatory, so no separation of control exists.",DOC-0080|DOC-0081
-RF-0030,RSK-0007,extraction_confidence,0.1,The director name was extracted from a scanned register at 0.64 confidence and was matched to the identity document rather than relied on alone.,DOC-0080
-RF-0031,RSK-0007,industry_risk,0.2,Aggregates supply and haulage carries a moderately elevated industry weighting.,DOC-0088
-RF-0032,RSK-0007,screening_outcome,0.0,"No sanctions or PEP findings for the entity, the director or the beneficial owner.",SCR-0019|SCR-0020
-RF-0033,RSK-0008,jurisdiction_risk,0.05,Estonia under Wallester AS; no elevated country weighting.,REG-0007
-RF-0034,RSK-0008,industry_risk,0.1,Food and beverage wholesale is a low-risk activity.,DOC-0107
-RF-0035,RSK-0008,ownership_transparency,0.05,"A single 70 percent direct beneficial owner, supported by the registry record.",REG-0007|DOC-0101
-RF-0036,RSK-0008,document_quality,0.0,All twelve documents passed the pre-screen at the first attempt.,PACK-0009
-RF-0037,RSK-0008,screening_outcome,0.0,"No sanctions, PEP or adverse-media findings for the entity, the director or the beneficial owner.",SCR-0022|SCR-0023|SCR-0024
-RF-0038,RSK-0009,ownership_transparency,0.1,"The applicant is held through one intermediate UK holding company, Marchbank Holdings Ltd, which is itself wholly owned by the 70 percent beneficial owner. Both tiers appear on the register and the chain is fully supported by the registry record, so the additional layer does not add opacity.",REG-0008|DOC-0113|DOC-0114
-RF-0039,RSK-0009,jurisdiction_risk,0.05,United Kingdom under Wallester UK Ltd; no elevated country weighting.,REG-0008
-RF-0040,RSK-0009,industry_risk,0.1,Consultancy services carry a low industry weighting.,DOC-0122
-RF-0041,RSK-0009,document_quality,0.0,All sixteen documents passed the pre-screen at the first attempt.,PACK-0010
-RF-0042,RSK-0009,screening_outcome,0.0,"No sanctions, PEP or adverse-media findings for the entity or any of the three individuals.",SCR-0025|SCR-0026|SCR-0027|SCR-0028
-RF-0043,RSK-0010,entity_status,0.95,"The register records the company as dissolved. A dissolved entity cannot hold a card programme, and no document supplied by the applicant can change that.",REG-0009
-RF-0044,RSK-0010,document_quality,0.0,All fourteen documents passed the pre-screen at the first attempt.,PACK-0011
-RF-0045,RSK-0010,screening_outcome,0.0,"No sanctions, PEP or adverse-media findings for the entity or any of the three individuals.",SCR-0029|SCR-0030|SCR-0031|SCR-0032
-RF-0046,RSK-0011,sanctions_exposure,0.95,"The 80 percent beneficial owner returned a confirmed sanctions match. Configured policy routes this to compliance without any automated clearance, and the orchestration layer has not cleared or downgraded the finding.",SCR-0035
-RF-0047,RSK-0011,ownership_concentration,0.3,"A single owner holds 80 percent, so the finding attaches to effective control of the applicant rather than to a minority holding.",DOC-0143
-RF-0048,RSK-0011,document_quality,0.0,All twelve documents passed the pre-screen at the first attempt.,PACK-0012
-RF-0049,RSK-0012,identity_verification,0.0,"The identity check on director IND-0029 failed on the document and biometric components and the name and date of birth did not match. That is a gap in the evidence, not a finding about the person.",IDC-0026
-RF-0050,RSK-0012,media_coverage,0.0,"The adverse-media provider did not return a result for the same director, so the file cannot be said to be clear on that point either.",SCR-0039
-RF-0051,RSK-0012,document_quality,0.0,All fourteen documents passed the pre-screen at the first attempt.,PACK-0013
-RF-0052,RSK-0013,document_completeness,0.0,"The proof of address was a screenshot rather than the original and was never replaced, so the mandatory checklist was never completed.",PACK-0014
-RF-0053,RSK-0013,applicant_engagement,0.0,One request and one reminder were sent and neither was answered within 30 days.,PACK-0014
+RF-0001,RSK-0002,document_quality,10,A document failed the quality screen and had to be sent back,PACK-0002
+RF-0002,RSK-0003,registry_address_mismatch,30,The registered address on file does not match the register,REG-0002
+RF-0003,RSK-0003,extraction_confidence,5,An analyst had to correct a value the system could not read reliably,PACK-0003
+RF-0004,RSK-0003,usage_volume,8,Expected monthly card spend is above the 50000 threshold,PACK-0003
+RF-0005,RSK-0004,jurisdiction_risk,8,A beneficial owner lives outside the country the applicant is registered in,DOC-0037
+RF-0006,RSK-0004,ownership_complexity,15,Ownership runs through at least one intermediate company,DOC-0037
+RF-0007,RSK-0004,ownership_opacity,25,The register does not corroborate the declared beneficial ownership,REG-0003
+RF-0008,RSK-0004,extraction_confidence,6,A value was read below the confidence floor and accepted as read by an analyst,PACK-0004
+RF-0009,RSK-0004,document_quality,15,A document was held for an analyst at the quality screen,PACK-0004
+RF-0010,RSK-0005,jurisdiction_risk,8,A beneficial owner lives outside the country the applicant is registered in,DOC-0053
+RF-0011,RSK-0005,usage_volume,8,Expected monthly card spend is above the 50000 threshold,PACK-0005
+RF-0012,RSK-0005,pep_exposure,30,A subject is a politically exposed person or a close associate,SCR-0011
+RF-0013,RSK-0005,adverse_media_severity,20,"Moderate adverse media of relevance to a subject; allegations, not established fact",SCR-0011
+RF-0014,RSK-0006,sanctions_exposure,60,A possible sanctions match that only a human can resolve,SCR-0015
+RF-0015,RSK-0007,extraction_confidence,6,A value was read below the confidence floor and accepted as read by an analyst,PACK-0007
+RF-0016,RSK-0007,usage_volume,8,Expected monthly card spend is above the 50000 threshold,PACK-0007
+RF-0017,RSK-0007,adverse_media_severity,40,"Serious adverse media of relevance to a subject; allegations, not established fact",SCR-0019
+RF-0018,RSK-0009,ownership_complexity,15,Ownership runs through at least one intermediate company,DOC-0112
+RF-0019,RSK-0010,entity_status,60,The register does not show the entity as active,REG-0009
+RF-0020,RSK-0011,sanctions_exposure,70,A confirmed sanctions match,SCR-0033
+RF-0021,RSK-0012,identity_verification,25,"An identity check returned fail or review for a director, owner or signatory",PACK-0013
+RF-0022,RSK-0013,document_quality,10,A document failed the quality screen and had to be sent back,PACK-0014
