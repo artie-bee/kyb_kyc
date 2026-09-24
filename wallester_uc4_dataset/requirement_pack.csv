@@ -1,0 +1,11 @@
+pack_id,case_id,applicant_type,jurisdiction,entity_type,kb_version
+PACK-0001,WAL-ONB-0001,freelancer_sole_trader,EE,sole_trader,WAL-KB-2026.09
+PACK-0002,WAL-ONB-0002,sme_corporate,UK,private_limited_company,WAL-KB-2026.09
+PACK-0003,WAL-ONB-0003,sme_corporate,UK,private_limited_company,WAL-KB-2026.09
+PACK-0004,WAL-ONB-0004,complex_corporate_ubo,EE,private_limited_company,WAL-KB-2026.09
+PACK-0005,WAL-ONB-0005,sme_corporate,UK,private_limited_company,WAL-KB-2026.09
+PACK-0006,WAL-ONB-0006,sme_corporate,EE,private_limited_company,WAL-KB-2026.09
+PACK-0007,WAL-ONB-0007,sme_corporate,UK,private_limited_company,WAL-KB-2026.09
+PACK-0008,WAL-ONB-0008,white_label_partner,EE,private_limited_company,WAL-KB-2026.09
+PACK-0009,WAL-ONB-0009,sme_corporate,EE,private_limited_company,WAL-KB-2026.09
+PACK-0010,WAL-ONB-0010,complex_corporate_ubo,UK,private_limited_company,WAL-KB-2026.09

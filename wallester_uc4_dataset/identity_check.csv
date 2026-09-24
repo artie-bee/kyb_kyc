@@ -1,0 +1,21 @@
+check_id,case_id,individual_id,provider_name,document_result,liveness_result,biometric_result,address_result,name_dob_match,document_expired,duplicate_individual_detected,result
+IDC-0001,WAL-ONB-0001,IND-0001,VerifyMock ID,pass,pass,pass,pass,match,false,false,pass
+IDC-0002,WAL-ONB-0003,IND-0004,VerifyMock ID,pass,pass,pass,pass,match,false,false,pass
+IDC-0003,WAL-ONB-0003,IND-0005,VerifyMock ID,pass,pass,pass,pass,match,false,false,pass
+IDC-0004,WAL-ONB-0003,IND-0006,VerifyMock ID,pass,pass,pass,pass,match,false,false,pass
+IDC-0005,WAL-ONB-0004,IND-0007,VerifyMock ID,pass,pass,pass,pass,match,false,false,pass
+IDC-0006,WAL-ONB-0004,IND-0008,VerifyMock ID,pass,pass,pass,pass,match,false,false,pass
+IDC-0007,WAL-ONB-0004,IND-0009,VerifyMock ID,pass,pass,pass,pass,match,false,false,pass
+IDC-0008,WAL-ONB-0005,IND-0010,VerifyMock ID,pass,pass,pass,pass,match,false,false,pass
+IDC-0009,WAL-ONB-0005,IND-0011,VerifyMock ID,pass,pass,pass,pass,match,false,false,pass
+IDC-0010,WAL-ONB-0005,IND-0012,VerifyMock ID,pass,pass,pass,pass,match,false,false,pass
+IDC-0011,WAL-ONB-0006,IND-0013,VerifyMock ID,pass,pass,pass,pass,match,false,false,pass
+IDC-0012,WAL-ONB-0006,IND-0014,VerifyMock ID,pass,pass,pass,pass,match,false,false,pass
+IDC-0013,WAL-ONB-0006,IND-0015,VerifyMock ID,pass,pass,pass,pass,match,false,false,pass
+IDC-0014,WAL-ONB-0007,IND-0016,VerifyMock ID,pass,pass,pass,pass,match,false,false,pass
+IDC-0015,WAL-ONB-0007,IND-0017,VerifyMock ID,pass,pass,pass,pass,match,false,false,pass
+IDC-0016,WAL-ONB-0009,IND-0019,VerifyMock ID,pass,pass,pass,pass,match,false,false,pass
+IDC-0017,WAL-ONB-0009,IND-0020,VerifyMock ID,pass,pass,pass,pass,match,false,false,pass
+IDC-0018,WAL-ONB-0010,IND-0021,VerifyMock ID,pass,pass,pass,pass,match,false,false,pass
+IDC-0019,WAL-ONB-0010,IND-0022,VerifyMock ID,pass,pass,pass,pass,match,false,false,pass
+IDC-0020,WAL-ONB-0010,IND-0023,VerifyMock ID,pass,pass,pass,pass,match,false,false,pass

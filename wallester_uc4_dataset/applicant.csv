@@ -1,0 +1,11 @@
+applicant_id,legal_name,trading_name,registration_number,entity_type,country,business_activity,expected_usage,vat_registered,risk_segment
+APP-0001,Kaari Mets,Mets Design Studio,EE-FIE-4410932,sole_trader,EE,Freelance graphic design and brand identity services,One card; up to 4000 EUR per month on software and travel,false,low
+APP-0002,Northbridge Craft Supplies Ltd,Northbridge Crafts,UK-99010288,private_limited_company,GB,Wholesale of craft and hobby supplies to independent retailers,Up to 12 cards; around 25000 GBP per month on stock and logistics,false,unassessed
+APP-0003,Calderwick Logistics Ltd,Calderwick Freight,UK-99014477,private_limited_company,GB,Regional road freight and contract haulage,Up to 30 fuel cards; around 60000 GBP per month,true,standard
+APP-0004,Vestmark Nordic OU,Vestmark,EE-90012345,private_limited_company,EE,Import and distribution of marine equipment,Up to 15 cards; around 35000 EUR per month,true,elevated
+APP-0005,Quillon Marine Services Ltd,Quillon Marine,UK-99017733,private_limited_company,GB,Offshore vessel chartering and crew logistics,"Up to 40 cards; around 120000 GBP per month on fuel, port fees and crew travel",true,elevated
+APP-0006,Saarvik Metall OU,Saarvik,EE-90014782,private_limited_company,EE,Metal fabrication and industrial subcontracting,Up to 20 cards; around 45000 EUR per month on materials and fuel,true,elevated
+APP-0007,Bramforth Aggregates Ltd,Bramforth,UK-99021560,private_limited_company,GB,Supply of construction aggregates and tipper haulage,Up to 25 cards; around 55000 GBP per month on fuel and plant hire,true,elevated
+APP-0008,Kestrel Pay Partners OU,KestrelPay,EE-90016004,private_limited_company,EE,Payments software platform seeking a white-label card programme,Programme level; not assessed in this phase,true,unassessed
+APP-0009,Parnu Kohviubade OU,Parnu Coffee Roasters,EE-90018321,private_limited_company,EE,Coffee roasting and wholesale supply to cafes,Up to 8 cards; around 9000 EUR per month on green coffee and packaging,true,low
+APP-0010,Thornbury Analytics Ltd,Thornbury,UK-99025819,private_limited_company,GB,Data analytics consultancy for the retail sector,Up to 18 cards; around 22000 GBP per month on software and travel,false,low

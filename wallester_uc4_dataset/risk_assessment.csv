@@ -1,0 +1,10 @@
+assessment_id,case_id,risk_score,risk_band,recommended_action,confidence,insufficient_evidence_flag,requires_human_signoff,risk_matrix_version
+RSK-0001,WAL-ONB-0001,12,low,approve,0.91,false,false,WAL-RM-2026.03
+RSK-0002,WAL-ONB-0002,,insufficient_evidence,request_more_information,0.4,true,false,WAL-RM-2026.03
+RSK-0003,WAL-ONB-0003,38,medium,request_more_information,0.82,false,true,WAL-RM-2026.03
+RSK-0004,WAL-ONB-0004,66,high,enhanced_due_diligence,0.69,false,true,WAL-RM-2026.03
+RSK-0005,WAL-ONB-0005,72,high,enhanced_due_diligence,0.78,false,true,WAL-RM-2026.03
+RSK-0006,WAL-ONB-0006,88,critical,escalate,0.85,false,true,WAL-RM-2026.03
+RSK-0007,WAL-ONB-0007,74,high,enhanced_due_diligence,0.8,false,true,WAL-RM-2026.03
+RSK-0008,WAL-ONB-0009,15,low,approve,0.93,false,false,WAL-RM-2026.03
+RSK-0009,WAL-ONB-0010,22,low,approve,0.9,false,false,WAL-RM-2026.03

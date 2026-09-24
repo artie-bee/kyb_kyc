@@ -1,0 +1,170 @@
+event_id,case_id,actor_type,actor_id,action,payload_summary,model_or_prompt_version,timestamp
+EVT-0001,WAL-ONB-0001,system,portal-intake-service,case_created,Onboarding case created from portal intake for Kaari Mets,,2026-09-01T08:15:00Z
+EVT-0002,WAL-ONB-0001,ai_agent,applicant-classifier,applicant_type_classified,Classified as freelancer_sole_trader; jurisdiction path EE; entity scope wallester_as,wallester-uc4-intake-prompt-v0.9,2026-09-01T08:18:00Z
+EVT-0003,WAL-ONB-0001,ai_agent,requirement-pack-builder,requirement_pack_generated,Requirement pack PACK-0001 generated from WAL-KB-2026.09 for freelancer_sole_trader / EE,wallester-uc4-intake-prompt-v0.9,2026-09-01T08:20:00Z
+EVT-0004,WAL-ONB-0001,applicant,APP-0001,documents_uploaded,6 file(s) received via portal,,2026-09-01T08:58:00Z
+EVT-0005,WAL-ONB-0001,ai_agent,document-quality-agent,document_quality_prescreen_completed,6 document(s) screened; 6 accepted for checks; 0 flagged,doc-quality-classifier-v1.4,2026-09-01T09:02:00Z
+EVT-0006,WAL-ONB-0001,ai_agent,ocr-extraction-agent,fields_extracted,16 field(s) extracted from 5 document(s); 0 below the 0.70 confidence threshold,ocr-extract-v2.3,2026-09-01T09:05:00Z
+EVT-0007,WAL-ONB-0001,external_provider,MockRegistryHub EE,registry_check_completed,"REG-0001 -> company_status active, name match, number match, address match, director match, result pass",,2026-09-01T09:10:00Z
+EVT-0008,WAL-ONB-0001,external_provider,VerifyMock ID,identity_checks_completed,1 individual check(s) returned: IDC-0001 IND-0001=pass,,2026-09-01T09:16:00Z
+EVT-0009,WAL-ONB-0001,external_provider,ScreenMock Global,screening_checks_completed,"2 subject(s) screened: SCR-0001 sanctions=no_match pep=no_match adverse_media=none severity=none, SCR-0002 sanctions=no_match pep=no_match adverse_media=none severity=none",,2026-09-01T09:23:00Z
+EVT-0010,WAL-ONB-0001,ai_agent,risk-classification-agent,risk_assessment_completed,"RSK-0001 -> band low, score 12, recommended action approve, requires_human_signoff false",risk-explainer-v1.6,2026-09-01T09:27:00Z
+EVT-0011,WAL-ONB-0001,ai_agent,evidence-pack-agent,evidence_pack_generated,Evidence pack prepared for human review; recommended next action approve,evidence-pack-writer-v1.2,2026-09-01T09:30:00Z
+EVT-0012,WAL-ONB-0001,ai_agent,communication-agent,communication_drafted,COM-0001 drafted from template TPL-0005 for audience applicant,comms-drafter-v1.3,2026-09-01T09:34:00Z
+EVT-0013,WAL-ONB-0001,analyst,ops.tiina.kask,communication_approved,COM-0001 approved for release under template TPL-0005,,2026-09-01T09:36:00Z
+EVT-0014,WAL-ONB-0001,system,notification-service,communication_sent,COM-0001 sent to applicant,,2026-09-01T09:37:00Z
+EVT-0015,WAL-ONB-0001,system,case-state-machine,status_changed,Case status set to ready_for_decision; next action owner analyst,,2026-09-01T09:38:00Z
+EVT-0016,WAL-ONB-0002,system,portal-intake-service,case_created,Onboarding case created from portal intake for Northbridge Craft Supplies Ltd,,2026-09-02T09:40:00Z
+EVT-0017,WAL-ONB-0002,ai_agent,applicant-classifier,applicant_type_classified,Classified as sme_corporate; jurisdiction path UK; entity scope wallester_uk_ltd,wallester-uc4-intake-prompt-v0.9,2026-09-02T09:43:00Z
+EVT-0018,WAL-ONB-0002,ai_agent,requirement-pack-builder,requirement_pack_generated,Requirement pack PACK-0002 generated from WAL-KB-2026.09 for sme_corporate / UK,wallester-uc4-intake-prompt-v0.9,2026-09-02T09:45:00Z
+EVT-0019,WAL-ONB-0002,applicant,APP-0002,documents_uploaded,10 file(s) received via portal,,2026-09-02T10:31:00Z
+EVT-0020,WAL-ONB-0002,ai_agent,document-quality-agent,document_quality_prescreen_completed,10 document(s) screened; 9 accepted for checks; 1 flagged,doc-quality-classifier-v1.4,2026-09-02T10:35:00Z
+EVT-0021,WAL-ONB-0002,ai_agent,document-quality-agent,document_flagged,DOC-0011 (id_document) -> resubmission_required; flags blurred_unreadable; reasons document_unreadable,doc-quality-classifier-v1.4,2026-09-02T10:36:00Z
+EVT-0022,WAL-ONB-0002,ai_agent,ocr-extraction-agent,fields_extracted,18 field(s) extracted from 9 document(s); 0 below the 0.70 confidence threshold,ocr-extract-v2.3,2026-09-02T10:39:00Z
+EVT-0023,WAL-ONB-0002,ai_agent,missing-item-agent,resubmission_reasons_determined,Outstanding items for WAL-ONB-0002 mapped to approved reason codes: document_unreadable (director identity document for IND-0002) and ubo_declaration_missing (no beneficial ownership declaration received for the company). Reason codes drive the customer-facing template; no other reason is disclosed.,doc-quality-classifier-v1.4,2026-09-02T10:41:00Z
+EVT-0024,WAL-ONB-0002,ai_agent,orchestration-controller,paid_checks_suppressed,"Registry, identity and screening provider calls were not commissioned for WAL-ONB-0002. Mandatory evidence is incomplete: the director identity document for IND-0002 failed the quality pre-screen and no UBO declaration has been received. Checks will be commissioned once the outstanding items are accepted.",wallester-uc4-intake-prompt-v0.9,2026-09-02T10:44:00Z
+EVT-0025,WAL-ONB-0002,ai_agent,risk-classification-agent,risk_assessment_completed,"RSK-0002 -> band insufficient_evidence, score , recommended action request_more_information, requires_human_signoff false",risk-explainer-v1.6,2026-09-02T10:48:00Z
+EVT-0026,WAL-ONB-0002,ai_agent,evidence-pack-agent,evidence_pack_generated,Evidence pack prepared for human review; recommended next action request_more_information,evidence-pack-writer-v1.2,2026-09-02T10:51:00Z
+EVT-0027,WAL-ONB-0002,ai_agent,communication-agent,communication_drafted,COM-0002 drafted from template TPL-0001 for audience applicant,comms-drafter-v1.3,2026-09-02T10:55:00Z
+EVT-0028,WAL-ONB-0002,analyst,ops.james.corrin,communication_approved,COM-0002 approved for release under template TPL-0001,,2026-09-02T10:57:00Z
+EVT-0029,WAL-ONB-0002,system,notification-service,communication_sent,COM-0002 sent to applicant,,2026-09-02T10:58:00Z
+EVT-0030,WAL-ONB-0002,system,case-state-machine,status_changed,Case status set to resubmission_required; next action owner customer,,2026-09-02T10:59:00Z
+EVT-0031,WAL-ONB-0003,system,portal-intake-service,case_created,Onboarding case created from email intake for Calderwick Logistics Ltd,,2026-09-03T11:05:00Z
+EVT-0032,WAL-ONB-0003,ai_agent,applicant-classifier,applicant_type_classified,Classified as sme_corporate; jurisdiction path UK; entity scope wallester_uk_ltd,wallester-uc4-intake-prompt-v0.9,2026-09-03T11:08:00Z
+EVT-0033,WAL-ONB-0003,ai_agent,requirement-pack-builder,requirement_pack_generated,Requirement pack PACK-0003 generated from WAL-KB-2026.09 for sme_corporate / UK,wallester-uc4-intake-prompt-v0.9,2026-09-03T11:10:00Z
+EVT-0034,WAL-ONB-0003,applicant,APP-0003,documents_uploaded,15 file(s) received via email,,2026-09-03T12:06:00Z
+EVT-0035,WAL-ONB-0003,ai_agent,document-quality-agent,document_quality_prescreen_completed,15 document(s) screened; 15 accepted for checks; 0 flagged,doc-quality-classifier-v1.4,2026-09-03T12:10:00Z
+EVT-0036,WAL-ONB-0003,ai_agent,ocr-extraction-agent,fields_extracted,26 field(s) extracted from 15 document(s); 1 below the 0.70 confidence threshold,ocr-extract-v2.3,2026-09-03T12:13:00Z
+EVT-0037,WAL-ONB-0003,analyst,analyst.r.toome,extracted_field_corrected,Analyst corrected low-confidence field FLD-0040 (registered_address) on document DOC-0018,,2026-09-03T12:19:00Z
+EVT-0038,WAL-ONB-0003,external_provider,MockRegistryHub UK,registry_check_completed,"REG-0002 -> company_status active, name match, number match, address mismatch, director match, result review",,2026-09-03T12:24:00Z
+EVT-0039,WAL-ONB-0003,external_provider,VerifyMock ID,identity_checks_completed,"3 individual check(s) returned: IDC-0002 IND-0004=pass, IDC-0003 IND-0005=pass, IDC-0004 IND-0006=pass",,2026-09-03T12:30:00Z
+EVT-0040,WAL-ONB-0003,external_provider,ScreenMock Global,screening_checks_completed,"4 subject(s) screened: SCR-0003 sanctions=no_match pep=no_match adverse_media=none severity=none, SCR-0004 sanctions=no_match pep=no_match adverse_media=none severity=none, SCR-0005 sanctions=no_match pep=no_match adverse_media=none severity=none, SCR-0006 sanctions=no_match pep=no_match adverse_media=none severity=none",,2026-09-03T12:37:00Z
+EVT-0041,WAL-ONB-0003,ai_agent,risk-classification-agent,risk_assessment_completed,"RSK-0003 -> band medium, score 38, recommended action request_more_information, requires_human_signoff true",risk-explainer-v1.6,2026-09-03T12:41:00Z
+EVT-0042,WAL-ONB-0003,ai_agent,evidence-pack-agent,evidence_pack_generated,Evidence pack prepared for human review; recommended next action request_more_information,evidence-pack-writer-v1.2,2026-09-03T12:44:00Z
+EVT-0043,WAL-ONB-0003,analyst,R. Toome,human_decision_recorded,DEC-0001 -> request_more_information (reason registered_address_mismatch),,2026-09-03T13:19:00Z
+EVT-0044,WAL-ONB-0003,ai_agent,communication-agent,communication_drafted,COM-0003 drafted from template TPL-0002 for audience applicant,comms-drafter-v1.3,2026-09-03T13:23:00Z
+EVT-0045,WAL-ONB-0003,analyst,analyst.r.toome,communication_approved,COM-0003 approved for release under template TPL-0002,,2026-09-03T13:25:00Z
+EVT-0046,WAL-ONB-0003,system,notification-service,communication_sent,COM-0003 sent to applicant,,2026-09-03T13:26:00Z
+EVT-0047,WAL-ONB-0003,ai_agent,communication-agent,communication_drafted,COM-0004 drafted from template TPL-0008 for audience analyst,comms-drafter-v1.3,2026-09-03T13:30:00Z
+EVT-0048,WAL-ONB-0003,analyst,analyst.r.toome,communication_approved,COM-0004 approved for release under template TPL-0008,,2026-09-03T13:32:00Z
+EVT-0049,WAL-ONB-0003,system,notification-service,communication_sent,COM-0004 sent to analyst,,2026-09-03T13:33:00Z
+EVT-0050,WAL-ONB-0003,system,case-state-machine,status_changed,Case status set to analyst_review_required; next action owner customer,,2026-09-03T13:34:00Z
+EVT-0051,WAL-ONB-0004,system,portal-intake-service,case_created,Onboarding case created from portal intake for Vestmark Nordic OU,,2026-09-07T10:00:00Z
+EVT-0052,WAL-ONB-0004,ai_agent,applicant-classifier,applicant_type_classified,Classified as complex_corporate_ubo; jurisdiction path EE; entity scope wallester_as,wallester-uc4-intake-prompt-v0.9,2026-09-07T10:03:00Z
+EVT-0053,WAL-ONB-0004,ai_agent,requirement-pack-builder,requirement_pack_generated,Requirement pack PACK-0004 generated from WAL-KB-2026.09 for complex_corporate_ubo / EE,wallester-uc4-intake-prompt-v0.9,2026-09-07T10:05:00Z
+EVT-0054,WAL-ONB-0004,applicant,APP-0004,documents_uploaded,16 file(s) received via portal,,2026-09-07T11:03:00Z
+EVT-0055,WAL-ONB-0004,ai_agent,document-quality-agent,document_quality_prescreen_completed,16 document(s) screened; 15 accepted for checks; 1 flagged,doc-quality-classifier-v1.4,2026-09-07T11:07:00Z
+EVT-0056,WAL-ONB-0004,ai_agent,document-quality-agent,document_flagged,DOC-0038 (ownership_chart) -> manual_review_required; flags missing_pages; reasons ownership_structure_unclear,doc-quality-classifier-v1.4,2026-09-07T11:08:00Z
+EVT-0057,WAL-ONB-0004,ai_agent,ocr-extraction-agent,fields_extracted,24 field(s) extracted from 16 document(s); 2 below the 0.70 confidence threshold,ocr-extract-v2.3,2026-09-07T11:11:00Z
+EVT-0058,WAL-ONB-0004,external_provider,MockRegistryHub EE,registry_check_completed,"REG-0003 -> company_status active, name match, number match, address match, director match, result review",,2026-09-07T11:16:00Z
+EVT-0059,WAL-ONB-0004,external_provider,VerifyMock ID,identity_checks_completed,"3 individual check(s) returned: IDC-0005 IND-0007=pass, IDC-0006 IND-0008=pass, IDC-0007 IND-0009=pass",,2026-09-07T11:22:00Z
+EVT-0060,WAL-ONB-0004,external_provider,ScreenMock Global,screening_checks_completed,"4 subject(s) screened: SCR-0007 sanctions=no_match pep=no_match adverse_media=none severity=none, SCR-0008 sanctions=no_match pep=no_match adverse_media=none severity=none, SCR-0009 sanctions=no_match pep=no_match adverse_media=none severity=none, SCR-0010 sanctions=no_match pep=no_match adverse_media=none severity=none",,2026-09-07T11:29:00Z
+EVT-0061,WAL-ONB-0004,ai_agent,risk-classification-agent,risk_assessment_completed,"RSK-0004 -> band high, score 66, recommended action enhanced_due_diligence, requires_human_signoff true",risk-explainer-v1.6,2026-09-07T11:33:00Z
+EVT-0062,WAL-ONB-0004,ai_agent,evidence-pack-agent,evidence_pack_generated,Evidence pack prepared for human review; recommended next action enhanced_due_diligence,evidence-pack-writer-v1.2,2026-09-07T11:36:00Z
+EVT-0063,WAL-ONB-0004,analyst,M. Sild,human_decision_recorded,DEC-0002 -> enhanced_due_diligence (reason ownership_structure_unclear),,2026-09-07T12:11:00Z
+EVT-0064,WAL-ONB-0004,ai_agent,communication-agent,communication_drafted,COM-0005 drafted from template TPL-0003 for audience applicant,comms-drafter-v1.3,2026-09-07T12:15:00Z
+EVT-0065,WAL-ONB-0004,analyst,analyst.m.sild,communication_approved,COM-0005 approved for release under template TPL-0003,,2026-09-07T12:17:00Z
+EVT-0066,WAL-ONB-0004,system,notification-service,communication_sent,COM-0005 sent to applicant,,2026-09-07T12:18:00Z
+EVT-0067,WAL-ONB-0004,ai_agent,communication-agent,communication_drafted,COM-0006 drafted from template TPL-0006 for audience applicant,comms-drafter-v1.3,2026-09-07T12:22:00Z
+EVT-0068,WAL-ONB-0004,system,communication-gate,communication_held,"COM-0006 held: approval_status is pending_approval, so it has not been sent",,2026-09-07T12:24:00Z
+EVT-0069,WAL-ONB-0004,system,case-state-machine,status_changed,Case status set to enhanced_due_diligence; next action owner compliance,,2026-09-07T12:25:00Z
+EVT-0070,WAL-ONB-0005,system,portal-intake-service,case_created,Onboarding case created from portal intake for Quillon Marine Services Ltd,,2026-09-10T08:50:00Z
+EVT-0071,WAL-ONB-0005,ai_agent,applicant-classifier,applicant_type_classified,Classified as sme_corporate; jurisdiction path UK; entity scope wallester_uk_ltd,wallester-uc4-intake-prompt-v0.9,2026-09-10T08:53:00Z
+EVT-0072,WAL-ONB-0005,ai_agent,requirement-pack-builder,requirement_pack_generated,Requirement pack PACK-0005 generated from WAL-KB-2026.09 for sme_corporate / UK,wallester-uc4-intake-prompt-v0.9,2026-09-10T08:55:00Z
+EVT-0073,WAL-ONB-0005,applicant,APP-0005,documents_uploaded,15 file(s) received via portal,,2026-09-10T09:51:00Z
+EVT-0074,WAL-ONB-0005,ai_agent,document-quality-agent,document_quality_prescreen_completed,15 document(s) screened; 15 accepted for checks; 0 flagged,doc-quality-classifier-v1.4,2026-09-10T09:55:00Z
+EVT-0075,WAL-ONB-0005,ai_agent,ocr-extraction-agent,fields_extracted,20 field(s) extracted from 15 document(s); 0 below the 0.70 confidence threshold,ocr-extract-v2.3,2026-09-10T09:58:00Z
+EVT-0076,WAL-ONB-0005,external_provider,MockRegistryHub UK,registry_check_completed,"REG-0004 -> company_status active, name match, number match, address match, director match, result pass",,2026-09-10T10:03:00Z
+EVT-0077,WAL-ONB-0005,external_provider,VerifyMock ID,identity_checks_completed,"3 individual check(s) returned: IDC-0008 IND-0010=pass, IDC-0009 IND-0011=pass, IDC-0010 IND-0012=pass",,2026-09-10T10:09:00Z
+EVT-0078,WAL-ONB-0005,external_provider,ScreenMock Global,screening_checks_completed,"4 subject(s) screened: SCR-0011 sanctions=no_match pep=no_match adverse_media=none severity=none, SCR-0012 sanctions=no_match pep=no_match adverse_media=none severity=none, SCR-0013 sanctions=no_match pep=no_match adverse_media=none severity=none, SCR-0014 sanctions=no_match pep=pep_match adverse_media=moderate severity=high",,2026-09-10T10:16:00Z
+EVT-0079,WAL-ONB-0005,ai_agent,risk-classification-agent,risk_assessment_completed,"RSK-0005 -> band high, score 72, recommended action enhanced_due_diligence, requires_human_signoff true",risk-explainer-v1.6,2026-09-10T10:20:00Z
+EVT-0080,WAL-ONB-0005,ai_agent,evidence-pack-agent,evidence_pack_generated,Evidence pack prepared for human review; recommended next action enhanced_due_diligence,evidence-pack-writer-v1.2,2026-09-10T10:23:00Z
+EVT-0081,WAL-ONB-0005,ai_agent,communication-agent,communication_drafted,COM-0007 drafted from template TPL-0004 for audience applicant,comms-drafter-v1.3,2026-09-10T10:27:00Z
+EVT-0082,WAL-ONB-0005,compliance,compliance.h.laur,communication_approved,COM-0007 approved for release under template TPL-0004,,2026-09-10T10:29:00Z
+EVT-0083,WAL-ONB-0005,system,notification-service,communication_sent,COM-0007 sent to applicant,,2026-09-10T10:30:00Z
+EVT-0084,WAL-ONB-0005,ai_agent,communication-agent,communication_drafted,COM-0008 drafted from template TPL-0008 for audience analyst,comms-drafter-v1.3,2026-09-10T10:34:00Z
+EVT-0085,WAL-ONB-0005,compliance,compliance.h.laur,communication_approved,COM-0008 approved for release under template TPL-0008,,2026-09-10T10:36:00Z
+EVT-0086,WAL-ONB-0005,system,notification-service,communication_sent,COM-0008 sent to analyst,,2026-09-10T10:37:00Z
+EVT-0087,WAL-ONB-0005,compliance,H. Laur,human_decision_recorded,DEC-0003 -> enhanced_due_diligence (reason pep_match_edd_required),,2026-09-10T11:12:00Z
+EVT-0088,WAL-ONB-0005,system,case-state-machine,status_changed,Case status set to enhanced_due_diligence; next action owner compliance,,2026-09-10T11:13:00Z
+EVT-0089,WAL-ONB-0006,system,portal-intake-service,case_created,Onboarding case created from portal intake for Saarvik Metall OU,,2026-09-14T09:20:00Z
+EVT-0090,WAL-ONB-0006,ai_agent,applicant-classifier,applicant_type_classified,Classified as sme_corporate; jurisdiction path EE; entity scope wallester_as,wallester-uc4-intake-prompt-v0.9,2026-09-14T09:23:00Z
+EVT-0091,WAL-ONB-0006,ai_agent,requirement-pack-builder,requirement_pack_generated,Requirement pack PACK-0006 generated from WAL-KB-2026.09 for sme_corporate / EE,wallester-uc4-intake-prompt-v0.9,2026-09-14T09:25:00Z
+EVT-0092,WAL-ONB-0006,applicant,APP-0006,documents_uploaded,14 file(s) received via portal,,2026-09-14T10:19:00Z
+EVT-0093,WAL-ONB-0006,ai_agent,document-quality-agent,document_quality_prescreen_completed,14 document(s) screened; 14 accepted for checks; 0 flagged,doc-quality-classifier-v1.4,2026-09-14T10:23:00Z
+EVT-0094,WAL-ONB-0006,ai_agent,ocr-extraction-agent,fields_extracted,19 field(s) extracted from 14 document(s); 0 below the 0.70 confidence threshold,ocr-extract-v2.3,2026-09-14T10:26:00Z
+EVT-0095,WAL-ONB-0006,external_provider,MockRegistryHub EE,registry_check_completed,"REG-0005 -> company_status active, name match, number match, address match, director match, result pass",,2026-09-14T10:31:00Z
+EVT-0096,WAL-ONB-0006,external_provider,VerifyMock ID,identity_checks_completed,"3 individual check(s) returned: IDC-0011 IND-0013=pass, IDC-0012 IND-0014=pass, IDC-0013 IND-0015=pass",,2026-09-14T10:37:00Z
+EVT-0097,WAL-ONB-0006,external_provider,ScreenMock Global,screening_checks_completed,"4 subject(s) screened: SCR-0015 sanctions=no_match pep=no_match adverse_media=none severity=none, SCR-0016 sanctions=no_match pep=no_match adverse_media=none severity=none, SCR-0017 sanctions=no_match pep=no_match adverse_media=none severity=none, SCR-0018 sanctions=possible_match pep=no_match adverse_media=none severity=critical",,2026-09-14T10:44:00Z
+EVT-0098,WAL-ONB-0006,ai_agent,risk-classification-agent,risk_assessment_completed,"RSK-0006 -> band critical, score 88, recommended action escalate, requires_human_signoff true",risk-explainer-v1.6,2026-09-14T10:48:00Z
+EVT-0099,WAL-ONB-0006,ai_agent,evidence-pack-agent,evidence_pack_generated,Evidence pack prepared for human review; recommended next action escalate,evidence-pack-writer-v1.2,2026-09-14T10:51:00Z
+EVT-0100,WAL-ONB-0006,ai_agent,communication-agent,communication_drafted,COM-0009 drafted from template TPL-0004 for audience applicant,comms-drafter-v1.3,2026-09-14T10:55:00Z
+EVT-0101,WAL-ONB-0006,compliance,compliance.k.ohtla,communication_approved,COM-0009 approved for release under template TPL-0004,,2026-09-14T10:57:00Z
+EVT-0102,WAL-ONB-0006,system,notification-service,communication_sent,COM-0009 sent to applicant,,2026-09-14T10:58:00Z
+EVT-0103,WAL-ONB-0006,ai_agent,communication-agent,communication_drafted,COM-0010 drafted from template TPL-0009 for audience compliance,comms-drafter-v1.3,2026-09-14T11:02:00Z
+EVT-0104,WAL-ONB-0006,compliance,compliance.k.ohtla,communication_approved,COM-0010 approved for release under template TPL-0009,,2026-09-14T11:04:00Z
+EVT-0105,WAL-ONB-0006,system,notification-service,communication_sent,COM-0010 sent to compliance,,2026-09-14T11:05:00Z
+EVT-0106,WAL-ONB-0006,compliance,K. Ohtla,human_decision_recorded,DEC-0004 -> escalate (reason possible_sanctions_match),,2026-09-14T11:40:00Z
+EVT-0107,WAL-ONB-0006,system,case-state-machine,status_changed,Case status set to analyst_review_required; next action owner compliance,,2026-09-14T11:41:00Z
+EVT-0108,WAL-ONB-0007,system,portal-intake-service,case_created,Onboarding case created from email intake for Bramforth Aggregates Ltd,,2026-09-16T13:30:00Z
+EVT-0109,WAL-ONB-0007,ai_agent,applicant-classifier,applicant_type_classified,Classified as sme_corporate; jurisdiction path UK; entity scope wallester_uk_ltd,wallester-uc4-intake-prompt-v0.9,2026-09-16T13:33:00Z
+EVT-0110,WAL-ONB-0007,ai_agent,requirement-pack-builder,requirement_pack_generated,Requirement pack PACK-0007 generated from WAL-KB-2026.09 for sme_corporate / UK,wallester-uc4-intake-prompt-v0.9,2026-09-16T13:35:00Z
+EVT-0111,WAL-ONB-0007,applicant,APP-0007,documents_uploaded,13 file(s) received via email,,2026-09-16T14:27:00Z
+EVT-0112,WAL-ONB-0007,ai_agent,document-quality-agent,document_quality_prescreen_completed,13 document(s) screened; 13 accepted for checks; 0 flagged,doc-quality-classifier-v1.4,2026-09-16T14:31:00Z
+EVT-0113,WAL-ONB-0007,ai_agent,ocr-extraction-agent,fields_extracted,18 field(s) extracted from 13 document(s); 1 below the 0.70 confidence threshold,ocr-extract-v2.3,2026-09-16T14:34:00Z
+EVT-0114,WAL-ONB-0007,external_provider,MockRegistryHub UK,registry_check_completed,"REG-0006 -> company_status active, name match, number match, address match, director match, result pass",,2026-09-16T14:39:00Z
+EVT-0115,WAL-ONB-0007,external_provider,VerifyMock ID,identity_checks_completed,"2 individual check(s) returned: IDC-0014 IND-0016=pass, IDC-0015 IND-0017=pass",,2026-09-16T14:45:00Z
+EVT-0116,WAL-ONB-0007,external_provider,ScreenMock Global,screening_checks_completed,"3 subject(s) screened: SCR-0019 sanctions=no_match pep=no_match adverse_media=none severity=none, SCR-0020 sanctions=no_match pep=no_match adverse_media=none severity=none, SCR-0021 sanctions=no_match pep=no_match adverse_media=serious severity=high",,2026-09-16T14:52:00Z
+EVT-0117,WAL-ONB-0007,ai_agent,risk-classification-agent,risk_assessment_completed,"RSK-0007 -> band high, score 74, recommended action enhanced_due_diligence, requires_human_signoff true",risk-explainer-v1.6,2026-09-16T14:56:00Z
+EVT-0118,WAL-ONB-0007,ai_agent,evidence-pack-agent,evidence_pack_generated,Evidence pack prepared for human review; recommended next action escalate,evidence-pack-writer-v1.2,2026-09-16T14:59:00Z
+EVT-0119,WAL-ONB-0007,ai_agent,communication-agent,communication_drafted,COM-0011 drafted from template TPL-0004 for audience applicant,comms-drafter-v1.3,2026-09-16T15:03:00Z
+EVT-0120,WAL-ONB-0007,compliance,compliance.d.ferreira,communication_approved,COM-0011 approved for release under template TPL-0004,,2026-09-16T15:05:00Z
+EVT-0121,WAL-ONB-0007,system,notification-service,communication_sent,COM-0011 sent to applicant,,2026-09-16T15:06:00Z
+EVT-0122,WAL-ONB-0007,ai_agent,communication-agent,communication_drafted,COM-0012 drafted from template TPL-0009 for audience compliance,comms-drafter-v1.3,2026-09-16T15:10:00Z
+EVT-0123,WAL-ONB-0007,compliance,compliance.d.ferreira,communication_approved,COM-0012 approved for release under template TPL-0009,,2026-09-16T15:12:00Z
+EVT-0124,WAL-ONB-0007,system,notification-service,communication_sent,COM-0012 sent to compliance,,2026-09-16T15:13:00Z
+EVT-0125,WAL-ONB-0007,compliance,D. Ferreira,human_decision_recorded,DEC-0005 -> escalate (reason serious_adverse_media),,2026-09-16T15:48:00Z
+EVT-0126,WAL-ONB-0007,system,case-state-machine,status_changed,Case status set to enhanced_due_diligence; next action owner compliance,,2026-09-16T15:49:00Z
+EVT-0127,WAL-ONB-0008,system,portal-intake-service,case_created,Onboarding case created from portal intake for Kestrel Pay Partners OU,,2026-09-18T10:10:00Z
+EVT-0128,WAL-ONB-0008,ai_agent,applicant-classifier,applicant_type_classified,Classified as white_label_partner; jurisdiction path EE; entity scope undetermined,wallester-uc4-intake-prompt-v0.9,2026-09-18T10:13:00Z
+EVT-0129,WAL-ONB-0008,ai_agent,requirement-pack-builder,requirement_pack_generated,Requirement pack PACK-0008 generated from WAL-KB-2026.09 for white_label_partner / EE,wallester-uc4-intake-prompt-v0.9,2026-09-18T10:15:00Z
+EVT-0130,WAL-ONB-0008,applicant,APP-0008,documents_uploaded,6 file(s) received via portal,,2026-09-18T10:53:00Z
+EVT-0131,WAL-ONB-0008,ai_agent,document-quality-agent,document_quality_prescreen_completed,6 document(s) screened; 6 accepted for checks; 0 flagged,doc-quality-classifier-v1.4,2026-09-18T10:57:00Z
+EVT-0132,WAL-ONB-0008,ai_agent,ocr-extraction-agent,fields_extracted,10 field(s) extracted from 6 document(s); 0 below the 0.70 confidence threshold,ocr-extract-v2.3,2026-09-18T11:00:00Z
+EVT-0133,WAL-ONB-0008,ai_agent,applicant-router,routed_to_white_label_future_phase,"Applicant type white_label_partner. Case routed to the white-label programme onboarding branch, which is a future phase and outside the primary POC decision path. Future-phase steps: partner KYB tracking, API integration checklist, Visa co-brand approval, BIN and 3DS configuration, go-live testing readiness. No risk assessment, registry, identity, screening or decision records are produced for this branch.",wallester-uc4-intake-prompt-v0.9,2026-09-18T11:03:00Z
+EVT-0134,WAL-ONB-0008,system,case-state-machine,entity_scope_deferred,"Entity scope left as undetermined: the Wallester AS or Wallester UK Ltd perimeter for a partner programme is decided during programme design, not at KYB intake.",,2026-09-18T11:05:00Z
+EVT-0135,WAL-ONB-0008,ai_agent,communication-agent,communication_drafted,COM-0013 drafted from template TPL-0010 for audience applicant,comms-drafter-v1.3,2026-09-18T11:09:00Z
+EVT-0136,WAL-ONB-0008,analyst,partner.delivery.queue,communication_approved,COM-0013 approved for release under template TPL-0010,,2026-09-18T11:11:00Z
+EVT-0137,WAL-ONB-0008,system,notification-service,communication_sent,COM-0013 sent to applicant,,2026-09-18T11:12:00Z
+EVT-0138,WAL-ONB-0008,system,case-state-machine,status_changed,Case status set to submitted; next action owner system,,2026-09-18T11:13:00Z
+EVT-0139,WAL-ONB-0009,system,portal-intake-service,case_created,Onboarding case created from portal intake for Parnu Kohviubade OU,,2026-09-19T09:00:00Z
+EVT-0140,WAL-ONB-0009,ai_agent,applicant-classifier,applicant_type_classified,Classified as sme_corporate; jurisdiction path EE; entity scope wallester_as,wallester-uc4-intake-prompt-v0.9,2026-09-19T09:03:00Z
+EVT-0141,WAL-ONB-0009,ai_agent,requirement-pack-builder,requirement_pack_generated,Requirement pack PACK-0009 generated from WAL-KB-2026.09 for sme_corporate / EE,wallester-uc4-intake-prompt-v0.9,2026-09-19T09:05:00Z
+EVT-0142,WAL-ONB-0009,applicant,APP-0009,documents_uploaded,12 file(s) received via portal,,2026-09-19T09:55:00Z
+EVT-0143,WAL-ONB-0009,ai_agent,document-quality-agent,document_quality_prescreen_completed,12 document(s) screened; 12 accepted for checks; 0 flagged,doc-quality-classifier-v1.4,2026-09-19T09:59:00Z
+EVT-0144,WAL-ONB-0009,ai_agent,ocr-extraction-agent,fields_extracted,15 field(s) extracted from 12 document(s); 0 below the 0.70 confidence threshold,ocr-extract-v2.3,2026-09-19T10:02:00Z
+EVT-0145,WAL-ONB-0009,external_provider,MockRegistryHub EE,registry_check_completed,"REG-0007 -> company_status active, name match, number match, address match, director match, result pass",,2026-09-19T10:07:00Z
+EVT-0146,WAL-ONB-0009,external_provider,VerifyMock ID,identity_checks_completed,"2 individual check(s) returned: IDC-0016 IND-0019=pass, IDC-0017 IND-0020=pass",,2026-09-19T10:13:00Z
+EVT-0147,WAL-ONB-0009,external_provider,ScreenMock Global,screening_checks_completed,"3 subject(s) screened: SCR-0022 sanctions=no_match pep=no_match adverse_media=none severity=none, SCR-0023 sanctions=no_match pep=no_match adverse_media=none severity=none, SCR-0024 sanctions=no_match pep=no_match adverse_media=none severity=none",,2026-09-19T10:20:00Z
+EVT-0148,WAL-ONB-0009,ai_agent,risk-classification-agent,risk_assessment_completed,"RSK-0008 -> band low, score 15, recommended action approve, requires_human_signoff false",risk-explainer-v1.6,2026-09-19T10:24:00Z
+EVT-0149,WAL-ONB-0009,ai_agent,evidence-pack-agent,evidence_pack_generated,Evidence pack prepared for human review; recommended next action approve,evidence-pack-writer-v1.2,2026-09-19T10:27:00Z
+EVT-0150,WAL-ONB-0009,analyst,R. Toome,human_decision_recorded,DEC-0006 -> approve (reason all_mandatory_checks_passed),,2026-09-19T11:02:00Z
+EVT-0151,WAL-ONB-0009,ai_agent,communication-agent,communication_drafted,COM-0014 drafted from template TPL-0007 for audience applicant,comms-drafter-v1.3,2026-09-19T11:06:00Z
+EVT-0152,WAL-ONB-0009,analyst,analyst.r.toome,communication_approved,COM-0014 approved for release under template TPL-0007,,2026-09-19T11:08:00Z
+EVT-0153,WAL-ONB-0009,system,notification-service,communication_sent,COM-0014 sent to applicant,,2026-09-19T11:09:00Z
+EVT-0154,WAL-ONB-0009,system,case-state-machine,status_changed,Case status set to approved; next action owner system,,2026-09-19T11:10:00Z
+EVT-0155,WAL-ONB-0010,system,portal-intake-service,case_created,Onboarding case created from portal intake for Thornbury Analytics Ltd,,2026-09-21T14:00:00Z
+EVT-0156,WAL-ONB-0010,ai_agent,applicant-classifier,applicant_type_classified,Classified as complex_corporate_ubo; jurisdiction path UK; entity scope wallester_uk_ltd,wallester-uc4-intake-prompt-v0.9,2026-09-21T14:03:00Z
+EVT-0157,WAL-ONB-0010,ai_agent,requirement-pack-builder,requirement_pack_generated,Requirement pack PACK-0010 generated from WAL-KB-2026.09 for complex_corporate_ubo / UK,wallester-uc4-intake-prompt-v0.9,2026-09-21T14:05:00Z
+EVT-0158,WAL-ONB-0010,applicant,APP-0010,documents_uploaded,16 file(s) received via portal,,2026-09-21T15:03:00Z
+EVT-0159,WAL-ONB-0010,ai_agent,document-quality-agent,document_quality_prescreen_completed,16 document(s) screened; 16 accepted for checks; 0 flagged,doc-quality-classifier-v1.4,2026-09-21T15:07:00Z
+EVT-0160,WAL-ONB-0010,ai_agent,ocr-extraction-agent,fields_extracted,23 field(s) extracted from 16 document(s); 0 below the 0.70 confidence threshold,ocr-extract-v2.3,2026-09-21T15:10:00Z
+EVT-0161,WAL-ONB-0010,external_provider,MockRegistryHub UK,registry_check_completed,"REG-0008 -> company_status active, name match, number match, address match, director match, result pass",,2026-09-21T15:15:00Z
+EVT-0162,WAL-ONB-0010,external_provider,VerifyMock ID,identity_checks_completed,"3 individual check(s) returned: IDC-0018 IND-0021=pass, IDC-0019 IND-0022=pass, IDC-0020 IND-0023=pass",,2026-09-21T15:21:00Z
+EVT-0163,WAL-ONB-0010,external_provider,ScreenMock Global,screening_checks_completed,"4 subject(s) screened: SCR-0025 sanctions=no_match pep=no_match adverse_media=none severity=none, SCR-0026 sanctions=no_match pep=no_match adverse_media=none severity=none, SCR-0027 sanctions=no_match pep=no_match adverse_media=none severity=none, SCR-0028 sanctions=no_match pep=no_match adverse_media=none severity=none",,2026-09-21T15:28:00Z
+EVT-0164,WAL-ONB-0010,ai_agent,risk-classification-agent,risk_assessment_completed,"RSK-0009 -> band low, score 22, recommended action approve, requires_human_signoff false",risk-explainer-v1.6,2026-09-21T15:32:00Z
+EVT-0165,WAL-ONB-0010,ai_agent,evidence-pack-agent,evidence_pack_generated,Evidence pack prepared for human review; recommended next action approve,evidence-pack-writer-v1.2,2026-09-21T15:35:00Z
+EVT-0166,WAL-ONB-0010,ai_agent,communication-agent,communication_drafted,COM-0015 drafted from template TPL-0005 for audience applicant,comms-drafter-v1.3,2026-09-21T15:39:00Z
+EVT-0167,WAL-ONB-0010,analyst,analyst.j.okoro,communication_approved,COM-0015 approved for release under template TPL-0005,,2026-09-21T15:41:00Z
+EVT-0168,WAL-ONB-0010,system,notification-service,communication_sent,COM-0015 sent to applicant,,2026-09-21T15:42:00Z
+EVT-0169,WAL-ONB-0010,system,case-state-machine,status_changed,Case status set to ready_for_decision; next action owner analyst,,2026-09-21T15:43:00Z

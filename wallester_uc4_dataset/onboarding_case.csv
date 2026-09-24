@@ -1,0 +1,11 @@
+case_id,applicant_id,applicant_type,jurisdiction_path,entity_scope,source_channel,status,assigned_owner,next_action_owner,white_label_branch_flag,created_at,updated_at
+WAL-ONB-0001,APP-0001,freelancer_sole_trader,EE,wallester_as,portal,ready_for_decision,ops.tiina.kask,analyst,false,2026-09-01T08:15:00Z,2026-09-01T09:38:00Z
+WAL-ONB-0002,APP-0002,sme_corporate,UK,wallester_uk_ltd,portal,resubmission_required,ops.james.corrin,customer,false,2026-09-02T09:40:00Z,2026-09-02T10:59:00Z
+WAL-ONB-0003,APP-0003,sme_corporate,UK,wallester_uk_ltd,email,analyst_review_required,analyst.r.toome,customer,false,2026-09-03T11:05:00Z,2026-09-03T13:34:00Z
+WAL-ONB-0004,APP-0004,complex_corporate_ubo,EE,wallester_as,portal,enhanced_due_diligence,analyst.m.sild,compliance,false,2026-09-07T10:00:00Z,2026-09-07T12:25:00Z
+WAL-ONB-0005,APP-0005,sme_corporate,UK,wallester_uk_ltd,portal,enhanced_due_diligence,compliance.h.laur,compliance,false,2026-09-10T08:50:00Z,2026-09-10T11:13:00Z
+WAL-ONB-0006,APP-0006,sme_corporate,EE,wallester_as,portal,analyst_review_required,compliance.k.ohtla,compliance,false,2026-09-14T09:20:00Z,2026-09-14T11:41:00Z
+WAL-ONB-0007,APP-0007,sme_corporate,UK,wallester_uk_ltd,email,enhanced_due_diligence,compliance.d.ferreira,compliance,false,2026-09-16T13:30:00Z,2026-09-16T15:49:00Z
+WAL-ONB-0008,APP-0008,white_label_partner,EE,undetermined,portal,submitted,partner.delivery.queue,system,true,2026-09-18T10:10:00Z,2026-09-18T11:13:00Z
+WAL-ONB-0009,APP-0009,sme_corporate,EE,wallester_as,portal,approved,analyst.r.toome,system,false,2026-09-19T09:00:00Z,2026-09-19T11:10:00Z
+WAL-ONB-0010,APP-0010,complex_corporate_ubo,UK,wallester_uk_ltd,portal,ready_for_decision,analyst.j.okoro,analyst,false,2026-09-21T14:00:00Z,2026-09-21T15:43:00Z

@@ -1,0 +1,24 @@
+individual_id,applicant_id,role,full_name,date_of_birth,nationality,residence_country,id_document_id,relationship_to_entity
+IND-0001,APP-0001,sole_trader,Kaari Mets,1991-03-14,EE,EE,DOC-0002,Registered sole trader and sole beneficial owner
+IND-0002,APP-0002,director,Denton Halliwell,1978-06-02,GB,GB,,Registered director and primary application contact
+IND-0003,APP-0002,director,Priya Nankivell,1985-11-19,GB,GB,DOC-0012,Registered director and authorised signatory
+IND-0004,APP-0003,director,Marcus Ellersby,1974-01-27,GB,GB,DOC-0023,Managing director
+IND-0005,APP-0003,director,Roisin Delamere,1982-05-09,IE,GB,DOC-0024,Operations director
+IND-0006,APP-0003,ubo,Torvald Kellingray,1969-08-22,GB,GB,DOC-0025,Holds 60 percent of the issued share capital directly
+IND-0007,APP-0004,director,Lembit Vaher,1971-02-11,EE,EE,DOC-0040,Managing director
+IND-0008,APP-0004,director,Anneli Sormus,1980-07-30,EE,EE,DOC-0041,Director and holder of 24.5 percent of shares directly
+IND-0009,APP-0004,ubo,Ruben Halvorsen,1966-12-05,NO,NO,DOC-0042,Declared indirect beneficial owner through two intermediate companies
+IND-0010,APP-0005,director,Gareth Pennyfold,1975-09-17,GB,GB,DOC-0054,Managing director
+IND-0011,APP-0005,director,Ines Carrasco-Bell,1983-04-03,ES,GB,DOC-0055,Finance director
+IND-0012,APP-0005,ubo,Aurelio Vantano,1962-11-28,IT,MT,DOC-0056,Holds 55 percent of the issued share capital directly
+IND-0013,APP-0006,director,Rasmus Kalda,1977-05-21,EE,EE,DOC-0069,Registered director with sole signing authority
+IND-0014,APP-0006,director,Triin Lepik,1986-10-08,EE,EE,DOC-0070,Registered director
+IND-0015,APP-0006,ubo,Oskar Magiste,1970-03-16,EE,EE,DOC-0071,Holds 80 percent of the issued share capital directly
+IND-0016,APP-0007,director,Nigel Braithwaite-Cole,1968-04-12,GB,GB,DOC-0083,Sole registered director and authorised signatory
+IND-0017,APP-0007,ubo,Fenella Quist,1979-01-25,GB,GB,DOC-0084,Holds 45 percent of the issued share capital directly
+IND-0018,APP-0008,director,Marek Tonisson,1981-08-04,EE,EE,,Registered director and programme contact
+IND-0019,APP-0009,director,Katrin Ilves,1984-02-19,EE,EE,DOC-0102,Managing director and authorised signatory
+IND-0020,APP-0009,ubo,Mihkel Roosaar,1976-06-11,EE,EE,DOC-0103,Holds 70 percent of the issued share capital directly
+IND-0021,APP-0010,director,Imogen Skellow,1987-12-01,GB,GB,DOC-0115,Managing director
+IND-0022,APP-0010,director,Callum Pryde-Nash,1979-07-23,GB,GB,DOC-0116,Technical director
+IND-0023,APP-0010,ubo,Helena Marchbank,1973-10-14,GB,GB,DOC-0117,"Holds 70 percent through Marchbank Holdings Ltd, a UK holding company recorded on the register"

@@ -1,0 +1,9 @@
+check_id,case_id,applicant_id,provider_name,company_status,name_match,number_match,address_match,director_match,ubo_supported_by_registry,high_risk_jurisdiction_or_industry,confidence,result
+REG-0001,WAL-ONB-0001,APP-0001,MockRegistryHub EE,active,match,match,match,match,true,false,0.96,pass
+REG-0002,WAL-ONB-0003,APP-0003,MockRegistryHub UK,active,match,match,mismatch,match,true,false,0.88,review
+REG-0003,WAL-ONB-0004,APP-0004,MockRegistryHub EE,active,match,match,match,match,false,false,0.52,review
+REG-0004,WAL-ONB-0005,APP-0005,MockRegistryHub UK,active,match,match,match,match,true,false,0.93,pass
+REG-0005,WAL-ONB-0006,APP-0006,MockRegistryHub EE,active,match,match,match,match,true,false,0.94,pass
+REG-0006,WAL-ONB-0007,APP-0007,MockRegistryHub UK,active,match,match,match,match,true,false,0.9,pass
+REG-0007,WAL-ONB-0009,APP-0009,MockRegistryHub EE,active,match,match,match,match,true,false,0.97,pass
+REG-0008,WAL-ONB-0010,APP-0010,MockRegistryHub UK,active,match,match,match,match,true,false,0.95,pass
