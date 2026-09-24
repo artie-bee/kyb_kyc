@@ -24,6 +24,7 @@ from orchestrator.steps.communication import scan                         # noqa
 from tools.run_demo import run                                            # noqa: E402
 
 APP = ROOT / "app"
+WEB = ROOT / "web"          # the HTML console, held to the same rule
 WRITE_SQL = re.compile(
     r"""["'][^"']*\b(INSERT\s+INTO|UPDATE\s+\w+\s+SET|DELETE\s+FROM|DROP\s+TABLE
         |CREATE\s+TABLE|ALTER\s+TABLE|REPLACE\s+INTO)\b""",
@@ -247,9 +248,14 @@ def test_the_future_phase_steps_are_the_ones_the_branch_audits(demo):
 
 
 def test_the_app_contains_no_sql_writes():
-    """Reads are fine. A write here would bypass every rule in the pipeline."""
+    """Reads are fine. A write here would bypass every rule in the pipeline.
+
+    Both front ends are scanned. Two user interfaces over one set of rules is
+    fine; a second implementation of the rules inside one of them is not, and a
+    screen that writes its own UPDATE is exactly that.
+    """
     offenders = []
-    for path in sorted(APP.rglob("*.py")):
+    for path in sorted(APP.rglob("*.py")) + sorted(WEB.rglob("*.py")):
         for number, line in enumerate(path.read_text(encoding="utf-8").splitlines(), 1):
             if WRITE_SQL.search(line):
                 offenders.append(f"{path.relative_to(ROOT)}:{number}: {line.strip()}")
