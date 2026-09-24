@@ -32,6 +32,8 @@ class KnowledgeBase:
         self.registry_rules = _read_csv("registry_rules.csv")
         self.ubo_policy = {r["rule"]: r for r in _read_csv("ubo_policy.csv")}
         self.screening_rules = _read_csv("screening_rules.csv")
+        self.risk_factors = _read_csv("risk_scoring_matrix.csv")
+        self.risk_bands = _read_csv("risk_bands.csv")
         self.adverse_media_categories = {r["category"]: r
                                          for r in _read_csv("adverse_media_categories.csv")}
 
@@ -39,6 +41,21 @@ class KnowledgeBase:
     def ubo_threshold(self) -> float:
         """The percentage at or above which an owner must be verified (UB-01)."""
         return float(self.ubo_policy["ubo_threshold_percent"]["parameter"])
+
+    @property
+    def score_bands(self) -> list[tuple]:
+        """(band, min, max) for the bands that are scored, worst last."""
+        return [(r["band"], int(r["min_score"]), int(r["max_score"]))
+                for r in self.risk_bands if r["min_score"] != ""]
+
+    @property
+    def hard_floors(self) -> list[tuple]:
+        """(condition, band) floors that override the score outright."""
+        return [(r["hard_floor_condition"], r["band"])
+                for r in self.risk_bands if r["hard_floor_condition"]]
+
+    def action_for_band(self, band: str) -> str:
+        return next(r["recommended_action"] for r in self.risk_bands if r["band"] == band)
 
     def screening_rule(self, check: str, result: str) -> dict | None:
         return next((r for r in self.screening_rules

@@ -27,6 +27,7 @@ from datetime import date
 
 from .. import db
 from ..kb import KnowledgeBase
+from .. import holds
 from ..quality_checker import QualityChecker, MockQualityChecker
 
 ACTOR = "step.document_quality"
@@ -288,31 +289,46 @@ def route_case(conn, case_id: str, kb: KnowledgeBase,
     held = [r for r in open_items if r["status"] == "manual_review"]
     to_resend = [r for r in open_items if r["status"] == "resubmission_requested"]
 
+    # This step re-runs after an analyst release, so it lifts its own holds first
+    # and places whatever the current picture warrants. It never touches another
+    # step's hold.
+    holds.release_own(conn, case_id, ACTOR, "document quality re-evaluated", kb)
+
     if held or counts["manual_review_required"]:
-        status, owner, next_step = "analyst_review_required", "analyst", None
-        summary = f"{len(held) or counts['manual_review_required']} item(s) need an analyst"
+        n = len(held) or counts["manual_review_required"]
+        summary = f"{n} item(s) need an analyst"
+        holds.place(conn, case_id, ACTOR, "manual_review",
+                    f"{n} document(s) flagged for an analyst at the quality screen",
+                    "analyst", kb)
     elif to_resend or counts["resubmission_required"]:
-        # The customer owes a better copy, but the documents that DID pass can
-        # still be read: extraction costs nothing external. The paid provider
-        # checks are what must wait, and Step 5 gates itself on the checklist.
-        status, owner, next_step = "resubmission_required", "customer", "extraction"
-        summary = f"{len(to_resend) or counts['resubmission_required']} item(s) must be resubmitted"
-    elif not required_open:
-        status, owner, next_step = "verification_in_progress", "system", "extraction"
-        summary = "all required checklist items accepted"
-    else:
-        status, owner, next_step = "document_quality_review", "customer", None
+        n = len(to_resend) or counts["resubmission_required"]
+        summary = f"{n} item(s) must be resubmitted"
+        holds.place(conn, case_id, ACTOR, "resubmission",
+                    f"{n} document(s) must be resubmitted before the case can proceed",
+                    "customer", kb)
+    elif required_open:
         summary = f"{len(required_open)} required item(s) still outstanding"
+        holds.place(conn, case_id, ACTOR, "insufficient_evidence",
+                    f"{len(required_open)} required checklist item(s) not yet supplied",
+                    "customer", kb)
+    else:
+        summary = "all required checklist items accepted"
+
+    # Extraction is free and runs whatever is outstanding; the paid step gates
+    # itself on the checklist, so a hold here does not stop Step 4.
+    next_step = "extraction"
 
     # The white-label branch is KYB intake only: its documents are screened so the
     # partner knows where it stands, but nothing after Step 3 runs in this phase.
-    if case["white_label_branch_flag"] and next_step == "extraction":
-        status, owner, next_step = "submitted", "system", None
-        summary = "white-label KYB intake complete; later phases handle the programme"
+    if case["white_label_branch_flag"] and not holds.open_holds(conn, case_id):
+        next_step = None
+        db.update_case(conn, case_id, status="submitted", next_action_owner="system")
         db.audit(conn, case_id, "system", ACTOR, "white_label_kyb_intake_only",
                  "KYB documents screened; no further steps run in this phase", kb.version)
+        status, owner = "submitted", "system"
+    else:
+        status, owner = holds.apply_status(conn, case_id, kb, "document_quality_review", "system")
 
-    db.update_case(conn, case_id, status=status, next_action_owner=owner)
     db.audit(conn, case_id, "system", ACTOR, "document_quality_completed",
              f"{documents_checked} document(s) checked: {counts[ACCEPTED]} accepted, "
              f"{counts['resubmission_required']} resubmission, "

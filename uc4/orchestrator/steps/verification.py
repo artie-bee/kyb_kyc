@@ -33,6 +33,7 @@ import re
 from dataclasses import dataclass, field
 
 from .. import db
+from .. import holds
 from ..kb import KnowledgeBase
 from ..providers import (IdentityProvider, MockIdentityProvider, MockRegistryProvider,
                          RegistryProvider, UNAVAILABLE)
@@ -367,15 +368,19 @@ def run(conn, case_id: str, application: dict, kb: KnowledgeBase,
     # analyst opens one queue item with the registry, identity and screening
     # picture together rather than being asked the same question twice.
     next_step = "screening"
+    holds.release_own(conn, case_id, ACTOR, "verification re-evaluated", kb)
     if blocking:
-        status, owner = "analyst_review_required", "analyst"
         summary = f"{len(blocking)} blocking outcome(s): " + "; ".join(blocking[:3])
+        code = ("insufficient_evidence" if any("RG-09" in b for b in blocking)
+                else "eligibility" if registry_result == "fail" else "manual_review")
+        holds.place(conn, case_id, ACTOR, code,
+                    f"{len(blocking)} verification outcome(s) need an analyst: "
+                    + "; ".join(blocking[:2]), "analyst", kb)
     else:
-        status, owner = "verification_in_progress", "system"
         summary = (f"{len(findings)} non-blocking finding(s) carried forward"
                    if findings else "no findings")
 
-    db.update_case(conn, case_id, status=status, next_action_owner=owner)
+    status, owner = holds.apply_status(conn, case_id, kb, "verification_in_progress", "system")
     db.audit(conn, case_id, "system", ACTOR, "verification_completed",
              f"registry {registry_result}, {len(subjects)} identity check(s), "
              f"{len(ubos)} beneficial owner(s); {summary}; case -> {status}", kb.version)

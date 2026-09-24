@@ -1,0 +1,10 @@
+band_id,band,min_score,max_score,hard_floor_condition,recommended_action,description
+RB-01,low,0,24,,approve,Nothing outstanding. Still requires a human decision; there is no automatic approval
+RB-02,medium,25,49,,conditional_approve,"Something to resolve, but nothing that stops the application"
+RB-03,high,50,79,,enhanced_due_diligence,Enhanced due diligence before any decision
+RB-04,critical,80,100,,escalate,Compliance decision required
+RB-05,critical,,,sanctions_clear_match,escalate,A confirmed sanctions match is critical whatever the score
+RB-06,critical,,,sanctions_possible_match,escalate,An unresolved possible sanctions match is critical whatever the score
+RB-07,high,,,pep_match,enhanced_due_diligence,A PEP match is at least high whatever the score
+RB-08,high,,,adverse_media_serious,enhanced_due_diligence,Serious adverse media is at least high whatever the score
+RB-09,insufficient_evidence,,,insufficient_evidence_hold,insufficient_evidence,An unresolved gap in the evidence. The case is not scored: there is not enough to score

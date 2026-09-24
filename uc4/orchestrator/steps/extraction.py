@@ -24,6 +24,7 @@ from dataclasses import dataclass, field
 from datetime import date
 
 from .. import db
+from .. import holds
 from ..extractor import Extractor, MockExtractor
 from ..kb import KnowledgeBase
 from . import document_quality
@@ -163,24 +164,26 @@ def route_case(conn, case_id: str, kb: KnowledgeBase, documents_read: int = 0,
         "WHERE p.case_id = ? AND i.level = 'required' AND i.status != 'accepted'",
         (case_id,)).fetchone()[0]
 
+    holds.release_own(conn, case_id, ACTOR, "extraction re-evaluated", kb)
+
     if outstanding or held:
-        status, owner, next_step = "analyst_review_required", "analyst", None
         summary = (f"{outstanding} field(s) need an analyst"
                    + (f"; {held} document(s) held after a date conflict" if held else ""))
+        holds.place(conn, case_id, ACTOR, "insufficient_evidence",
+                    f"{outstanding} extracted field(s) cannot be relied on as read"
+                    + (f" and {held} document(s) have conflicting dates" if held else ""),
+                    "analyst", kb)
     elif required_open:
-        # Everything readable has been read, but the checklist is not complete, so
-        # Step 5 stays shut. The case keeps whatever Step 3 set: it is still the
-        # customer's move, and extraction does not change whose move it is.
-        case = conn.execute("SELECT status, next_action_owner FROM onboarding_case "
-                            "WHERE case_id = ?", (case_id,)).fetchone()
-        status, owner, next_step = case["status"], case["next_action_owner"], None
         summary = (f"{required_open} required checklist item(s) still outstanding; "
                    f"verification stays closed")
     else:
-        status, owner, next_step = "verification_in_progress", "system", "verification"
         summary = "every required field extracted above the confidence floor"
 
-    db.update_case(conn, case_id, status=status, next_action_owner=owner)
+    status, owner = holds.apply_status(conn, case_id, kb, "verification_in_progress", "system")
+    # Verification gates itself on the checklist, so it is only offered when the
+    # case is actually ready for a paid call.
+    next_step = "verification" if not required_open and not holds.open_holds(conn, case_id) else None
+
     db.audit(conn, case_id, "system", ACTOR, "extraction_completed",
              f"{documents_read} accepted document(s) read, {n_fields} field(s) extracted, "
              f"{low_conf} below the floor, {missing_req} required field(s) missing; "

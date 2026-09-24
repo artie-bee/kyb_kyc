@@ -16,9 +16,10 @@ from .kb import KnowledgeBase
 from .extractor import get_extractor
 from .quality_checker import get_checker
 from .media_relevance import get_media_assessor
+from .narrator import get_narrator
 from .providers import get_providers, get_screening_provider
-from .steps import (analyst_review, document_quality, extraction, intake, requirement_pack,
-                    screening, verification)
+from .steps import (analyst_review, document_quality, evidence_pack, extraction, intake,
+                    requirement_pack, risk_assessment, screening, verification)
 
 # Which document-quality checker to use. "mock" replays scripted verdicts;
 # "claude_vision" is a stub and raises. Default stays mock so that running the
@@ -30,6 +31,8 @@ EXTRACTOR_MODE = "mock"
 PROVIDER_MODE = "mock"
 # The adverse-media relevance call in Step 6. "claude" is a stub and raises.
 MEDIA_ASSESSOR_MODE = "mock"
+# The written parts of Steps 7 and 8. "claude" is a stub and raises.
+NARRATOR_MODE = "mock"
 
 STEPS = {
     "requirement_pack": requirement_pack.run,
@@ -37,7 +40,8 @@ STEPS = {
     "extraction": extraction.run,
     "verification": verification.run,
     "screening": screening.run,
-    # "risk_assessment": risk_assessment.run,   <- next layer
+    "risk_assessment": risk_assessment.run,
+    # "decision": decision.run,   <- next layer
 }
 
 
@@ -45,7 +49,8 @@ def process_application(conn, application: dict, kb: KnowledgeBase,
                         checker_mode: str = QUALITY_CHECKER_MODE,
                         extractor_mode: str = EXTRACTOR_MODE,
                         provider_mode: str = PROVIDER_MODE,
-                        media_mode: str = MEDIA_ASSESSOR_MODE) -> dict:
+                        media_mode: str = MEDIA_ASSESSOR_MODE,
+                        narrator_mode: str = NARRATOR_MODE) -> dict:
     trace = {"application_id": application.get("application_id")}
 
     result = intake.run(conn, application, kb)
@@ -67,6 +72,8 @@ def process_application(conn, application: dict, kb: KnowledgeBase,
         elif next_step == "screening":
             kwargs = {"screening_provider": get_screening_provider(provider_mode, application),
                       "media_assessor": get_media_assessor(media_mode)}
+        elif next_step == "risk_assessment":
+            kwargs = {"narrator": get_narrator(narrator_mode)}
         step_result = STEPS[next_step](conn, result.case_id, application, kb, **kwargs)
         trace[next_step] = step_result.__dict__
 
@@ -74,8 +81,11 @@ def process_application(conn, application: dict, kb: KnowledgeBase,
         # the releases the dataset scripted, so the run continues the way the
         # scripted case did; in live mode the case simply stops here until a real
         # analyst calls release_document().
+        held_docs = conn.execute(
+            "SELECT COUNT(*) FROM document WHERE case_id = ? AND quality_status = "
+            "'manual_review_required'", (result.case_id,)).fetchone()[0]
         if (next_step == "document_quality" and checker_mode == "mock"
-                and step_result.next_step is None and application.get("analyst_releases")):
+                and held_docs and application.get("analyst_releases")):
             releases = analyst_review.replay_scripted_releases(
                 conn, result.case_id, application["analyst_releases"], kb)
             step_result = document_quality.route_case(conn, result.case_id, kb)
@@ -85,8 +95,11 @@ def process_application(conn, application: dict, kb: KnowledgeBase,
 
         # Same idea after extraction: a field OCR could not read confidently waits
         # for an analyst, and mock mode replays the corrections the dataset scripted.
-        if (next_step == "extraction" and extractor_mode == "mock"
-                and step_result.next_step is None
+        outstanding = conn.execute(
+            "SELECT COUNT(*) FROM extracted_field f JOIN document d USING (document_id) "
+            "WHERE d.case_id = ? AND f.needs_analyst_correction = 1", (result.case_id,)
+        ).fetchone()[0]
+        if (next_step == "extraction" and extractor_mode == "mock" and outstanding
                 and (application.get("field_corrections")
                      or application.get("field_acceptances"))):
             applied = extraction.replay_scripted_corrections(
@@ -100,6 +113,12 @@ def process_application(conn, application: dict, kb: KnowledgeBase,
                                                 step_result.missing_required)
             trace["field_corrections"] = {"applied": applied, "status": step_result.status}
             trace["extraction"] = step_result.__dict__
+
+        # The pack is assembled from the assessment, so it follows immediately.
+        if next_step == "risk_assessment":
+            pack = evidence_pack.run(conn, result.case_id, application, kb,
+                                     narrator=get_narrator(narrator_mode))
+            trace["evidence_pack"] = pack.__dict__
 
         next_step = step_result.next_step
         if next_step not in STEPS:
@@ -121,6 +140,7 @@ def main(paths: list[str], db_path: str = "onboarding.db") -> None:
         dq = trace.get("document_quality", {})
         ex = trace.get("extraction", {})
         sc = trace.get("screening", {})
+        rk = trace.get("risk_assessment", {})
         print(f"{i['case_id']}  {Path(p).name:<32} type={i['applicant_type']!s:<24} "
               f"route={i['route']:<18} scope={i['entity_scope']!s:<17} "
               f"items={pack.get('items_required', '-')}/{pack.get('items_optional', '-')}/"
@@ -131,7 +151,8 @@ def main(paths: list[str], db_path: str = "onboarding.db") -> None:
               f"/{ex.get('low_confidence', '-')}  "
               f"scr={sc.get('subjects_screened', '-')}"
               f"/{len(sc.get('findings', [])) if sc else '-'}  "
-              f"status={sc.get('status') or ex.get('status') or dq.get('status') or pack.get('status') or i['status']}  "
+              f"risk={rk.get('band', '-')}/{rk.get('score', '-')}  "
+              f"status={rk.get('status') or sc.get('status') or ex.get('status') or dq.get('status') or pack.get('status') or i['status']}  "
               f"next={trace.get('waiting_for')}")
         for prob in (i["problems"] + pack.get("problems", []) + dq.get("problems", [])
                      + ex.get("problems", []) + sc.get("problems", [])):

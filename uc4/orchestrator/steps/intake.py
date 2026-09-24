@@ -99,9 +99,12 @@ def run(conn, application: dict, kb: KnowledgeBase) -> IntakeResult:
     for u in application.get("ubos", []):
         conn.execute(
             "INSERT INTO ubo (ubo_id, applicant_id, individual_id, ownership_percentage,"
-            " control_type, ownership_path) VALUES (?,?,?,?,?,?)",
+            " ownership_chain_percentages, control_type, ownership_path)"
+            " VALUES (?,?,?,?,?,?,?)",
             (db.next_id(conn, "ubo"), applicant_id, ref_to_id[u["individual_ref"]],
-             u["ownership_percentage"], u.get("control_type"), u.get("ownership_path")),
+             u["ownership_percentage"],
+             "|".join(str(c) for c in u.get("ownership_chain_percentages") or []),
+             u.get("control_type"), u.get("ownership_path")),
         )
 
     # 4. Classify applicant type and jurisdiction from the KB.

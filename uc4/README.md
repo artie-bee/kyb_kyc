@@ -13,6 +13,9 @@ kb/                         Knowledge base (read-only CSV, versioned in kb_manif
   ubo_policy.csv               Beneficial-ownership threshold and findings (Section 5.6)
   screening_rules.csv          Sanctions and PEP outcomes (Section 5.7)
   adverse_media_categories.csv Media relevance categories (Section 5.7)
+  risk_scoring_matrix.csv      Risk factors and weights (Section 5.8)
+                               EVERY weight is a POC placeholder for Wallester to confirm
+  risk_bands.csv               Score thresholds and the hard floors that override them
 orchestrator/
   orchestrator.py           The orchestration layer: runs steps in order, stops cleanly
   kb.py                     Loads the KB + tiny rule engine
@@ -25,7 +28,11 @@ orchestrator/
   steps/verification.py     Step 5: registry, identity and UBO (Sections 5.5, 5.6)
   steps/screening.py        Step 6: sanctions, PEP and adverse media (Section 5.7)
   providers.py              Registry, identity and screening providers (mock / live stubs)
+  steps/risk_assessment.py  Step 7: scoring and hard floors (Section 5.8)
+  steps/evidence_pack.py    Step 7b: the analyst pack (Section 5.11)
   media_relevance.py        AI half of Step 6 (mock / Claude stub)
+  narrator.py               Written parts of Steps 7-8 (mock / Claude stub)
+  holds.py                  Case holds - the one place a case is stopped or released
   quality_checker.py        AI half of Step 3 (mock / Claude Vision stub)
   extractor.py              AI half of Step 4 (mock / Claude stub)
 sample_applications/        6 test applications (normal, complex, branch, and failure cases)
@@ -34,9 +41,10 @@ tools/
   dataset_to_applications.py  Dataset CSVs -> application JSON; prints every assumption
   compare_to_dataset.py       Runs the orchestrator and scores it against the dataset
 tests/test_first_layers.py    4 unit tests
-tests/test_against_dataset.py 50 tests - full match against the 14-case dataset:
+tests/test_against_dataset.py 65 tests - full match against the 14-case dataset:
                               70/70 case fields, 168/168 documents, 256/256 extracted
-                              fields, 50/50 verification, 39/39 screening
+                              fields, 50/50 verification, 39/39 screening,
+                              33/33 risk and evidence pack
 tests/test_schema_sync.py     6 tests - fails if the dataset or database gains a
                               column or enum value the schema file does not describe
 
@@ -66,11 +74,20 @@ application -> [Step 1 intake] --primary--> [Step 2 requirement pack] -> [Step 3
 [Step 5 verification] --> [Step 6 screening] either way; a blocking outcome sets
                           analyst_review_required so the analyst sees both together
 
-[Step 6 screening] --clear sanctions match / serious media--> compliance
-                   --possible sanctions match--> analyst
-                   --PEP / moderate media--> risk_assessment, findings attached
-                   --provider silent after a retry--> insufficient evidence, analyst
-                   --nothing found--> risk_assessment (unless an earlier step held it)
+[Step 6 screening] --> [Step 7 risk assessment + evidence pack] --> decision
+                   holds placed for: clear match (compliance), possible match
+                   (analyst), silent provider (analyst). Findings alone travel on.
+
+[Step 7] low / medium -> ready_for_decision    high -> enhanced_due_diligence
+         critical -> analyst_review_required   insufficient_evidence -> analyst
+         ...unless a hold is open, in which case the hold decides.
+
+## Case holds
+One mechanism, in orchestrator/holds.py. Any step may PLACE a hold; only the step
+that placed it, or a named human, may RELEASE it. Screening finding nothing does
+not release a hold verification placed. Case status and next_action_owner are
+DERIVED from the open holds, worst first: compliance > analyst > insufficient
+evidence > customer. Every place and release is audited.
 
 A document held at Step 3 waits for a named analyst: steps/analyst_review.py
 release_document(document_id, analyst_id, decision, reason) with decision
@@ -129,6 +146,24 @@ adverse-media finding, ready for Step 8 to force generic customer wording.
   mock    replays screening_check.csv - the default, calls no API
   live    STUBS, raise; see orchestrator/providers.py and media_relevance.py
 Set the modes with PROVIDER_MODE and MEDIA_ASSESSOR_MODE in orchestrator.py.
+
+## Step 7 - risk assessment and evidence pack (Sections 5.8, 5.11)
+The score is arithmetic, computed in code from the findings table and the case
+data using kb/risk_scoring_matrix.csv. The dataset generator reads the same
+matrix, so the scripted scores and the computed ones cannot drift apart.
+EVERY weight is marked "poc_placeholder - Wallester to confirm": the brief does
+not state them, and a number nobody has agreed should not look like one that has.
+Hard floors override the score - a confirmed sanctions match is critical whatever
+else the file looks like, and a case with unresolved gaps is not scored at all.
+Nothing is approved automatically (Section 18): a low band RECOMMENDS approval
+and a person still has to make it.
+The evidence pack is assembled from the database only. The one written part is
+the compliance narrative, which may cite nothing that is not already a row here -
+an invented reference is rejected, not stored - and is internal: it is never
+copied into any field a customer could be shown.
+  mock    replays / assembles deterministically - the default, calls no API
+  claude  STUB, raises; see orchestrator/narrator.py
+Set the mode with NARRATOR_MODE in orchestrator/orchestrator.py.
 
 ## Step 3 - document quality (Section 5.3)
 Deterministic checks (file type, expiry, proof-of-address age, page count) run in code.

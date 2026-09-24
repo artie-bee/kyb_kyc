@@ -39,7 +39,11 @@ CREATE TABLE IF NOT EXISTS ubo (
     ubo_id TEXT PRIMARY KEY,
     applicant_id TEXT NOT NULL REFERENCES applicant(applicant_id),
     individual_id TEXT NOT NULL REFERENCES individual(individual_id),
-    ownership_percentage REAL NOT NULL, control_type TEXT, ownership_path TEXT,
+    ownership_percentage REAL NOT NULL,
+    -- the per-link percentages, so effective ownership can be multiplied along
+    -- the chain rather than taken on trust from the declared total
+    ownership_chain_percentages TEXT,
+    control_type TEXT, ownership_path TEXT,
     verification_status TEXT NOT NULL DEFAULT 'review'
 );
 CREATE TABLE IF NOT EXISTS requirement_pack (
@@ -111,6 +115,41 @@ CREATE TABLE IF NOT EXISTS identity_check (
 );
 -- Non-blocking findings: the case moves on, but these travel with it to the
 -- risk step, each pointing at the evidence it was drawn from.
+-- One mechanism for 'this case cannot move yet'. Any step may place a hold;
+-- only the step that placed it, or a named human, may release it.
+CREATE TABLE IF NOT EXISTS risk_assessment (
+    assessment_id TEXT PRIMARY KEY,
+    case_id TEXT NOT NULL UNIQUE REFERENCES onboarding_case(case_id),
+    risk_score INTEGER, risk_band TEXT NOT NULL, recommended_action TEXT NOT NULL,
+    confidence REAL, insufficient_evidence_flag INTEGER NOT NULL DEFAULT 0,
+    requires_human_signoff INTEGER NOT NULL DEFAULT 0, risk_matrix_version TEXT
+);
+CREATE TABLE IF NOT EXISTS risk_factor (
+    factor_id TEXT PRIMARY KEY,
+    assessment_id TEXT NOT NULL REFERENCES risk_assessment(assessment_id),
+    factor TEXT NOT NULL, weight INTEGER NOT NULL, explanation TEXT,
+    evidence_refs TEXT
+);
+-- The analyst's pack. draft_compliance_narrative is internal and is never
+-- copied into anything the customer is shown.
+CREATE TABLE IF NOT EXISTS evidence_pack (
+    evidence_pack_id TEXT PRIMARY KEY,
+    case_id TEXT NOT NULL UNIQUE REFERENCES onboarding_case(case_id),
+    assessment_id TEXT REFERENCES risk_assessment(assessment_id),
+    applicant_summary TEXT, entity_details TEXT, individuals TEXT, ubos TEXT,
+    checklist_completeness TEXT, provider_results TEXT, risk_factors TEXT,
+    open_holds TEXT, missing_or_conflicting_evidence TEXT,
+    recommended_next_action TEXT, draft_compliance_narrative TEXT,
+    evidence_refs TEXT, created_at TEXT NOT NULL
+);
+CREATE TABLE IF NOT EXISTS case_hold (
+    hold_id TEXT PRIMARY KEY,
+    case_id TEXT NOT NULL REFERENCES onboarding_case(case_id),
+    placed_by_step TEXT NOT NULL, reason TEXT NOT NULL,
+    owner TEXT NOT NULL CHECK (owner IN ('customer', 'analyst', 'compliance')),
+    placed_at TEXT NOT NULL,
+    released_by TEXT, release_reason TEXT, released_at TEXT
+);
 CREATE TABLE IF NOT EXISTS screening_check (
     check_id TEXT PRIMARY KEY,
     case_id TEXT NOT NULL REFERENCES onboarding_case(case_id),
@@ -161,6 +200,10 @@ ID_PREFIX = {
     "identity_check": ("check_id", "IDC-"),
     "finding": ("finding_id", "FND-"),
     "screening_check": ("check_id", "SCR-"),
+    "case_hold": ("hold_id", "HLD-"),
+    "risk_assessment": ("assessment_id", "RSK-"),
+    "risk_factor": ("factor_id", "RF-"),
+    "evidence_pack": ("evidence_pack_id", "EVP-"),
     "audit_event": ("event_id", "EVT-"),
 }
 

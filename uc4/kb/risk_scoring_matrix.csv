@@ -1,0 +1,20 @@
+factor_id,factor,source,condition,points,description,weight_status
+RS-01,jurisdiction_risk,individual,ubo_resident_outside_applicant_country,8,A beneficial owner lives outside the country the applicant is registered in,poc_placeholder - Wallester to confirm
+RS-02,industry_risk,registry_check,high_risk_industry,12,The register or the declared activity marks this as a higher-risk industry,poc_placeholder - Wallester to confirm
+RS-03,ownership_complexity,ubo,ownership_layers_gt_1,15,Ownership runs through at least one intermediate company,poc_placeholder - Wallester to confirm
+RS-04,ownership_opacity,finding,ubo_not_supported_by_registry,25,The register does not corroborate the declared beneficial ownership,poc_placeholder - Wallester to confirm
+RS-05,registry_address_mismatch,finding,registry_address_mismatch,30,The registered address on file does not match the register,poc_placeholder - Wallester to confirm
+RS-06,registry_director_mismatch,finding,registry_director_mismatch,12,The declared directors do not match the register,poc_placeholder - Wallester to confirm
+RS-07,entity_status,finding,entity_not_active,60,The register does not show the entity as active,poc_placeholder - Wallester to confirm
+RS-08,identity_verification,identity_check,identity_check_failed,25,"An identity check returned fail or review for a director, owner or signatory",poc_placeholder - Wallester to confirm
+RS-09,identity_verification,identity_check,identity_duplicate,25,An individual appears to duplicate someone already known to us,poc_placeholder - Wallester to confirm
+RS-10,extraction_confidence,extracted_field,low_confidence_accepted_as_read,6,A value was read below the confidence floor and accepted as read by an analyst,poc_placeholder - Wallester to confirm
+RS-11,extraction_confidence,extracted_field,field_corrected_by_analyst,5,An analyst had to correct a value the system could not read reliably,poc_placeholder - Wallester to confirm
+RS-12,usage_volume,applicant,expected_monthly_spend_above_50k,8,Expected monthly card spend is above the 50000 threshold,poc_placeholder - Wallester to confirm
+RS-13,pep_exposure,screening_check,pep_match,30,A subject is a politically exposed person or a close associate,poc_placeholder - Wallester to confirm
+RS-14,adverse_media_severity,screening_check,adverse_media_moderate,20,"Moderate adverse media of relevance to a subject; allegations, not established fact",poc_placeholder - Wallester to confirm
+RS-15,adverse_media_severity,screening_check,adverse_media_serious,40,"Serious adverse media of relevance to a subject; allegations, not established fact",poc_placeholder - Wallester to confirm
+RS-16,sanctions_exposure,screening_check,sanctions_possible_match,60,A possible sanctions match that only a human can resolve,poc_placeholder - Wallester to confirm
+RS-17,sanctions_exposure,screening_check,sanctions_clear_match,70,A confirmed sanctions match,poc_placeholder - Wallester to confirm
+RS-18,document_quality,document,document_resubmission_required,10,A document failed the quality screen and had to be sent back,poc_placeholder - Wallester to confirm
+RS-19,document_quality,document,document_manual_review,15,A document was held for an analyst at the quality screen,poc_placeholder - Wallester to confirm

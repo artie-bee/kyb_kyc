@@ -29,6 +29,7 @@ Four things this step will not do:
 from dataclasses import dataclass, field
 
 from .. import db
+from .. import holds
 from ..kb import KnowledgeBase
 from ..media_relevance import MediaRelevanceAssessor, MockMediaRelevance
 from ..providers import MockScreeningProvider, ScreeningProvider, UNAVAILABLE
@@ -173,34 +174,36 @@ def run(conn, case_id: str, application: dict, kb: KnowledgeBase,
     # ---- routing ----------------------------------------------------------
     # Ordered worst first: compliance escalation beats an analyst stop, which
     # beats enhanced due diligence, which still continues to the risk step.
+    holds.release_own(conn, case_id, ACTOR, "screening re-evaluated", kb)
+
     if "escalate_compliance" in outcomes:
-        status, owner, next_step = "analyst_review_required", "compliance", None
         summary = "escalated to compliance"
+        holds.place(conn, case_id, ACTOR, "sanctions_escalation",
+                    "a screening finding needs a compliance decision before the case moves",
+                    "compliance", kb)
     elif "analyst_review" in outcomes:
-        status, owner, next_step = "analyst_review_required", "analyst", None
         summary = "held for an analyst"
+        holds.place(conn, case_id, ACTOR, "manual_review",
+                    "a possible sanctions match needs an analyst; no automated step may "
+                    "clear it", "analyst", kb)
     elif "insufficient_evidence" in outcomes:
-        status, owner, next_step = "analyst_review_required", "analyst", None
         summary = "a provider did not answer; insufficient evidence"
         problems.append("A screening provider returned no result after a retry. "
                         "That is not a pass and the case cannot proceed on it.")
+        holds.place(conn, case_id, ACTOR, "insufficient_evidence",
+                    "a screening provider returned no result after a retry", "analyst", kb)
     else:
-        # A clean screening result does not release a case that verification
-        # already held. Screening answers its own question and no other.
-        held_earlier = conn.execute(
-            "SELECT COUNT(*) FROM finding WHERE case_id = ? AND blocking = 1 AND source != ?",
-            (case_id, "screening")).fetchone()[0]
-        if held_earlier:
-            status, owner, next_step = "analyst_review_required", "analyst", None
-            summary = (f"screening found nothing, but {held_earlier} earlier blocking "
-                       f"finding(s) still hold the case")
-        else:
-            status, owner, next_step = "verification_in_progress", "system", "risk_assessment"
-            summary = (f"{len(findings)} finding(s) carried to the risk step"
-                       if findings else "no findings")
+        summary = (f"{len(findings)} finding(s) carried to the risk step"
+                   if findings else "no findings")
 
-    db.update_case(conn, case_id, status=status, next_action_owner=owner,
-                   restricted_finding=int(restricted),
+    # A clean screening result does not release a case another step is holding:
+    # apply_status reads every open hold, not just this step's.
+    status, owner = holds.apply_status(conn, case_id, kb, "verification_in_progress", "system")
+    # The risk step runs either way: an analyst picking the case up needs the
+    # band and the pack in front of them, not just a list of holds.
+    next_step = "risk_assessment"
+
+    db.update_case(conn, case_id, restricted_finding=int(restricted),
                    requires_human_signoff=int(human_required or case["requires_human_signoff"]))
     db.audit(conn, case_id, "system", ACTOR, "screening_completed",
              f"{len(subjects)} subject(s) screened; {len(findings)} finding(s); {summary}; "

@@ -25,15 +25,18 @@ from orchestrator.quality_checker import (MockQualityChecker,                  #
                                           QualityVerdict, UnknownQualityFlag)
 from orchestrator.extractor import (ExtractedValue, ExtractionResult,        # noqa: E402
                                     UnknownExtractedField)
-from orchestrator import providers                                            # noqa: E402
+from orchestrator import holds, providers                                     # noqa: E402
 from orchestrator.media_relevance import (MediaAssessment,                    # noqa: E402
                                           UnknownMediaCategory)
-from orchestrator.steps import (analyst_review, document_quality, extraction,  # noqa: E402
+from orchestrator.narrator import (Narrative,                                  # noqa: E402
+                                   UnknownEvidenceReference)
+from orchestrator.steps import (analyst_review, document_quality,              # noqa: E402
+                                evidence_pack, extraction, risk_assessment,
                                 verification)
 from tools.compare_to_dataset import (compare, compare_documents,              # noqa: E402
-                                      compare_fields, compare_screening,
-                                      compare_verification, render,
-                                      run_orchestrator, score)
+                                      compare_fields, compare_risk,
+                                      compare_screening, compare_verification,
+                                      render, run_orchestrator, score)
 from tools.dataset_to_applications import DEFAULT_DATASET, DEFAULT_OUT         # noqa: E402
 
 # Cases whose pipeline genuinely ends at Step 3, so the dataset's final status is
@@ -90,7 +93,7 @@ def _rerun_verification(app: dict, registry_edit=None, identity_edit=None,
     conn = db.connect(":memory:")
     trace = process_application(conn, app, KnowledgeBase())
     case_id = trace["intake"]["case_id"]
-    for table in ("registry_check", "identity_check", "finding"):
+    for table in ("registry_check", "identity_check", "finding", "case_hold"):
         conn.execute(f"DELETE FROM {table}")
     reg, ident = _scripted_providers(app, case_id, registry_edit, identity_edit)
     return conn, verification.run(conn, case_id, app, KnowledgeBase(),
@@ -171,8 +174,9 @@ def test_case_status_after_step_3():
             # pick up, never in a final status it has not earned.
             assert status in ("verification_in_progress", "analyst_review_required",
                               "document_quality_review", "resubmission_required",
+                              "ready_for_decision", "enhanced_due_diligence",
                               "submitted"), \
-                f"{case_id} left Step 3 in unexpected status {status}"
+                f"{case_id} left the pipeline in unexpected status {status}"
 
 
 def test_case_2_never_reaches_a_paid_provider_check():
@@ -202,7 +206,10 @@ def test_tampering_goes_to_manual_review_not_resubmission():
     assert doc["quality_status"] == "manual_review_required"
     assert doc["resubmission_required"] == 0, "suspected tampering is never sent back to the customer"
     assert trace["document_quality"]["status"] == "analyst_review_required"
-    assert trace["document_quality"]["next_step"] is None
+    held = holds.open_holds(conn, trace["intake"]["case_id"])
+    assert all(h.owner == "analyst" for h in held), "the case is held for an analyst"
+    assert any(h.placed_by_step == "step.document_quality" and h.code == "manual_review"
+               for h in held)
 
     item = conn.execute("SELECT status FROM checklist_item WHERE item_id = "
                         "(SELECT item_id FROM checklist_item_document WHERE document_id = ?)",
@@ -235,7 +242,8 @@ def test_three_failed_attempts_stop_asking_the_customer():
     assert item_row()["resubmission_attempts"] == 3
     assert item_row()["status"] == "manual_review", \
         "after three failures the item goes to an analyst, not back to the customer"
-    assert r3.status == "analyst_review_required" and r3.next_step is None
+    assert r3.status == "analyst_review_required"
+    assert [h.code for h in holds.open_holds(conn, case_id)] == ["manual_review"]
 
 
 def test_deterministic_rules_fire_without_the_checker():
@@ -297,13 +305,16 @@ def _held_case():
     """Case 4 without its scripted release, so the document is still held."""
     app = copy.deepcopy(_application("WAL-ONB-0004"))
     app["analyst_releases"] = []
+    app["field_corrections"] = []
+    app["field_acceptances"] = []
     return _run_one(app)
 
 
 def test_case_4_is_held_until_an_analyst_releases_it():
     conn, trace = _held_case()
     assert trace["document_quality"]["status"] == "analyst_review_required"
-    assert trace["document_quality"]["next_step"] is None
+    assert any(h.placed_by_step == "step.document_quality"
+               for h in holds.open_holds(conn, trace["intake"]["case_id"]))
     held = conn.execute("SELECT * FROM document WHERE quality_status = 'manual_review_required'"
                         ).fetchone()
     assert held["file_name"] == "ownership_chart_vestmark.pdf"
@@ -322,8 +333,12 @@ def test_release_accept_moves_the_case_on_and_keeps_the_screen_verdict():
         "missing annex lists dormant subsidiaries only; the chain is legible")
 
     assert out.document_status == "accepted_for_checks"
-    assert out.case_status == "verification_in_progress"
-    assert out.next_step == "extraction", "releasing the last held document should unblock the case"
+    # The quality hold is gone. The case is still with an analyst because
+    # extraction independently held it over two low-confidence fields, which is
+    # the point of central holds: one step does not speak for another.
+    assert not [h for h in holds.open_holds(conn, case_id)
+                if h.placed_by_step == "step.document_quality"]
+    assert out.case_status == "analyst_review_required"
 
     row = conn.execute("SELECT * FROM document WHERE document_id = ?",
                        (held["document_id"],)).fetchone()
@@ -351,10 +366,14 @@ def test_release_request_resubmission_sends_the_case_back_to_the_customer():
         conn, held["document_id"], "analyst.m.sild", "request_resubmission",
         "the annex is needed in full to confirm the chain")
     assert out.document_status == "resubmission_required"
-    assert out.case_status == "resubmission_required"
-    assert out.next_step == "extraction", "the readable documents can still be read"
+    quality = [h for h in holds.open_holds(conn, held["case_id"])
+               if h.placed_by_step == "step.document_quality"]
+    assert [(h.owner, h.code) for h in quality] == [("customer", "resubmission")]
+    # The customer owes a document, but an analyst still owns the case overall
+    # because extraction is holding it too. Precedence decides, not the last
+    # step to speak.
     assert conn.execute("SELECT next_action_owner FROM onboarding_case WHERE case_id = ?",
-                        (held["case_id"],)).fetchone()[0] == "customer"
+                        (held["case_id"],)).fetchone()[0] == "analyst"
 
 
 def test_a_release_needs_a_reason_a_decision_and_a_held_document():
@@ -518,7 +537,7 @@ def test_case_3_corrected_address_survives_for_the_registry_check():
         "SELECT case_id FROM document WHERE file_name = 'registry_extract_calderwick.pdf'"
     ).fetchone()["case_id"]
     assert conn.execute("SELECT status FROM onboarding_case WHERE case_id = ?",
-                        (case_id,)).fetchone()["status"] == "verification_in_progress"
+                        (case_id,)).fetchone()["status"] == "ready_for_decision"
     reg = next(r for r in _csv("registry_check.csv") if r["case_id"] == "WAL-ONB-0003")
     assert reg["address_match"] == "mismatch"
 
@@ -589,9 +608,10 @@ def test_case_3_address_mismatch_is_found_using_the_corrected_address():
         "SELECT * FROM finding WHERE case_id = ? AND rule_id = 'RG-07'", (case_id,)).fetchone()
     assert finding is not None and finding["blocking"] == 0, "an address mismatch is not blocking"
     assert reg["check_id"] in finding["evidence_refs"]
-    # non-blocking, so the case still goes on to screening
+    # non-blocking, so the case ran through to a decision-ready state
+    assert not holds.open_holds(conn, case_id)
     assert conn.execute("SELECT status FROM onboarding_case WHERE case_id = ?",
-                        (case_id,)).fetchone()["status"] == "verification_in_progress"
+                        (case_id,)).fetchone()["status"] == "ready_for_decision"
 
 
 def test_case_4_effective_ubo_ownership_is_31_5_percent():
@@ -696,8 +716,7 @@ def test_non_blocking_findings_still_let_screening_run():
         found = conn.execute("SELECT COUNT(*) FROM finding WHERE case_id = ? AND blocking = 0",
                              (case_id,)).fetchone()[0]
         assert found, f"{case_id} should carry non-blocking findings forward"
-        assert conn.execute("SELECT status FROM onboarding_case WHERE case_id = ?",
-                            (case_id,)).fetchone()["status"] == "verification_in_progress"
+        assert not holds.open_holds(conn, case_id), "a finding is not a hold"
         # every subject was still checked, findings or not
         subjects = conn.execute(
             "SELECT COUNT(*) FROM individual WHERE applicant_id = "
@@ -774,8 +793,10 @@ def test_case_5_pep_on_ubo_goes_to_edd_and_needs_a_human():
     case = conn.execute("SELECT * FROM onboarding_case WHERE case_id = ?", (case_id,)).fetchone()
     assert case["requires_human_signoff"] == 1
     assert case["restricted_finding"] == 1
-    # PEP alone does not stop the case: it continues with the finding attached.
-    assert case["status"] == "verification_in_progress"
+    # PEP alone does not hold the case: it continues with the finding attached
+    # and lands on the enhanced due diligence path at Step 7.
+    assert not holds.open_holds(conn, case_id)
+    assert case["status"] == "enhanced_due_diligence"
 
 
 def test_case_6_possible_match_holds_the_case_and_is_never_downgraded():
@@ -881,6 +902,243 @@ def test_a_media_assessor_may_not_invent_a_category():
         raise AssertionError("an unknown category should be rejected")
     except UnknownMediaCategory:
         pass
+
+
+# ---------------------------------------------------------------------------
+# Central holds
+# ---------------------------------------------------------------------------
+
+def test_a_step_cannot_release_another_steps_hold():
+    """The rule the whole mechanism exists for."""
+    conn = db.connect(":memory:")
+    trace = process_application(conn, _application("WAL-ONB-0011"), KnowledgeBase())
+    case_id = trace["intake"]["case_id"]
+
+    hold = next(h for h in holds.open_holds(conn, case_id)
+                if h.placed_by_step == "step.verification")
+    for impostor in ("step.screening", "step.document_quality", "step.extraction"):
+        try:
+            holds.release(conn, hold.hold_id, impostor, "looks fine to me", by_step=impostor)
+            raise AssertionError(f"{impostor} must not be able to release a verification hold")
+        except holds.HoldReleaseError:
+            pass
+    # nor by pretending to be a person
+    try:
+        holds.release(conn, hold.hold_id, "step.screening", "looks fine to me")
+        raise AssertionError("a step must not release a hold as if it were a human")
+    except holds.HoldReleaseError:
+        pass
+
+    assert holds.open_holds(conn, case_id), "the hold is still open"
+    # the step that placed it may lift it, and so may a named human
+    holds.release(conn, hold.hold_id, "step.verification", "register re-checked",
+                  by_step="step.verification")
+    assert not [h for h in holds.open_holds(conn, case_id) if h.hold_id == hold.hold_id]
+
+
+def test_a_human_may_release_any_hold_with_a_reason():
+    conn = db.connect(":memory:")
+    trace = process_application(conn, _application("WAL-ONB-0011"), KnowledgeBase())
+    case_id = trace["intake"]["case_id"]
+    hold = holds.open_holds(conn, case_id)[0]
+
+    try:
+        holds.release(conn, hold.hold_id, "analyst.j.okoro", "   ")
+        raise AssertionError("a release needs a reason")
+    except ValueError:
+        pass
+
+    holds.release(conn, hold.hold_id, "analyst.j.okoro", "company restored to the register")
+    event = conn.execute("SELECT * FROM audit_event WHERE action = 'case_hold_released'").fetchone()
+    assert event["actor_type"] == "analyst" and "analyst.j.okoro" in event["payload_summary"]
+
+
+def test_case_status_comes_from_the_worst_open_hold():
+    conn = db.connect(":memory:")
+    trace = process_application(conn, _application("WAL-ONB-0009"), KnowledgeBase())
+    case_id = trace["intake"]["case_id"]
+    for h in holds.open_holds(conn, case_id):
+        holds.release(conn, h.hold_id, "analyst.test", "clearing for the test")
+
+    holds.place(conn, case_id, "step.document_quality", "resubmission", "a document", "customer")
+    assert holds.apply_status(conn, case_id) == ("resubmission_required", "customer")
+    holds.place(conn, case_id, "step.screening", "sanctions_escalation", "a match", "compliance")
+    assert holds.apply_status(conn, case_id) == ("analyst_review_required", "compliance"),         "compliance outranks the customer hold"
+
+
+def test_every_hold_is_audited():
+    conn = run_orchestrator(DEFAULT_OUT)
+    placed = conn.execute("SELECT COUNT(*) FROM case_hold").fetchone()[0]
+    released = conn.execute(
+        "SELECT COUNT(*) FROM case_hold WHERE released_at IS NOT NULL").fetchone()[0]
+    events = {a: n for a, n in conn.execute(
+        "SELECT action, COUNT(*) FROM audit_event WHERE action LIKE 'case_hold_%' "
+        "GROUP BY action")}
+    assert events.get("case_hold_placed") == placed
+    assert events.get("case_hold_released", 0) == released
+
+
+# ---------------------------------------------------------------------------
+# Step 7 - risk assessment and evidence pack
+# ---------------------------------------------------------------------------
+
+def test_risk_and_evidence_pack_match_the_dataset():
+    rows = compare_risk(run_orchestrator(DEFAULT_OUT), DEFAULT_DATASET)
+    ok, total = score(rows)
+    assert total == 33, f"expected 33 risk checks, got {total}"
+    assert ok == total, (
+        f"{ok}/{total} risk checks match; mismatches:\n"
+        + render([r for r in rows if r[4] == "NO"]))
+
+
+def test_risk_coverage_accounts_for_every_dataset_assessment():
+    """Cases 2 and 14 never reach Step 7: the paid gate is shut, so there is
+    nothing to assess. Pinned down so the gap cannot widen unnoticed."""
+    ds = {r["case_id"] for r in _csv("risk_assessment.csv")}
+    conn = run_orchestrator(DEFAULT_OUT)
+    ours = {r["case_id"] for r in conn.execute("SELECT case_id FROM risk_assessment")}
+    assert ds - ours == {"WAL-ONB-0002", "WAL-ONB-0014"}
+    assert not ours - ds, "assessed a case the dataset does not have"
+    for case_id in ("WAL-ONB-0002", "WAL-ONB-0014"):
+        assert holds.open_holds(conn, case_id), f"{case_id} must still be held"
+
+
+def test_every_weight_is_marked_as_a_placeholder():
+    """The brief does not state weights. None of these may look agreed."""
+    kb = KnowledgeBase()
+    assert kb.risk_factors, "no risk factors loaded"
+    for row in kb.risk_factors:
+        assert row["weight_status"] == "poc_placeholder - Wallester to confirm", \
+            f"{row['factor_id']} does not say its weight is a placeholder"
+
+
+def test_hard_floors_override_the_score():
+    conn = run_orchestrator(DEFAULT_OUT)
+
+    def band(case_id):
+        return conn.execute("SELECT * FROM risk_assessment WHERE case_id = ?",
+                            (case_id,)).fetchone()
+
+    # case 5: PEP -> at least high
+    five = band("WAL-ONB-0005")
+    assert five["risk_band"] == "high" and five["requires_human_signoff"] == 1
+
+    # case 6: possible sanctions match -> critical, whatever the score
+    six = band("WAL-ONB-0006")
+    assert six["risk_band"] == "critical"
+    assert six["risk_score"] < 80, "the floor is what makes this critical, not the score"
+    assert six["recommended_action"] == "escalate"
+
+    # case 7: serious adverse media -> at least high
+    seven = band("WAL-ONB-0007")
+    assert seven["risk_band"] == "high" and seven["risk_score"] < 80
+
+    # case 12: confirmed sanctions match -> critical
+    twelve = band("WAL-ONB-0012")
+    assert twelve["risk_band"] == "critical" and twelve["risk_score"] < 80
+    assert twelve["requires_human_signoff"] == 1
+
+    # and a floor never lowers a band
+    kb = KnowledgeBase()
+    assert risk_assessment.apply_floors("critical", {"pep_match": True}, kb) == "critical"
+
+
+def test_case_13_is_insufficient_evidence_and_never_recommends_approve():
+    conn = run_orchestrator(DEFAULT_OUT)
+    row = conn.execute("SELECT * FROM risk_assessment WHERE case_id = 'WAL-ONB-0013'").fetchone()
+    assert row["risk_band"] == "insufficient_evidence"
+    assert row["risk_score"] is None, "a case with gaps is not scored"
+    assert row["insufficient_evidence_flag"] == 1
+    assert row["recommended_action"] != "approve"
+    assert row["recommended_action"] == "insufficient_evidence"
+    assert row["requires_human_signoff"] == 1
+
+    # no assessment anywhere recommends approval on insufficient evidence
+    for r in conn.execute("SELECT * FROM risk_assessment "
+                          "WHERE risk_band = 'insufficient_evidence'"):
+        assert r["recommended_action"] != "approve"
+
+
+def test_case_10_scores_lower_than_case_4():
+    """Same applicant type, cleaner evidence. If the control does not actually
+    score lower, it is not a control."""
+    conn = run_orchestrator(DEFAULT_OUT)
+    four = conn.execute("SELECT * FROM risk_assessment WHERE case_id = 'WAL-ONB-0004'").fetchone()
+    ten = conn.execute("SELECT * FROM risk_assessment WHERE case_id = 'WAL-ONB-0010'").fetchone()
+    assert conn.execute("SELECT applicant_type FROM onboarding_case WHERE case_id = 'WAL-ONB-0004'"
+                        ).fetchone()[0] == conn.execute(
+        "SELECT applicant_type FROM onboarding_case WHERE case_id = 'WAL-ONB-0010'").fetchone()[0]
+    assert ten["risk_score"] < four["risk_score"], (
+        f"control scored {ten['risk_score']}, case 4 scored {four['risk_score']}")
+    assert ten["risk_band"] == "low" and four["risk_band"] == "high"
+
+
+def test_every_risk_factor_cites_an_existing_id():
+    conn = run_orchestrator(DEFAULT_OUT)
+    checked = 0
+    for r in conn.execute(
+            "SELECT a.case_id, f.factor_id, f.factor, f.evidence_refs FROM risk_factor f "
+            "JOIN risk_assessment a USING (assessment_id)"):
+        ids = evidence_pack.known_ids(conn, r["case_id"])
+        refs = [x for x in (r["evidence_refs"] or "").split("|") if x]
+        assert refs, f"{r['factor_id']} ({r['factor']}) cites nothing"
+        for ref in refs:
+            assert ref in ids, f"{r['factor_id']} cites {ref}, which is not on {r['case_id']}"
+            checked += 1
+    assert checked > 20, "too few references checked to mean anything"
+
+
+def test_a_narrative_citing_an_unknown_id_is_rejected():
+    conn = run_orchestrator(DEFAULT_OUT)
+    ids = evidence_pack.known_ids(conn, "WAL-ONB-0009")
+    try:
+        Narrative(text="all clear", evidence_refs=["DOC-9999"]).validate(ids)
+        raise AssertionError("an invented reference should be rejected")
+    except UnknownEvidenceReference:
+        pass
+    # and a real one passes
+    Narrative(text="all clear", evidence_refs=[sorted(ids)[0]]).validate(ids)
+
+
+def test_the_narrative_never_reaches_a_customer_field():
+    conn = run_orchestrator(DEFAULT_OUT)
+    narratives = [r["draft_compliance_narrative"] for r in
+                  conn.execute("SELECT draft_compliance_narrative FROM evidence_pack")]
+    assert narratives and any(n for n in narratives)
+    for table, column in (("checklist_item", "note"), ("document", "resubmission_reasons"),
+                          ("document", "release_reason"), ("case_hold", "reason")):
+        for row in conn.execute(f"SELECT {column} AS v FROM {table} WHERE {column} IS NOT NULL"):
+            for narrative in narratives:
+                if narrative:
+                    assert narrative not in (row["v"] or ""), \
+                        f"narrative text leaked into {table}.{column}"
+
+
+def test_the_evidence_pack_is_assembled_from_the_database():
+    conn = run_orchestrator(DEFAULT_OUT)
+    pack = evidence_pack.build(conn, "WAL-ONB-0004", KnowledgeBase())
+    assert pack["entity_details"]["legal_name"] == "Vestmark Nordic OU"
+    assert pack["checklist_completeness"]["required"] > 0
+    assert pack["provider_results"]["registry"]["result"] == "review"
+    assert len(pack["provider_results"]["screening"]) == 4
+    # effective ownership is carried, not just the declared figure
+    indirect = [u for u in pack["ubos"] if u["control_type"] == "indirect_shareholding"]
+    assert indirect and indirect[0]["effective_ownership"] == 31.5
+    assert pack["recommended_next_action"] == "enhanced_due_diligence"
+    assert pack["risk_band"] == "high"
+
+
+def test_low_band_still_needs_a_human_decision():
+    """Section 18: nothing is approved automatically."""
+    conn = run_orchestrator(DEFAULT_OUT)
+    low = conn.execute("SELECT * FROM risk_assessment WHERE risk_band = 'low'").fetchall()
+    assert low
+    for r in low:
+        assert r["recommended_action"] == "approve"
+        case = conn.execute("SELECT status FROM onboarding_case WHERE case_id = ?",
+                            (r["case_id"],)).fetchone()
+        assert case["status"] != "approved", "the system must not approve a case by itself"
+        assert case["status"] == "ready_for_decision"
 
 
 def test_a_checker_may_not_invent_a_flag():

@@ -230,6 +230,47 @@ def compare_screening(conn: sqlite3.Connection, dataset: Path = DEFAULT_DATASET)
     return rows
 
 
+def compare_risk(conn: sqlite3.Connection, dataset: Path = DEFAULT_DATASET) -> list[tuple]:
+    """Risk assessment, factor set and evidence pack against the dataset.
+
+    Both sides compute the score from kb/risk_scoring_matrix.csv, so this is a
+    check that one source of truth really is one: the generator and the
+    orchestrator read the same weights and must land on the same number.
+    """
+    ds_ra = {r["case_id"]: r for r in read_csv(dataset / "risk_assessment.csv")}
+    ds_rf = defaultdict(set)
+    for r in read_csv(dataset / "risk_factor.csv"):
+        ds_rf[r["assessment_id"]].add((r["factor"], r["weight"]))
+    ds_by_case = {a["case_id"]: ds_rf[a["assessment_id"]] for a in ds_ra.values()}
+    ds_packs = {r["case_id"] for r in read_csv(dataset / "evidence_pack.csv")}
+
+    rows = []
+    for r in conn.execute("SELECT * FROM risk_assessment ORDER BY assessment_id"):
+        want = ds_ra.get(r["case_id"])
+        score = "" if r["risk_score"] is None else str(r["risk_score"])
+        got = (r["risk_band"], r["recommended_action"], score,
+               str(bool(r["requires_human_signoff"])).lower())
+        exp = ((want["risk_band"], want["recommended_action"], want["risk_score"],
+                want["requires_human_signoff"]) if want else None)
+        rows.append((r["case_id"], "risk_assessment",
+                     " | ".join(exp) if exp else "(no dataset row)", " | ".join(got),
+                     "YES" if exp == got else "NO"))
+
+        ours = {(f["factor"], str(f["weight"]))
+                for f in conn.execute("SELECT factor, weight FROM risk_factor "
+                                      "WHERE assessment_id = ?", (r["assessment_id"],))}
+        theirs = ds_by_case.get(r["case_id"], set())
+        rows.append((r["case_id"], "risk_factor set",
+                     f"{len(theirs)} factors", f"{len(ours)} factors",
+                     "YES" if ours == theirs else "NO"))
+
+    for r in conn.execute("SELECT case_id FROM evidence_pack ORDER BY evidence_pack_id"):
+        rows.append((r["case_id"], "evidence_pack",
+                     "present" if r["case_id"] in ds_packs else "(no dataset row)",
+                     "present", "YES" if r["case_id"] in ds_packs else "NO"))
+    return rows
+
+
 def score(rows: list[tuple]) -> tuple[int, int]:
     scored = [r for r in rows if not r[1].startswith("  ")]
     return sum(1 for r in scored if r[4] == "YES"), len(scored)
@@ -264,7 +305,8 @@ def main() -> None:
 
     for label, fn in (("document quality", compare_documents), ("extracted field", compare_fields),
                      ("verification", compare_verification),
-                     ("screening", compare_screening)):
+                     ("screening", compare_screening),
+                     ("risk and evidence pack", compare_risk)):
         rows = fn(conn, args.dataset)
         ok, total = score(rows)
         print(f"{ok}/{total} {label} checks match")

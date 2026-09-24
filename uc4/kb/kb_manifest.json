@@ -1,5 +1,5 @@
 {
-  "kb_version": "kb-2026.09-poc-v5",
+  "kb_version": "kb-2026.09-poc-v6",
   "items": {
     "applicant_type_rules": {"file": "applicant_type_rules.csv", "version": "1.1", "brief_section": "7 - Applicant-type rules"},
     "jurisdiction_routing": {"file": "jurisdiction_routing.csv", "version": "1.0", "brief_section": "6.2 - Wallester AS / UK Ltd routing"},
@@ -9,6 +9,8 @@
     "registry_rules": {"file": "registry_rules.csv", "version": "1.0", "brief_section": "5.5 - Registry verification"},
     "ubo_policy": {"file": "ubo_policy.csv", "version": "1.0", "brief_section": "5.6 - Beneficial ownership"},
     "screening_rules": {"file": "screening_rules.csv", "version": "1.0", "brief_section": "5.7 - Sanctions, PEP and adverse media"},
-    "adverse_media_categories": {"file": "adverse_media_categories.csv", "version": "1.0", "brief_section": "5.7 - Adverse media relevance"}
+    "adverse_media_categories": {"file": "adverse_media_categories.csv", "version": "1.0", "brief_section": "5.7 - Adverse media relevance"},
+    "risk_scoring_matrix": {"file": "risk_scoring_matrix.csv", "version": "1.0", "brief_section": "5.8 - Risk scoring (all weights are POC placeholders)"},
+    "risk_bands": {"file": "risk_bands.csv", "version": "1.0", "brief_section": "5.8 - Risk bands and hard floors"}
   }
 }
