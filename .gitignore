@@ -3,4 +3,6 @@ __pycache__/
 onboarding.db
 exports/
 sample_documents/
-eval_report.md
+# eval_report.md is committed deliberately: every document in this project
+# is synthetic, so the report carries no real customer data. Restore the
+# ignore before pointing tools/evaluate_live.py at anything real.

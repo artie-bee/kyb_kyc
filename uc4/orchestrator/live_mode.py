@@ -10,6 +10,8 @@ Which model answers is a separate question, set by LLM_PROVIDER:
     LLM_PROVIDER=anthropic   Claude, reads PDFs natively      ANTHROPIC_API_KEY
     LLM_PROVIDER=xai         Grok, images only - PDFs are     XAI_API_KEY
                              rasterised to page images first
+    LLM_PROVIDER=groq        Groq (a different company from   GROQ_API_KEY
+                             xAI), images only, 3 per request
 
 Flip LIVE_MODE_READY once a key and the network access are in place, and run
 tools/evaluate_live.py before trusting anything it produces.
@@ -23,11 +25,12 @@ MESSAGE = "\n".join([
     "LIVE MODE NOT CONFIGURED - pending API access.",
     "",
     "The live integration is written but is not enabled. To turn it on:",
-    "  1. choose a provider: set LLM_PROVIDER to 'anthropic' or 'xai'",
+    "  1. choose a provider: set LLM_PROVIDER to 'anthropic', 'xai' or 'groq'",
     "  2. set that provider's key in the environment:",
     "       anthropic -> ANTHROPIC_API_KEY",
     "       xai       -> XAI_API_KEY",
-    "  3. confirm this network or proxy allows api.anthropic.com or api.x.ai",
+    "       groq      -> GROQ_API_KEY",
+    "  3. confirm this network or proxy allows that provider's host",
     "  4. set LIVE_MODE_READY = True in orchestrator/live_mode.py",
     "  5. run tools/evaluate_live.py and read eval_report.md before trusting it",
     "",

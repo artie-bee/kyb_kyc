@@ -64,7 +64,7 @@ def evaluate(dataset: Path, docs_root: Path, cases: tuple, limit: int | None,
     subject_names = {r["individual_id"]: r["full_name"]
                      for r in read_csv(dataset / "individual.csv")}
 
-    quality_rows, field_rows, errors = [], [], []
+    quality_rows, field_rows, errors, calls = [], [], [], []
     checker = None if extraction_only else ClaudeVisionQualityChecker()
     extractor = None if quality_only else ClaudeExtractor()
 
@@ -90,6 +90,8 @@ def evaluate(dataset: Path, docs_root: Path, cases: tuple, limit: int | None,
                     "notes": verdict.notes,
                     "transport": call.transport if call else "",
                     "cost": call.audit_note() if call else ""})
+                if call:
+                    calls.append(("quality", d["file_name"], call))
             except Exception as e:
                 errors.append((d["document_id"], d["file_name"], f"quality: {e}"))
 
@@ -98,6 +100,8 @@ def evaluate(dataset: Path, docs_root: Path, cases: tuple, limit: int | None,
             scripted = {f["name"]: f["value"] for f in fields_by_doc.get(d["document_id"], [])}
             try:
                 result = extractor.extract(payload, expected)
+                if extractor.last_call:
+                    calls.append(("extraction", d["file_name"], extractor.last_call))
                 live = {f.name: f.value for f in result.fields if f.value is not None}
                 for name in sorted(set(scripted) | set(live)):
                     want, got = scripted.get(name), live.get(name)
@@ -113,6 +117,7 @@ def evaluate(dataset: Path, docs_root: Path, cases: tuple, limit: int | None,
             "provider": llm_client.provider_name(),
             "model": llm_client.model_name(),
             "transport": sorted({r["transport"] for r in quality_rows if r.get("transport")}),
+            "calls": calls,
             "prompts": [p.stamp for p in
                         (checker.prompt if checker else None,
                          extractor.prompt if extractor else None) if p]}
@@ -189,6 +194,26 @@ def report(result: dict) -> str:
         for doc_id, name, err in errors:
             lines.append(f"| {doc_id} | {name} | {str(err)[:160]} |")
         lines.append("")
+
+    calls = result.get("calls") or []
+    if calls:
+        tok_in = sum(c.input_tokens for _, _, c in calls)
+        tok_out = sum(c.output_tokens for _, _, c in calls)
+        latency = sum(c.latency_ms for _, _, c in calls)
+        retried = sum(1 for _, _, c in calls if c.attempts > 1)
+        lines += ["## Calls and tokens", "",
+                  f"**{len(calls)} call(s)**, {tok_in:,} input and {tok_out:,} output "
+                  f"tokens, {latency / 1000:.1f}s of model time. "
+                  f"{retried} needed the retry.", "",
+                  "| step | document | attempts | in | out | latency |",
+                  "|---|---|---|---|---|---|"]
+        for step, name, c in calls:
+            lines.append(f"| {step} | {name} | {c.attempts} | {c.input_tokens:,} | "
+                         f"{c.output_tokens:,} | {c.latency_ms}ms |")
+        per_call = tok_in // len(calls)
+        lines += ["",
+                  f"At this rate the full set of 61 documents would be roughly "
+                  f"{per_call * 122:,} input tokens across 122 calls.", ""]
 
     if not (q or f or errors):
         lines += ["Nothing was evaluated.", ""]

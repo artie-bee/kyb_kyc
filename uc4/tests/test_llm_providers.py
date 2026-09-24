@@ -264,6 +264,55 @@ def test_xai_refuses_a_format_it_cannot_send(clean_env, tmp_path):
     assert "not a format xAI accepts" in str(e.value)
 
 
+# ---------------------------------------------------------------------------
+# Groq - a different company from xAI, despite the name
+# ---------------------------------------------------------------------------
+
+def test_groq_is_its_own_provider_with_its_own_key_and_endpoint(clean_env):
+    os.environ["LLM_PROVIDER"] = "groq"
+    client = llm_client.get_client()
+    assert isinstance(client, llm_client.GroqClient)
+    assert client.base_url == "https://api.groq.com/openai/v1"
+    assert client.model == "qwen/qwen3.8-27b"
+
+    with pytest.raises(llm_client.MissingApiKey) as e:
+        llm_client.api_key("groq")
+    assert "GROQ_API_KEY" in str(e.value)
+
+    # an xAI key must not satisfy Groq. The names are one letter apart and the
+    # consoles are different companies; silently accepting either would send a
+    # credential to the wrong vendor.
+    os.environ["XAI_API_KEY"] = "test-value-not-a-real-key"
+    with pytest.raises(llm_client.MissingApiKey):
+        llm_client.api_key("groq")
+
+
+def test_groq_caps_a_rasterised_pdf_at_three_pages_and_says_when_it_did(clean_env):
+    pdf = ROOT / "sample_documents" / "WAL-ONB-0001" / "ee_fie_registry_extract_mets.pdf"
+    if not pdf.exists():
+        pytest.skip("sample documents not generated")
+    parts, transport = llm_client.GroqClient()._image_parts(pdf)
+    assert len(parts) <= 3, "Groq accepts at most three images per request"
+    assert "rasterised" in transport
+
+
+def test_an_oversized_image_is_named_rather_than_sent(clean_env, tmp_path):
+    big = tmp_path / "huge.png"
+    big.write_bytes(b"\x89PNG" + b"\0" * (llm_client.MAX_IMAGE_BYTES + 1))
+    with pytest.raises(llm_client.CallFailed) as e:
+        llm_client.GroqClient()._image_parts(big)
+    assert "huge.png" in str(e.value), \
+        "an oversized payload must not surface as an unexplained 400"
+
+
+def test_both_openai_compatible_providers_share_one_implementation():
+    """The guarantees are shared code, not two copies that can drift apart."""
+    for cls in (llm_client.XaiClient, llm_client.GroqClient):
+        assert issubclass(cls, llm_client.OpenAICompatibleClient)
+        assert cls._send is llm_client.OpenAICompatibleClient._send
+        assert cls.ask is llm_client.LLMClient.ask
+
+
 def test_anthropic_sends_a_pdf_as_a_document_unchanged(clean_env):
     pdf = ROOT / "sample_documents" / "WAL-ONB-0001" / "ee_fie_registry_extract_mets.pdf"
     if not pdf.exists():

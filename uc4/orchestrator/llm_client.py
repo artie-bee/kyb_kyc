@@ -38,23 +38,35 @@ MAX_ATTEMPTS = 2          # one call, one retry, then the caller places a hold
 DEFAULT_PROVIDER = "anthropic"
 DEFAULT_MODELS = {
     "anthropic": "claude-sonnet-5",
-    # xAI's current vision-capable chat model. A setting, not a constant in the
-    # calling code: model names move and the audit row has to say which one ran.
+    # The vision-capable model for each provider. A setting, not a constant in
+    # the calling code: model names move, and the audit row has to be able to
+    # say which one actually ran.
     "xai": "grok-4.7",
+    "groq": "qwen/qwen3.8-27b",
 }
-API_KEY_ENV = {"anthropic": "ANTHROPIC_API_KEY", "xai": "XAI_API_KEY"}
+API_KEY_ENV = {"anthropic": "ANTHROPIC_API_KEY",
+               "xai": "XAI_API_KEY",
+               "groq": "GROQ_API_KEY"}
 
 XAI_BASE_URL = "https://api.x.ai/v1"
+GROQ_BASE_URL = "https://api.groq.com/openai/v1"
 
 # What each provider will accept directly.
 MEDIA_TYPES = {".pdf": "application/pdf", ".png": "image/png", ".jpg": "image/jpeg",
                ".jpeg": "image/jpeg", ".gif": "image/gif", ".webp": "image/webp"}
-XAI_IMAGE_TYPES = {".png": "image/png", ".jpg": "image/jpeg", ".jpeg": "image/jpeg"}
+IMAGE_TYPES = {".png": "image/png", ".jpg": "image/jpeg", ".jpeg": "image/jpeg"}
+XAI_IMAGE_TYPES = IMAGE_TYPES          # kept under the old name for callers
 
 # A rasterised PDF is sent as page images. Four pages is more than any document
 # in this set needs and keeps a runaway file from turning into a large bill.
+# Providers that accept fewer images per request lower this for themselves.
 PDF_MAX_PAGES = 4
 PDF_RENDER_SCALE = 2.0            # roughly 144 dpi against a 72 dpi page box
+
+# Base64 payloads are rejected above a few megabytes by most providers, and an
+# oversized request fails as a 400 that reads like a bad key. Checking here
+# turns that into a sentence naming the file.
+MAX_IMAGE_BYTES = 4 * 1024 * 1024
 
 _FENCE = re.compile(r"^```(?:json)?\s*|\s*```$", re.M)
 
@@ -301,59 +313,85 @@ def render_pdf_pages(path: Path, max_pages: int = PDF_MAX_PAGES) -> list[bytes]:
     return pages
 
 
-class XaiClient(LLMClient):
-    """Grok, over the OpenAI-compatible /v1/chat/completions endpoint.
+class OpenAICompatibleClient(LLMClient):
+    """Any provider that serves OpenAI's /v1/chat/completions shape.
 
-    Base URL is https://api.x.ai/v1 and the request is the standard OpenAI
-    shape, so the official openai package is pointed at xAI rather than a second
-    SDK being added.
+    xAI and Groq both do, so the official openai package is pointed at whichever
+    base URL is wanted rather than a second SDK being added for each one. A
+    subclass supplies the base URL, the default model and its own image limits;
+    everything else here is shared, which is the point.
 
-    Images go as base64 data URLs. xAI accepts jpg and png only, so a PDF is
-    rasterised first and the conversion is recorded on the Call - the audit row
-    has to be able to say the model saw page images, not the file itself.
+    Neither provider accepts a PDF. A PDF is therefore rasterised to page images
+    first, and the conversion is recorded on the Call - the audit row must not
+    imply the model read the file when what it saw was a picture of it.
     """
 
-    provider = "xai"
+    provider = "openai_compatible"
+    base_url_default = ""
+    base_url_env = ""
+    max_images = PDF_MAX_PAGES
+    label = "this provider"
 
     def __init__(self, model: str | None = None, base_url: str | None = None):
         super().__init__(model)
-        self.base_url = base_url or os.environ.get("XAI_BASE_URL") or XAI_BASE_URL
+        self.base_url = (base_url
+                         or (os.environ.get(self.base_url_env) if self.base_url_env else None)
+                         or self.base_url_default)
 
-    def _image_parts(self, path: Path) -> tuple[list[dict], str]:
-        suffix = path.suffix.lower()
-        if suffix in XAI_IMAGE_TYPES:
-            data = base64.standard_b64encode(path.read_bytes()).decode("ascii")
-            url = f"data:{XAI_IMAGE_TYPES[suffix]};base64,{data}"
-            return [{"type": "image_url",
-                     "image_url": {"url": url, "detail": "high"}}], ""
-        if suffix == ".pdf":
-            pages = render_pdf_pages(path)
-            parts = [{"type": "image_url",
-                      "image_url": {
-                          "url": "data:image/png;base64,"
-                                 + base64.standard_b64encode(p).decode("ascii"),
-                          "detail": "high"}}
-                     for p in pages]
-            return parts, f"pdf rasterised to {len(pages)} page image(s)"
-        raise CallFailed(
-            f"{path.name}: {suffix} is not a format xAI accepts "
-            f"(jpg, jpeg and png only, or a PDF this client rasterises)")
-
-    def _send(self, document_path, text, max_tokens, corrections):
+    # -- transport ---------------------------------------------------------
+    def _client(self):
         try:
             import openai
         except ImportError as e:
             raise CallFailed(
-                "the openai package is not installed; the xAI provider uses it "
-                "against xAI's OpenAI-compatible endpoint: pip install openai") from e
+                f"the openai package is not installed; the {self.provider} provider "
+                f"uses it against an OpenAI-compatible endpoint: "
+                f"pip install openai") from e
+        return openai.OpenAI(api_key=api_key(self.provider), base_url=self.base_url)
 
-        client = openai.OpenAI(api_key=api_key(self.provider), base_url=self.base_url)
+    def _data_url(self, media_type: str, blob: bytes, name: str) -> str:
+        if len(blob) > MAX_IMAGE_BYTES:
+            raise CallFailed(
+                f"{name}: the image is {len(blob) // 1024}KB, over the "
+                f"{MAX_IMAGE_BYTES // 1024}KB this client will send as base64. "
+                f"Lower PDF_RENDER_SCALE or send a smaller file")
+        return f"data:{media_type};base64," + base64.standard_b64encode(blob).decode("ascii")
+
+    def _image_parts(self, path: Path) -> tuple[list[dict], str]:
+        suffix = path.suffix.lower()
+        if suffix in IMAGE_TYPES:
+            url = self._data_url(IMAGE_TYPES[suffix], path.read_bytes(), path.name)
+            return [{"type": "image_url",
+                     "image_url": {"url": url, "detail": "high"}}], ""
+        if suffix == ".pdf":
+            pages = render_pdf_pages(path, max_pages=self.max_images)
+            parts = [{"type": "image_url",
+                      "image_url": {"url": self._data_url("image/png", page, path.name),
+                                    "detail": "high"}}
+                     for page in pages]
+            transport = f"pdf rasterised to {len(pages)} page image(s)"
+            # Say so when the cap bit: a verdict reached on page 1 of a longer
+            # document is a different claim from one reached on the whole thing.
+            try:
+                import pypdfium2
+                total = len(pypdfium2.PdfDocument(str(path)))
+                if total > len(pages):
+                    transport += f" (first {len(pages)} of {total}; "
+                    transport += f"{self.provider} accepts {self.max_images} per request)"
+            except Exception:
+                pass
+            return parts, transport
+        raise CallFailed(
+            f"{path.name}: {suffix} is not a format {self.label} accepts "
+            f"(jpg, jpeg and png only, or a PDF this client rasterises)")
+
+    def _send(self, document_path, text, max_tokens, corrections):
         parts, transport = self._image_parts(document_path)
         content = parts + [{"type": "text", "text": text}]
         for note in corrections:
             content.append({"type": "text", "text": note})
 
-        response = client.chat.completions.create(
+        response = self._client().chat.completions.create(
             model=self.model, max_tokens=max_tokens,
             messages=[{"role": "user", "content": content}])
         raw = (response.choices[0].message.content or "") if response.choices else ""
@@ -369,21 +407,40 @@ class XaiClient(LLMClient):
         Deliberately not part of the interface: it sends no document and asks
         for no JSON, so it tells you about the connection and nothing else.
         """
-        try:
-            import openai
-        except ImportError as e:
-            raise CallFailed("the openai package is not installed: "
-                             "pip install openai") from e
-        client = openai.OpenAI(api_key=api_key(self.provider), base_url=self.base_url)
-        response = client.chat.completions.create(
+        response = self._client().chat.completions.create(
             model=self.model, max_tokens=max_tokens,
             messages=[{"role": "user", "content": "Reply with the single word: ready"}])
         return (response.choices[0].message.content or "").strip()
 
 
+class XaiClient(OpenAICompatibleClient):
+    """Grok, at https://api.x.ai/v1. Images are jpg and png only."""
+
+    provider = "xai"
+    label = "xAI"
+    base_url_default = XAI_BASE_URL
+    base_url_env = "XAI_BASE_URL"
+
+
+class GroqClient(OpenAICompatibleClient):
+    """Groq, at https://api.groq.com/openai/v1.
+
+    Not the same thing as xAI's Grok, despite the name: Groq runs open models
+    on its own hardware. Only its multimodal model takes images, it accepts at
+    most three per request, and each image costs a flat 2,048 input tokens - so
+    a rasterised PDF is capped at three pages here rather than four.
+    """
+
+    provider = "groq"
+    label = "Groq"
+    base_url_default = GROQ_BASE_URL
+    base_url_env = "GROQ_BASE_URL"
+    max_images = 3
+
+
 # ---------------------------------------------------------------------------
 
-CLIENTS = {"anthropic": AnthropicClient, "xai": XaiClient}
+CLIENTS = {"anthropic": AnthropicClient, "xai": XaiClient, "groq": GroqClient}
 
 
 def get_client(provider: str | None = None, model: str | None = None) -> LLMClient:
