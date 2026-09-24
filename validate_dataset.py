@@ -99,7 +99,11 @@ BRIEF_ENUMS = {
  ("document", "quality_status"): ["pending", "accepted_for_checks", "resubmission_required",
                                   "manual_review_required"],
  ("document", "quality_flags"): ["blurred_unreadable", "cut_off_pages", "expired", "missing_pages",
-    "screenshot_not_original", "name_mismatch", "tampering_indicator", "unsupported_file_type"],
+    "screenshot_not_original", "name_mismatch", "tampering_indicator", "unsupported_file_type",
+    # wrong_document_type: legible, but not the document the checklist asked for.
+    # document_too_old: still valid, but older than the rule's max_age_days. Distinct
+    # from 'expired', which means the document carries a past expiry date.
+    "wrong_document_type", "document_too_old"],
  ("document", "resubmission_reasons"): ["document_unreadable", "document_expired",
     "ubo_declaration_missing", "registered_address_mismatch", "director_identity_missing",
     "source_of_funds_clarification", "ownership_structure_unclear", "proof_of_address_too_old"],

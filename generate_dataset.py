@@ -642,8 +642,20 @@ def build_case(spec):
 # ---------------------------------------------------------------------------
 # Scripted cases - 8 demo cases from section 8.1 plus 2 controls
 # ---------------------------------------------------------------------------
+# The document.quality_flags vocabulary. wrong_document_type and document_too_old
+# were split out of unsupported_file_type and expired: a legible file that is the
+# wrong document is not an unreadable format, and a document that is merely older
+# than the rule's max_age_days has not expired.
+QUALITY_FLAGS = ("blurred_unreadable", "cut_off_pages", "expired", "missing_pages",
+                 "screenshot_not_original", "name_mismatch", "tampering_indicator",
+                 "unsupported_file_type", "wrong_document_type", "document_too_old")
+
+
 def doc(dtype, file_name, quality="accepted_for_checks", subject="", fields=None, flags="",
         reasons="", expiry="", issue_country=""):
+    for f in flags.split("|") if flags else []:
+        if f not in QUALITY_FLAGS:
+            raise ValueError("unknown quality flag %r on %s" % (f, file_name))
     return {"type": dtype, "file_name": file_name, "quality": quality, "subject": subject,
             "fields": fields or [], "flags": flags, "reasons": reasons, "expiry": expiry,
             "issue_country": issue_country}
@@ -1073,6 +1085,15 @@ CASES.append({
      ("declared_industry", "Wholesale of marine equipment", 0.90, 1, False)]),
  ],
  "triggered_conditionals": [find_rule("complex_corporate_ubo", "EE", "source_of_wealth_statement")],
+ # The ownership chart failed the quality screen and went to an analyst. The case
+ # only reaches the paid provider checks because the analyst released it - without
+ # this event the jump from document_flagged to registry_check_completed is
+ # unexplained, and nothing downstream could show who authorised it.
+ "audit_after_quality": [
+   {"actor_type": "analyst", "actor_id": "analyst.m.sild", "action": "document_released_after_review",
+    "summary": "DOC-0038 (ownership_chart) released by analyst.m.sild; decision accept; reason: "
+               "the missing annex lists dormant subsidiaries only and does not affect the "
+               "beneficial ownership chain, which is legible on the pages supplied"}],
  "registry": {"provider": "MockRegistryHub EE", "company_status": "active", "name_match": "match",
    "number_match": "match", "address_match": "match", "director_match": "match",
    "ubo_supported": False, "high_risk": False, "confidence": 0.52, "result": "review"},
