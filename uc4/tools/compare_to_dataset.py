@@ -94,6 +94,29 @@ def compare(conn: sqlite3.Connection, dataset: Path = DEFAULT_DATASET) -> list[t
     return rows
 
 
+def compare_documents(conn: sqlite3.Connection, dataset: Path = DEFAULT_DATASET) -> list[tuple]:
+    """One row per document the orchestrator assessed, matched by (case, file name).
+
+    Step 3 outcomes only: quality_status, quality_flags, resubmission_reasons and
+    the resubmission flag. Documents on cases that stop before Step 3 - the
+    white-label branch - are not assessed and so are not compared.
+    """
+    ds = {(r["case_id"], r["file_name"]):
+          (r["quality_status"], r["quality_flags"], r["resubmission_reasons"],
+           r["resubmission_required"])
+          for r in read_csv(dataset / "document.csv")}
+    rows = []
+    for r in conn.execute("SELECT * FROM document ORDER BY document_id"):
+        key = (r["case_id"], r["file_name"])
+        got = (r["quality_status"], r["quality_flags"] or "", r["resubmission_reasons"] or "",
+               str(bool(r["resubmission_required"])).lower())
+        want = ds.get(key)
+        rows.append((r["case_id"], r["file_name"],
+                     " / ".join(want) if want else "(no dataset row)",
+                     " / ".join(got), "YES" if want == got else "NO"))
+    return rows
+
+
 def score(rows: list[tuple]) -> tuple[int, int]:
     scored = [r for r in rows if not r[1].startswith("  ")]
     return sum(1 for r in scored if r[4] == "YES"), len(scored)
@@ -119,10 +142,19 @@ def main() -> None:
     ap.add_argument("--applications", type=Path, default=DEFAULT_OUT)
     args = ap.parse_args()
 
-    rows = compare(run_orchestrator(args.applications), args.dataset)
+    conn = run_orchestrator(args.applications)
+
+    rows = compare(conn, args.dataset)
     print(render(rows))
     ok, total = score(rows)
-    print(f"\n{ok}/{total} field checks match")
+    print(f"\n{ok}/{total} case field checks match")
+
+    docs = compare_documents(conn, args.dataset)
+    dok, dtotal = score(docs)
+    print(f"{dok}/{dtotal} document quality checks match")
+    for r in docs:
+        if r[4] == "NO":
+            print(f"  MISMATCH {r[0]} {r[1]}\n    dataset: {r[2]}\n    ours   : {r[3]}")
 
 
 if __name__ == "__main__":

@@ -13,15 +13,23 @@ from pathlib import Path
 
 from . import db
 from .kb import KnowledgeBase
-from .steps import intake, requirement_pack
+from .quality_checker import get_checker
+from .steps import document_quality, intake, requirement_pack
+
+# Which document-quality checker to use. "mock" replays scripted verdicts;
+# "claude_vision" is a stub and raises. Default stays mock so that running the
+# orchestrator never calls an API by accident.
+QUALITY_CHECKER_MODE = "mock"
 
 STEPS = {
     "requirement_pack": requirement_pack.run,
-    # "document_quality": document_quality.run,   <- next layer
+    "document_quality": document_quality.run,
+    # "extraction": extraction.run,   <- next layer
 }
 
 
-def process_application(conn, application: dict, kb: KnowledgeBase) -> dict:
+def process_application(conn, application: dict, kb: KnowledgeBase,
+                        checker_mode: str = QUALITY_CHECKER_MODE) -> dict:
     trace = {"application_id": application.get("application_id")}
 
     result = intake.run(conn, application, kb)
@@ -32,7 +40,8 @@ def process_application(conn, application: dict, kb: KnowledgeBase) -> dict:
         if next_step not in STEPS:          # step not built yet -> stop cleanly
             trace["waiting_for"] = next_step
             break
-        step_result = STEPS[next_step](conn, result.case_id, application, kb)
+        kwargs = {"checker": get_checker(checker_mode)} if next_step == "document_quality" else {}
+        step_result = STEPS[next_step](conn, result.case_id, application, kb, **kwargs)
         trace[next_step] = step_result.__dict__
         next_step = step_result.next_step
         if next_step not in STEPS:
@@ -51,11 +60,16 @@ def main(paths: list[str], db_path: str = "onboarding.db") -> None:
         trace = process_application(conn, application, kb)
         i = trace["intake"]
         pack = trace.get("requirement_pack", {})
+        dq = trace.get("document_quality", {})
         print(f"{i['case_id']}  {Path(p).name:<32} type={i['applicant_type']!s:<24} "
               f"route={i['route']:<18} scope={i['entity_scope']!s:<17} "
               f"items={pack.get('items_required', '-')}/{pack.get('items_optional', '-')}/"
-              f"{pack.get('items_conditional', '-')}  next={trace.get('waiting_for')}")
-        for prob in i["problems"] + pack.get("problems", []):
+              f"{pack.get('items_conditional', '-')}  "
+              f"docs={dq.get('accepted', '-')}/{dq.get('resubmission', '-')}/"
+              f"{dq.get('manual_review', '-')}  "
+              f"status={dq.get('status') or pack.get('status') or i['status']}  "
+              f"next={trace.get('waiting_for')}")
+        for prob in i["problems"] + pack.get("problems", []) + dq.get("problems", []):
             print(f"{'':12}! {prob}")
 
 

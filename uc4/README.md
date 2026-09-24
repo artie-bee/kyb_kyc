@@ -7,6 +7,7 @@ kb/                         Knowledge base (read-only CSV, versioned in kb_manif
   requirement_rule.csv      Document requirement matrix (Section 5.2) - the 86-rule matrix
                             from the scripted dataset
   requirement_rule_sample.csv  The original 36-rule sample matrix, kept for reference
+  document_quality_rules.csv   Quality checks per document type (Section 5.3)
 orchestrator/
   orchestrator.py           The orchestration layer: runs steps in order, stops cleanly
   kb.py                     Loads the KB + tiny rule engine
@@ -29,10 +30,27 @@ python tools/compare_to_dataset.py          # print the comparison table
 python -m pytest tests -q
 
 ## Flow so far
-application -> [Step 1 intake] --primary--> [Step 2 requirement pack] -> waits for documents
+application -> [Step 1 intake] --primary--> [Step 2 requirement pack] -> [Step 3 document quality]
                                --white_label--> [Step 2 requirement pack] -> stop (KYB intake only)
                                --unknown country / no rule--> analyst_review_required
                                --form incomplete--> next_action_owner = customer
+
+[Step 3 document quality] --any manual review--> analyst_review_required (analyst)
+                          --any resubmission---> resubmission_required (customer)
+                          --all required accepted--> verification_in_progress -> extraction
+                          --required items outstanding--> document_quality_review (customer)
+
+## Step 3 - document quality (Section 5.3)
+Deterministic checks (file type, expiry, proof-of-address age, page count) run in code.
+Judgement calls run through a QualityChecker:
+  mock           replays the scripted verdict - the default, calls no API
+  claude_vision  STUB, raises; see orchestrator/quality_checker.py
+Set the mode with QUALITY_CHECKER_MODE in orchestrator/orchestrator.py.
+A checker may only return flags in ALLOWED_FLAGS; anything else is rejected, not trusted.
+A document that fails quality never reaches a later step: document_quality.accepted_documents()
+is the only supported way to ask what a downstream step may read, and the case only moves to
+extraction when every required checklist item is accepted. Three failed attempts on one item
+send it to an analyst instead of back to the customer.
 
 ## Conditional rules
 requirement_rule.csv carries both a human-readable `condition` sentence and a machine-readable

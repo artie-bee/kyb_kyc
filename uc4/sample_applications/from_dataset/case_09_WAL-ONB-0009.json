@@ -51,5 +51,127 @@
     "ubo_indirect_25pct_or_more": false,
     "signatory_not_director": false,
     "vat_registered": true
-  }
+  },
+  "documents": [
+    {
+      "document_type": "certificate_of_incorporation",
+      "file_name": "cert_incorporation_parnu.pdf",
+      "subject_ref": null,
+      "upload_time": "2026-09-19T09:32:00Z",
+      "expiry_date": null,
+      "document_date": null,
+      "issue_country": "EE",
+      "scripted_quality_flags": []
+    },
+    {
+      "document_type": "registry_extract",
+      "file_name": "registry_extract_parnu.pdf",
+      "subject_ref": null,
+      "upload_time": "2026-09-19T09:34:00Z",
+      "expiry_date": null,
+      "document_date": null,
+      "issue_country": "EE",
+      "scripted_quality_flags": []
+    },
+    {
+      "document_type": "tax_registration_certificate",
+      "file_name": "tax_registration_parnu.pdf",
+      "subject_ref": null,
+      "upload_time": "2026-09-19T09:36:00Z",
+      "expiry_date": null,
+      "document_date": null,
+      "issue_country": null,
+      "scripted_quality_flags": []
+    },
+    {
+      "document_type": "director_register",
+      "file_name": "director_register_parnu.pdf",
+      "subject_ref": null,
+      "upload_time": "2026-09-19T09:38:00Z",
+      "expiry_date": null,
+      "document_date": null,
+      "issue_country": null,
+      "scripted_quality_flags": []
+    },
+    {
+      "document_type": "authorised_signatory_list",
+      "file_name": "signatory_list_parnu.pdf",
+      "subject_ref": null,
+      "upload_time": "2026-09-19T09:40:00Z",
+      "expiry_date": null,
+      "document_date": null,
+      "issue_country": null,
+      "scripted_quality_flags": []
+    },
+    {
+      "document_type": "ubo_declaration",
+      "file_name": "ubo_declaration_parnu.pdf",
+      "subject_ref": null,
+      "upload_time": "2026-09-19T09:42:00Z",
+      "expiry_date": null,
+      "document_date": null,
+      "issue_country": null,
+      "scripted_quality_flags": []
+    },
+    {
+      "document_type": "id_document",
+      "file_name": "id_card_ilves_k.jpg",
+      "subject_ref": "IND-0019",
+      "upload_time": "2026-09-19T09:44:00Z",
+      "expiry_date": "2030-09-12",
+      "document_date": null,
+      "issue_country": "EE",
+      "scripted_quality_flags": []
+    },
+    {
+      "document_type": "id_document",
+      "file_name": "id_card_roosaar_m.jpg",
+      "subject_ref": "IND-0020",
+      "upload_time": "2026-09-19T09:46:00Z",
+      "expiry_date": "2029-11-03",
+      "document_date": null,
+      "issue_country": "EE",
+      "scripted_quality_flags": []
+    },
+    {
+      "document_type": "proof_of_address",
+      "file_name": "poa_ilves_sep2026.pdf",
+      "subject_ref": "IND-0019",
+      "upload_time": "2026-09-19T09:48:00Z",
+      "expiry_date": null,
+      "document_date": "2026-09-05",
+      "issue_country": "EE",
+      "scripted_quality_flags": []
+    },
+    {
+      "document_type": "proof_of_address",
+      "file_name": "poa_roosaar_aug2026.pdf",
+      "subject_ref": "IND-0020",
+      "upload_time": "2026-09-19T09:50:00Z",
+      "expiry_date": null,
+      "document_date": "2026-08-29",
+      "issue_country": "EE",
+      "scripted_quality_flags": []
+    },
+    {
+      "document_type": "source_of_funds_declaration",
+      "file_name": "source_of_funds_parnu.pdf",
+      "subject_ref": null,
+      "upload_time": "2026-09-19T09:52:00Z",
+      "expiry_date": null,
+      "document_date": null,
+      "issue_country": null,
+      "scripted_quality_flags": []
+    },
+    {
+      "document_type": "business_activity_description",
+      "file_name": "business_activity_parnu.pdf",
+      "subject_ref": null,
+      "upload_time": "2026-09-19T09:54:00Z",
+      "expiry_date": null,
+      "document_date": null,
+      "issue_country": null,
+      "scripted_quality_flags": []
+    }
+  ]
 }

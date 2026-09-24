@@ -54,6 +54,22 @@ CREATE TABLE IF NOT EXISTS checklist_item (
     resubmission_attempts INTEGER NOT NULL DEFAULT 0,
     note TEXT
 );
+CREATE TABLE IF NOT EXISTS document (
+    document_id TEXT PRIMARY KEY,
+    case_id TEXT NOT NULL REFERENCES onboarding_case(case_id),
+    subject_individual_id TEXT REFERENCES individual(individual_id),
+    document_type TEXT NOT NULL, file_name TEXT NOT NULL, upload_time TEXT,
+    quality_status TEXT NOT NULL DEFAULT 'pending', quality_flags TEXT,
+    expiry_date TEXT, document_date TEXT, issue_country TEXT,
+    resubmission_required INTEGER NOT NULL DEFAULT 0, resubmission_reasons TEXT
+);
+-- Which uploaded file satisfies which checklist item (a rule asking for two
+-- director IDs produces two items, each with its own document).
+CREATE TABLE IF NOT EXISTS checklist_item_document (
+    item_id TEXT NOT NULL REFERENCES checklist_item(item_id),
+    document_id TEXT NOT NULL REFERENCES document(document_id),
+    PRIMARY KEY (item_id, document_id)
+);
 CREATE TABLE IF NOT EXISTS audit_event (
     event_id TEXT PRIMARY KEY,
     case_id TEXT NOT NULL REFERENCES onboarding_case(case_id),
@@ -75,6 +91,7 @@ ID_PREFIX = {
     "ubo": ("ubo_id", "UBO-"),
     "requirement_pack": ("pack_id", "PACK-"),
     "checklist_item": ("item_id", "CHK-"),
+    "document": ("document_id", "DOC-"),
     "audit_event": ("event_id", "EVT-"),
 }
 

@@ -35,5 +35,67 @@
     "ubo_indirect_25pct_or_more": false,
     "signatory_not_director": false,
     "vat_registered": false
-  }
+  },
+  "documents": [
+    {
+      "document_type": "registry_extract",
+      "file_name": "ee_fie_registry_extract_mets.pdf",
+      "subject_ref": null,
+      "upload_time": "2026-09-01T08:47:00Z",
+      "expiry_date": null,
+      "document_date": null,
+      "issue_country": "EE",
+      "scripted_quality_flags": []
+    },
+    {
+      "document_type": "id_document",
+      "file_name": "passport_mets_k.jpg",
+      "subject_ref": "IND-0001",
+      "upload_time": "2026-09-01T08:49:00Z",
+      "expiry_date": "2031-04-18",
+      "document_date": null,
+      "issue_country": "EE",
+      "scripted_quality_flags": []
+    },
+    {
+      "document_type": "proof_of_address",
+      "file_name": "utility_bill_aug2026_mets.pdf",
+      "subject_ref": "IND-0001",
+      "upload_time": "2026-09-01T08:51:00Z",
+      "expiry_date": null,
+      "document_date": "2026-08-12",
+      "issue_country": "EE",
+      "scripted_quality_flags": []
+    },
+    {
+      "document_type": "liveness_selfie",
+      "file_name": "liveness_capture_20260901_mets.jpg",
+      "subject_ref": "IND-0001",
+      "upload_time": "2026-09-01T08:53:00Z",
+      "expiry_date": null,
+      "document_date": null,
+      "issue_country": null,
+      "scripted_quality_flags": []
+    },
+    {
+      "document_type": "source_of_funds_declaration",
+      "file_name": "source_of_funds_mets.pdf",
+      "subject_ref": null,
+      "upload_time": "2026-09-01T08:55:00Z",
+      "expiry_date": null,
+      "document_date": null,
+      "issue_country": null,
+      "scripted_quality_flags": []
+    },
+    {
+      "document_type": "business_activity_description",
+      "file_name": "business_activity_mets.pdf",
+      "subject_ref": null,
+      "upload_time": "2026-09-01T08:57:00Z",
+      "expiry_date": null,
+      "document_date": null,
+      "issue_country": null,
+      "scripted_quality_flags": []
+    }
+  ]
 }

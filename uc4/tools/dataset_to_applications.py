@@ -68,6 +68,19 @@ ASSUMPTIONS = [
            "treats as requiring a liveness selfie from the ones it waives."),
     ("F7", "registered_with_trade_register: NOT DERIVABLE, left unanswered. It applies only to "
            "UK sole traders, and the dataset contains no such case."),
+    # --- documents, for Step 3 -------------------------------------------------
+    ("D1", "documents[] comes from document.csv: type, file name, upload time, expiry date and "
+           "issue country are all upload-time facts a portal would capture."),
+    ("D2", "document_date is not a column on document.csv. It is taken from the extracted_field "
+           "row named 'document_date' where one exists, on the basis that a portal asks for the "
+           "date on a proof of address at upload. It feeds the max_age_days rule only, and on "
+           "this dataset no document is old enough to fail it."),
+    ("D3", "scripted_quality_flags carries document.csv's quality_flags through to the mock "
+           "checker. It is the scripted verdict being replayed, not an input a real applicant "
+           "would supply, and a live checker ignores it."),
+    ("D4", "page_count / expected_page_count are absent from the dataset, so the deterministic "
+           "missing-pages rule never fires here; DOC-0038's missing_pages flag arrives as a "
+           "scripted verdict instead."),
 ]
 
 # Rule-of-thumb monthly spend threshold, in the rule's own currency terms (F1).
@@ -139,8 +152,23 @@ def derive_flags(applicant: dict, people: list[dict], ubos: list[dict]) -> dict:
     return flags
 
 
-def build_application(case: dict, applicant: dict,
-                      people: list[dict], ubos: list[dict]) -> dict:
+def build_documents(case_docs: list[dict], doc_dates: dict[str, str]) -> list[dict]:
+    """D1-D4: what the customer uploaded, as Step 3 receives it."""
+    return [
+        {"document_type": d["document_type"],
+         "file_name": d["file_name"],
+         "subject_ref": d["subject_individual_id"] or None,
+         "upload_time": d["upload_time"] or None,
+         "expiry_date": d["expiry_date"] or None,
+         "document_date": doc_dates.get(d["document_id"]),          # D2
+         "issue_country": d["issue_country"] or None,
+         "scripted_quality_flags": [f for f in d["quality_flags"].split("|") if f]}   # D3
+        for d in case_docs
+    ]
+
+
+def build_application(case: dict, applicant: dict, people: list[dict], ubos: list[dict],
+                      documents: list[dict]) -> dict:
     return {
         "application_id": f"{case['source_channel'].upper()}-{case['case_id']}",
         "source_channel": case["source_channel"],
@@ -174,6 +202,7 @@ def build_application(case: dict, applicant: dict,
             for u in ubos
         ],
         "flags": derive_flags(applicant, people, ubos),         # F1-F7
+        "documents": documents,                                 # D1-D4
     }
 
 
@@ -191,6 +220,12 @@ def main() -> None:
     ubos_by_applicant = defaultdict(list)
     for r in read_csv(args.dataset / "ubo.csv"):
         ubos_by_applicant[r["applicant_id"]].append(r)
+    docs_by_case = defaultdict(list)
+    for r in read_csv(args.dataset / "document.csv"):
+        docs_by_case[r["case_id"]].append(r)
+    doc_dates = {r["document_id"]: r["value"]
+                 for r in read_csv(args.dataset / "extracted_field.csv")
+                 if r["name"] == "document_date"}
 
     args.out.mkdir(parents=True, exist_ok=True)
     for stale in args.out.glob("*.json"):
@@ -198,8 +233,9 @@ def main() -> None:
 
     for n, case in enumerate(cases, start=1):
         aid = case["applicant_id"]
-        app = build_application(case, applicants[aid],
-                                people_by_applicant[aid], ubos_by_applicant[aid])
+        app = build_application(
+            case, applicants[aid], people_by_applicant[aid], ubos_by_applicant[aid],
+            build_documents(docs_by_case[case["case_id"]], doc_dates))
         out = args.out / f"case_{n:02d}_{case['case_id']}.json"
         out.write_text(json.dumps(app, indent=2, ensure_ascii=False), encoding="utf-8")
         own = app["ownership"]
@@ -207,7 +243,8 @@ def main() -> None:
               f" entity_type={app['applicant']['entity_type']:<24}"
               f" layers={own['ownership_layers']}"
               f" corp={str(own['has_corporate_shareholder']):<5}"
-              f" people={len(app['individuals'])} ubos={len(app['ubos'])}")
+              f" people={len(app['individuals'])} ubos={len(app['ubos'])}"
+              f" docs={len(app['documents'])}")
 
     print(f"\nWrote {len(cases)} applications to {args.out}")
     print("\nAssumptions made (fields the application format needs but the dataset lacks):")

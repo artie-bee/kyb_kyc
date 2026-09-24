@@ -66,5 +66,169 @@
     "ubo_indirect_25pct_or_more": true,
     "signatory_not_director": false,
     "vat_registered": true
-  }
+  },
+  "documents": [
+    {
+      "document_type": "certificate_of_incorporation",
+      "file_name": "cert_incorporation_vestmark.pdf",
+      "subject_ref": null,
+      "upload_time": "2026-09-07T10:32:00Z",
+      "expiry_date": null,
+      "document_date": null,
+      "issue_country": "EE",
+      "scripted_quality_flags": []
+    },
+    {
+      "document_type": "registry_extract",
+      "file_name": "registry_extract_vestmark.pdf",
+      "subject_ref": null,
+      "upload_time": "2026-09-07T10:34:00Z",
+      "expiry_date": null,
+      "document_date": null,
+      "issue_country": "EE",
+      "scripted_quality_flags": []
+    },
+    {
+      "document_type": "tax_registration_certificate",
+      "file_name": "tax_registration_vestmark.pdf",
+      "subject_ref": null,
+      "upload_time": "2026-09-07T10:36:00Z",
+      "expiry_date": null,
+      "document_date": null,
+      "issue_country": null,
+      "scripted_quality_flags": []
+    },
+    {
+      "document_type": "director_register",
+      "file_name": "director_register_vestmark.pdf",
+      "subject_ref": null,
+      "upload_time": "2026-09-07T10:38:00Z",
+      "expiry_date": null,
+      "document_date": null,
+      "issue_country": null,
+      "scripted_quality_flags": []
+    },
+    {
+      "document_type": "authorised_signatory_list",
+      "file_name": "signatory_list_vestmark.pdf",
+      "subject_ref": null,
+      "upload_time": "2026-09-07T10:40:00Z",
+      "expiry_date": null,
+      "document_date": null,
+      "issue_country": null,
+      "scripted_quality_flags": []
+    },
+    {
+      "document_type": "ubo_declaration",
+      "file_name": "ubo_declaration_vestmark.pdf",
+      "subject_ref": null,
+      "upload_time": "2026-09-07T10:42:00Z",
+      "expiry_date": null,
+      "document_date": null,
+      "issue_country": null,
+      "scripted_quality_flags": []
+    },
+    {
+      "document_type": "ownership_chart",
+      "file_name": "ownership_chart_vestmark.pdf",
+      "subject_ref": null,
+      "upload_time": "2026-09-07T10:44:00Z",
+      "expiry_date": null,
+      "document_date": null,
+      "issue_country": null,
+      "scripted_quality_flags": [
+        "missing_pages"
+      ]
+    },
+    {
+      "document_type": "shareholder_register",
+      "file_name": "shareholder_register_vestmark.pdf",
+      "subject_ref": null,
+      "upload_time": "2026-09-07T10:46:00Z",
+      "expiry_date": null,
+      "document_date": null,
+      "issue_country": null,
+      "scripted_quality_flags": []
+    },
+    {
+      "document_type": "id_document",
+      "file_name": "id_card_vaher_l.jpg",
+      "subject_ref": "IND-0007",
+      "upload_time": "2026-09-07T10:48:00Z",
+      "expiry_date": "2029-05-22",
+      "document_date": null,
+      "issue_country": "EE",
+      "scripted_quality_flags": []
+    },
+    {
+      "document_type": "id_document",
+      "file_name": "id_card_sormus_a.jpg",
+      "subject_ref": "IND-0008",
+      "upload_time": "2026-09-07T10:50:00Z",
+      "expiry_date": "2031-01-09",
+      "document_date": null,
+      "issue_country": "EE",
+      "scripted_quality_flags": []
+    },
+    {
+      "document_type": "id_document",
+      "file_name": "passport_halvorsen_r.jpg",
+      "subject_ref": "IND-0009",
+      "upload_time": "2026-09-07T10:52:00Z",
+      "expiry_date": "2030-08-17",
+      "document_date": null,
+      "issue_country": "NO",
+      "scripted_quality_flags": []
+    },
+    {
+      "document_type": "proof_of_address",
+      "file_name": "poa_vaher_aug2026.pdf",
+      "subject_ref": "IND-0007",
+      "upload_time": "2026-09-07T10:54:00Z",
+      "expiry_date": null,
+      "document_date": "2026-08-25",
+      "issue_country": "EE",
+      "scripted_quality_flags": []
+    },
+    {
+      "document_type": "proof_of_address",
+      "file_name": "poa_sormus_aug2026.pdf",
+      "subject_ref": "IND-0008",
+      "upload_time": "2026-09-07T10:56:00Z",
+      "expiry_date": null,
+      "document_date": "2026-08-27",
+      "issue_country": "EE",
+      "scripted_quality_flags": []
+    },
+    {
+      "document_type": "proof_of_address",
+      "file_name": "poa_halvorsen_jul2026.pdf",
+      "subject_ref": "IND-0009",
+      "upload_time": "2026-09-07T10:58:00Z",
+      "expiry_date": null,
+      "document_date": "2026-07-15",
+      "issue_country": "NO",
+      "scripted_quality_flags": []
+    },
+    {
+      "document_type": "source_of_funds_declaration",
+      "file_name": "source_of_funds_vestmark.pdf",
+      "subject_ref": null,
+      "upload_time": "2026-09-07T11:00:00Z",
+      "expiry_date": null,
+      "document_date": null,
+      "issue_country": null,
+      "scripted_quality_flags": []
+    },
+    {
+      "document_type": "business_activity_description",
+      "file_name": "business_activity_vestmark.pdf",
+      "subject_ref": null,
+      "upload_time": "2026-09-07T11:02:00Z",
+      "expiry_date": null,
+      "document_date": null,
+      "issue_country": null,
+      "scripted_quality_flags": []
+    }
+  ]
 }

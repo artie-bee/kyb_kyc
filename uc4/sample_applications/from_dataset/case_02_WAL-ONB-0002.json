@@ -44,5 +44,109 @@
     "ubo_indirect_25pct_or_more": false,
     "signatory_not_director": false,
     "vat_registered": false
-  }
+  },
+  "documents": [
+    {
+      "document_type": "certificate_of_incorporation",
+      "file_name": "cert_incorporation_northbridge.pdf",
+      "subject_ref": null,
+      "upload_time": "2026-09-02T10:12:00Z",
+      "expiry_date": null,
+      "document_date": null,
+      "issue_country": "GB",
+      "scripted_quality_flags": []
+    },
+    {
+      "document_type": "registry_extract",
+      "file_name": "registry_extract_northbridge.pdf",
+      "subject_ref": null,
+      "upload_time": "2026-09-02T10:14:00Z",
+      "expiry_date": null,
+      "document_date": null,
+      "issue_country": "GB",
+      "scripted_quality_flags": []
+    },
+    {
+      "document_type": "director_register",
+      "file_name": "director_register_northbridge.pdf",
+      "subject_ref": null,
+      "upload_time": "2026-09-02T10:16:00Z",
+      "expiry_date": null,
+      "document_date": null,
+      "issue_country": null,
+      "scripted_quality_flags": []
+    },
+    {
+      "document_type": "authorised_signatory_list",
+      "file_name": "signatory_list_northbridge.pdf",
+      "subject_ref": null,
+      "upload_time": "2026-09-02T10:18:00Z",
+      "expiry_date": null,
+      "document_date": null,
+      "issue_country": null,
+      "scripted_quality_flags": []
+    },
+    {
+      "document_type": "id_document",
+      "file_name": "director_id_halliwell_scan.jpg",
+      "subject_ref": "IND-0002",
+      "upload_time": "2026-09-02T10:20:00Z",
+      "expiry_date": null,
+      "document_date": null,
+      "issue_country": null,
+      "scripted_quality_flags": [
+        "blurred_unreadable"
+      ]
+    },
+    {
+      "document_type": "id_document",
+      "file_name": "passport_nankivell_p.jpg",
+      "subject_ref": "IND-0003",
+      "upload_time": "2026-09-02T10:22:00Z",
+      "expiry_date": "2029-09-30",
+      "document_date": null,
+      "issue_country": "GB",
+      "scripted_quality_flags": []
+    },
+    {
+      "document_type": "proof_of_address",
+      "file_name": "poa_halliwell_jul2026.pdf",
+      "subject_ref": "IND-0002",
+      "upload_time": "2026-09-02T10:24:00Z",
+      "expiry_date": null,
+      "document_date": "2026-07-28",
+      "issue_country": "GB",
+      "scripted_quality_flags": []
+    },
+    {
+      "document_type": "proof_of_address",
+      "file_name": "poa_nankivell_aug2026.pdf",
+      "subject_ref": "IND-0003",
+      "upload_time": "2026-09-02T10:26:00Z",
+      "expiry_date": null,
+      "document_date": "2026-08-05",
+      "issue_country": "GB",
+      "scripted_quality_flags": []
+    },
+    {
+      "document_type": "source_of_funds_declaration",
+      "file_name": "source_of_funds_northbridge.pdf",
+      "subject_ref": null,
+      "upload_time": "2026-09-02T10:28:00Z",
+      "expiry_date": null,
+      "document_date": null,
+      "issue_country": null,
+      "scripted_quality_flags": []
+    },
+    {
+      "document_type": "business_activity_description",
+      "file_name": "business_activity_northbridge.pdf",
+      "subject_ref": null,
+      "upload_time": "2026-09-02T10:30:00Z",
+      "expiry_date": null,
+      "document_date": null,
+      "issue_country": null,
+      "scripted_quality_flags": []
+    }
+  ]
 }

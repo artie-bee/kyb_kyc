@@ -60,5 +60,147 @@
     "ubo_indirect_25pct_or_more": false,
     "signatory_not_director": false,
     "vat_registered": true
-  }
+  },
+  "documents": [
+    {
+      "document_type": "certificate_of_incorporation",
+      "file_name": "cert_incorporation_saarvik.pdf",
+      "subject_ref": null,
+      "upload_time": "2026-09-14T09:52:00Z",
+      "expiry_date": null,
+      "document_date": null,
+      "issue_country": "EE",
+      "scripted_quality_flags": []
+    },
+    {
+      "document_type": "registry_extract",
+      "file_name": "registry_extract_saarvik.pdf",
+      "subject_ref": null,
+      "upload_time": "2026-09-14T09:54:00Z",
+      "expiry_date": null,
+      "document_date": null,
+      "issue_country": "EE",
+      "scripted_quality_flags": []
+    },
+    {
+      "document_type": "tax_registration_certificate",
+      "file_name": "tax_registration_saarvik.pdf",
+      "subject_ref": null,
+      "upload_time": "2026-09-14T09:56:00Z",
+      "expiry_date": null,
+      "document_date": null,
+      "issue_country": null,
+      "scripted_quality_flags": []
+    },
+    {
+      "document_type": "director_register",
+      "file_name": "director_register_saarvik.pdf",
+      "subject_ref": null,
+      "upload_time": "2026-09-14T09:58:00Z",
+      "expiry_date": null,
+      "document_date": null,
+      "issue_country": null,
+      "scripted_quality_flags": []
+    },
+    {
+      "document_type": "authorised_signatory_list",
+      "file_name": "signatory_list_saarvik.pdf",
+      "subject_ref": null,
+      "upload_time": "2026-09-14T10:00:00Z",
+      "expiry_date": null,
+      "document_date": null,
+      "issue_country": null,
+      "scripted_quality_flags": []
+    },
+    {
+      "document_type": "ubo_declaration",
+      "file_name": "ubo_declaration_saarvik.pdf",
+      "subject_ref": null,
+      "upload_time": "2026-09-14T10:02:00Z",
+      "expiry_date": null,
+      "document_date": null,
+      "issue_country": null,
+      "scripted_quality_flags": []
+    },
+    {
+      "document_type": "id_document",
+      "file_name": "id_card_kalda_r.jpg",
+      "subject_ref": "IND-0013",
+      "upload_time": "2026-09-14T10:04:00Z",
+      "expiry_date": "2030-04-02",
+      "document_date": null,
+      "issue_country": "EE",
+      "scripted_quality_flags": []
+    },
+    {
+      "document_type": "id_document",
+      "file_name": "id_card_lepik_t.jpg",
+      "subject_ref": "IND-0014",
+      "upload_time": "2026-09-14T10:06:00Z",
+      "expiry_date": "2029-08-14",
+      "document_date": null,
+      "issue_country": "EE",
+      "scripted_quality_flags": []
+    },
+    {
+      "document_type": "id_document",
+      "file_name": "id_card_magiste_o.jpg",
+      "subject_ref": "IND-0015",
+      "upload_time": "2026-09-14T10:08:00Z",
+      "expiry_date": "2031-06-25",
+      "document_date": null,
+      "issue_country": "EE",
+      "scripted_quality_flags": []
+    },
+    {
+      "document_type": "proof_of_address",
+      "file_name": "poa_kalda_sep2026.pdf",
+      "subject_ref": "IND-0013",
+      "upload_time": "2026-09-14T10:10:00Z",
+      "expiry_date": null,
+      "document_date": "2026-09-02",
+      "issue_country": "EE",
+      "scripted_quality_flags": []
+    },
+    {
+      "document_type": "proof_of_address",
+      "file_name": "poa_lepik_aug2026.pdf",
+      "subject_ref": "IND-0014",
+      "upload_time": "2026-09-14T10:12:00Z",
+      "expiry_date": null,
+      "document_date": "2026-08-21",
+      "issue_country": "EE",
+      "scripted_quality_flags": []
+    },
+    {
+      "document_type": "proof_of_address",
+      "file_name": "poa_magiste_aug2026.pdf",
+      "subject_ref": "IND-0015",
+      "upload_time": "2026-09-14T10:14:00Z",
+      "expiry_date": null,
+      "document_date": "2026-08-18",
+      "issue_country": "EE",
+      "scripted_quality_flags": []
+    },
+    {
+      "document_type": "source_of_funds_declaration",
+      "file_name": "source_of_funds_saarvik.pdf",
+      "subject_ref": null,
+      "upload_time": "2026-09-14T10:16:00Z",
+      "expiry_date": null,
+      "document_date": null,
+      "issue_country": null,
+      "scripted_quality_flags": []
+    },
+    {
+      "document_type": "business_activity_description",
+      "file_name": "business_activity_saarvik.pdf",
+      "subject_ref": null,
+      "upload_time": "2026-09-14T10:18:00Z",
+      "expiry_date": null,
+      "document_date": null,
+      "issue_country": null,
+      "scripted_quality_flags": []
+    }
+  ]
 }

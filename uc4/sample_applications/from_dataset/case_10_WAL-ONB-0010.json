@@ -60,5 +60,167 @@
     "ubo_indirect_25pct_or_more": true,
     "signatory_not_director": false,
     "vat_registered": false
-  }
+  },
+  "documents": [
+    {
+      "document_type": "certificate_of_incorporation",
+      "file_name": "cert_incorporation_thornbury.pdf",
+      "subject_ref": null,
+      "upload_time": "2026-09-21T14:32:00Z",
+      "expiry_date": null,
+      "document_date": null,
+      "issue_country": "GB",
+      "scripted_quality_flags": []
+    },
+    {
+      "document_type": "registry_extract",
+      "file_name": "registry_extract_thornbury.pdf",
+      "subject_ref": null,
+      "upload_time": "2026-09-21T14:34:00Z",
+      "expiry_date": null,
+      "document_date": null,
+      "issue_country": "GB",
+      "scripted_quality_flags": []
+    },
+    {
+      "document_type": "director_register",
+      "file_name": "director_register_thornbury.pdf",
+      "subject_ref": null,
+      "upload_time": "2026-09-21T14:36:00Z",
+      "expiry_date": null,
+      "document_date": null,
+      "issue_country": null,
+      "scripted_quality_flags": []
+    },
+    {
+      "document_type": "authorised_signatory_list",
+      "file_name": "signatory_list_thornbury.pdf",
+      "subject_ref": null,
+      "upload_time": "2026-09-21T14:38:00Z",
+      "expiry_date": null,
+      "document_date": null,
+      "issue_country": null,
+      "scripted_quality_flags": []
+    },
+    {
+      "document_type": "ubo_declaration",
+      "file_name": "ubo_declaration_thornbury.pdf",
+      "subject_ref": null,
+      "upload_time": "2026-09-21T14:40:00Z",
+      "expiry_date": null,
+      "document_date": null,
+      "issue_country": null,
+      "scripted_quality_flags": []
+    },
+    {
+      "document_type": "ownership_chart",
+      "file_name": "ownership_chart_thornbury.pdf",
+      "subject_ref": null,
+      "upload_time": "2026-09-21T14:42:00Z",
+      "expiry_date": null,
+      "document_date": null,
+      "issue_country": null,
+      "scripted_quality_flags": []
+    },
+    {
+      "document_type": "shareholder_register",
+      "file_name": "shareholder_register_thornbury.pdf",
+      "subject_ref": null,
+      "upload_time": "2026-09-21T14:44:00Z",
+      "expiry_date": null,
+      "document_date": null,
+      "issue_country": null,
+      "scripted_quality_flags": []
+    },
+    {
+      "document_type": "id_document",
+      "file_name": "passport_skellow_i.jpg",
+      "subject_ref": "IND-0021",
+      "upload_time": "2026-09-21T14:46:00Z",
+      "expiry_date": "2031-05-16",
+      "document_date": null,
+      "issue_country": "GB",
+      "scripted_quality_flags": []
+    },
+    {
+      "document_type": "id_document",
+      "file_name": "passport_pryde_nash_c.jpg",
+      "subject_ref": "IND-0022",
+      "upload_time": "2026-09-21T14:48:00Z",
+      "expiry_date": "2029-04-27",
+      "document_date": null,
+      "issue_country": "GB",
+      "scripted_quality_flags": []
+    },
+    {
+      "document_type": "id_document",
+      "file_name": "passport_marchbank_h.jpg",
+      "subject_ref": "IND-0023",
+      "upload_time": "2026-09-21T14:50:00Z",
+      "expiry_date": "2030-02-09",
+      "document_date": null,
+      "issue_country": "GB",
+      "scripted_quality_flags": []
+    },
+    {
+      "document_type": "proof_of_address",
+      "file_name": "poa_skellow_sep2026.pdf",
+      "subject_ref": "IND-0021",
+      "upload_time": "2026-09-21T14:52:00Z",
+      "expiry_date": null,
+      "document_date": "2026-09-08",
+      "issue_country": "GB",
+      "scripted_quality_flags": []
+    },
+    {
+      "document_type": "proof_of_address",
+      "file_name": "poa_pryde_nash_aug2026.pdf",
+      "subject_ref": "IND-0022",
+      "upload_time": "2026-09-21T14:54:00Z",
+      "expiry_date": null,
+      "document_date": "2026-08-31",
+      "issue_country": "GB",
+      "scripted_quality_flags": []
+    },
+    {
+      "document_type": "proof_of_address",
+      "file_name": "poa_marchbank_sep2026.pdf",
+      "subject_ref": "IND-0023",
+      "upload_time": "2026-09-21T14:56:00Z",
+      "expiry_date": null,
+      "document_date": "2026-09-02",
+      "issue_country": "GB",
+      "scripted_quality_flags": []
+    },
+    {
+      "document_type": "source_of_funds_declaration",
+      "file_name": "source_of_funds_thornbury.pdf",
+      "subject_ref": null,
+      "upload_time": "2026-09-21T14:58:00Z",
+      "expiry_date": null,
+      "document_date": null,
+      "issue_country": null,
+      "scripted_quality_flags": []
+    },
+    {
+      "document_type": "business_activity_description",
+      "file_name": "business_activity_thornbury.pdf",
+      "subject_ref": null,
+      "upload_time": "2026-09-21T15:00:00Z",
+      "expiry_date": null,
+      "document_date": null,
+      "issue_country": null,
+      "scripted_quality_flags": []
+    },
+    {
+      "document_type": "source_of_wealth_statement",
+      "file_name": "source_of_wealth_marchbank.pdf",
+      "subject_ref": null,
+      "upload_time": "2026-09-21T15:02:00Z",
+      "expiry_date": null,
+      "document_date": null,
+      "issue_country": null,
+      "scripted_quality_flags": []
+    }
+  ]
 }

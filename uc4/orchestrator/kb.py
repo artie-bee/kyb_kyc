@@ -27,6 +27,18 @@ class KnowledgeBase:
         )
         self.jurisdiction_routing = {r["country_code"]: r for r in _read_csv("jurisdiction_routing.csv")}
         self.requirement_rules = _read_csv("requirement_rule.csv")
+        self.document_quality_rules = _read_csv("document_quality_rules.csv")
+
+    def quality_rules_for(self, document_type: str) -> list[dict]:
+        """Rules that apply to a document type, most specific first.
+
+        A rule naming the document type wins over the catch-all '*', so
+        missing_pages on an ownership chart routes to manual review while the
+        same flag on any other document asks for a resubmission.
+        """
+        return sorted((r for r in self.document_quality_rules
+                       if r["document_type"] in (document_type, "*")),
+                      key=lambda r: r["document_type"] == "*")
 
 
 # ---------------------------------------------------------------------------

@@ -60,5 +60,157 @@
     "ubo_indirect_25pct_or_more": false,
     "signatory_not_director": false,
     "vat_registered": true
-  }
+  },
+  "documents": [
+    {
+      "document_type": "certificate_of_incorporation",
+      "file_name": "cert_incorporation_calderwick.pdf",
+      "subject_ref": null,
+      "upload_time": "2026-09-03T11:37:00Z",
+      "expiry_date": null,
+      "document_date": null,
+      "issue_country": "GB",
+      "scripted_quality_flags": []
+    },
+    {
+      "document_type": "registry_extract",
+      "file_name": "registry_extract_calderwick.pdf",
+      "subject_ref": null,
+      "upload_time": "2026-09-03T11:39:00Z",
+      "expiry_date": null,
+      "document_date": null,
+      "issue_country": "GB",
+      "scripted_quality_flags": []
+    },
+    {
+      "document_type": "tax_registration_certificate",
+      "file_name": "vat_certificate_calderwick.pdf",
+      "subject_ref": null,
+      "upload_time": "2026-09-03T11:41:00Z",
+      "expiry_date": null,
+      "document_date": null,
+      "issue_country": null,
+      "scripted_quality_flags": []
+    },
+    {
+      "document_type": "director_register",
+      "file_name": "director_register_calderwick.pdf",
+      "subject_ref": null,
+      "upload_time": "2026-09-03T11:43:00Z",
+      "expiry_date": null,
+      "document_date": null,
+      "issue_country": null,
+      "scripted_quality_flags": []
+    },
+    {
+      "document_type": "authorised_signatory_list",
+      "file_name": "signatory_list_calderwick.pdf",
+      "subject_ref": null,
+      "upload_time": "2026-09-03T11:45:00Z",
+      "expiry_date": null,
+      "document_date": null,
+      "issue_country": null,
+      "scripted_quality_flags": []
+    },
+    {
+      "document_type": "ubo_declaration",
+      "file_name": "ubo_declaration_calderwick.pdf",
+      "subject_ref": null,
+      "upload_time": "2026-09-03T11:47:00Z",
+      "expiry_date": null,
+      "document_date": null,
+      "issue_country": null,
+      "scripted_quality_flags": []
+    },
+    {
+      "document_type": "id_document",
+      "file_name": "passport_ellersby_m.jpg",
+      "subject_ref": "IND-0004",
+      "upload_time": "2026-09-03T11:49:00Z",
+      "expiry_date": "2030-02-14",
+      "document_date": null,
+      "issue_country": "GB",
+      "scripted_quality_flags": []
+    },
+    {
+      "document_type": "id_document",
+      "file_name": "passport_delamere_r.jpg",
+      "subject_ref": "IND-0005",
+      "upload_time": "2026-09-03T11:51:00Z",
+      "expiry_date": "2032-07-06",
+      "document_date": null,
+      "issue_country": "IE",
+      "scripted_quality_flags": []
+    },
+    {
+      "document_type": "id_document",
+      "file_name": "passport_kellingray_t.jpg",
+      "subject_ref": "IND-0006",
+      "upload_time": "2026-09-03T11:53:00Z",
+      "expiry_date": "2028-11-30",
+      "document_date": null,
+      "issue_country": "GB",
+      "scripted_quality_flags": []
+    },
+    {
+      "document_type": "proof_of_address",
+      "file_name": "poa_ellersby_aug2026.pdf",
+      "subject_ref": "IND-0004",
+      "upload_time": "2026-09-03T11:55:00Z",
+      "expiry_date": null,
+      "document_date": "2026-08-19",
+      "issue_country": "GB",
+      "scripted_quality_flags": []
+    },
+    {
+      "document_type": "proof_of_address",
+      "file_name": "poa_delamere_aug2026.pdf",
+      "subject_ref": "IND-0005",
+      "upload_time": "2026-09-03T11:57:00Z",
+      "expiry_date": null,
+      "document_date": "2026-08-22",
+      "issue_country": "GB",
+      "scripted_quality_flags": []
+    },
+    {
+      "document_type": "proof_of_address",
+      "file_name": "poa_kellingray_jul2026.pdf",
+      "subject_ref": "IND-0006",
+      "upload_time": "2026-09-03T11:59:00Z",
+      "expiry_date": null,
+      "document_date": "2026-07-30",
+      "issue_country": "GB",
+      "scripted_quality_flags": []
+    },
+    {
+      "document_type": "source_of_funds_declaration",
+      "file_name": "source_of_funds_calderwick.pdf",
+      "subject_ref": null,
+      "upload_time": "2026-09-03T12:01:00Z",
+      "expiry_date": null,
+      "document_date": null,
+      "issue_country": null,
+      "scripted_quality_flags": []
+    },
+    {
+      "document_type": "business_activity_description",
+      "file_name": "business_activity_calderwick.pdf",
+      "subject_ref": null,
+      "upload_time": "2026-09-03T12:03:00Z",
+      "expiry_date": null,
+      "document_date": null,
+      "issue_country": null,
+      "scripted_quality_flags": []
+    },
+    {
+      "document_type": "bank_statement",
+      "file_name": "bank_statement_calderwick_aug2026.pdf",
+      "subject_ref": null,
+      "upload_time": "2026-09-03T12:05:00Z",
+      "expiry_date": null,
+      "document_date": null,
+      "issue_country": null,
+      "scripted_quality_flags": []
+    }
+  ]
 }
