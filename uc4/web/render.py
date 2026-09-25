@@ -160,9 +160,6 @@ def page(title, body, active, conn=None, case_id=None, role="analyst",
         flash_html = note(e(text), "bad" if kind == "err" else "ok",
                           "Refused" if kind == "err" else "Done")
 
-    role_a = " selected" if role == "analyst" else ""
-    role_c = " selected" if role == "compliance" else ""
-
     return (
         '<!doctype html>\n<html lang="en">\n<head>\n<meta charset="utf-8">\n'
         '<meta name="viewport" content="width=device-width, initial-scale=1">\n'
@@ -172,18 +169,6 @@ def page(title, body, active, conn=None, case_id=None, role="analyst",
         '  <aside class="rail">\n'
         '    <div class="rail__brand">Wallester UC4</div>\n'
         "    " + badge + "\n"
-        '    <form method="post" action="/action/settings">\n'
-        '      <span class="rail__label">Your role</span>\n'
-        '      <select name="role">'
-        '<option value="analyst"' + role_a + ">analyst</option>"
-        '<option value="compliance"' + role_c + ">compliance</option></select>\n"
-        '      <div style="height:8px"></div>\n'
-        '      <span class="rail__label">Your name</span>\n'
-        '      <input type="text" name="reviewer" value="' + e(reviewer) + '">\n'
-        '      <input type="hidden" name="back" value="' + e(_back(active, case_id)) + '">\n'
-        '      <div style="height:8px"></div>\n'
-        '      <button class="btn btn--wide" type="submit">Apply</button>\n'
-        "    </form>\n"
         '    <nav class="rail__nav"><span class="rail__label">Screen</span>'
         + "".join(nav) + "</nav>\n"
         "    " + picker + "\n"
@@ -836,8 +821,7 @@ def _tab_decision(conn, case_id, role="analyst", reviewer="analyst.demo", **kw):
         '<button class="btn btn--primary" type="submit">Record as ' + e(role)
         + "</button>"
         '<p class="formsection__note" style="margin-top:9px">Recorded against '
-        + e(reviewer) + " as " + e(role)
-        + ". Change either in the sidebar.</p></form>")
+        + e(reviewer) + " as " + e(role) + ".</p></form>")
     return "".join(out)
 
 

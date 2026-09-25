@@ -278,12 +278,25 @@ def test_an_action_without_a_reason_is_refused(site):
     assert flash(location)[0] == "err", "a release without a reason is not a release"
 
 
-def test_the_role_switch_is_remembered_between_requests(site):
+def test_who_you_are_acting_as_is_remembered_between_requests(site):
+    """There is no control for this in the sidebar any more, but the identity
+    still travels with the session and still reaches the decision form."""
     post(site, "/action/settings", role="compliance", reviewer="ines.b", back="/")
     _, html = get(site, "/case/WAL-ONB-0001?tab=Decision")
     assert "Record as compliance" in html
-    assert 'value="ines.b"' in html
+    assert "ines.b" in html, "the decision form says whose name it will record"
     post(site, "/action/settings", role="analyst", reviewer="analyst.demo", back="/")
+    _, html = get(site, "/case/WAL-ONB-0001?tab=Decision")
+    assert "Record as analyst" in html
+
+
+def test_the_sidebar_carries_no_identity_controls(site):
+    """Removed at the user's request. The role is still enforced by the backend;
+    there is simply nothing on screen that changes it."""
+    _, html = get(site, "/")
+    rail = html.split('<aside class="rail">', 1)[1].split("</aside>", 1)[0]
+    assert "Your role" not in rail and "Your name" not in rail
+    assert 'name="reviewer"' not in rail and 'name="role"' not in rail
 
 
 def test_the_server_module_never_writes_sql():
