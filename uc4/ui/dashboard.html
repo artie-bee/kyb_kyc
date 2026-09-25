@@ -12,14 +12,6 @@
   <aside class="rail">
     <div class="rail__brand">Wallester UC4</div>
 
-    <div class="badge badge--mock">
-      <span class="badge__dot"></span>
-      <div>
-        <strong>MOCK</strong>
-        <span>scripted answers, no API calls</span>
-      </div>
-    </div>
-
     <nav class="rail__nav" aria-label="Screens">
       <span class="rail__label">Screen</span>
       <a class="navitem navitem--on" href="#" aria-current="page">Operations dashboard</a>
@@ -30,8 +22,8 @@
     </nav>
 
     <div class="rail__foot">
-      <div class="kv"><span>Knowledge base</span><code>kb-2026.09-poc-v7</code></div>
-      <div class="kv"><span>Generated</span><code>2026-09-24 21:46 UTC</code></div>
+      <div class="kv"><span>Knowledge base</span><code>kb-2026.09-poc-v8</code></div>
+      <div class="kv"><span>Generated</span><code>2026-09-25 10:50 UTC</code></div>
       <button class="theme" type="button" id="theme">Toggle theme</button>
     </div>
   </aside>
@@ -46,7 +38,7 @@
 
     <section class="stats" aria-label="Summary">
       <div class="stat"><span class="stat__k">Cases</span><span class="stat__v num">14</span></div>
-      <div class="stat"><span class="stat__k">Open</span><span class="stat__v num">14</span></div>
+      <div class="stat"><span class="stat__k">Open</span><span class="stat__v num">13</span></div>
       <div class="stat"><span class="stat__k">With holds</span><span class="stat__v num">9</span></div>
       <div class="stat"><span class="stat__k">Restricted findings</span><span class="stat__v num">3</span></div>
     </section>
@@ -56,6 +48,7 @@
         <legend>Status</legend>
         <div class="opts">
             <label class="opt"><input type="checkbox" name="status" value="analyst_review_required" checked><span>analyst_review_required</span></label>
+            <label class="opt"><input type="checkbox" name="status" value="approved" checked><span>approved</span></label>
             <label class="opt"><input type="checkbox" name="status" value="enhanced_due_diligence" checked><span>enhanced_due_diligence</span></label>
             <label class="opt"><input type="checkbox" name="status" value="ready_for_decision" checked><span>ready_for_decision</span></label>
             <label class="opt"><input type="checkbox" name="status" value="resubmission_required" checked><span>resubmission_required</span></label>
@@ -92,13 +85,13 @@
           </tr>
         </thead>
         <tbody>
-        <tr data-status="ready_for_decision" data-owner="analyst"
-            data-open="1">
+        <tr data-status="approved" data-owner="system"
+            data-open="0">
           <td class="cell-id"><span class="id">WAL-ONB-0001</span></td>
           <td class="cell-name">Kaari Mets</td>
           <td class="cell-type"><span class="type">freelancer_sole_trader</span></td>
-          <td><span class="chip chip--info"><span class="chip__dot"></span>ready_for_decision</span></td>
-          <td><span class="chip chip--info"><span class="chip__dot"></span>analyst</span></td>
+          <td><span class="chip chip--ok"><span class="chip__dot"></span>approved</span></td>
+          <td><span class="chip chip--neutral"><span class="chip__dot"></span>system</span></td>
           <td><span class="chip chip--ok"><span class="chip__dot"></span>low</span></td>
           <td class="ta-r"><span class="num">0</span></td>
           <td class="ta-r"><span class="muted">0</span></td>

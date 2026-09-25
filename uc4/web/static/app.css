@@ -77,31 +77,74 @@ a { color:var(--accent); }
 
 .shell { display:grid; grid-template-columns:248px minmax(0,1fr); min-height:100vh; }
 
+/* The rail is dark green in both themes, on purpose. It is chrome, not
+   content: keeping it constant means the page beside it can go light or dark
+   without the navigation moving underfoot, and the green keeps it from reading
+   as another panel of the case. Its own token ramp, because the page's
+   neutrals are blue-grey and would muddy against it. */
+
+:root {
+  --rail-bg:#15291f;
+  --rail-bg-2:#1e3a2b;
+  --rail-fg:#e8f1ea;
+  --rail-mute:#a9c4b3;
+  --rail-faint:#7e9c8a;
+  --rail-line:#27462f;
+  --rail-accent:#8ed9a6;
+}
+
 .rail {
-  border-right:1px solid var(--line);
-  background:var(--surface);
+  border-right:1px solid var(--rail-line);
+  background:var(--rail-bg);
+  color:var(--rail-fg);
   padding:20px 16px;
   display:flex; flex-direction:column; gap:18px;
   position:sticky; top:0; height:100vh; overflow:auto;
 }
-.rail__brand { font-weight:640; letter-spacing:-.01em; font-size:14px; }
+.rail__brand { font-weight:640; letter-spacing:-.01em; font-size:14px;
+               color:var(--rail-fg); }
 .rail__label {
   display:block; font-size:10.5px; text-transform:uppercase; letter-spacing:.07em;
-  color:var(--fg-faint); margin-bottom:6px;
+  color:var(--rail-faint); margin-bottom:6px;
 }
 .rail__nav { display:flex; flex-direction:column; gap:1px; }
 .navitem {
   display:block; padding:6px 9px; border-radius:var(--r);
-  color:var(--fg-mute); text-decoration:none; font-size:13px;
+  color:var(--rail-mute); text-decoration:none; font-size:13px;
 }
-.navitem:hover { background:var(--line-soft); color:var(--fg); }
-.navitem--on { background:var(--accent-soft); color:var(--accent); font-weight:560; }
-.navitem--off { color:var(--fg-faint); cursor:not-allowed; }
-.navitem--off:hover { background:transparent; color:var(--fg-faint); }
+.navitem:hover { background:var(--rail-bg-2); color:var(--rail-fg); }
+.navitem--on { background:var(--rail-bg-2); color:var(--rail-accent); font-weight:560;
+               box-shadow:inset 2px 0 0 var(--rail-accent); }
+.navitem--off { color:var(--rail-faint); cursor:not-allowed; }
+.navitem--off:hover { background:transparent; color:var(--rail-faint); }
 
-.rail__foot { margin-top:auto; display:flex; flex-direction:column; gap:8px; }
-.kv { display:flex; justify-content:space-between; gap:8px; font-size:11.5px; color:var(--fg-faint); }
-.kv code { font-family:var(--mono); font-size:11px; color:var(--fg-mute); }
+/* The case picker and the buttons sit on the dark ground, so they take the
+   rail's ramp rather than the page's. */
+.rail select, .rail input[type=text] {
+  background:var(--rail-bg-2); border:1px solid var(--rail-line);
+  color:var(--rail-fg);
+}
+.rail select:focus, .rail input[type=text]:focus {
+  outline:2px solid var(--rail-accent); outline-offset:1px;
+  border-color:var(--rail-accent);
+}
+.rail .btn {
+  background:var(--rail-bg-2); border:1px solid var(--rail-line);
+  color:var(--rail-fg);
+}
+.rail .btn:hover { border-color:var(--rail-accent); color:var(--rail-accent); }
+
+.rail__foot { margin-top:auto; display:flex; flex-direction:column; gap:8px;
+              border-top:1px solid var(--rail-line); padding-top:12px; }
+.kv { display:flex; justify-content:space-between; gap:8px; font-size:11.5px;
+      color:var(--rail-faint); }
+.kv code { font-family:var(--mono); font-size:11px; color:var(--rail-mute); }
+
+.theme { font:inherit; font-size:12px; padding:6px 10px; border-radius:var(--r); cursor:pointer; }
+
+.rail a:focus-visible, .rail button:focus-visible, .rail select:focus-visible {
+  outline:2px solid var(--rail-accent); outline-offset:2px;
+}
 
 /* ---------- badge ------------------------------------------------------- */
 
