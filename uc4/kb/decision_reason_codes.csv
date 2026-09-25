@@ -1,0 +1,24 @@
+code,applies_to,description,code_status
+all_mandatory_checks_passed,approve|conditional_approve,Every required check returned a pass and nothing was outstanding,poc_placeholder - Wallester to confirm
+low_risk_standard_profile,approve|conditional_approve,A standard profile with no factors above the low band,poc_placeholder - Wallester to confirm
+conditions_attached_pending_evidence,conditional_approve,Opened subject to evidence the applicant still owes,poc_placeholder - Wallester to confirm
+registered_address_mismatch,request_more_information|conditional_approve,The address on the register does not match the documents supplied,poc_placeholder - Wallester to confirm
+director_mismatch,request_more_information,The declared directors do not match the register,poc_placeholder - Wallester to confirm
+ownership_structure_unclear,request_more_information|enhanced_due_diligence,The ownership chain is not corroborated or not fully explained,poc_placeholder - Wallester to confirm
+document_quality_unresolved,request_more_information,A document could not be relied on and a clearer copy is needed,poc_placeholder - Wallester to confirm
+pep_match_edd_required,enhanced_due_diligence|escalate,A subject is a politically exposed person or a close associate,poc_placeholder - Wallester to confirm
+adverse_media_moderate,enhanced_due_diligence,Moderate adverse media of relevance to a subject,poc_placeholder - Wallester to confirm
+serious_adverse_media,escalate|enhanced_due_diligence|reject,Serious adverse media of relevance to a subject,poc_placeholder - Wallester to confirm
+high_risk_jurisdiction_or_industry,enhanced_due_diligence,The jurisdiction or declared activity carries elevated risk,poc_placeholder - Wallester to confirm
+possible_sanctions_match,escalate,An unresolved possible sanctions match that only a human may settle,poc_placeholder - Wallester to confirm
+confirmed_sanctions_match_on_ubo,escalate|reject,A confirmed sanctions match on a beneficial owner,poc_placeholder - Wallester to confirm
+confirmed_sanctions_match_on_director,escalate|reject,A confirmed sanctions match on a director or signatory,poc_placeholder - Wallester to confirm
+entity_not_active_on_register,reject,The register does not show the entity as active,poc_placeholder - Wallester to confirm
+eligibility_outside_appetite,reject,The applicant falls outside the stated onboarding appetite,poc_placeholder - Wallester to confirm
+identity_verification_failed,reject|insufficient_evidence,An identity check returned fail or could not be completed,poc_placeholder - Wallester to confirm
+identity_failure_and_provider_non_answer,insufficient_evidence,An identity failure alongside a provider that returned no result,poc_placeholder - Wallester to confirm
+provider_unavailable_no_result,insufficient_evidence,A provider returned no result after a retry and nothing can be concluded,poc_placeholder - Wallester to confirm
+evidence_gap_unresolved,insufficient_evidence,A gap in the evidence that the applicant has not closed,poc_placeholder - Wallester to confirm
+applicant_withdrew,withdrawn,The applicant asked to withdraw the application,poc_placeholder - Wallester to confirm
+no_response_from_applicant,withdrawn,Closed after the reminder schedule ran out with no reply,poc_placeholder - Wallester to confirm
+demo_decision,*,Placeholder used when walking through the demo; not a production code,poc_placeholder - Wallester to confirm

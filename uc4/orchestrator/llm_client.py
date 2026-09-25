@@ -5,22 +5,29 @@ Everything the live checkers share lives here: the key, the model setting, the
 versioned prompt files, strict JSON parsing with a single retry, and the timing
 and token counts that go into the audit row.
 
-    LLM_PROVIDER        anthropic (default) | xai
-    ANTHROPIC_API_KEY   read from the environment, never hard-coded
-    XAI_API_KEY         read from the environment, never hard-coded
-    WALLESTER_UC4_MODEL optional model override, applied to whichever provider
+    LLM_PROVIDER              anthropic (default) | xai | groq
+    ANTHROPIC_API_KEY         read from the environment, never hard-coded
+    XAI_API_KEY               read from the environment, never hard-coded
+    GROQ_API_KEY              read from the environment, never hard-coded
+    WALLESTER_UC4_MODEL       optional model override, for whichever provider
+    WALLESTER_UC4_TEMPERATURE optional; defaults to 0
 
 Nothing here decides anything. It fetches an answer and hands it back; the
 caller validates it against the KB and decides what to do when it does not
 parse. A failed call is never a pass - that rule is enforced by the callers, and
 `CallFailed` is what they act on.
 
-The two providers differ in one way that matters and the difference is not
-cosmetic. Anthropic accepts a PDF as a document and reads it natively. xAI's
-image understanding takes jpg and png only, so a PDF has to be rasterised to
-page images before it can be sent at all. That conversion is recorded on the
-Call and reaches the audit row, because "the model read the PDF" and "the model
-read a picture of the PDF" are different claims and only one of them is true.
+The providers differ in one way that matters and the difference is not
+cosmetic. Anthropic accepts a PDF as a document and reads it natively. xAI and
+Groq take jpg and png only, so a PDF has to be rasterised to page images before
+it can be sent at all, and Groq accepts at most three images in one request.
+That conversion is recorded on the Call and reaches the audit row, because "the
+model read the PDF" and "the model read a picture of the first three pages of
+the PDF" are different claims and only one of them can be true of a given call.
+
+Groq is not xAI. The names are one letter apart and both serve an
+OpenAI-compatible endpoint, but they are separate companies with separate keys,
+and a key for one is rejected by the other.
 """
 
 import base64
@@ -68,6 +75,32 @@ PDF_RENDER_SCALE = 2.0            # roughly 144 dpi against a 72 dpi page box
 # turns that into a sentence naming the file.
 MAX_IMAGE_BYTES = 4 * 1024 * 1024
 
+# Sampling temperature for every live call. Zero by default: the same document
+# asked the same question should give the same answer, or an evaluation run
+# measures the sampler as much as the model. It is a setting rather than a
+# constant because a future step might want a less literal reading, and the
+# value used is written into the audit row either way - a verdict reached at
+# temperature 1.0 is a different claim from one reached at 0.
+DEFAULT_TEMPERATURE = 0.0
+
+# A 429 is backpressure, not an answer, so it is waited out rather than counted
+# against the format-retry budget. Bounded so a stalled provider stops the case
+# instead of hanging it.
+RATE_LIMIT_ATTEMPTS = 6
+MAX_RATE_LIMIT_WAIT = 90.0        # seconds, per wait
+
+
+def default_temperature() -> float:
+    """The temperature a client uses when its caller does not name one."""
+    raw = os.environ.get("WALLESTER_UC4_TEMPERATURE")
+    if raw is None or not raw.strip():
+        return DEFAULT_TEMPERATURE
+    try:
+        return float(raw)
+    except ValueError:
+        raise ValueError(
+            f"WALLESTER_UC4_TEMPERATURE is {raw!r}, which is not a number")
+
 _FENCE = re.compile(r"^```(?:json)?\s*|\s*```$", re.M)
 
 
@@ -97,11 +130,12 @@ class Call:
     attempts: int = 1
     raw: str = ""
     transport: str = ""       # e.g. "pdf rasterised to 2 page image(s)"
+    temperature: float = DEFAULT_TEMPERATURE
 
     def audit_note(self) -> str:
         note = (f"provider={self.provider}; model={self.model}; "
-                f"prompt={self.prompt_version}; attempts={self.attempts}; "
-                f"latency={self.latency_ms}ms; "
+                f"prompt={self.prompt_version}; temperature={self.temperature:g}; "
+                f"attempts={self.attempts}; latency={self.latency_ms}ms; "
                 f"tokens in/out={self.input_tokens}/{self.output_tokens}")
         return f"{note}; {self.transport}" if self.transport else note
 
@@ -181,8 +215,10 @@ class LLMClient:
 
     provider = "base"
 
-    def __init__(self, model: str | None = None):
+    def __init__(self, model: str | None = None, temperature: float | None = None):
         self.model = model or model_name(self.provider)
+        self.temperature = (default_temperature() if temperature is None
+                            else float(temperature))
 
     # -- what a provider implements ---------------------------------------
     def _send(self, document_path: Path, text: str, max_tokens: int,
@@ -224,7 +260,7 @@ class LLMClient:
                 continue
 
             return Call(data=data, model=self.model, prompt_version=prompt.stamp,
-                        provider=self.provider,
+                        provider=self.provider, temperature=self.temperature,
                         latency_ms=int((time.monotonic() - started) * 1000),
                         input_tokens=tok_in, output_tokens=tok_out,
                         attempts=attempt, raw=raw, transport=transport)
@@ -265,7 +301,7 @@ class AnthropicClient(LLMClient):
             content.append({"type": "text", "text": note})
 
         response = client.messages.create(
-            model=self.model, max_tokens=max_tokens,
+            model=self.model, max_tokens=max_tokens, temperature=self.temperature,
             messages=[{"role": "user", "content": content}])
         raw = "".join(block.text for block in response.content
                       if getattr(block, "type", "") == "text")
@@ -279,24 +315,51 @@ class AnthropicClient(LLMClient):
 # xAI - the OpenAI-compatible chat completions endpoint
 # ---------------------------------------------------------------------------
 
-def render_pdf_pages(path: Path, max_pages: int = PDF_MAX_PAGES) -> list[bytes]:
-    """A PDF as PNG page images, because xAI's vision input takes images only.
-
-    Raises rather than returning an empty list: a document nobody could render
-    has not been read, and the caller must place a hold instead of recording a
-    clean verdict against a blank page.
-    """
+def pdf_page_count(path: Path) -> int:
     try:
         import pypdfium2
     except ImportError as e:
         raise CallFailed(
-            f"{path.name} is a PDF, and the xAI provider can only send images. "
+            f"{path.name} is a PDF, and this provider can only send images. "
             f"Rendering it needs pypdfium2: pip install pypdfium2") from e
-
     try:
         pdf = pypdfium2.PdfDocument(str(path))
+        total = len(pdf)
+        pdf.close()
+        return total
+    except Exception as e:
+        raise CallFailed(f"{path.name}: the PDF could not be opened: "
+                         f"{type(e).__name__}: {e}") from e
+
+
+def render_pdf_pages(path: Path, max_pages: int = PDF_MAX_PAGES) -> list[bytes]:
+    """A PDF as PNG page images, for providers whose vision input takes images.
+
+    Refuses a document with more pages than one request can carry, rather than
+    rendering the first few and letting the caller believe it saw the whole
+    thing. A verdict reached on page 1 of a five-page document is not a verdict
+    on that document, and the difference is invisible downstream once the
+    answer is written to a row. The caller turns this into a manual-review hold,
+    which is the honest outcome: nobody has assessed the document yet.
+
+    Also raises rather than returning an empty list: a document nobody could
+    render has not been read either.
+    """
+    total = pdf_page_count(path)
+    if total == 0:
+        raise CallFailed(f"{path.name}: the PDF has no pages to send")
+    if total > max_pages:
+        raise CallFailed(
+            f"{path.name} could not be fully assessed: it has {total} pages and "
+            f"one request carries at most {max_pages} page image(s). No verdict "
+            f"was reached, because a verdict on the first {max_pages} page(s) "
+            f"would not be a verdict on this document")
+
+    try:
+        import pypdfium2
+        pdf = pypdfium2.PdfDocument(str(path))
         pages = []
-        for index in range(min(len(pdf), max_pages)):
+        for index in range(total):
             bitmap = pdf[index].render(scale=PDF_RENDER_SCALE)
             buffer = io.BytesIO()
             bitmap.to_pil().convert("RGB").save(buffer, "PNG")
@@ -307,9 +370,6 @@ def render_pdf_pages(path: Path, max_pages: int = PDF_MAX_PAGES) -> list[bytes]:
     except Exception as e:
         raise CallFailed(f"{path.name}: the PDF could not be rendered: "
                          f"{type(e).__name__}: {e}") from e
-
-    if not pages:
-        raise CallFailed(f"{path.name}: the PDF has no pages to send")
     return pages
 
 
@@ -332,8 +392,9 @@ class OpenAICompatibleClient(LLMClient):
     max_images = PDF_MAX_PAGES
     label = "this provider"
 
-    def __init__(self, model: str | None = None, base_url: str | None = None):
-        super().__init__(model)
+    def __init__(self, model: str | None = None, base_url: str | None = None,
+                 temperature: float | None = None):
+        super().__init__(model, temperature)
         self.base_url = (base_url
                          or (os.environ.get(self.base_url_env) if self.base_url_env else None)
                          or self.base_url_default)
@@ -364,23 +425,15 @@ class OpenAICompatibleClient(LLMClient):
             return [{"type": "image_url",
                      "image_url": {"url": url, "detail": "high"}}], ""
         if suffix == ".pdf":
+            # Raises if the document is longer than one request can carry, so
+            # the only PDFs that reach the model are ones sent in full.
             pages = render_pdf_pages(path, max_pages=self.max_images)
             parts = [{"type": "image_url",
                       "image_url": {"url": self._data_url("image/png", page, path.name),
                                     "detail": "high"}}
                      for page in pages]
-            transport = f"pdf rasterised to {len(pages)} page image(s)"
-            # Say so when the cap bit: a verdict reached on page 1 of a longer
-            # document is a different claim from one reached on the whole thing.
-            try:
-                import pypdfium2
-                total = len(pypdfium2.PdfDocument(str(path)))
-                if total > len(pages):
-                    transport += f" (first {len(pages)} of {total}; "
-                    transport += f"{self.provider} accepts {self.max_images} per request)"
-            except Exception:
-                pass
-            return parts, transport
+            return parts, (f"whole document: pdf rasterised to {len(pages)} "
+                           f"page image(s) in one request")
         raise CallFailed(
             f"{path.name}: {suffix} is not a format {self.label} accepts "
             f"(jpg, jpeg and png only, or a PDF this client rasterises)")
@@ -391,15 +444,60 @@ class OpenAICompatibleClient(LLMClient):
         for note in corrections:
             content.append({"type": "text", "text": note})
 
-        response = self._client().chat.completions.create(
-            model=self.model, max_tokens=max_tokens,
-            messages=[{"role": "user", "content": content}])
+        response = self._with_backpressure(
+            lambda: self._client().chat.completions.create(
+                model=self.model, max_tokens=max_tokens, temperature=self.temperature,
+                messages=[{"role": "user", "content": content}]))
         raw = (response.choices[0].message.content or "") if response.choices else ""
         usage = getattr(response, "usage", None)
         return (raw,
                 getattr(usage, "prompt_tokens", 0) or 0,
                 getattr(usage, "completion_tokens", 0) or 0,
                 transport)
+
+    def _with_backpressure(self, send):
+        """Wait out a rate limit rather than treating it as an answer.
+
+        A 429 is not a bad reply, it is the provider asking for less traffic, so
+        it does not spend the format-retry budget: `ask` gets one call, one
+        retry on unusable JSON, and that is unchanged. This sits underneath,
+        waiting the interval the provider names and trying again.
+
+        Bounded, because a demo that hangs is worse than one that stops: after
+        RATE_LIMIT_ATTEMPTS the caller gets a CallFailed and the document goes
+        to an analyst, which is the correct outcome for a document nobody has
+        managed to look at.
+        """
+        try:
+            import openai
+        except ImportError:                             # handled in _client()
+            return send()
+
+        for attempt in range(1, RATE_LIMIT_ATTEMPTS + 1):
+            try:
+                return send()
+            except openai.RateLimitError as e:
+                if attempt == RATE_LIMIT_ATTEMPTS:
+                    raise CallFailed(
+                        f"rate limited by {self.provider} after "
+                        f"{RATE_LIMIT_ATTEMPTS} attempts: {e}") from e
+                time.sleep(self._retry_after(e, attempt))
+        raise CallFailed("unreachable")               # pragma: no cover
+
+    @staticmethod
+    def _retry_after(error, attempt: int) -> float:
+        """How long the provider asked us to wait, or a backoff if it did not."""
+        headers = getattr(getattr(error, "response", None), "headers", None) or {}
+        for name in ("retry-after", "x-ratelimit-reset-tokens",
+                     "x-ratelimit-reset-requests"):
+            raw = headers.get(name)
+            if not raw:
+                continue
+            try:                                       # "20.557s" or "13"
+                return min(MAX_RATE_LIMIT_WAIT, float(str(raw).rstrip("s")) + 1.0)
+            except ValueError:
+                continue
+        return min(MAX_RATE_LIMIT_WAIT, 2.0 ** attempt)
 
     def ping(self, max_tokens: int = 16) -> str:
         """One tiny text-only call, to prove the key and the network work.
@@ -443,13 +541,14 @@ class GroqClient(OpenAICompatibleClient):
 CLIENTS = {"anthropic": AnthropicClient, "xai": XaiClient, "groq": GroqClient}
 
 
-def get_client(provider: str | None = None, model: str | None = None) -> LLMClient:
+def get_client(provider: str | None = None, model: str | None = None,
+               temperature: float | None = None) -> LLMClient:
     """The client for the selected provider. Default is anthropic."""
     provider = (provider or provider_name()).strip().lower()
     if provider not in CLIENTS:
         raise UnknownProvider(
             f"unknown provider {provider!r}; choose from {sorted(CLIENTS)}")
-    return CLIENTS[provider](model=model)
+    return CLIENTS[provider](model=model, temperature=temperature)
 
 
 def ask(document_path: Path, prompt: Prompt, instruction: str,

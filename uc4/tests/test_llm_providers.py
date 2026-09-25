@@ -1,5 +1,5 @@
 """
-The provider layer: two providers, one set of guarantees.
+The provider layer: three providers, one set of guarantees.
 
 Nothing here touches a network. Every test drives a FakeClient that records what
 it was asked and returns what the test tells it to, which is the only way to
@@ -40,14 +40,15 @@ class FakeClient(llm_client.LLMClient):
 
     provider = "fake"
 
-    def __init__(self, replies, model="fake-model-1"):
-        self.model = model
+    def __init__(self, replies, model="fake-model-1", temperature=None):
+        super().__init__(model=model, temperature=temperature)
         self.replies = list(replies)
         self.sent = []
 
     def _send(self, document_path, text, max_tokens, corrections):
         self.sent.append({"path": Path(document_path), "text": text,
-                          "corrections": list(corrections)})
+                          "corrections": list(corrections),
+                          "temperature": self.temperature})
         if not self.replies:
             raise llm_client.CallFailed("the fake client ran out of replies")
         reply = self.replies.pop(0)
@@ -62,9 +63,16 @@ class FakeClient(llm_client.LLMClient):
 
 @pytest.fixture
 def clean_env():
-    """LLM_PROVIDER and the model override restored after each test."""
+    """Every setting this module touches, cleared and then restored.
+
+    All of them, not only the ones a given test sets: a leftover temperature or
+    key from one test silently changes the next, and a suite that depends on
+    its own running order is worse than no suite.
+    """
     saved = {k: os.environ.get(k) for k in
-             ("LLM_PROVIDER", "WALLESTER_UC4_MODEL", "XAI_API_KEY", "ANTHROPIC_API_KEY")}
+             ("LLM_PROVIDER", "WALLESTER_UC4_MODEL", "WALLESTER_UC4_TEMPERATURE",
+              "XAI_API_KEY", "ANTHROPIC_API_KEY", "GROQ_API_KEY",
+              "XAI_BASE_URL", "GROQ_BASE_URL")}
     for k in saved:
         os.environ.pop(k, None)
     yield
@@ -115,14 +123,22 @@ def test_each_provider_reads_only_its_own_key_from_the_environment(clean_env):
 
 
 def test_no_key_value_is_committed_anywhere_in_the_source():
-    """The xAI key prefix, assembled so this file does not trip over its own text."""
-    needle = "xai" + "-"
+    """No provider's key prefix appears in any file.
+
+    The needles are assembled so that this file does not trip over its own
+    text. One per provider, because the point of supporting three is that three
+    different credentials can end up on one developer's machine.
+    """
+    needles = ["xai" + "-", "gsk" + "_", "sk" + "-ant-"]
     for path in list(ROOT.rglob("*.py")) + list(ROOT.rglob("*.txt")) + \
             list(ROOT.rglob("*.md")) + list(ROOT.rglob("*.json")):
-        if path.name == Path(__file__).name or "__pycache__" in str(path):
+        if path.name in (Path(__file__).name, "test_live_mode.py"):
+            continue                              # both assemble their own needles
+        if "__pycache__" in str(path):
             continue
-        text = path.read_text(encoding="utf-8", errors="ignore")
-        assert needle not in text.lower(), f"{path} looks like it contains an xAI key"
+        text = path.read_text(encoding="utf-8", errors="ignore").lower()
+        for needle in needles:
+            assert needle not in text, f"{path} looks like it contains an API key"
 
 
 # ---------------------------------------------------------------------------
@@ -167,9 +183,37 @@ def test_the_audit_note_names_provider_model_prompt_latency_and_tokens():
     call = client.ask(SAMPLE, llm_client.load_prompt("quality_check", "v1"), "go")
     note = call.audit_note()
     for piece in ("provider=fake", "model=fake-model-1", "prompt=quality_check_v1",
-                  "attempts=1", "latency=", "tokens in/out=11/22"):
+                  "temperature=0", "attempts=1", "latency=", "tokens in/out=11/22"):
         assert piece in note
     assert "fake transport" in note, "how the file was sent belongs in the audit row"
+
+
+def test_temperature_defaults_to_zero_and_is_recorded(clean_env):
+    """An evaluation run must measure the model, not the sampler."""
+    assert llm_client.default_temperature() == 0.0
+    for provider in ("anthropic", "xai", "groq"):
+        assert llm_client.get_client(provider).temperature == 0.0
+
+    client = FakeClient(['{"flags": []}'])
+    call = client.ask(SAMPLE, llm_client.load_prompt("quality_check", "v1"), "go")
+    assert call.temperature == 0.0
+    assert client.sent[0]["temperature"] == 0.0, "the transport is given the value"
+    assert "temperature=0" in call.audit_note()
+
+
+def test_a_non_default_temperature_is_carried_and_audited(clean_env):
+    os.environ["WALLESTER_UC4_TEMPERATURE"] = "0.7"
+    assert llm_client.default_temperature() == 0.7
+    call = FakeClient(['{"flags": []}']).ask(
+        SAMPLE, llm_client.load_prompt("quality_check", "v1"), "go")
+    assert call.temperature == 0.7
+    assert "temperature=0.7" in call.audit_note(),         "a verdict reached at 0.7 is a different claim from one reached at 0"
+
+
+def test_a_temperature_that_is_not_a_number_is_refused(clean_env):
+    os.environ["WALLESTER_UC4_TEMPERATURE"] = "warm"
+    with pytest.raises(ValueError):
+        llm_client.default_temperature()
 
 
 # ---------------------------------------------------------------------------
@@ -287,13 +331,61 @@ def test_groq_is_its_own_provider_with_its_own_key_and_endpoint(clean_env):
         llm_client.api_key("groq")
 
 
-def test_groq_caps_a_rasterised_pdf_at_three_pages_and_says_when_it_did(clean_env):
+def test_groq_sends_a_short_pdf_whole_and_records_that_it_did(clean_env):
     pdf = ROOT / "sample_documents" / "WAL-ONB-0001" / "ee_fie_registry_extract_mets.pdf"
     if not pdf.exists():
         pytest.skip("sample documents not generated")
     parts, transport = llm_client.GroqClient()._image_parts(pdf)
     assert len(parts) <= 3, "Groq accepts at most three images per request"
-    assert "rasterised" in transport
+    assert transport.startswith("whole document"), \
+        "the audit row records that the whole document was sent, not just that it was converted"
+
+
+def _stub_pdf(tmp_path, pages):
+    """A real multi-page PDF, built rather than faked, so the page count is read
+    by the same library the client uses."""
+    from PIL import Image
+    path = tmp_path / f"{pages}page.pdf"
+    sheets = [Image.new("RGB", (400, 560), "white") for _ in range(pages)]
+    sheets[0].save(path, "PDF", save_all=True, append_images=sheets[1:])
+    return path
+
+
+def test_a_pdf_longer_than_one_request_is_refused_not_truncated(clean_env, tmp_path):
+    """The rule: never silently drop pages.
+
+    Groq carries three images per request. A five-page document therefore
+    cannot be assessed in one call, and the client says so instead of reaching
+    a verdict on the first three pages.
+    """
+    pdf = _stub_pdf(tmp_path, 5)
+    assert llm_client.pdf_page_count(pdf) == 5
+    with pytest.raises(llm_client.CallFailed) as e:
+        llm_client.GroqClient()._image_parts(pdf)
+    message = str(e.value)
+    assert "could not be fully assessed" in message
+    assert "5 pages" in message and "3 page image(s)" in message
+    assert pdf.name in message, "the hold has to name the document"
+
+
+def test_the_page_limit_is_the_provider_s_own(clean_env, tmp_path):
+    """Four pages is fine for xAI and Anthropic, too many for Groq."""
+    pdf = _stub_pdf(tmp_path, 4)
+    parts, transport = llm_client.XaiClient()._image_parts(pdf)
+    assert len(parts) == 4 and transport.startswith("whole document")
+    with pytest.raises(llm_client.CallFailed):
+        llm_client.GroqClient()._image_parts(pdf)
+
+
+def test_a_refused_pdf_becomes_a_manual_review_hold_not_a_clean_verdict(clean_env, tmp_path):
+    """The refusal reaches the caller as CallFailed, which the quality step
+    already turns into a hold - the same path a network failure takes."""
+    pdf = _stub_pdf(tmp_path, 9)
+    checker = ClaudeVisionQualityChecker(
+        allow_unready=True, client=llm_client.GroqClient())
+    with pytest.raises(llm_client.CallFailed):
+        checker.check({"file_path": str(pdf), "file_name": pdf.name,
+                       "document_type": "registry_extract"})
 
 
 def test_an_oversized_image_is_named_rather_than_sent(clean_env, tmp_path):
@@ -303,6 +395,56 @@ def test_an_oversized_image_is_named_rather_than_sent(clean_env, tmp_path):
         llm_client.GroqClient()._image_parts(big)
     assert "huge.png" in str(e.value), \
         "an oversized payload must not surface as an unexplained 400"
+
+
+def _rate_limited(headers: dict):
+    """A real openai.RateLimitError, built the way the SDK builds one."""
+    import httpx
+    import openai
+    response = httpx.Response(429, headers=headers,
+                              request=httpx.Request("POST", "https://example.invalid"))
+    return openai.RateLimitError("rate limited", response=response, body=None)
+
+
+def test_a_rate_limit_is_waited_out_not_counted_as_a_bad_answer(clean_env, monkeypatch):
+    """429 is the provider asking for less traffic, not a malformed reply.
+
+    It must not spend the format-retry budget, and it must not become a pass.
+    """
+    calls = {"n": 0}
+    slept = []
+    monkeypatch.setattr(llm_client.time, "sleep", lambda s: slept.append(s))
+
+    client = llm_client.GroqClient()
+
+    def flaky():
+        calls["n"] += 1
+        if calls["n"] < 3:
+            raise _rate_limited({"x-ratelimit-reset-tokens": "0.01s"})
+        return "fine"
+
+    assert client._with_backpressure(flaky) == "fine"
+    assert calls["n"] == 3, "it retried rather than giving up or passing"
+    assert slept and all(s > 0 for s in slept), "it waited between attempts"
+
+
+def test_a_rate_limit_that_never_clears_becomes_call_failed(clean_env, monkeypatch):
+    monkeypatch.setattr(llm_client.time, "sleep", lambda s: None)
+    monkeypatch.setattr(llm_client, "RATE_LIMIT_ATTEMPTS", 3)
+
+    def always():
+        raise _rate_limited({})
+
+    with pytest.raises(llm_client.CallFailed) as e:
+        llm_client.GroqClient()._with_backpressure(always)
+    assert "rate limited" in str(e.value), \
+        "a document nobody could look at goes to an analyst, it does not pass"
+
+
+def test_the_wait_is_capped(clean_env):
+    error = _rate_limited({"retry-after": "100000"})
+    wait = llm_client.OpenAICompatibleClient._retry_after(error, 1)
+    assert wait == llm_client.MAX_RATE_LIMIT_WAIT, "a demo that hangs is worse than one that stops"
 
 
 def test_both_openai_compatible_providers_share_one_implementation():

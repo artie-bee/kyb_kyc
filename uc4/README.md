@@ -40,8 +40,8 @@ orchestrator/
   steps/communication.py    Step 8a: customer messages, templates only (5.9, 11.3)
   steps/decision.py         Step 8b: the human decision (5.10, 10.7, 18)
   holds.py                  Case holds - the one place a case is stopped or released
-  quality_checker.py        AI half of Step 3 (mock / Claude Vision stub)
-  extractor.py              AI half of Step 4 (mock / Claude stub)
+  quality_checker.py        AI half of Step 3 (mock / live vision)
+  extractor.py              AI half of Step 4 (mock / live)
 sample_applications/        6 test applications (normal, complex, branch, and failure cases)
   from_dataset/             10 applications rebuilt from the scripted dataset (generated)
 tools/
@@ -50,7 +50,7 @@ tools/
   run_demo.py                 All 14 cases through Steps 1-8, scripted humans replayed
   export_case.py              Audit bundle per case: rows, trail, versions (10.8)
   make_sample_documents.py    Demo document files for cases 1, 2, 3, 4 and 6
-  evaluate_live.py            Live Claude vs the scripted answers -> eval_report.md
+  evaluate_live.py            Live model vs the scripted answers -> eval_report.md
 prompts/                    Versioned prompt files; the version is audited per call
 sample_documents/           Generated demo files (git-ignored)
 ARCHITECTURE.md             The 8 steps, holds, the KB, and mock vs live
@@ -63,6 +63,7 @@ tests/test_step8_end_to_end.py 17 tests - all 14 cases through Steps 1-8:
                               14/14 final statuses, 14/14 applicant communications
 tests/test_sample_documents.py 5 tests - printed values match extracted_field
 tests/test_live_mode.py       10 tests - live mode stays opt-in and never passes on failure
+tests/test_llm_providers.py   provider layer - three providers, one set of guarantees
 tests/test_app.py             25 tests - no SQL writes in app/, every screen renders,
                               the customer view leaks nothing, reuse points at real
                               KB files, and a human action carries the case forward
@@ -216,43 +217,87 @@ copied into any field a customer could be shown.
   claude  STUB, raises; see orchestrator/narrator.py
 Set the mode with NARRATOR_MODE in orchestrator/orchestrator.py.
 
-## Live mode (pending)
+## Live mode
 
 **Mock is the default everywhere and needs no key, no network and no
-configuration.** Live mode is written but has never been run against the real
-Claude API - there is no API access on this network - so it is marked as a
-placeholder and selecting it stops with a message rather than failing part-way
-through a case.
+configuration.** The demo runs in mock mode. Live mode is opt-in: with
+`LIVE_MODE_READY = False` in `orchestrator/live_mode.py`, selecting a live
+implementation stops with a message rather than failing part-way through a case.
 
-What is built:
+### Which model answers
 
-- `orchestrator/claude_client.py` - key from `ANTHROPIC_API_KEY`, model from a
-  setting, versioned prompts, strict JSON parsing with one retry, and the
-  latency and token counts that go into the audit row
+`LLM_PROVIDER` selects the provider. The default is `anthropic`, so an
+environment that sets nothing behaves as it always did.
+
+| `LLM_PROVIDER` | Key | Model default | Documents | Tested against the real API |
+|---|---|---|---|---|
+| `anthropic` | `ANTHROPIC_API_KEY` | `claude-sonnet-5` | PDFs read natively | **no** |
+| `xai` | `XAI_API_KEY` | `grok-4.7` | images only, PDFs rasterised | **no** |
+| `groq` | `GROQ_API_KEY` | `qwen/qwen3.8-27b` | images only, max 3 per request | **yes** |
+
+Groq is not xAI. The names are one letter apart and both serve an
+OpenAI-compatible endpoint, but they are separate companies with separate keys,
+and a key for one is rejected by the other.
+
+### What is built
+
+- `orchestrator/llm_client.py` - the provider interface. `LLMClient.ask` owns the
+  retry budget, the strict-JSON rule and the `Call` record, so a provider
+  supplies a transport and cannot relax a guarantee. `AnthropicClient` uses the
+  anthropic SDK; `XaiClient` and `GroqClient` share `OpenAICompatibleClient`.
 - `prompts/quality_check_v1.txt` and `prompts/extraction_v1.txt` - the prompt
   text as versioned files, never inline, so the audit trail can say what was
-  asked
+  asked.
 - `ClaudeVisionQualityChecker` and `ClaudeExtractor` - both validate the reply
-  against the KB and raise rather than return something unusable
+  against the KB and raise rather than return something unusable.
 - Steps 3 and 4 hold the document when a call fails: a failed call is never a
-  pass
+  pass.
 - `tools/evaluate_live.py` - runs the live checkers over `sample_documents/`,
-  compares with the scripted answers and writes `eval_report.md`
+  compares with the scripted answers and writes `eval_report.md`.
 
-What is untested: **all of it, against the real API.** The JSON parsing, the
-validation and the failure paths have unit tests with injected failures, but no
-real request has ever been sent. Prompt wording in particular is unproven -
-`eval_report.md` exists to find out how far the model and the script actually
-agree, and that report has not been produced.
+Every call is audited with the provider, the model, the prompt version, the
+temperature, the attempt count, the latency, the token counts and how the file
+was transported.
 
-To enable it later:
+### Two things that are not cosmetic
 
-1. set `ANTHROPIC_API_KEY` in the environment
-2. confirm the network or proxy allows `api.anthropic.com`
-3. `pip install anthropic`
+**Temperature is 0 by default.** `WALLESTER_UC4_TEMPERATURE` overrides it, and
+the value used is written into every audit row: a verdict reached at 0.7 is a
+different claim from one reached at 0. This matters more than it sounds. The
+first live runs were made before temperature was pinned, and two identical runs
+over the same two documents disagreed with each other - one flagged a document
+the other called clean. An evaluation at a sampled temperature measures the
+sampler as much as the model.
+
+**PDFs are rasterised for the OpenAI-compatible providers**, which take jpg and
+png only. The conversion is recorded on the call, because "the model read the
+PDF" and "the model read a picture of the PDF" are different claims. A document
+with more pages than one request can carry is **refused, not truncated**: the
+caller turns that into a manual-review hold saying the document could not be
+fully assessed, rather than reaching a verdict on page one and presenting it as
+a verdict on the document. Every sample PDF in this repository is one page, so
+the limit does not bite today - but the guard is what stops it biting silently
+later.
+
+### Rate limits
+
+A 429 is backpressure, not an answer. It is waited out - honouring the
+provider's own `retry-after` - without spending the format-retry budget, and
+after `RATE_LIMIT_ATTEMPTS` the document goes to an analyst. The Groq account
+used for the evaluation allowed **8,000 tokens per minute**, and each vision
+call costs about 2,350 (a Groq image is a flat 2,048 tokens regardless of
+content), so roughly three calls fit in a minute. The full 61-document run is
+122 calls and about 282,000 tokens; budget the best part of an hour.
+
+### Turning it on
+
+1. set `LLM_PROVIDER` and the matching key in the environment
+2. confirm the network or proxy allows that provider's host
+3. `pip install` the SDK it needs: `anthropic`, or `openai` for xai and groq
+   (`pypdfium2` as well, for rasterising PDFs)
 4. set `LIVE_MODE_READY = True` in `orchestrator/live_mode.py`
-5. run `python tools/evaluate_live.py` and read `eval_report.md` before trusting
-   any of it
+5. run `python tools/evaluate_live.py --limit 2` first, then the full run, and
+   read `eval_report.md` before trusting any of it
 
 A prompt that needs changing gets a new file - `quality_check_v2.txt` - never an
 edit to v1, or the audit trail stops meaning anything.

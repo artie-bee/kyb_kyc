@@ -38,12 +38,27 @@ class KnowledgeBase:
         self.communication_rules = _read_csv("communication_rules.csv")
         self.decision_taxonomy = {r["decision"]: r for r in
                                   _read_csv("analyst_decision_taxonomy.csv")}
+        self.decision_reason_codes = _read_csv("decision_reason_codes.csv")
         self.audit_log_standard = {r["step"]: [a for a in r["required_actions"].split("|") if a]
                                    for r in _read_csv("audit_log_standard.csv")}
         self.communication_schedule = {r["setting"]: int(r["days"])
                                        for r in _read_csv("communication_schedule.csv")}
         self.adverse_media_categories = {r["category"]: r
                                          for r in _read_csv("adverse_media_categories.csv")}
+
+    def reason_codes_for(self, decision: str | None = None) -> list[dict]:
+        """The reason codes the KB permits, narrowed to one decision if given.
+
+        A code marked `*` applies everywhere. Like every other vocabulary here,
+        the list is a CSV rather than free text, so the codes can be counted
+        later - two analysts writing "address problem" and "addr mismatch" are
+        not countable, and a category nobody can count is not a category.
+        """
+        rows = self.decision_reason_codes
+        if decision is None:
+            return rows
+        return [r for r in rows
+                if r["applies_to"] == "*" or decision in r["applies_to"].split("|")]
 
     @property
     def ubo_threshold(self) -> float:

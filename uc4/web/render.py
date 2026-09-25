@@ -31,6 +31,11 @@ SCREENS = [("Operations dashboard", "/"), ("Case detail", "/case/"),
            ("Customer view", "/customer/"), ("Agent reuse", "/reuse"),
            ("Audit export", "/export/")]
 
+# Which screens are about one case, and so take a case id on the end of their
+# path. Named rather than inferred from a trailing slash: "/" ends in a slash
+# too, and inferring it sent every "Operations dashboard" link to /<case-id>.
+CASE_SCREENS = {"Case detail", "Customer view", "Audit export"}
+
 TABS = ["Timeline", "Checklist", "Documents", "People", "Checks",
         "Risk", "Decision", "Communications"]
 
@@ -85,6 +90,14 @@ def cell(value, title="") -> str:
     return em_dash(title) if value in (None, "") else e(value)
 
 
+def help_mark(text: str, edge: bool = False) -> str:
+    """A "?" that explains a label. Pure CSS, and a real button so it is
+    reachable by keyboard rather than hover-only."""
+    extra = " qmark--left" if edge else ""
+    return ('<button type="button" class="qmark' + extra + '" tabindex="0"'
+            ' aria-label="What is this?" data-help="' + e(text) + '">?</button>')
+
+
 def note(body, tone="info", title="") -> str:
     head = '<span class="note__title">' + title + "</span>" if title else ""
     return '<div class="note note--' + tone + '">' + head + body + "</div>"
@@ -102,7 +115,7 @@ def table(headers, rows, empty="Nothing to show.") -> str:
 
 def _back(active, case_id):
     href = dict(SCREENS).get(active, "/")
-    return href + case_id if href.endswith("/") and case_id else href
+    return href + case_id if active in CASE_SCREENS and case_id else href
 
 
 # ---------------------------------------------------------------------------
@@ -122,7 +135,7 @@ def page(title, body, active, conn=None, case_id=None, role="analyst",
     cases = [r["case_id"] for r in data.dashboard(conn)] if conn is not None else []
     nav = []
     for name, href in SCREENS:
-        if href.endswith("/"):
+        if name in CASE_SCREENS:
             target = href + (case_id or (cases[0] if cases else ""))
         else:
             target = href
@@ -131,7 +144,7 @@ def page(title, body, active, conn=None, case_id=None, role="analyst",
                    + e(name) + "</a>")
 
     picker = ""
-    if cases and active in ("Case detail", "Customer view", "Audit export"):
+    if cases and active in CASE_SCREENS:
         base = dict(SCREENS)[active]
         options = "".join(
             '<option value="' + e(c) + '"'
@@ -297,15 +310,21 @@ def case_detail(conn, case_id, tab="Timeline", role="analyst",
                         + '<span class="hold__by">' + e(h.placed_by_step) + "</span></div>")
         holds_html = note('<div class="holds">' + "".join(rows) + "</div>", "warn",
                           "Open holds &mdash; the case cannot be approved while any "
-                          "of these stand")
+                          "of these stand"
+                          + help_mark("A hold is a lock placed by one step. Only that "
+                                      "step, or the named person it belongs to, can "
+                                      "release it. The case moves only when every "
+                                      "hold is clear - and carrying on can surface a "
+                                      "new one."))
     else:
         holds_html = note("No open holds.", "ok")
 
+    # The restricted-finding banner used to sit here. Removed at the user's
+    # request: the enforcement is unchanged and lives in the communication step
+    # - a narrowed template library, no automatic message at all on a confirmed
+    # sanctions match, and a wording scan on every rendered message before it
+    # can be sent. What has gone is the warning to the analyst, not the rule.
     restricted = ""
-    if case["restricted_finding"]:
-        restricted = note("Customer messages are limited to generic templates. "
-                          "Nothing about the finding may reach the applicant.",
-                          "bad", "Restricted finding on this case")
 
     future = ""
     if data.is_white_label(conn, case_id):
@@ -368,25 +387,99 @@ def _tab_timeline(conn, case_id, **kw):
                     "No audit events."))
 
 
+# What each checklist status means for the eye: the colour of the left rule and
+# the mark in the circle. "waived" is deliberately neutral rather than green -
+# the item was not satisfied, it was ruled not to apply, and those are different.
+CHECK_STATUS = {
+    "accepted":               ("ok",   "✓", "accepted"),
+    "pending":                ("warn", "•", "still to come"),
+    "manual_review":          ("warn", "!",      "with an analyst"),
+    "resubmission_requested": ("bad",  "↻", "sent back to the customer"),
+    "rejected":               ("bad",  "✗", "rejected"),
+    "waived":                 ("none", "–", "not required here"),
+}
+LEVEL_ORDER = [("required", "Required"), ("conditional", "Conditional"),
+               ("optional", "Optional")]
+
+
 def _tab_checklist(conn, case_id, **kw):
     items = data.checklist(conn, case_id)
+    if not items:
+        return "<h2>Requirement checklist</h2><p class=\"empty\">No checklist.</p>"
+
     required = [i for i in items if i["level"] == "required"]
     accepted = [i for i in required if i["status"] == "accepted"]
-    tone = {"accepted": "ok", "pending": "warn", "waived": "neutral",
-            "resubmission_requested": "bad", "manual_review": "warn"}
-    rows = []
-    for i in items:
-        level_tone = "info" if i["level"] == "required" else "neutral"
-        rows.append([idtag(i["item_id"]),
-                     '<span class="type">' + e(i["rule_id"]) + "</span>",
-                     e(i["document_type"]), chip(i["level"], tone=level_tone),
-                     chip(i["status"], tone), str(i["resubmission_attempts"]),
-                     cell(i["file_name"])])
-    return ("<h2>Requirement checklist</h2>"
-            '<p class="count-line">' + str(len(accepted)) + " of " + str(len(required))
-            + " required items accepted (" + str(len(items)) + " items in total)</p>"
-            + table(["Item", "Rule", "Document", "Level", "Status", "Attempts", "File"],
-                    rows, "No checklist."))
+    outstanding = [i for i in required if i["status"] != "accepted"]
+
+    # The bar is the headline: how much of the required pack is in.
+    done = len(accepted)
+    total = len(required) or 1
+    pct = int(round(100 * done / total))
+    fill_class = "progress__fill" if done == len(required) else "progress__fill progress__fill--part"
+    if outstanding:
+        note_text = (str(len(outstanding)) + " required item"
+                     + ("s" if len(outstanding) != 1 else "") + " outstanding: "
+                     + ", ".join(i["document_type"].replace("_", " ") for i in outstanding))
+    else:
+        note_text = "Every required item is in."
+
+    out = ["<h2>Requirement checklist</h2>",
+           '<div class="progress">'
+           '<div class="progress__head">'
+           '<span class="progress__count">' + str(done) + " of " + str(len(required))
+           + "<small>required items accepted</small></span>"
+           '<span class="progress__note">' + e(note_text) + "</span></div>"
+           '<div class="progress__bar"><div class="' + fill_class
+           + '" style="width:' + str(pct) + '%"></div></div></div>']
+
+    seen = set()
+    for level, heading in LEVEL_ORDER:
+        group = [i for i in items if i["level"] == level]
+        seen.update(id(i) for i in group)
+        if not group:
+            continue
+        in_hand = sum(1 for i in group if i["status"] == "accepted")
+        extra = " group--optional" if level == "optional" else ""
+        out.append('<section class="group' + extra + '">'
+                   '<div class="group__head"><span class="group__name">' + heading
+                   + '</span><span class="group__tally">' + str(in_hand) + " of "
+                   + str(len(group)) + " accepted</span></div>")
+        for i in group:
+            out.append(_check_row(i))
+        out.append("</section>")
+
+    # Anything with a level the KB has added since this list was written still
+    # has to appear; a checklist that quietly drops an item is worse than an
+    # ugly one.
+    rest = [i for i in items if id(i) not in seen]
+    if rest:
+        out.append('<section class="group"><div class="group__head">'
+                   '<span class="group__name">Other</span></div>')
+        out.extend(_check_row(i) for i in rest)
+        out.append("</section>")
+    return "".join(out)
+
+
+def _check_row(item) -> str:
+    tone, mark, plain = CHECK_STATUS.get(item["status"], ("none", "?", item["status"]))
+    if item["file_name"]:
+        file_html = '<span class="check__file">' + e(item["file_name"]) + "</span>"
+    else:
+        file_html = ('<span class="check__file check__file--none">no file '
+                     + e(plain) + "</span>")
+    attempts = ""
+    if item["resubmission_attempts"]:
+        attempts = ('<span class="check__attempts">' + str(item["resubmission_attempts"])
+                    + " attempt" + ("s" if item["resubmission_attempts"] != 1 else "")
+                    + "</span>")
+    return ('<div class="check check--' + tone + '">'
+            '<span class="check__mark" aria-hidden="true">' + mark + "</span>"
+            '<span class="check__body"><span class="check__doc">'
+            + e(item["document_type"].replace("_", " ")) + "</span>" + file_html + "</span>"
+            '<span class="check__side">' + attempts
+            + chip(plain, tone=("neutral" if tone == "none" else tone))
+            + '<span class="check__ids">' + e(item["rule_id"]) + " &middot; "
+            + e(item["item_id"]) + "</span></span></div>")
 
 
 def _tab_documents(conn, case_id, role="analyst", reviewer="analyst.demo", **kw):
@@ -424,8 +517,15 @@ def _tab_documents(conn, case_id, role="analyst", reviewer="analyst.demo", **kw)
             right.append(note("Released by " + e(doc["released_by"]) + ": "
                               + e(doc["release_reason"]), "info"))
         if held:
-            right.append(note("Releasing it is a decision on the record.", "warn",
-                              "Held for an analyst"))
+            right.append(note("Accept keeps the document and lets the case carry "
+                              "on. Request resubmission sends it back to the "
+                              "customer. Either way your name and reason go on the "
+                              "record.", "warn",
+                              "Held for an analyst"
+                              + help_mark("The quality screen could not settle this "
+                                          "one, so it is waiting on a person. "
+                                          "Whichever you choose is audited against "
+                                          "your name.")))
             right.append(
                 '<form method="post" action="/action/release-document">'
                 '<input type="hidden" name="document_id" value="' + e(doc["document_id"]) + '">'
@@ -460,7 +560,12 @@ def _tab_documents(conn, case_id, role="analyst", reviewer="analyst.demo", **kw)
                         '<input type="hidden" name="field_id" value="' + e(f["field_id"]) + '">'
                         '<input type="hidden" name="back" value="' + back + '">'
                         '<p class="help">' + e(f["field_id"])
-                        + ": accept the reading as it stands, or replace it.</p>"
+                        + ": accept the reading as it stands, or replace it."
+                        + help_mark("Accept as read means you looked at the original "
+                                    "and the faint reading was right - the value does "
+                                    "not change. Correct replaces it. Both are "
+                                    "recorded against your name; neither is "
+                                    "'dismiss'.") + "</p>"
                         '<div class="field"><label>Corrected value</label>'
                         '<input type="text" name="value" value="' + e(f["value"] or "") + '"></div>'
                         '<div class="field"><label>Reason</label>'
@@ -640,43 +745,260 @@ def _tab_decision(conn, case_id, role="analyst", reviewer="analyst.demo", **kw):
                         "close the case is refused while any stands &mdash; try it "
                         "and the backend will say so.", "info"))
 
-    withheld = data.withheld_decisions(conn, case_id)
     band = data.band_for_decisions(conn, case_id)
-    if withheld:
-        items = "".join("<li><strong>" + e(w["decision"]) + "</strong> (allowed at "
-                        + e(w["allowed_bands"]) + ")</li>" for w in withheld)
-        out.append(note("The taxonomy does not allow these here, so they are not on "
-                        "the list to be attempted:<ul>" + items + "</ul>", "warn",
-                        "Not offered at band <code>" + e(band) + "</code>"))
-
     options = data.available_decisions(conn, case_id)
-    out.append('<p class="foot">The dropdown is kb/analyst_decision_taxonomy.csv read '
-               "at this band. The role each decision needs is checked by the backend "
-               "when you record it.</p>")
     if not options:
         out.append('<p class="empty">No decision is available at this band.</p>')
         return "".join(out)
 
-    opts = "".join("<option>" + e(o) + "</option>" for o in options)
+    # What the system concluded. Without this the analyst has to leave the tab
+    # to find out whether they are agreeing with the recommendation or
+    # overriding it - which is the one thing that changes what the form needs.
+    a = data.risk(conn, case_id)["assessment"]
+    recommended = a["recommended_action"] if a else None
+    score = "not scored" if not a or a["risk_score"] is None else str(a["risk_score"])
+    signoff = ("Required" if a and a["requires_human_signoff"] else "Not required")
+    out.append(
+        '<div class="recobar">'
+        '<div class="recobar__cell"><span class="recobar__k">Band'
+        + help_mark("Which risk bucket the score fell into, or the band a hard "
+                    "floor forced. It decides which decisions are offered at all.")
+        + '</span><span class="recobar__v">' + chip(band, BAND_TONE) + "</span></div>"
+        '<div class="recobar__cell"><span class="recobar__k">Score'
+        + help_mark("Points added up from kb/risk_scoring_matrix.csv. Every weight "
+                    "is a POC placeholder for Wallester to confirm.")
+        + '</span><span class="recobar__v num">' + e(score) + "</span></div>"
+        '<div class="recobar__cell"><span class="recobar__k">System recommends'
+        + help_mark("What the rules suggest. It is a recommendation, not a "
+                    "decision: nothing is recorded until a named person records it. "
+                    "Choosing anything else is an override and needs its own reason.")
+        + '</span><span class="recobar__v">'
+        + (chip(recommended, tone="info") if recommended else em_dash()) + "</span></div>"
+        '<div class="recobar__cell"><span class="recobar__k">Human sign-off'
+        + help_mark("Whether the rules say this case cannot be closed without a "
+                    "person signing it off.")
+        + '</span><span class="recobar__v">' + e(signoff) + "</span></div></div>")
+
+    out.append(_ai_preparation(conn, case_id, role))
+
+    opts = []
+    for o in options:
+        same = " (matches the recommendation)" if o == recommended else ""
+        opts.append('<option value="' + e(o) + '">' + e(o) + e(same) + "</option>")
+
     out.append(
         '<form method="post" action="/action/record-decision" class="panel">'
         '<input type="hidden" name="case_id" value="' + e(case_id) + '">'
         '<input type="hidden" name="back" value="/case/' + e(case_id) + '?tab=Decision">'
-        '<div class="field"><label>Decision</label><select name="choice">' + opts
-        + "</select></div>"
-        '<div class="field"><label>Reason code</label>'
-        '<input type="text" name="reason_code" value="demo_decision"></div>'
-        '<div class="field"><label>Rationale</label><textarea name="rationale"></textarea></div>'
-        '<div class="field"><label>Override reason</label>'
-        '<input type="text" name="override_reason">'
-        '<span class="help">Required only if the decision differs from the '
-        "recommendation; the backend computes that, not you.</span></div>"
-        '<div class="field"><label>Escalation target</label>'
-        '<input type="text" name="escalation_target">'
-        '<span class="help">Required for escalate.</span></div>'
+
+        '<div class="formsection"><div class="formsection__head">The decision</div>'
+        '<div class="field"><label>Decision'
+        + help_mark("Only the decisions kb/analyst_decision_taxonomy.csv allows at "
+                    "band " + band + " appear here. Some also need a particular "
+                    "role, which the backend checks when you record it.")
+        + '</label><select name="choice">' + "".join(opts) + "</select></div>"
+        '<div class="field"><label>Rationale'
+        + help_mark("Why you decided this, in plain words. Required for every "
+                    "decision. This is what a reviewer reads months later, so "
+                    "write it for them rather than for yourself today.")
+        + '</label><textarea name="rationale" '
+          'placeholder="What you concluded, and what you based it on."></textarea></div>'
+        '<div class="field"><label>Reason code'
+        + help_mark("The category behind the decision, from "
+                    "kb/decision_reason_codes.csv. The rationale is for a person "
+                    "to read; this is the part that can be counted later - how "
+                    "many rejections last quarter were entity_not_active_on_register. "
+                    "Free text cannot answer that, because two analysts will word "
+                    "the same thing differently.")
+        + "</label>" + _reason_code_select(conn, case_id, options) + "</div>"
+        "</div>"
+
+        '<div class="formsection"><div class="formsection__head">Only when they apply'
+        + help_mark("Both of these are usually left empty. Fill one only in the "
+                    "case described beside it.", edge=True)
+        + "</div>"
+        '<div class="formgrid">'
+        '<div class="field"><label>Override reason'
+        + help_mark("Fill this only if your decision differs from what the system "
+                    "recommended. You do not declare an override - the backend "
+                    "compares the two and refuses without a reason if they differ.")
+        + '</label><input type="text" name="override_reason" '
+          'placeholder="Only if you disagree with the recommendation">'
+        '<span class="help">Recommended here: <strong>'
+        + (e(recommended) if recommended else "none") + "</strong></span></div>"
+        '<div class="field"><label>Escalation target'
+        + help_mark("Who the case goes to. Required for 'escalate' and ignored "
+                    "otherwise, for example sanctions.desk.")
+        + '</label><input type="text" name="escalation_target" '
+          'placeholder="Only for escalate"></div>'
+        "</div></div>"
+
         '<button class="btn btn--primary" type="submit">Record as ' + e(role)
-        + "</button></form>")
+        + "</button>"
+        '<p class="formsection__note" style="margin-top:9px">Recorded against '
+        + e(reviewer) + " as " + e(role)
+        + ". Change either in the sidebar.</p></form>")
     return "".join(out)
+
+
+def _reason_code_select(conn, case_id, options) -> str:
+    """The reason codes the KB allows, grouped by the decision each one suits.
+
+    Grouped rather than flat because the list is long and most of it is
+    irrelevant to whichever decision is being recorded: an optgroup per
+    decision lets the eye skip to the right part. Codes that apply everywhere
+    sit in their own group at the end.
+    """
+    kb = data.kb()
+    groups, seen = [], set()
+    for decision in options:
+        rows = [r for r in kb.reason_codes_for(decision) if r["applies_to"] != "*"]
+        if not rows:
+            continue
+        items = []
+        for r in rows:
+            items.append('<option value="' + e(r["code"]) + '" title="'
+                         + e(r["description"]) + '">' + e(r["code"]) + "</option>")
+            seen.add(r["code"])
+        groups.append('<optgroup label="' + e(decision) + '">'
+                      + "".join(items) + "</optgroup>")
+
+    anywhere = [r for r in kb.decision_reason_codes if r["applies_to"] == "*"]
+    if anywhere:
+        groups.append('<optgroup label="any decision">'
+                      + "".join('<option value="' + e(r["code"]) + '" title="'
+                                + e(r["description"]) + '">' + e(r["code"]) + "</option>"
+                                for r in anywhere) + "</optgroup>")
+
+    if not groups:                       # a KB with no codes is still usable
+        return '<input type="text" name="reason_code" value="demo_decision">'
+    return '<select name="reason_code">' + "".join(groups) + "</select>"
+
+
+def _next_steps(conn, case_id, role) -> str:
+    """What this analyst can actually do next, and what is in the way.
+
+    Derived, not drafted: every line comes from the open holds and from
+    kb/analyst_decision_taxonomy.csv read at this band. It is marked apart from
+    the AI summary above it for that reason - a suggestion computed from the
+    rules and a suggestion written by a model are different things, and a screen
+    that blurred them would be making the claim this POC exists to avoid.
+    """
+    steps = []
+    taxonomy = data.kb().decision_taxonomy
+    assessment = data.risk(conn, case_id)["assessment"]
+    recommended = assessment["recommended_action"] if assessment else None
+    offered = data.available_decisions(conn, case_id)
+    band = data.band_for_decisions(conn, case_id)
+
+    # 1. Anything that has to be cleared before a decision can close the case.
+    for hold in data.open_holds(conn, case_id):
+        what = hold.reason.split(": ", 1)[-1]
+        if hold.owner == "customer":
+            steps.append('<span class="nextsteps__blocked">Waiting on the applicant'
+                         "</span>: " + e(what) + ". Nothing for you to clear - send "
+                         "the reminder from the Communications tab if it is overdue.")
+        elif hold.owner != role:
+            steps.append('<span class="nextsteps__blocked">Only ' + e(hold.owner)
+                         + " can release " + idtag(hold.hold_id) + "</span>: "
+                         + e(what) + ". Switch role in the sidebar, or hand it on.")
+        else:
+            steps.append("Clear " + idtag(hold.hold_id) + " (" + e(hold.code)
+                         + "): " + e(what) + ". Use the Documents tab.")
+
+    # 2. Whether the recommended action is something this person may record.
+    if recommended:
+        rule = taxonomy.get(recommended)
+        allowed_here = recommended in offered
+        needs = rule["required_role"] if rule else None
+        if not allowed_here:
+            steps.append("The recommendation is <strong>" + e(recommended)
+                         + "</strong>, which the taxonomy does not offer at band <code>"
+                         + e(band) + "</code>. Choose from what is offered, and give "
+                         "an override reason.")
+        elif needs and needs != role:
+            steps.append("Recording the recommendation <strong>" + e(recommended)
+                         + "</strong> needs the <strong>" + e(needs)
+                         + "</strong> role. As " + e(role) + " it will be refused - "
+                         "switch role in the sidebar first.")
+        else:
+            extra = (" It also needs an escalation target."
+                     if recommended == "escalate" else "")
+            steps.append("Recording <strong>" + e(recommended)
+                         + "</strong> matches the recommendation, so it needs a "
+                         "rationale and no override reason." + extra)
+            steps.append("Recording anything else is an override: give a rationale "
+                         "<em>and</em> an override reason, or the backend refuses it.")
+
+    if not steps:
+        steps.append("No holds and no recommendation on this case yet. There is "
+                     "nothing to record until it has been assessed.")
+
+    return ('<div class="nextsteps"><div class="nextsteps__head">'
+            '<span class="nextsteps__tag">Derived from the rules</span>'
+            '<span class="nextsteps__title">What you can do next</span>'
+            + help_mark("Worked out from the holds open on this case and from "
+                        "kb/analyst_decision_taxonomy.csv read at band " + band
+                        + ". Not written by the model, and not a decision - it only "
+                          "says what the rules will and will not accept from you.")
+            + "</div><ol>"
+            + "".join("<li>" + s + "</li>" for s in steps) + "</ol></div>")
+
+
+def _ai_preparation(conn, case_id, role="analyst") -> str:
+    """What the model wrote about this case, on the tab where it is used.
+
+    Deliberately not called a verdict or a recommendation. The band, the score
+    and the recommended action are computed in code from the KB before a word is
+    written; the narrative describes that outcome and cites the rows behind it.
+    Labelling drafting as judgement is the one claim this POC must not make, and
+    a screen that made it would contradict the rest of the system.
+    """
+    pack = data.risk(conn, case_id)["pack"]
+    if not pack or not (pack["draft_compliance_narrative"] or "").strip():
+        # No drafted summary yet, but the next steps are derived rather than
+        # drafted, so they still apply and still help.
+        return ('<section class="aiprep"><div class="aiprep__body">'
+                + _next_steps(conn, case_id, role) + "</div></section>")
+
+    # Which model and prompt version wrote it, from the audit row rather than
+    # from a constant, so the panel cannot claim a version that did not run.
+    version = ""
+    for event in reversed(data.audit_trail(conn, case_id)):
+        if event["action"] == "evidence_pack_generated":
+            version = event["model_or_prompt_version"] or ""
+            break
+
+    missing = ""
+    if pack["missing_or_conflicting_evidence"]:
+        missing = note(e(pack["missing_or_conflicting_evidence"]), "warn",
+                       "Missing or conflicting evidence")
+
+    meta = ("written by " + e(version) if version else "written in mock mode")
+
+    return (
+        '<section class="aiprep"><div class="aiprep__head">'
+        '<span class="aiprep__tag">AI-drafted</span>'
+        '<span class="aiprep__title">Case summary prepared for you</span>'
+        '<span class="muted">internal &mdash; not shown to the applicant</span>'
+        + help_mark("The model wrote this summary from the rows already on the case, "
+                    "and every reference in it must point at a row that exists. It is "
+                    "preparation, not a decision: the band, the score and the "
+                    "recommended action were all computed from the rule files before "
+                    "any of it was written. Read it, check it against the evidence, "
+                    "and decide for yourself.")
+        + "</div>"
+        '<div class="aiprep__body">'
+        + missing
+        + '<div class="aiprep__narrative">'
+        + e(pack["draft_compliance_narrative"]) + "</div>"
+        + '<p class="aiprep__caveat">This is drafting to save you starting from a '
+          "blank page. It carries no authority: nothing is recorded against this "
+          "case until you record it below, under your own name.</p>"
+        '<p class="aiprep__meta">' + meta + " &middot; every evidence reference is "
+        "checked against the database before the pack is stored</p>"
+        + _next_steps(conn, case_id, role)
+        + "</div></section>")
 
 
 def _tab_comms(conn, case_id, reviewer="analyst.demo", **kw):

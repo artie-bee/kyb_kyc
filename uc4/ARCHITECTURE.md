@@ -119,12 +119,29 @@ unless the mode is changed explicitly.
 | Risk / pack narrative | `narrator.py` | assembles from the pack | stub |
 | Template choice | `steps/communication.py` | first allowed template | stub |
 
-**Live mode is a placeholder.** `LIVE_MODE_READY` in
+**Live mode is opt-in and off.** `LIVE_MODE_READY` in
 `orchestrator/live_mode.py` is `False`, and selecting a live implementation
 raises `LiveModeNotConfigured` with instructions rather than attempting a call.
-The Claude integration for Steps 3 and 4 is written and unit-tested but has
-never met the real API; see the *Live mode (pending)* section of README.md for
-what is built, what is unproven, and how to turn it on.
+The demo runs in mock mode.
+
+Which model answers is `LLM_PROVIDER`: `anthropic` (the default),
+`xai` or `groq`. `orchestrator/llm_client.py` holds the interface;
+`LLMClient.ask` owns the retry budget, the strict-JSON rule and the audit
+record, so a provider supplies a transport and cannot relax a guarantee.
+Temperature is 0 by default and is written into every audit row alongside the
+provider, model, prompt version, latency, tokens and how the file was
+transported.
+
+Steps 3 and 4 have been exercised against a real API once, through Groq
+(`qwen/qwen3.8-27b`, temperature 0), over all 61 sample documents. That run is
+`eval_report.md`. The Anthropic and xAI transports remain unproven against
+their real APIs.
+
+The OpenAI-compatible providers take images only, so PDFs are rasterised to
+page images; a document with more pages than one request can carry is refused
+rather than truncated, and the caller holds it for an analyst. See the *Live
+mode* section of README.md for what is built, what is proven, and how to turn
+it on.
 
 Modes are set at the top of `orchestrator/orchestrator.py`:
 `QUALITY_CHECKER_MODE`, `EXTRACTOR_MODE`, `PROVIDER_MODE`,

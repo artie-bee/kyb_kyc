@@ -165,10 +165,27 @@ def test_the_customer_view_leaks_nothing_on_a_sanctions_case(site):
         assert word not in body, f"{word!r} reached the customer view"
 
 
-def test_the_decision_tab_says_what_the_band_withholds(site):
+def test_the_decision_tab_offers_only_what_the_band_allows(site):
+    """The dropdown is the taxonomy read at this band.
+
+    Case 6 is critical, where approve and conditional_approve are not allowed,
+    so neither may appear as an option to attempt.
+    """
     _, html = get(site, "/case/WAL-ONB-0006?tab=Decision")
-    assert "Not offered at band" in html
-    assert "approve" in html, "the withheld decision is named, not just hidden"
+    options = re.findall(r'<option value="([a-z_]+)"', html)
+    assert options, "some decision must be offered"
+    assert "approve" not in options and "conditional_approve" not in options
+    assert "escalate" in options, "escalate is allowed at critical, by compliance"
+
+
+def test_the_next_steps_name_the_role_a_decision_needs(site):
+    """Escalate is compliance's at critical. The analyst is told before trying."""
+    post(site, "/action/settings", role="analyst", reviewer="analyst.demo", back="/")
+    _, html = get(site, "/case/WAL-ONB-0006?tab=Decision")
+    block = re.search(r'<div class="nextsteps">.*?</ol>', html, re.S)
+    assert block, "the derived next steps must be on the decision tab"
+    text = re.sub("<[^>]+>", " ", block.group(0))
+    assert "compliance" in text and "escalate" in text
 
 
 def test_the_white_label_case_shows_its_future_phase_and_scope(site):

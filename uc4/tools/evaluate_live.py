@@ -116,6 +116,7 @@ def evaluate(dataset: Path, docs_root: Path, cases: tuple, limit: int | None,
     return {"quality": quality_rows, "fields": field_rows, "errors": errors,
             "provider": llm_client.provider_name(),
             "model": llm_client.model_name(),
+            "temperature": llm_client.default_temperature(),
             "transport": sorted({r["transport"] for r in quality_rows if r.get("transport")}),
             "calls": calls,
             "prompts": [p.stamp for p in
@@ -136,6 +137,7 @@ def report(result: dict) -> str:
         "# Live evaluation - the live model against the scripted answers", "",
         f"Provider: `{result.get('provider', '?')}`  ",
         f"Model: `{result['model']}`  ",
+        f"Temperature: `{result.get('temperature', '?')}`  ",
         f"Prompts: {', '.join(f'`{p}`' for p in result['prompts']) or 'none'}", "",
         "Nothing was tuned to improve these numbers. Where the model and the script "
         "disagree, both are listed so a person can decide which is right - sometimes "

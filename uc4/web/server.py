@@ -37,7 +37,11 @@ STATIC = Path(__file__).resolve().parent / "static"
 # One connection, guarded. SQLite is happy with this and it keeps the demo's
 # state in one place; the lock matters because ThreadingHTTPServer will happily
 # run two requests at once and an action must not interleave with a read.
-_lock = threading.Lock()
+#
+# Reentrant, because a request that fails part-way through re-enters to build
+# the error page - and a plain Lock deadlocks the thread against itself there,
+# which shows up as a page that hangs rather than one that errors.
+_lock = threading.RLock()
 _conn = None
 
 
@@ -144,6 +148,21 @@ class Handler(BaseHTTPRequestHandler):
             role, reviewer = self._identity()
             with _lock:
                 conn = connection()
+
+                # A bare case id - what a browser offers from history, or what
+                # you get typing the id you were just looking at. It is
+                # unambiguous, so redirect rather than refuse.
+                bare = path.strip("/")
+                if bare and "/" not in bare and _case_exists(conn, bare):
+                    return self._redirect("/case/" + bare)
+
+                # A screen path with no case on it. The sidebar generates these
+                # whenever it has no case to hand, so they have to go somewhere.
+                if path in ("/case/", "/customer/", "/export/"):
+                    first = next((r["case_id"] for r in data.dashboard(conn)), None)
+                    if first:
+                        return self._redirect(path + first)
+
                 if path == "/":
                     body = render.dashboard(conn)
                     title, active, case_id = "Operations dashboard", "Operations dashboard", None
@@ -287,7 +306,21 @@ class Handler(BaseHTTPRequestHandler):
 
     # -- error pages -------------------------------------------------------
     def _shell(self, body):
-        return render.page("Not found", body, "", conn=None)
+        """An error page with a working sidebar.
+
+        Built with the connection rather than without it: a 404 whose own
+        navigation is broken leaves you clicking in circles, which is worse
+        than no navigation at all.
+        """
+        role, reviewer = self._identity()
+        try:
+            with _lock:
+                conn = connection()
+                first = next((r["case_id"] for r in data.dashboard(conn)), None)
+                return render.page("Not found", body, "", conn=conn, case_id=first,
+                                   role=role, reviewer=reviewer)
+        except Exception:
+            return render.page("Not found", body, "", conn=None)
 
     def _no_case(self, case_id):
         return self._shell(render.note(
