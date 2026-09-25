@@ -278,16 +278,51 @@ def test_an_action_without_a_reason_is_refused(site):
     assert flash(location)[0] == "err", "a release without a reason is not a release"
 
 
-def test_who_you_are_acting_as_is_remembered_between_requests(site):
-    """There is no control for this in the sidebar any more, but the identity
-    still travels with the session and still reaches the decision form."""
+def test_the_decision_form_carries_the_role(site):
+    """The role lives on the decision form, not the sidebar: it is checked when
+    a decision is recorded, and that is the moment it matters."""
+    _, html = get(site, "/case/WAL-ONB-0006?tab=Decision")
+    form = html.split('action="/action/record-decision"', 1)[1]
+    assert '<option value="analyst"' in form
+    assert '<option value="compliance"' in form
+    assert 'name="reviewer"' in form
+
+
+def test_who_you_are_acting_as_sticks_after_a_decision(site):
+    """Whatever the form carried is remembered for the next request, so a
+    refusal on the role does not also lose what was typed."""
     post(site, "/action/settings", role="compliance", reviewer="ines.b", back="/")
     _, html = get(site, "/case/WAL-ONB-0001?tab=Decision")
-    assert "Record as compliance" in html
-    assert "ines.b" in html, "the decision form says whose name it will record"
+    assert '<option value="compliance" selected' in html
+    assert 'value="ines.b"' in html
+
     post(site, "/action/settings", role="analyst", reviewer="analyst.demo", back="/")
     _, html = get(site, "/case/WAL-ONB-0001?tab=Decision")
-    assert "Record as analyst" in html
+    assert '<option value="analyst" selected' in html
+
+
+def test_the_role_chosen_on_the_form_is_the_one_enforced(site):
+    """Case 6 is critical, where escalate is compliance's to take. The form's
+    own role decides, without a separate settings step."""
+    post(site, "/action/settings", role="analyst", reviewer="analyst.demo", back="/")
+    back = "/case/WAL-ONB-0006?tab=Decision"
+
+    _, location = post(site, "/action/record-decision", case_id="WAL-ONB-0006",
+                       choice="escalate", reason_code="demo", rationale="trying it",
+                       escalation_target="sanctions.desk",
+                       role="analyst", reviewer="a.analyst", back=back)
+    kind, text = flash(location)
+    assert kind == "err" and "compliance" in text
+
+    _, location = post(site, "/action/record-decision", case_id="WAL-ONB-0006",
+                       choice="escalate", reason_code="demo",
+                       rationale="to the sanctions desk",
+                       escalation_target="sanctions.desk",
+                       role="compliance", reviewer="k.ohtla", back=back)
+    kind, text = flash(location)
+    assert kind == "ok" and "escalate" in text
+    _, html = get(site, back)
+    assert "k.ohtla" in html and "compliance" in html
 
 
 def test_the_sidebar_carries_no_identity_controls(site):

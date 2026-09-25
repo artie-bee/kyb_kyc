@@ -248,17 +248,29 @@ class Handler(BaseHTTPRequestHandler):
                 "role=" + quote(new_role) + "; Path=/; SameSite=Lax",
                 "reviewer=" + quote(new_reviewer) + "; Path=/; SameSite=Lax"])
 
+        # A form may carry who is acting - the decision form does, because the
+        # role is checked when the decision is recorded and that is the moment
+        # it matters. What it carries wins, and sticks for the next request.
+        cookies = []
+        if form.get("role") in ("analyst", "compliance"):
+            role = form["role"]
+            cookies.append("role=" + quote(role) + "; Path=/; SameSite=Lax")
+        if (form.get("reviewer") or "").strip():
+            reviewer = form["reviewer"].strip()
+            cookies.append("reviewer=" + quote(reviewer) + "; Path=/; SameSite=Lax")
+
         try:
             with _lock:
                 message = self._run(path, form, role, reviewer)
-            return self._redirect(_with(back, "ok", message))
+            return self._redirect(_with(back, "ok", message), cookies=cookies)
         except KeyError:
             return self._html(self._not_found(path), 404)
         except Exception as err:
             # The backend's refusal, verbatim. It is the real rule speaking and
-            # the screen must not soften or reword it.
+            # the screen must not soften or reword it. The identity still
+            # sticks, so a refusal on the role does not also lose what was typed.
             text = type(err).__name__ + ": " + str(err)
-            return self._redirect(_with(back, "err", text))
+            return self._redirect(_with(back, "err", text), cookies=cookies)
 
     def _run(self, path, form, role, reviewer):
         conn = connection()

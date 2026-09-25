@@ -821,10 +821,23 @@ def _tab_decision(conn, case_id, role="analyst", reviewer="analyst.demo", **kw):
           'placeholder="Only for escalate"></div>'
         "</div></div>"
 
-        '<button class="btn btn--primary" type="submit">Record as ' + e(role)
-        + "</button>"
-        '<p class="formsection__note" style="margin-top:9px">Recorded against '
-        + e(reviewer) + " as " + e(role) + ".</p></form>")
+        '<div class="formsection"><div class="formsection__head">Acting as'
+        + help_mark("Who is recording this. The role is checked by the backend "
+                    "against kb/analyst_decision_taxonomy.csv when you submit - "
+                    "escalate, for instance, is compliance's to take at high and "
+                    "critical, and an analyst who tries it is refused.")
+        + "</div>"
+        '<div class="formgrid">'
+        '<div class="field"><label>Role</label><select name="role">'
+        '<option value="analyst"' + (" selected" if role == "analyst" else "")
+        + ">analyst</option>"
+        '<option value="compliance"' + (" selected" if role == "compliance" else "")
+        + ">compliance</option></select></div>"
+        '<div class="field"><label>Your name</label>'
+        '<input type="text" name="reviewer" value="' + e(reviewer) + '"></div>'
+        "</div></div>"
+        '<button class="btn btn--primary" type="submit">Record this decision</button>'
+        "</form>")
     return "".join(out)
 
 
