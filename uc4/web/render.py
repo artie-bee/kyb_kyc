@@ -124,13 +124,16 @@ def _back(active, case_id):
 
 def page(title, body, active, conn=None, case_id=None, role="analyst",
          reviewer="analyst.demo", flash=None) -> str:
+    # The MOCK badge was removed from the sidebar at the user's request. The
+    # amber LIVE state is kept: with nothing on screen saying so, a console
+    # pointed at a real provider would look exactly like the demo, and that is
+    # the one confusion worth a line of chrome.
     mode = data.mode_badge()
-    live = mode != "MOCK"
-    badge_class = "badge badge--live" if live else "badge"
-    badge_text = "live provider calls" if live else "scripted answers, no API calls"
-    badge = ('<div class="' + badge_class + '"><span class="badge__dot"></span>'
-             "<div><strong>" + e(mode) + "</strong><span>" + badge_text
-             + "</span></div></div>")
+    badge = ""
+    if mode != "MOCK":
+        badge = ('<div class="badge badge--live"><span class="badge__dot"></span>'
+                 "<div><strong>" + e(mode) + "</strong><span>live provider calls"
+                 "</span></div></div>")
 
     cases = [r["case_id"] for r in data.dashboard(conn)] if conn is not None else []
     nav = []
@@ -168,8 +171,8 @@ def page(title, body, active, conn=None, case_id=None, role="analyst",
         '<div class="shell">\n'
         '  <aside class="rail">\n'
         '    <div class="rail__brand">Wallester UC4</div>\n'
-        "    " + badge + "\n"
-        '    <nav class="rail__nav"><span class="rail__label">Screen</span>'
+        + ("    " + badge + "\n" if badge else "")
+        + '    <nav class="rail__nav"><span class="rail__label">Screen</span>'
         + "".join(nav) + "</nav>\n"
         "    " + picker + "\n"
         '    <form method="post" action="/action/reset">\n'
