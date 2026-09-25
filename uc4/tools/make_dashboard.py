@@ -56,14 +56,6 @@ OWNER_TONE = {"analyst": "info", "compliance": "bad", "customer": "warn", "syste
 CLOSED = ("approved", "rejected", "closed_withdrawn")
 
 
-def ageing_days(created_at: str) -> int:
-    try:
-        created = datetime.fromisoformat((created_at or "").replace("Z", "+00:00"))
-    except (ValueError, AttributeError):
-        return 0
-    return (datetime.now(timezone.utc) - created).days
-
-
 def read_cases(conn) -> list[dict]:
     """Every case, with what an operations team needs to triage it. Read only."""
     out = []
@@ -87,7 +79,6 @@ def read_cases(conn) -> list[dict]:
             "holds": len(open_now),
             "hold_detail": "; ".join(f"{h.code} ({h.owner})" for h in open_now),
             "restricted": bool(case["restricted_finding"]),
-            "age": ageing_days(case["created_at"]),
         })
     return out
 
@@ -101,13 +92,6 @@ def chip(value: str, tone: str) -> str:
         return '<span class="muted">&mdash;</span>'
     return (f'<span class="chip chip--{tone}"><span class="chip__dot"></span>'
             f'{html.escape(value)}</span>')
-
-
-def age_cell(days: int) -> str:
-    # The ageing signal an operations lead scans for. Three quiet steps, not a
-    # traffic light: the number stays legible and the tint does the sorting.
-    step = "age--old" if days >= 21 else "age--due" if days >= 14 else ""
-    return f'<span class="age {step}">{days}</span>'
 
 
 def row_html(c: dict) -> str:
@@ -133,7 +117,6 @@ def row_html(c: dict) -> str:
           <td class="ta-r">{score}</td>
           <td class="ta-r">{holds_cell}</td>
           <td class="cell-detail">{detail}</td>
-          <td class="ta-r">{age_cell(c['age'])}</td>
         </tr>"""
 
 
@@ -229,7 +212,6 @@ def build(cases: list[dict], kb_version: str, generated: str) -> str:
             <th scope="col" data-sort="num" class="ta-r">Score</th>
             <th scope="col" data-sort="num" class="ta-r">Holds</th>
             <th scope="col">Hold detail</th>
-            <th scope="col" data-sort="num" class="ta-r">Age&nbsp;(days)</th>
           </tr>
         </thead>
         <tbody>

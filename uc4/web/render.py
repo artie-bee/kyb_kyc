@@ -202,8 +202,6 @@ def dashboard(conn, **kw) -> str:
 
     body = []
     for r in rows:
-        age = r["ageing_days"]
-        step = "age--old" if age >= 21 else "age--due" if age >= 14 else ""
         flag = ('<span class="restricted" title="Customer messages are limited '
                 'to generic templates">restricted</span>') if r["restricted"] else ""
         band = chip(r["risk_band"], BAND_TONE) if r["risk_band"] \
@@ -227,7 +225,6 @@ def dashboard(conn, **kw) -> str:
             '<td class="ta-r">' + score + "</td>"
             '<td class="ta-r">' + holds + "</td>"
             '<td class="cell-detail">' + detail + "</td>"
-            '<td class="ta-r"><span class="age ' + step + '">' + str(age) + "</span></td>"
             "</tr>")
 
     def boxes(name, values):
@@ -243,8 +240,7 @@ def dashboard(conn, **kw) -> str:
             '<th scope="col" data-sort="text">Band</th>'
             '<th scope="col" data-sort="num" class="ta-r">Score</th>'
             '<th scope="col" data-sort="num" class="ta-r">Holds</th>'
-            '<th scope="col">Hold detail</th>'
-            '<th scope="col" data-sort="num" class="ta-r">Age&nbsp;(days)</th>')
+            '<th scope="col">Hold detail</th>')
 
     n = len(rows)
     return (
@@ -352,8 +348,6 @@ def case_detail(conn, case_id, tab="Timeline", role="analyst",
         '<div class="stat"><span class="stat__k">Type</span>'
         '<span class="stat__v stat__v--sm"><span class="type">'
         + e(case["applicant_type"] or "-") + "</span></span></div>"
-        '<div class="stat"><span class="stat__k">Age (days)</span>'
-        '<span class="stat__v num">' + str(data.ageing_days(case["created_at"])) + "</span></div>"
         "</section>"
         + holds_html + restricted + future
         + '<nav class="tabs">' + tabs + "</nav>" + inner)

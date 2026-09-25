@@ -67,7 +67,7 @@ body {
   -webkit-font-smoothing:antialiased;
 }
 
-.num, .age, td.ta-r, th.ta-r { font-variant-numeric:tabular-nums; }
+.num, td.ta-r, th.ta-r { font-variant-numeric:tabular-nums; }
 .ta-r { text-align:right; }
 .muted { color:var(--fg-faint); }
 .mono { font-family:var(--mono); }
@@ -244,10 +244,6 @@ tr.rowlink a { text-decoration:none; }
 .count { display:inline-block; min-width:19px; padding:1px 5px; border-radius:3px;
          background:var(--warn-bg); border:1px solid var(--warn-line);
          color:var(--warn); font-size:11.5px; font-weight:600; }
-
-.age { display:inline-block; padding:1px 6px; border-radius:3px; }
-.age--due { background:var(--warn-bg); color:var(--warn); }
-.age--old { background:var(--bad-bg); color:var(--bad); }
 
 .restricted {
   margin-left:7px; font-size:10px; letter-spacing:.05em; text-transform:uppercase;
