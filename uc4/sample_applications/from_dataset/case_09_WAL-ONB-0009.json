@@ -1,0 +1,449 @@
+{
+  "application_id": "PORTAL-WAL-ONB-0009",
+  "source_channel": "portal",
+  "programme_type": "direct",
+  "applicant": {
+    "legal_name": "Parnu Kohviubade OU",
+    "trading_name": "Parnu Coffee Roasters",
+    "registration_number": "EE-90018321",
+    "entity_type": "private_limited_company",
+    "country": "EE",
+    "business_activity": "Coffee roasting and wholesale supply to cafes",
+    "expected_usage": "Up to 8 cards; around 9000 EUR per month on green coffee and packaging",
+    "vat_registered": true
+  },
+  "ownership": {
+    "ownership_layers": 1,
+    "has_corporate_shareholder": false,
+    "has_trust_or_nominee": false
+  },
+  "individuals": [
+    {
+      "ref": "IND-0019",
+      "role": "director",
+      "full_name": "Katrin Ilves",
+      "date_of_birth": "1984-02-19",
+      "nationality": "EE",
+      "residence_country": "EE",
+      "relationship_to_entity": "Managing director and authorised signatory"
+    },
+    {
+      "ref": "IND-0020",
+      "role": "ubo",
+      "full_name": "Mihkel Roosaar",
+      "date_of_birth": "1976-06-11",
+      "nationality": "EE",
+      "residence_country": "EE",
+      "relationship_to_entity": "Holds 70 percent of the issued share capital directly"
+    }
+  ],
+  "ubos": [
+    {
+      "individual_ref": "IND-0020",
+      "ownership_percentage": 70.0,
+      "ownership_chain_percentages": [
+        70.0
+      ],
+      "control_type": "direct_shareholding",
+      "ownership_path": "Parnu Kohviubade OU"
+    }
+  ],
+  "flags": {
+    "spend_above_50k": false,
+    "nominee_or_trust_in_chain": false,
+    "ubo_indirect_25pct_or_more": false,
+    "signatory_not_director": false,
+    "vat_registered": true
+  },
+  "documents": [
+    {
+      "document_type": "certificate_of_incorporation",
+      "file_name": "cert_incorporation_parnu.pdf",
+      "subject_ref": null,
+      "upload_time": "2026-09-19T09:32:00Z",
+      "expiry_date": null,
+      "document_date": null,
+      "issue_country": "EE",
+      "scripted_quality_flags": [],
+      "scripted_fields": [
+        {
+          "field_id": "FLD-0151",
+          "document_id": "DOC-0096",
+          "name": "company_name",
+          "value": "Parnu Kohviubade OU",
+          "confidence": "0.96",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        },
+        {
+          "field_id": "FLD-0152",
+          "document_id": "DOC-0096",
+          "name": "registration_number",
+          "value": "EE-90018321",
+          "confidence": "0.95",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        }
+      ]
+    },
+    {
+      "document_type": "registry_extract",
+      "file_name": "registry_extract_parnu.pdf",
+      "subject_ref": null,
+      "upload_time": "2026-09-19T09:34:00Z",
+      "expiry_date": null,
+      "document_date": null,
+      "issue_country": "EE",
+      "scripted_quality_flags": [],
+      "scripted_fields": [
+        {
+          "field_id": "FLD-0153",
+          "document_id": "DOC-0097",
+          "name": "company_name",
+          "value": "Parnu Kohviubade OU",
+          "confidence": "0.95",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        },
+        {
+          "field_id": "FLD-0154",
+          "document_id": "DOC-0097",
+          "name": "registration_number",
+          "value": "EE-90018321",
+          "confidence": "0.94",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        },
+        {
+          "field_id": "FLD-0155",
+          "document_id": "DOC-0097",
+          "name": "registered_address",
+          "value": "Ringi 42, 80010 Parnu, Estonia",
+          "confidence": "0.94",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        },
+        {
+          "field_id": "FLD-0156",
+          "document_id": "DOC-0097",
+          "name": "entity_status",
+          "value": "active",
+          "confidence": "0.96",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        }
+      ]
+    },
+    {
+      "document_type": "tax_registration_certificate",
+      "file_name": "tax_registration_parnu.pdf",
+      "subject_ref": null,
+      "upload_time": "2026-09-19T09:36:00Z",
+      "expiry_date": null,
+      "document_date": null,
+      "issue_country": null,
+      "scripted_quality_flags": [],
+      "scripted_fields": [
+        {
+          "field_id": "FLD-0157",
+          "document_id": "DOC-0098",
+          "name": "tax_number",
+          "value": "EE-TAX-90018321",
+          "confidence": "0.93",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        }
+      ]
+    },
+    {
+      "document_type": "director_register",
+      "file_name": "director_register_parnu.pdf",
+      "subject_ref": null,
+      "upload_time": "2026-09-19T09:38:00Z",
+      "expiry_date": null,
+      "document_date": null,
+      "issue_country": null,
+      "scripted_quality_flags": [],
+      "scripted_fields": [
+        {
+          "field_id": "FLD-0158",
+          "document_id": "DOC-0099",
+          "name": "director_name",
+          "value": "Katrin Ilves",
+          "confidence": "0.95",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        }
+      ]
+    },
+    {
+      "document_type": "authorised_signatory_list",
+      "file_name": "signatory_list_parnu.pdf",
+      "subject_ref": null,
+      "upload_time": "2026-09-19T09:40:00Z",
+      "expiry_date": null,
+      "document_date": null,
+      "issue_country": null,
+      "scripted_quality_flags": [],
+      "scripted_fields": [
+        {
+          "field_id": "FLD-0159",
+          "document_id": "DOC-0100",
+          "name": "signatory_name",
+          "value": "Katrin Ilves",
+          "confidence": "0.93",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        }
+      ]
+    },
+    {
+      "document_type": "ubo_declaration",
+      "file_name": "ubo_declaration_parnu.pdf",
+      "subject_ref": null,
+      "upload_time": "2026-09-19T09:42:00Z",
+      "expiry_date": null,
+      "document_date": null,
+      "issue_country": null,
+      "scripted_quality_flags": [],
+      "scripted_fields": [
+        {
+          "field_id": "FLD-0160",
+          "document_id": "DOC-0101",
+          "name": "ubo_name",
+          "value": "Mihkel Roosaar",
+          "confidence": "0.94",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        },
+        {
+          "field_id": "FLD-0161",
+          "document_id": "DOC-0101",
+          "name": "ownership_percentage",
+          "value": "70.0",
+          "confidence": "0.93",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        }
+      ]
+    },
+    {
+      "document_type": "id_document",
+      "file_name": "id_card_ilves_k.jpg",
+      "subject_ref": "IND-0019",
+      "upload_time": "2026-09-19T09:44:00Z",
+      "expiry_date": "2030-09-12",
+      "document_date": null,
+      "issue_country": "EE",
+      "scripted_quality_flags": [],
+      "scripted_fields": [
+        {
+          "field_id": "FLD-0162",
+          "document_id": "DOC-0102",
+          "name": "full_name",
+          "value": "Katrin Ilves",
+          "confidence": "0.96",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        }
+      ]
+    },
+    {
+      "document_type": "id_document",
+      "file_name": "id_card_roosaar_m.jpg",
+      "subject_ref": "IND-0020",
+      "upload_time": "2026-09-19T09:46:00Z",
+      "expiry_date": "2029-11-03",
+      "document_date": null,
+      "issue_country": "EE",
+      "scripted_quality_flags": [],
+      "scripted_fields": [
+        {
+          "field_id": "FLD-0163",
+          "document_id": "DOC-0103",
+          "name": "full_name",
+          "value": "Mihkel Roosaar",
+          "confidence": "0.95",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        }
+      ]
+    },
+    {
+      "document_type": "proof_of_address",
+      "file_name": "poa_ilves_sep2026.pdf",
+      "subject_ref": "IND-0019",
+      "upload_time": "2026-09-19T09:48:00Z",
+      "expiry_date": null,
+      "document_date": "2026-09-05",
+      "issue_country": "EE",
+      "scripted_quality_flags": [],
+      "scripted_fields": [
+        {
+          "field_id": "FLD-0164",
+          "document_id": "DOC-0104",
+          "name": "document_date",
+          "value": "2026-09-05",
+          "confidence": "0.93",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        }
+      ]
+    },
+    {
+      "document_type": "proof_of_address",
+      "file_name": "poa_roosaar_aug2026.pdf",
+      "subject_ref": "IND-0020",
+      "upload_time": "2026-09-19T09:50:00Z",
+      "expiry_date": null,
+      "document_date": "2026-08-29",
+      "issue_country": "EE",
+      "scripted_quality_flags": [],
+      "scripted_fields": [
+        {
+          "field_id": "FLD-0165",
+          "document_id": "DOC-0105",
+          "name": "document_date",
+          "value": "2026-08-29",
+          "confidence": "0.92",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        }
+      ]
+    },
+    {
+      "document_type": "source_of_funds_declaration",
+      "file_name": "source_of_funds_parnu.pdf",
+      "subject_ref": null,
+      "upload_time": "2026-09-19T09:52:00Z",
+      "expiry_date": null,
+      "document_date": null,
+      "issue_country": null,
+      "scripted_quality_flags": [],
+      "scripted_fields": [
+        {
+          "field_id": "FLD-0166",
+          "document_id": "DOC-0106",
+          "name": "declared_source",
+          "value": "Wholesale coffee sales to cafe customers",
+          "confidence": "0.9",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        }
+      ]
+    },
+    {
+      "document_type": "business_activity_description",
+      "file_name": "business_activity_parnu.pdf",
+      "subject_ref": null,
+      "upload_time": "2026-09-19T09:54:00Z",
+      "expiry_date": null,
+      "document_date": null,
+      "issue_country": null,
+      "scripted_quality_flags": [],
+      "scripted_fields": [
+        {
+          "field_id": "FLD-0167",
+          "document_id": "DOC-0107",
+          "name": "declared_industry",
+          "value": "Coffee roasting and wholesale",
+          "confidence": "0.92",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        }
+      ]
+    }
+  ],
+  "analyst_releases": [],
+  "field_corrections": [],
+  "field_acceptances": [],
+  "scripted_registry": [
+    {
+      "check_id": "REG-0007",
+      "case_id": "WAL-ONB-0009",
+      "applicant_id": "APP-0009",
+      "provider_name": "MockRegistryHub EE",
+      "company_status": "active",
+      "registry_legal_name": "Parnu Kohviubade OU",
+      "registry_number": "EE-90018321",
+      "registry_address": "Ringi 42, 80010 Parnu, Estonia",
+      "registry_directors": "Katrin Ilves",
+      "name_match": "match",
+      "number_match": "match",
+      "address_match": "match",
+      "director_match": "match",
+      "ubo_supported_by_registry": "true",
+      "high_risk_jurisdiction_or_industry": "false",
+      "confidence": "0.97",
+      "result": "pass"
+    }
+  ],
+  "scripted_identity": [
+    {
+      "check_id": "IDC-0016",
+      "case_id": "WAL-ONB-0009",
+      "individual_id": "IND-0019",
+      "provider_name": "VerifyMock ID",
+      "document_result": "pass",
+      "liveness_result": "pass",
+      "biometric_result": "pass",
+      "address_result": "pass",
+      "name_dob_match": "match",
+      "document_expired": "false",
+      "duplicate_individual_detected": "false",
+      "result": "pass"
+    },
+    {
+      "check_id": "IDC-0017",
+      "case_id": "WAL-ONB-0009",
+      "individual_id": "IND-0020",
+      "provider_name": "VerifyMock ID",
+      "document_result": "pass",
+      "liveness_result": "pass",
+      "biometric_result": "pass",
+      "address_result": "pass",
+      "name_dob_match": "match",
+      "document_expired": "false",
+      "duplicate_individual_detected": "false",
+      "result": "pass"
+    }
+  ],
+  "scripted_screening": [
+    {
+      "check_id": "SCR-0022",
+      "case_id": "WAL-ONB-0009",
+      "subject_type": "applicant",
+      "applicant_id": "APP-0009",
+      "individual_id": "",
+      "sanctions_result": "no_match",
+      "pep_result": "no_match",
+      "adverse_media_result": "none",
+      "severity": "none",
+      "evidence_refs": ""
+    },
+    {
+      "check_id": "SCR-0023",
+      "case_id": "WAL-ONB-0009",
+      "subject_type": "individual",
+      "applicant_id": "",
+      "individual_id": "IND-0019",
+      "sanctions_result": "no_match",
+      "pep_result": "no_match",
+      "adverse_media_result": "none",
+      "severity": "none",
+      "evidence_refs": ""
+    },
+    {
+      "check_id": "SCR-0024",
+      "case_id": "WAL-ONB-0009",
+      "subject_type": "individual",
+      "applicant_id": "",
+      "individual_id": "IND-0020",
+      "sanctions_result": "no_match",
+      "pep_result": "no_match",
+      "adverse_media_result": "none",
+      "severity": "none",
+      "evidence_refs": ""
+    }
+  ]
+}

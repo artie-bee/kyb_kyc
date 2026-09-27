@@ -1,0 +1,495 @@
+{
+  "application_id": "EMAIL-WAL-ONB-0007",
+  "source_channel": "email",
+  "programme_type": "direct",
+  "applicant": {
+    "legal_name": "Bramforth Aggregates Ltd",
+    "trading_name": "Bramforth",
+    "registration_number": "UK-99021560",
+    "entity_type": "private_limited_company",
+    "country": "GB",
+    "business_activity": "Supply of construction aggregates and tipper haulage",
+    "expected_usage": "Up to 25 cards; around 55000 GBP per month on fuel and plant hire",
+    "vat_registered": true
+  },
+  "ownership": {
+    "ownership_layers": 1,
+    "has_corporate_shareholder": false,
+    "has_trust_or_nominee": false
+  },
+  "individuals": [
+    {
+      "ref": "IND-0016",
+      "role": "director",
+      "full_name": "Nigel Braithwaite-Cole",
+      "date_of_birth": "1968-04-12",
+      "nationality": "GB",
+      "residence_country": "GB",
+      "relationship_to_entity": "Sole registered director and authorised signatory"
+    },
+    {
+      "ref": "IND-0017",
+      "role": "ubo",
+      "full_name": "Fenella Quist",
+      "date_of_birth": "1979-01-25",
+      "nationality": "GB",
+      "residence_country": "GB",
+      "relationship_to_entity": "Holds 45 percent of the issued share capital directly"
+    }
+  ],
+  "ubos": [
+    {
+      "individual_ref": "IND-0017",
+      "ownership_percentage": 45.0,
+      "ownership_chain_percentages": [
+        45.0
+      ],
+      "control_type": "direct_shareholding",
+      "ownership_path": "Bramforth Aggregates Ltd"
+    }
+  ],
+  "flags": {
+    "spend_above_50k": true,
+    "nominee_or_trust_in_chain": false,
+    "ubo_indirect_25pct_or_more": false,
+    "signatory_not_director": false,
+    "vat_registered": true
+  },
+  "documents": [
+    {
+      "document_type": "certificate_of_incorporation",
+      "file_name": "cert_incorporation_bramforth.pdf",
+      "subject_ref": null,
+      "upload_time": "2026-09-16T14:02:00Z",
+      "expiry_date": null,
+      "document_date": null,
+      "issue_country": "GB",
+      "scripted_quality_flags": [],
+      "scripted_fields": [
+        {
+          "field_id": "FLD-0131",
+          "document_id": "DOC-0077",
+          "name": "company_name",
+          "value": "Bramforth Aggregates Ltd",
+          "confidence": "0.95",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        },
+        {
+          "field_id": "FLD-0132",
+          "document_id": "DOC-0077",
+          "name": "registration_number",
+          "value": "UK-99021560",
+          "confidence": "0.94",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        }
+      ]
+    },
+    {
+      "document_type": "registry_extract",
+      "file_name": "registry_extract_bramforth.pdf",
+      "subject_ref": null,
+      "upload_time": "2026-09-16T14:04:00Z",
+      "expiry_date": null,
+      "document_date": null,
+      "issue_country": "GB",
+      "scripted_quality_flags": [],
+      "scripted_fields": [
+        {
+          "field_id": "FLD-0133",
+          "document_id": "DOC-0078",
+          "name": "company_name",
+          "value": "Bramforth Aggregates Ltd",
+          "confidence": "0.95",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        },
+        {
+          "field_id": "FLD-0134",
+          "document_id": "DOC-0078",
+          "name": "registration_number",
+          "value": "UK-99021560",
+          "confidence": "0.94",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        },
+        {
+          "field_id": "FLD-0135",
+          "document_id": "DOC-0078",
+          "name": "registered_address",
+          "value": "Bramforth Yard, Pinfold Lane, Doncaster DN4 6RS, United Kingdom",
+          "confidence": "0.9",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        },
+        {
+          "field_id": "FLD-0136",
+          "document_id": "DOC-0078",
+          "name": "entity_status",
+          "value": "active",
+          "confidence": "0.93",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        }
+      ]
+    },
+    {
+      "document_type": "tax_registration_certificate",
+      "file_name": "vat_certificate_bramforth.pdf",
+      "subject_ref": null,
+      "upload_time": "2026-09-16T14:06:00Z",
+      "expiry_date": null,
+      "document_date": null,
+      "issue_country": null,
+      "scripted_quality_flags": [],
+      "scripted_fields": [
+        {
+          "field_id": "FLD-0137",
+          "document_id": "DOC-0079",
+          "name": "vat_number",
+          "value": "GB-VAT-664120933",
+          "confidence": "0.89",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        }
+      ]
+    },
+    {
+      "document_type": "director_register",
+      "file_name": "director_register_bramforth_scan.pdf",
+      "subject_ref": null,
+      "upload_time": "2026-09-16T14:08:00Z",
+      "expiry_date": null,
+      "document_date": null,
+      "issue_country": null,
+      "scripted_quality_flags": [],
+      "scripted_fields": [
+        {
+          "field_id": "FLD-0138",
+          "document_id": "DOC-0080",
+          "name": "director_name",
+          "value": "Nigel Braithwaite-Cole",
+          "confidence": "0.64",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        },
+        {
+          "field_id": "FLD-0139",
+          "document_id": "DOC-0080",
+          "name": "appointment_date",
+          "value": "2015-02-03",
+          "confidence": "0.81",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        }
+      ]
+    },
+    {
+      "document_type": "authorised_signatory_list",
+      "file_name": "signatory_list_bramforth.pdf",
+      "subject_ref": null,
+      "upload_time": "2026-09-16T14:10:00Z",
+      "expiry_date": null,
+      "document_date": null,
+      "issue_country": null,
+      "scripted_quality_flags": [],
+      "scripted_fields": [
+        {
+          "field_id": "FLD-0140",
+          "document_id": "DOC-0081",
+          "name": "signatory_name",
+          "value": "Nigel Braithwaite-Cole",
+          "confidence": "0.88",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        }
+      ]
+    },
+    {
+      "document_type": "ubo_declaration",
+      "file_name": "ubo_declaration_bramforth.pdf",
+      "subject_ref": null,
+      "upload_time": "2026-09-16T14:12:00Z",
+      "expiry_date": null,
+      "document_date": null,
+      "issue_country": null,
+      "scripted_quality_flags": [],
+      "scripted_fields": [
+        {
+          "field_id": "FLD-0141",
+          "document_id": "DOC-0082",
+          "name": "ubo_name",
+          "value": "Fenella Quist",
+          "confidence": "0.91",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        },
+        {
+          "field_id": "FLD-0142",
+          "document_id": "DOC-0082",
+          "name": "ownership_percentage",
+          "value": "45.0",
+          "confidence": "0.9",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        }
+      ]
+    },
+    {
+      "document_type": "id_document",
+      "file_name": "passport_braithwaite_cole_n.jpg",
+      "subject_ref": "IND-0016",
+      "upload_time": "2026-09-16T14:14:00Z",
+      "expiry_date": "2030-10-08",
+      "document_date": null,
+      "issue_country": "GB",
+      "scripted_quality_flags": [],
+      "scripted_fields": [
+        {
+          "field_id": "FLD-0143",
+          "document_id": "DOC-0083",
+          "name": "full_name",
+          "value": "Nigel Braithwaite-Cole",
+          "confidence": "0.93",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        },
+        {
+          "field_id": "FLD-0144",
+          "document_id": "DOC-0083",
+          "name": "date_of_birth",
+          "value": "1968-04-12",
+          "confidence": "0.92",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        }
+      ]
+    },
+    {
+      "document_type": "id_document",
+      "file_name": "passport_quist_f.jpg",
+      "subject_ref": "IND-0017",
+      "upload_time": "2026-09-16T14:16:00Z",
+      "expiry_date": "2032-01-30",
+      "document_date": null,
+      "issue_country": "GB",
+      "scripted_quality_flags": [],
+      "scripted_fields": [
+        {
+          "field_id": "FLD-0145",
+          "document_id": "DOC-0084",
+          "name": "full_name",
+          "value": "Fenella Quist",
+          "confidence": "0.94",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        }
+      ]
+    },
+    {
+      "document_type": "proof_of_address",
+      "file_name": "poa_braithwaite_cole_aug2026.pdf",
+      "subject_ref": "IND-0016",
+      "upload_time": "2026-09-16T14:18:00Z",
+      "expiry_date": null,
+      "document_date": "2026-08-09",
+      "issue_country": "GB",
+      "scripted_quality_flags": [],
+      "scripted_fields": [
+        {
+          "field_id": "FLD-0146",
+          "document_id": "DOC-0085",
+          "name": "document_date",
+          "value": "2026-08-09",
+          "confidence": "0.9",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        }
+      ]
+    },
+    {
+      "document_type": "proof_of_address",
+      "file_name": "poa_quist_aug2026.pdf",
+      "subject_ref": "IND-0017",
+      "upload_time": "2026-09-16T14:20:00Z",
+      "expiry_date": null,
+      "document_date": "2026-08-15",
+      "issue_country": "GB",
+      "scripted_quality_flags": [],
+      "scripted_fields": [
+        {
+          "field_id": "FLD-0147",
+          "document_id": "DOC-0086",
+          "name": "document_date",
+          "value": "2026-08-15",
+          "confidence": "0.91",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        }
+      ]
+    },
+    {
+      "document_type": "source_of_funds_declaration",
+      "file_name": "source_of_funds_bramforth.pdf",
+      "subject_ref": null,
+      "upload_time": "2026-09-16T14:22:00Z",
+      "expiry_date": null,
+      "document_date": null,
+      "issue_country": null,
+      "scripted_quality_flags": [],
+      "scripted_fields": [
+        {
+          "field_id": "FLD-0148",
+          "document_id": "DOC-0087",
+          "name": "declared_source",
+          "value": "Aggregate supply contracts with regional construction firms",
+          "confidence": "0.87",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        }
+      ]
+    },
+    {
+      "document_type": "business_activity_description",
+      "file_name": "business_activity_bramforth.pdf",
+      "subject_ref": null,
+      "upload_time": "2026-09-16T14:24:00Z",
+      "expiry_date": null,
+      "document_date": null,
+      "issue_country": null,
+      "scripted_quality_flags": [],
+      "scripted_fields": [
+        {
+          "field_id": "FLD-0149",
+          "document_id": "DOC-0088",
+          "name": "declared_industry",
+          "value": "Construction aggregates and haulage",
+          "confidence": "0.9",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        }
+      ]
+    },
+    {
+      "document_type": "bank_statement",
+      "file_name": "bank_statement_bramforth_aug2026.pdf",
+      "subject_ref": null,
+      "upload_time": "2026-09-16T14:26:00Z",
+      "expiry_date": null,
+      "document_date": null,
+      "issue_country": null,
+      "scripted_quality_flags": [],
+      "scripted_fields": [
+        {
+          "field_id": "FLD-0150",
+          "document_id": "DOC-0089",
+          "name": "account_holder",
+          "value": "Bramforth Aggregates Ltd",
+          "confidence": "0.88",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        }
+      ]
+    }
+  ],
+  "analyst_releases": [],
+  "field_corrections": [],
+  "field_acceptances": [
+    {
+      "name": "director_name",
+      "file_name": "director_register_bramforth_scan.pdf",
+      "analyst_id": "compliance.d.ferreira",
+      "reason": "the name matches the signatory list and the director's passport, so the faint scan is corroborated"
+    }
+  ],
+  "scripted_registry": [
+    {
+      "check_id": "REG-0006",
+      "case_id": "WAL-ONB-0007",
+      "applicant_id": "APP-0007",
+      "provider_name": "MockRegistryHub UK",
+      "company_status": "active",
+      "registry_legal_name": "Bramforth Aggregates Ltd",
+      "registry_number": "UK-99021560",
+      "registry_address": "Bramforth Yard, Pinfold Lane, Doncaster DN4 6RS, United Kingdom",
+      "registry_directors": "Nigel Braithwaite-Cole",
+      "name_match": "match",
+      "number_match": "match",
+      "address_match": "match",
+      "director_match": "match",
+      "ubo_supported_by_registry": "true",
+      "high_risk_jurisdiction_or_industry": "false",
+      "confidence": "0.9",
+      "result": "pass"
+    }
+  ],
+  "scripted_identity": [
+    {
+      "check_id": "IDC-0014",
+      "case_id": "WAL-ONB-0007",
+      "individual_id": "IND-0016",
+      "provider_name": "VerifyMock ID",
+      "document_result": "pass",
+      "liveness_result": "pass",
+      "biometric_result": "pass",
+      "address_result": "pass",
+      "name_dob_match": "match",
+      "document_expired": "false",
+      "duplicate_individual_detected": "false",
+      "result": "pass"
+    },
+    {
+      "check_id": "IDC-0015",
+      "case_id": "WAL-ONB-0007",
+      "individual_id": "IND-0017",
+      "provider_name": "VerifyMock ID",
+      "document_result": "pass",
+      "liveness_result": "pass",
+      "biometric_result": "pass",
+      "address_result": "pass",
+      "name_dob_match": "match",
+      "document_expired": "false",
+      "duplicate_individual_detected": "false",
+      "result": "pass"
+    }
+  ],
+  "scripted_screening": [
+    {
+      "check_id": "SCR-0019",
+      "case_id": "WAL-ONB-0007",
+      "subject_type": "applicant",
+      "applicant_id": "APP-0007",
+      "individual_id": "",
+      "sanctions_result": "no_match",
+      "pep_result": "no_match",
+      "adverse_media_result": "none",
+      "severity": "none",
+      "evidence_refs": ""
+    },
+    {
+      "check_id": "SCR-0020",
+      "case_id": "WAL-ONB-0007",
+      "subject_type": "individual",
+      "applicant_id": "",
+      "individual_id": "IND-0017",
+      "sanctions_result": "no_match",
+      "pep_result": "no_match",
+      "adverse_media_result": "none",
+      "severity": "none",
+      "evidence_refs": ""
+    },
+    {
+      "check_id": "SCR-0021",
+      "case_id": "WAL-ONB-0007",
+      "subject_type": "individual",
+      "applicant_id": "",
+      "individual_id": "IND-0016",
+      "sanctions_result": "no_match",
+      "pep_result": "no_match",
+      "adverse_media_result": "serious",
+      "severity": "high",
+      "evidence_refs": "SCREEN-REF-MEDIA-5514|SCREEN-REF-MEDIA-5517"
+    }
+  ]
+}

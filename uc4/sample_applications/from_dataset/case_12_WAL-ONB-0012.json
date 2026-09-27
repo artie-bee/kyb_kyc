@@ -1,0 +1,449 @@
+{
+  "application_id": "PORTAL-WAL-ONB-0012",
+  "source_channel": "portal",
+  "programme_type": "direct",
+  "applicant": {
+    "legal_name": "Solvarn Baltic OU",
+    "trading_name": "Solvarn",
+    "registration_number": "EE-90021455",
+    "entity_type": "private_limited_company",
+    "country": "EE",
+    "business_activity": "Industrial valve distribution and maintenance",
+    "expected_usage": "Up to 16 cards; around 30000 EUR per month on parts and travel",
+    "vat_registered": true
+  },
+  "ownership": {
+    "ownership_layers": 1,
+    "has_corporate_shareholder": false,
+    "has_trust_or_nominee": false
+  },
+  "individuals": [
+    {
+      "ref": "IND-0027",
+      "role": "director",
+      "full_name": "Taavi Ruumet",
+      "date_of_birth": "1979-05-30",
+      "nationality": "EE",
+      "residence_country": "EE",
+      "relationship_to_entity": "Managing director"
+    },
+    {
+      "ref": "IND-0028",
+      "role": "ubo",
+      "full_name": "Ivar Kolmsaar",
+      "date_of_birth": "1968-02-17",
+      "nationality": "EE",
+      "residence_country": "EE",
+      "relationship_to_entity": "Holds 80 percent of the issued share capital directly"
+    }
+  ],
+  "ubos": [
+    {
+      "individual_ref": "IND-0028",
+      "ownership_percentage": 80.0,
+      "ownership_chain_percentages": [
+        80.0
+      ],
+      "control_type": "direct_shareholding",
+      "ownership_path": "Solvarn Baltic OU"
+    }
+  ],
+  "flags": {
+    "spend_above_50k": false,
+    "nominee_or_trust_in_chain": false,
+    "ubo_indirect_25pct_or_more": false,
+    "signatory_not_director": false,
+    "vat_registered": true
+  },
+  "documents": [
+    {
+      "document_type": "certificate_of_incorporation",
+      "file_name": "cert_incorporation_solvarn.pdf",
+      "subject_ref": null,
+      "upload_time": "2026-09-24T09:02:00Z",
+      "expiry_date": null,
+      "document_date": null,
+      "issue_country": "EE",
+      "scripted_quality_flags": [],
+      "scripted_fields": [
+        {
+          "field_id": "FLD-0213",
+          "document_id": "DOC-0138",
+          "name": "company_name",
+          "value": "Solvarn Baltic OU",
+          "confidence": "0.96",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        },
+        {
+          "field_id": "FLD-0214",
+          "document_id": "DOC-0138",
+          "name": "registration_number",
+          "value": "EE-90021455",
+          "confidence": "0.95",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        }
+      ]
+    },
+    {
+      "document_type": "registry_extract",
+      "file_name": "registry_extract_solvarn.pdf",
+      "subject_ref": null,
+      "upload_time": "2026-09-24T09:04:00Z",
+      "expiry_date": null,
+      "document_date": null,
+      "issue_country": "EE",
+      "scripted_quality_flags": [],
+      "scripted_fields": [
+        {
+          "field_id": "FLD-0215",
+          "document_id": "DOC-0139",
+          "name": "company_name",
+          "value": "Solvarn Baltic OU",
+          "confidence": "0.95",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        },
+        {
+          "field_id": "FLD-0216",
+          "document_id": "DOC-0139",
+          "name": "registration_number",
+          "value": "EE-90021455",
+          "confidence": "0.94",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        },
+        {
+          "field_id": "FLD-0217",
+          "document_id": "DOC-0139",
+          "name": "registered_address",
+          "value": "Punane 18, 13619 Tallinn, Estonia",
+          "confidence": "0.93",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        },
+        {
+          "field_id": "FLD-0218",
+          "document_id": "DOC-0139",
+          "name": "entity_status",
+          "value": "active",
+          "confidence": "0.95",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        }
+      ]
+    },
+    {
+      "document_type": "tax_registration_certificate",
+      "file_name": "tax_registration_solvarn.pdf",
+      "subject_ref": null,
+      "upload_time": "2026-09-24T09:06:00Z",
+      "expiry_date": null,
+      "document_date": null,
+      "issue_country": null,
+      "scripted_quality_flags": [],
+      "scripted_fields": [
+        {
+          "field_id": "FLD-0219",
+          "document_id": "DOC-0140",
+          "name": "tax_number",
+          "value": "EE-TAX-90021455",
+          "confidence": "0.92",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        }
+      ]
+    },
+    {
+      "document_type": "director_register",
+      "file_name": "director_register_solvarn.pdf",
+      "subject_ref": null,
+      "upload_time": "2026-09-24T09:08:00Z",
+      "expiry_date": null,
+      "document_date": null,
+      "issue_country": null,
+      "scripted_quality_flags": [],
+      "scripted_fields": [
+        {
+          "field_id": "FLD-0220",
+          "document_id": "DOC-0141",
+          "name": "director_name",
+          "value": "Taavi Ruumet",
+          "confidence": "0.94",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        }
+      ]
+    },
+    {
+      "document_type": "authorised_signatory_list",
+      "file_name": "signatory_list_solvarn.pdf",
+      "subject_ref": null,
+      "upload_time": "2026-09-24T09:10:00Z",
+      "expiry_date": null,
+      "document_date": null,
+      "issue_country": null,
+      "scripted_quality_flags": [],
+      "scripted_fields": [
+        {
+          "field_id": "FLD-0221",
+          "document_id": "DOC-0142",
+          "name": "signatory_name",
+          "value": "Taavi Ruumet",
+          "confidence": "0.92",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        }
+      ]
+    },
+    {
+      "document_type": "ubo_declaration",
+      "file_name": "ubo_declaration_solvarn.pdf",
+      "subject_ref": null,
+      "upload_time": "2026-09-24T09:12:00Z",
+      "expiry_date": null,
+      "document_date": null,
+      "issue_country": null,
+      "scripted_quality_flags": [],
+      "scripted_fields": [
+        {
+          "field_id": "FLD-0222",
+          "document_id": "DOC-0143",
+          "name": "ubo_name",
+          "value": "Ivar Kolmsaar",
+          "confidence": "0.93",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        },
+        {
+          "field_id": "FLD-0223",
+          "document_id": "DOC-0143",
+          "name": "ownership_percentage",
+          "value": "80.0",
+          "confidence": "0.92",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        }
+      ]
+    },
+    {
+      "document_type": "id_document",
+      "file_name": "id_card_ruumet_t.jpg",
+      "subject_ref": "IND-0027",
+      "upload_time": "2026-09-24T09:14:00Z",
+      "expiry_date": "2030-04-11",
+      "document_date": null,
+      "issue_country": "EE",
+      "scripted_quality_flags": [],
+      "scripted_fields": [
+        {
+          "field_id": "FLD-0224",
+          "document_id": "DOC-0144",
+          "name": "full_name",
+          "value": "Taavi Ruumet",
+          "confidence": "0.95",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        }
+      ]
+    },
+    {
+      "document_type": "id_document",
+      "file_name": "id_card_kolmsaar_i.jpg",
+      "subject_ref": "IND-0028",
+      "upload_time": "2026-09-24T09:16:00Z",
+      "expiry_date": "2029-08-05",
+      "document_date": null,
+      "issue_country": "EE",
+      "scripted_quality_flags": [],
+      "scripted_fields": [
+        {
+          "field_id": "FLD-0225",
+          "document_id": "DOC-0145",
+          "name": "full_name",
+          "value": "Ivar Kolmsaar",
+          "confidence": "0.94",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        }
+      ]
+    },
+    {
+      "document_type": "proof_of_address",
+      "file_name": "poa_ruumet_sep2026.pdf",
+      "subject_ref": "IND-0027",
+      "upload_time": "2026-09-24T09:18:00Z",
+      "expiry_date": null,
+      "document_date": "2026-09-06",
+      "issue_country": "EE",
+      "scripted_quality_flags": [],
+      "scripted_fields": [
+        {
+          "field_id": "FLD-0226",
+          "document_id": "DOC-0146",
+          "name": "document_date",
+          "value": "2026-09-06",
+          "confidence": "0.93",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        }
+      ]
+    },
+    {
+      "document_type": "proof_of_address",
+      "file_name": "poa_kolmsaar_sep2026.pdf",
+      "subject_ref": "IND-0028",
+      "upload_time": "2026-09-24T09:20:00Z",
+      "expiry_date": null,
+      "document_date": "2026-09-01",
+      "issue_country": "EE",
+      "scripted_quality_flags": [],
+      "scripted_fields": [
+        {
+          "field_id": "FLD-0227",
+          "document_id": "DOC-0147",
+          "name": "document_date",
+          "value": "2026-09-01",
+          "confidence": "0.92",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        }
+      ]
+    },
+    {
+      "document_type": "source_of_funds_declaration",
+      "file_name": "source_of_funds_solvarn.pdf",
+      "subject_ref": null,
+      "upload_time": "2026-09-24T09:22:00Z",
+      "expiry_date": null,
+      "document_date": null,
+      "issue_country": null,
+      "scripted_quality_flags": [],
+      "scripted_fields": [
+        {
+          "field_id": "FLD-0228",
+          "document_id": "DOC-0148",
+          "name": "declared_source",
+          "value": "Distribution margin on industrial valve sales",
+          "confidence": "0.9",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        }
+      ]
+    },
+    {
+      "document_type": "business_activity_description",
+      "file_name": "business_activity_solvarn.pdf",
+      "subject_ref": null,
+      "upload_time": "2026-09-24T09:24:00Z",
+      "expiry_date": null,
+      "document_date": null,
+      "issue_country": null,
+      "scripted_quality_flags": [],
+      "scripted_fields": [
+        {
+          "field_id": "FLD-0229",
+          "document_id": "DOC-0149",
+          "name": "declared_industry",
+          "value": "Industrial equipment distribution",
+          "confidence": "0.91",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        }
+      ]
+    }
+  ],
+  "analyst_releases": [],
+  "field_corrections": [],
+  "field_acceptances": [],
+  "scripted_registry": [
+    {
+      "check_id": "REG-0010",
+      "case_id": "WAL-ONB-0012",
+      "applicant_id": "APP-0012",
+      "provider_name": "MockRegistryHub EE",
+      "company_status": "active",
+      "registry_legal_name": "Solvarn Baltic OU",
+      "registry_number": "EE-90021455",
+      "registry_address": "Punane 18, 13619 Tallinn, Estonia",
+      "registry_directors": "Taavi Ruumet",
+      "name_match": "match",
+      "number_match": "match",
+      "address_match": "match",
+      "director_match": "match",
+      "ubo_supported_by_registry": "true",
+      "high_risk_jurisdiction_or_industry": "false",
+      "confidence": "0.94",
+      "result": "pass"
+    }
+  ],
+  "scripted_identity": [
+    {
+      "check_id": "IDC-0024",
+      "case_id": "WAL-ONB-0012",
+      "individual_id": "IND-0027",
+      "provider_name": "VerifyMock ID",
+      "document_result": "pass",
+      "liveness_result": "pass",
+      "biometric_result": "pass",
+      "address_result": "pass",
+      "name_dob_match": "match",
+      "document_expired": "false",
+      "duplicate_individual_detected": "false",
+      "result": "pass"
+    },
+    {
+      "check_id": "IDC-0025",
+      "case_id": "WAL-ONB-0012",
+      "individual_id": "IND-0028",
+      "provider_name": "VerifyMock ID",
+      "document_result": "pass",
+      "liveness_result": "pass",
+      "biometric_result": "pass",
+      "address_result": "pass",
+      "name_dob_match": "match",
+      "document_expired": "false",
+      "duplicate_individual_detected": "false",
+      "result": "pass"
+    }
+  ],
+  "scripted_screening": [
+    {
+      "check_id": "SCR-0033",
+      "case_id": "WAL-ONB-0012",
+      "subject_type": "applicant",
+      "applicant_id": "APP-0012",
+      "individual_id": "",
+      "sanctions_result": "no_match",
+      "pep_result": "no_match",
+      "adverse_media_result": "none",
+      "severity": "none",
+      "evidence_refs": ""
+    },
+    {
+      "check_id": "SCR-0034",
+      "case_id": "WAL-ONB-0012",
+      "subject_type": "individual",
+      "applicant_id": "",
+      "individual_id": "IND-0027",
+      "sanctions_result": "no_match",
+      "pep_result": "no_match",
+      "adverse_media_result": "none",
+      "severity": "none",
+      "evidence_refs": ""
+    },
+    {
+      "check_id": "SCR-0035",
+      "case_id": "WAL-ONB-0012",
+      "subject_type": "individual",
+      "applicant_id": "",
+      "individual_id": "IND-0028",
+      "sanctions_result": "clear_match",
+      "pep_result": "no_match",
+      "adverse_media_result": "none",
+      "severity": "critical",
+      "evidence_refs": "SCREEN-REF-SAN-7714"
+    }
+  ]
+}

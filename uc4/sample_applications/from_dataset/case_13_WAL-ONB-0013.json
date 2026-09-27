@@ -1,0 +1,535 @@
+{
+  "application_id": "EMAIL-WAL-ONB-0013",
+  "source_channel": "email",
+  "programme_type": "direct",
+  "applicant": {
+    "legal_name": "Pemberly Tooling Ltd",
+    "trading_name": "Pemberly",
+    "registration_number": "UK-99034820",
+    "entity_type": "private_limited_company",
+    "country": "GB",
+    "business_activity": "Precision tooling and machine parts for light manufacturing",
+    "expected_usage": "Up to 14 cards; around 21000 GBP per month on materials and freight",
+    "vat_registered": true
+  },
+  "ownership": {
+    "ownership_layers": 1,
+    "has_corporate_shareholder": false,
+    "has_trust_or_nominee": false
+  },
+  "individuals": [
+    {
+      "ref": "IND-0029",
+      "role": "director",
+      "full_name": "Hadley Winstock",
+      "date_of_birth": "1976-10-03",
+      "nationality": "GB",
+      "residence_country": "GB",
+      "relationship_to_entity": "Managing director"
+    },
+    {
+      "ref": "IND-0030",
+      "role": "director",
+      "full_name": "Marguerite Ellcott",
+      "date_of_birth": "1983-06-21",
+      "nationality": "GB",
+      "residence_country": "GB",
+      "relationship_to_entity": "Operations director"
+    },
+    {
+      "ref": "IND-0031",
+      "role": "ubo",
+      "full_name": "Oswin Prattley",
+      "date_of_birth": "1970-12-09",
+      "nationality": "GB",
+      "residence_country": "GB",
+      "relationship_to_entity": "Holds 55 percent of the issued share capital directly"
+    }
+  ],
+  "ubos": [
+    {
+      "individual_ref": "IND-0031",
+      "ownership_percentage": 55.0,
+      "ownership_chain_percentages": [
+        55.0
+      ],
+      "control_type": "direct_shareholding",
+      "ownership_path": "Pemberly Tooling Ltd"
+    }
+  ],
+  "flags": {
+    "spend_above_50k": false,
+    "nominee_or_trust_in_chain": false,
+    "ubo_indirect_25pct_or_more": false,
+    "signatory_not_director": false,
+    "vat_registered": true
+  },
+  "documents": [
+    {
+      "document_type": "certificate_of_incorporation",
+      "file_name": "cert_incorporation_pemberly.pdf",
+      "subject_ref": null,
+      "upload_time": "2026-09-25T10:37:00Z",
+      "expiry_date": null,
+      "document_date": null,
+      "issue_country": "GB",
+      "scripted_quality_flags": [],
+      "scripted_fields": [
+        {
+          "field_id": "FLD-0230",
+          "document_id": "DOC-0150",
+          "name": "company_name",
+          "value": "Pemberly Tooling Ltd",
+          "confidence": "0.95",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        },
+        {
+          "field_id": "FLD-0231",
+          "document_id": "DOC-0150",
+          "name": "registration_number",
+          "value": "UK-99034820",
+          "confidence": "0.94",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        }
+      ]
+    },
+    {
+      "document_type": "registry_extract",
+      "file_name": "registry_extract_pemberly.pdf",
+      "subject_ref": null,
+      "upload_time": "2026-09-25T10:39:00Z",
+      "expiry_date": null,
+      "document_date": null,
+      "issue_country": "GB",
+      "scripted_quality_flags": [],
+      "scripted_fields": [
+        {
+          "field_id": "FLD-0232",
+          "document_id": "DOC-0151",
+          "name": "company_name",
+          "value": "Pemberly Tooling Ltd",
+          "confidence": "0.94",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        },
+        {
+          "field_id": "FLD-0233",
+          "document_id": "DOC-0151",
+          "name": "registration_number",
+          "value": "UK-99034820",
+          "confidence": "0.93",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        },
+        {
+          "field_id": "FLD-0234",
+          "document_id": "DOC-0151",
+          "name": "registered_address",
+          "value": "Unit 12 Pemberly Trading Estate, Coventry CV6 5NN, United Kingdom",
+          "confidence": "0.92",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        },
+        {
+          "field_id": "FLD-0235",
+          "document_id": "DOC-0151",
+          "name": "entity_status",
+          "value": "active",
+          "confidence": "0.94",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        }
+      ]
+    },
+    {
+      "document_type": "tax_registration_certificate",
+      "file_name": "vat_certificate_pemberly.pdf",
+      "subject_ref": null,
+      "upload_time": "2026-09-25T10:41:00Z",
+      "expiry_date": null,
+      "document_date": null,
+      "issue_country": null,
+      "scripted_quality_flags": [],
+      "scripted_fields": [
+        {
+          "field_id": "FLD-0236",
+          "document_id": "DOC-0152",
+          "name": "vat_number",
+          "value": "GB-VAT-903155721",
+          "confidence": "0.91",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        }
+      ]
+    },
+    {
+      "document_type": "director_register",
+      "file_name": "director_register_pemberly.pdf",
+      "subject_ref": null,
+      "upload_time": "2026-09-25T10:43:00Z",
+      "expiry_date": null,
+      "document_date": null,
+      "issue_country": null,
+      "scripted_quality_flags": [],
+      "scripted_fields": [
+        {
+          "field_id": "FLD-0237",
+          "document_id": "DOC-0153",
+          "name": "director_name",
+          "value": "Hadley Winstock",
+          "confidence": "0.93",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        },
+        {
+          "field_id": "FLD-0238",
+          "document_id": "DOC-0153",
+          "name": "director_name_2",
+          "value": "Marguerite Ellcott",
+          "confidence": "0.92",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        }
+      ]
+    },
+    {
+      "document_type": "authorised_signatory_list",
+      "file_name": "signatory_list_pemberly.pdf",
+      "subject_ref": null,
+      "upload_time": "2026-09-25T10:45:00Z",
+      "expiry_date": null,
+      "document_date": null,
+      "issue_country": null,
+      "scripted_quality_flags": [],
+      "scripted_fields": [
+        {
+          "field_id": "FLD-0239",
+          "document_id": "DOC-0154",
+          "name": "signatory_name",
+          "value": "Hadley Winstock",
+          "confidence": "0.9",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        }
+      ]
+    },
+    {
+      "document_type": "ubo_declaration",
+      "file_name": "ubo_declaration_pemberly.pdf",
+      "subject_ref": null,
+      "upload_time": "2026-09-25T10:47:00Z",
+      "expiry_date": null,
+      "document_date": null,
+      "issue_country": null,
+      "scripted_quality_flags": [],
+      "scripted_fields": [
+        {
+          "field_id": "FLD-0240",
+          "document_id": "DOC-0155",
+          "name": "ubo_name",
+          "value": "Oswin Prattley",
+          "confidence": "0.92",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        },
+        {
+          "field_id": "FLD-0241",
+          "document_id": "DOC-0155",
+          "name": "ownership_percentage",
+          "value": "55.0",
+          "confidence": "0.91",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        }
+      ]
+    },
+    {
+      "document_type": "id_document",
+      "file_name": "passport_winstock_h.jpg",
+      "subject_ref": "IND-0029",
+      "upload_time": "2026-09-25T10:49:00Z",
+      "expiry_date": "2029-02-14",
+      "document_date": null,
+      "issue_country": "GB",
+      "scripted_quality_flags": [],
+      "scripted_fields": [
+        {
+          "field_id": "FLD-0242",
+          "document_id": "DOC-0156",
+          "name": "full_name",
+          "value": "Hadley Winstock",
+          "confidence": "0.88",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        }
+      ]
+    },
+    {
+      "document_type": "id_document",
+      "file_name": "passport_ellcott_m.jpg",
+      "subject_ref": "IND-0030",
+      "upload_time": "2026-09-25T10:51:00Z",
+      "expiry_date": "2031-07-08",
+      "document_date": null,
+      "issue_country": "GB",
+      "scripted_quality_flags": [],
+      "scripted_fields": [
+        {
+          "field_id": "FLD-0243",
+          "document_id": "DOC-0157",
+          "name": "full_name",
+          "value": "Marguerite Ellcott",
+          "confidence": "0.94",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        }
+      ]
+    },
+    {
+      "document_type": "id_document",
+      "file_name": "passport_prattley_o.jpg",
+      "subject_ref": "IND-0031",
+      "upload_time": "2026-09-25T10:53:00Z",
+      "expiry_date": "2030-05-26",
+      "document_date": null,
+      "issue_country": "GB",
+      "scripted_quality_flags": [],
+      "scripted_fields": [
+        {
+          "field_id": "FLD-0244",
+          "document_id": "DOC-0158",
+          "name": "full_name",
+          "value": "Oswin Prattley",
+          "confidence": "0.93",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        }
+      ]
+    },
+    {
+      "document_type": "proof_of_address",
+      "file_name": "poa_winstock_sep2026.pdf",
+      "subject_ref": "IND-0029",
+      "upload_time": "2026-09-25T10:55:00Z",
+      "expiry_date": null,
+      "document_date": "2026-09-07",
+      "issue_country": "GB",
+      "scripted_quality_flags": [],
+      "scripted_fields": [
+        {
+          "field_id": "FLD-0245",
+          "document_id": "DOC-0159",
+          "name": "document_date",
+          "value": "2026-09-07",
+          "confidence": "0.91",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        }
+      ]
+    },
+    {
+      "document_type": "proof_of_address",
+      "file_name": "poa_ellcott_sep2026.pdf",
+      "subject_ref": "IND-0030",
+      "upload_time": "2026-09-25T10:57:00Z",
+      "expiry_date": null,
+      "document_date": "2026-09-03",
+      "issue_country": "GB",
+      "scripted_quality_flags": [],
+      "scripted_fields": [
+        {
+          "field_id": "FLD-0246",
+          "document_id": "DOC-0160",
+          "name": "document_date",
+          "value": "2026-09-03",
+          "confidence": "0.92",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        }
+      ]
+    },
+    {
+      "document_type": "proof_of_address",
+      "file_name": "poa_prattley_aug2026.pdf",
+      "subject_ref": "IND-0031",
+      "upload_time": "2026-09-25T10:59:00Z",
+      "expiry_date": null,
+      "document_date": "2026-08-30",
+      "issue_country": "GB",
+      "scripted_quality_flags": [],
+      "scripted_fields": [
+        {
+          "field_id": "FLD-0247",
+          "document_id": "DOC-0161",
+          "name": "document_date",
+          "value": "2026-08-30",
+          "confidence": "0.9",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        }
+      ]
+    },
+    {
+      "document_type": "source_of_funds_declaration",
+      "file_name": "source_of_funds_pemberly.pdf",
+      "subject_ref": null,
+      "upload_time": "2026-09-25T11:01:00Z",
+      "expiry_date": null,
+      "document_date": null,
+      "issue_country": null,
+      "scripted_quality_flags": [],
+      "scripted_fields": [
+        {
+          "field_id": "FLD-0248",
+          "document_id": "DOC-0162",
+          "name": "declared_source",
+          "value": "Tooling contracts with light manufacturing customers",
+          "confidence": "0.89",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        }
+      ]
+    },
+    {
+      "document_type": "business_activity_description",
+      "file_name": "business_activity_pemberly.pdf",
+      "subject_ref": null,
+      "upload_time": "2026-09-25T11:03:00Z",
+      "expiry_date": null,
+      "document_date": null,
+      "issue_country": null,
+      "scripted_quality_flags": [],
+      "scripted_fields": [
+        {
+          "field_id": "FLD-0249",
+          "document_id": "DOC-0163",
+          "name": "declared_industry",
+          "value": "Precision engineering and tooling",
+          "confidence": "0.9",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        }
+      ]
+    }
+  ],
+  "analyst_releases": [],
+  "field_corrections": [],
+  "field_acceptances": [],
+  "scripted_registry": [
+    {
+      "check_id": "REG-0011",
+      "case_id": "WAL-ONB-0013",
+      "applicant_id": "APP-0013",
+      "provider_name": "MockRegistryHub UK",
+      "company_status": "active",
+      "registry_legal_name": "Pemberly Tooling Ltd",
+      "registry_number": "UK-99034820",
+      "registry_address": "Unit 12 Pemberly Trading Estate, Coventry CV6 5NN, United Kingdom",
+      "registry_directors": "Hadley Winstock|Marguerite Ellcott",
+      "name_match": "match",
+      "number_match": "match",
+      "address_match": "match",
+      "director_match": "match",
+      "ubo_supported_by_registry": "true",
+      "high_risk_jurisdiction_or_industry": "false",
+      "confidence": "0.91",
+      "result": "pass"
+    }
+  ],
+  "scripted_identity": [
+    {
+      "check_id": "IDC-0026",
+      "case_id": "WAL-ONB-0013",
+      "individual_id": "IND-0029",
+      "provider_name": "VerifyMock ID",
+      "document_result": "fail",
+      "liveness_result": "pass",
+      "biometric_result": "fail",
+      "address_result": "pass",
+      "name_dob_match": "mismatch",
+      "document_expired": "false",
+      "duplicate_individual_detected": "false",
+      "result": "fail"
+    },
+    {
+      "check_id": "IDC-0027",
+      "case_id": "WAL-ONB-0013",
+      "individual_id": "IND-0030",
+      "provider_name": "VerifyMock ID",
+      "document_result": "pass",
+      "liveness_result": "pass",
+      "biometric_result": "pass",
+      "address_result": "pass",
+      "name_dob_match": "match",
+      "document_expired": "false",
+      "duplicate_individual_detected": "false",
+      "result": "pass"
+    },
+    {
+      "check_id": "IDC-0028",
+      "case_id": "WAL-ONB-0013",
+      "individual_id": "IND-0031",
+      "provider_name": "VerifyMock ID",
+      "document_result": "pass",
+      "liveness_result": "pass",
+      "biometric_result": "pass",
+      "address_result": "pass",
+      "name_dob_match": "match",
+      "document_expired": "false",
+      "duplicate_individual_detected": "false",
+      "result": "pass"
+    }
+  ],
+  "scripted_screening": [
+    {
+      "check_id": "SCR-0036",
+      "case_id": "WAL-ONB-0013",
+      "subject_type": "applicant",
+      "applicant_id": "APP-0013",
+      "individual_id": "",
+      "sanctions_result": "no_match",
+      "pep_result": "no_match",
+      "adverse_media_result": "none",
+      "severity": "none",
+      "evidence_refs": ""
+    },
+    {
+      "check_id": "SCR-0037",
+      "case_id": "WAL-ONB-0013",
+      "subject_type": "individual",
+      "applicant_id": "",
+      "individual_id": "IND-0030",
+      "sanctions_result": "no_match",
+      "pep_result": "no_match",
+      "adverse_media_result": "none",
+      "severity": "none",
+      "evidence_refs": ""
+    },
+    {
+      "check_id": "SCR-0038",
+      "case_id": "WAL-ONB-0013",
+      "subject_type": "individual",
+      "applicant_id": "",
+      "individual_id": "IND-0031",
+      "sanctions_result": "no_match",
+      "pep_result": "no_match",
+      "adverse_media_result": "none",
+      "severity": "none",
+      "evidence_refs": ""
+    },
+    {
+      "check_id": "SCR-0039",
+      "case_id": "WAL-ONB-0013",
+      "subject_type": "individual",
+      "applicant_id": "",
+      "individual_id": "IND-0029",
+      "sanctions_result": "no_match",
+      "pep_result": "no_match",
+      "adverse_media_result": "unavailable",
+      "severity": "medium",
+      "evidence_refs": "SCREEN-REF-MEDIA-UNAVAILABLE-3301"
+    }
+  ]
+}

@@ -1,0 +1,322 @@
+{
+  "application_id": "PORTAL-WAL-ONB-0001",
+  "source_channel": "portal",
+  "programme_type": "direct",
+  "applicant": {
+    "legal_name": "Kaari Mets",
+    "trading_name": "Mets Design Studio",
+    "registration_number": "EE-FIE-4410932",
+    "entity_type": "sole_trader",
+    "country": "EE",
+    "business_activity": "Freelance graphic design and brand identity services",
+    "expected_usage": "One card; up to 4000 EUR per month on software and travel",
+    "vat_registered": false
+  },
+  "ownership": {
+    "ownership_layers": 0,
+    "has_corporate_shareholder": false,
+    "has_trust_or_nominee": false
+  },
+  "individuals": [
+    {
+      "ref": "IND-0001",
+      "role": "sole_trader",
+      "full_name": "Kaari Mets",
+      "date_of_birth": "1991-03-14",
+      "nationality": "EE",
+      "residence_country": "EE",
+      "relationship_to_entity": "Registered sole trader and sole beneficial owner"
+    }
+  ],
+  "ubos": [],
+  "flags": {
+    "spend_above_50k": false,
+    "nominee_or_trust_in_chain": false,
+    "ubo_indirect_25pct_or_more": false,
+    "signatory_not_director": false,
+    "vat_registered": false
+  },
+  "documents": [
+    {
+      "document_type": "registry_extract",
+      "file_name": "ee_fie_registry_extract_mets.pdf",
+      "subject_ref": null,
+      "upload_time": "2026-09-01T08:47:00Z",
+      "expiry_date": null,
+      "document_date": null,
+      "issue_country": "EE",
+      "scripted_quality_flags": [],
+      "scripted_fields": [
+        {
+          "field_id": "FLD-0001",
+          "document_id": "DOC-0001",
+          "name": "company_name",
+          "value": "Kaari Mets",
+          "confidence": "0.97",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        },
+        {
+          "field_id": "FLD-0002",
+          "document_id": "DOC-0001",
+          "name": "registration_number",
+          "value": "EE-FIE-4410932",
+          "confidence": "0.96",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        },
+        {
+          "field_id": "FLD-0003",
+          "document_id": "DOC-0001",
+          "name": "registered_address",
+          "value": "Kastani 12-4, 51006 Tartu, Estonia",
+          "confidence": "0.93",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        },
+        {
+          "field_id": "FLD-0004",
+          "document_id": "DOC-0001",
+          "name": "entity_status",
+          "value": "active",
+          "confidence": "0.95",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        }
+      ]
+    },
+    {
+      "document_type": "id_document",
+      "file_name": "passport_mets_k.jpg",
+      "subject_ref": "IND-0001",
+      "upload_time": "2026-09-01T08:49:00Z",
+      "expiry_date": "2031-04-18",
+      "document_date": null,
+      "issue_country": "EE",
+      "scripted_quality_flags": [],
+      "scripted_fields": [
+        {
+          "field_id": "FLD-0005",
+          "document_id": "DOC-0002",
+          "name": "full_name",
+          "value": "Kaari Mets",
+          "confidence": "0.98",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        },
+        {
+          "field_id": "FLD-0006",
+          "document_id": "DOC-0002",
+          "name": "date_of_birth",
+          "value": "1991-03-14",
+          "confidence": "0.97",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        },
+        {
+          "field_id": "FLD-0007",
+          "document_id": "DOC-0002",
+          "name": "document_number",
+          "value": "EE-P-3391842",
+          "confidence": "0.94",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        },
+        {
+          "field_id": "FLD-0008",
+          "document_id": "DOC-0002",
+          "name": "expiry_date",
+          "value": "2031-04-18",
+          "confidence": "0.96",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        }
+      ]
+    },
+    {
+      "document_type": "proof_of_address",
+      "file_name": "utility_bill_aug2026_mets.pdf",
+      "subject_ref": "IND-0001",
+      "upload_time": "2026-09-01T08:51:00Z",
+      "expiry_date": null,
+      "document_date": "2026-08-12",
+      "issue_country": "EE",
+      "scripted_quality_flags": [],
+      "scripted_fields": [
+        {
+          "field_id": "FLD-0009",
+          "document_id": "DOC-0003",
+          "name": "full_name",
+          "value": "Kaari Mets",
+          "confidence": "0.95",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        },
+        {
+          "field_id": "FLD-0010",
+          "document_id": "DOC-0003",
+          "name": "address",
+          "value": "Kastani 12-4, 51006 Tartu, Estonia",
+          "confidence": "0.92",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        },
+        {
+          "field_id": "FLD-0011",
+          "document_id": "DOC-0003",
+          "name": "document_date",
+          "value": "2026-08-12",
+          "confidence": "0.94",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        },
+        {
+          "field_id": "FLD-0012",
+          "document_id": "DOC-0003",
+          "name": "issuer",
+          "value": "Tartu Energia AS",
+          "confidence": "0.91",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        }
+      ]
+    },
+    {
+      "document_type": "liveness_selfie",
+      "file_name": "liveness_capture_20260901_mets.jpg",
+      "subject_ref": "IND-0001",
+      "upload_time": "2026-09-01T08:53:00Z",
+      "expiry_date": null,
+      "document_date": null,
+      "issue_country": null,
+      "scripted_quality_flags": [],
+      "scripted_fields": []
+    },
+    {
+      "document_type": "source_of_funds_declaration",
+      "file_name": "source_of_funds_mets.pdf",
+      "subject_ref": null,
+      "upload_time": "2026-09-01T08:55:00Z",
+      "expiry_date": null,
+      "document_date": null,
+      "issue_country": null,
+      "scripted_quality_flags": [],
+      "scripted_fields": [
+        {
+          "field_id": "FLD-0013",
+          "document_id": "DOC-0005",
+          "name": "declared_source",
+          "value": "Client invoices from retained design work",
+          "confidence": "0.89",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        },
+        {
+          "field_id": "FLD-0014",
+          "document_id": "DOC-0005",
+          "name": "expected_monthly_volume",
+          "value": "4000 EUR",
+          "confidence": "0.88",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        }
+      ]
+    },
+    {
+      "document_type": "business_activity_description",
+      "file_name": "business_activity_mets.pdf",
+      "subject_ref": null,
+      "upload_time": "2026-09-01T08:57:00Z",
+      "expiry_date": null,
+      "document_date": null,
+      "issue_country": null,
+      "scripted_quality_flags": [],
+      "scripted_fields": [
+        {
+          "field_id": "FLD-0015",
+          "document_id": "DOC-0006",
+          "name": "declared_industry",
+          "value": "Graphic design services",
+          "confidence": "0.9",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        },
+        {
+          "field_id": "FLD-0016",
+          "document_id": "DOC-0006",
+          "name": "expected_card_usage",
+          "value": "Software subscriptions, print suppliers, travel",
+          "confidence": "0.87",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        }
+      ]
+    }
+  ],
+  "analyst_releases": [],
+  "field_corrections": [],
+  "field_acceptances": [],
+  "scripted_registry": [
+    {
+      "check_id": "REG-0001",
+      "case_id": "WAL-ONB-0001",
+      "applicant_id": "APP-0001",
+      "provider_name": "MockRegistryHub EE",
+      "company_status": "active",
+      "registry_legal_name": "Kaari Mets",
+      "registry_number": "EE-FIE-4410932",
+      "registry_address": "Kastani 12-4, 51006 Tartu, Estonia",
+      "registry_directors": "Kaari Mets",
+      "name_match": "match",
+      "number_match": "match",
+      "address_match": "match",
+      "director_match": "match",
+      "ubo_supported_by_registry": "true",
+      "high_risk_jurisdiction_or_industry": "false",
+      "confidence": "0.96",
+      "result": "pass"
+    }
+  ],
+  "scripted_identity": [
+    {
+      "check_id": "IDC-0001",
+      "case_id": "WAL-ONB-0001",
+      "individual_id": "IND-0001",
+      "provider_name": "VerifyMock ID",
+      "document_result": "pass",
+      "liveness_result": "pass",
+      "biometric_result": "pass",
+      "address_result": "pass",
+      "name_dob_match": "match",
+      "document_expired": "false",
+      "duplicate_individual_detected": "false",
+      "result": "pass"
+    }
+  ],
+  "scripted_screening": [
+    {
+      "check_id": "SCR-0001",
+      "case_id": "WAL-ONB-0001",
+      "subject_type": "applicant",
+      "applicant_id": "APP-0001",
+      "individual_id": "",
+      "sanctions_result": "no_match",
+      "pep_result": "no_match",
+      "adverse_media_result": "none",
+      "severity": "none",
+      "evidence_refs": ""
+    },
+    {
+      "check_id": "SCR-0002",
+      "case_id": "WAL-ONB-0001",
+      "subject_type": "individual",
+      "applicant_id": "",
+      "individual_id": "IND-0001",
+      "sanctions_result": "no_match",
+      "pep_result": "no_match",
+      "adverse_media_result": "none",
+      "severity": "none",
+      "evidence_refs": ""
+    }
+  ]
+}

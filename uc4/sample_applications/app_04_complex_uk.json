@@ -1,0 +1,11 @@
+{"application_id": "EMAIL-2004", "source_channel": "email", "programme_type": "direct",
+ "applicant": {"legal_name": "Harbourline Trading Ltd", "registration_number": "14820917", "entity_type": "private_limited_company",
+   "country": "GB", "business_activity": "Wholesale import of marine equipment", "expected_usage": "Supplier payments, ~GBP 60k/month"},
+ "ownership": {"ownership_layers": 3, "has_corporate_shareholder": true, "has_trust_or_nominee": true},
+ "individuals": [
+   {"ref": "p1", "role": "director", "full_name": "Owen Pryce", "date_of_birth": "1975-06-21", "nationality": "GB", "residence_country": "GB"},
+   {"ref": "p2", "role": "director", "full_name": "Leah Brandt", "date_of_birth": "1983-09-30", "nationality": "DE", "residence_country": "GB"},
+   {"ref": "p3", "role": "ubo", "full_name": "Anton Vehko", "date_of_birth": "1969-01-17", "nationality": "FI", "residence_country": "CY"}],
+ "ubos": [{"individual_ref": "p3", "ownership_percentage": 62, "control_type": "indirect_shareholding",
+   "ownership_path": "Vehko Holdings Ltd > Meridian Capital SA > Harbourline Trading Ltd"}],
+ "flags": {}}

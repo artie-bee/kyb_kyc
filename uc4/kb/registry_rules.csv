@@ -1,0 +1,11 @@
+rule_id,check,condition,outcome,blocking,description
+RG-01,company_status,dissolved,analyst_review,true,A dissolved company cannot be onboarded; an analyst confirms before anything is said to the customer
+RG-02,company_status,struck_off,analyst_review,true,A company struck off the register cannot be onboarded; analyst confirms
+RG-03,company_status,not_found,analyst_review,true,The register has no such company; the application cannot proceed on the evidence supplied
+RG-04,company_status,suspended,analyst_review,true,A suspended company needs an analyst to establish why before the case moves on
+RG-05,name_match,mismatch,analyst_review,true,The legal name on the register differs from the name supplied; identity of the entity is unresolved
+RG-06,number_match,mismatch,analyst_review,true,The registration number on the register differs from the one supplied
+RG-07,address_match,mismatch,finding,false,Registered address differs from the register; carried to the risk step and may need customer clarification
+RG-08,director_match,mismatch,finding,false,Declared directors differ from the register; carried to the risk step and may need customer clarification
+RG-09,provider_status,unavailable,insufficient_evidence,true,Provider did not answer. This is not a pass: retry once and then send to an analyst
+RG-10,company_status,active,pass,false,The company is active on the register

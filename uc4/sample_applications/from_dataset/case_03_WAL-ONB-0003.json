@@ -1,0 +1,609 @@
+{
+  "application_id": "EMAIL-WAL-ONB-0003",
+  "source_channel": "email",
+  "programme_type": "direct",
+  "applicant": {
+    "legal_name": "Calderwick Logistics Ltd",
+    "trading_name": "Calderwick Freight",
+    "registration_number": "UK-99014477",
+    "entity_type": "private_limited_company",
+    "country": "GB",
+    "business_activity": "Regional road freight and contract haulage",
+    "expected_usage": "Up to 30 fuel cards; around 60000 GBP per month",
+    "vat_registered": true
+  },
+  "ownership": {
+    "ownership_layers": 1,
+    "has_corporate_shareholder": false,
+    "has_trust_or_nominee": false
+  },
+  "individuals": [
+    {
+      "ref": "IND-0004",
+      "role": "director",
+      "full_name": "Marcus Ellersby",
+      "date_of_birth": "1974-01-27",
+      "nationality": "GB",
+      "residence_country": "GB",
+      "relationship_to_entity": "Managing director"
+    },
+    {
+      "ref": "IND-0005",
+      "role": "director",
+      "full_name": "Roisin Delamere",
+      "date_of_birth": "1982-05-09",
+      "nationality": "IE",
+      "residence_country": "GB",
+      "relationship_to_entity": "Operations director"
+    },
+    {
+      "ref": "IND-0006",
+      "role": "ubo",
+      "full_name": "Torvald Kellingray",
+      "date_of_birth": "1969-08-22",
+      "nationality": "GB",
+      "residence_country": "GB",
+      "relationship_to_entity": "Holds 60 percent of the issued share capital directly"
+    }
+  ],
+  "ubos": [
+    {
+      "individual_ref": "IND-0006",
+      "ownership_percentage": 60.0,
+      "ownership_chain_percentages": [
+        60.0
+      ],
+      "control_type": "direct_shareholding",
+      "ownership_path": "Calderwick Logistics Ltd"
+    }
+  ],
+  "flags": {
+    "spend_above_50k": true,
+    "nominee_or_trust_in_chain": false,
+    "ubo_indirect_25pct_or_more": false,
+    "signatory_not_director": false,
+    "vat_registered": true
+  },
+  "documents": [
+    {
+      "document_type": "certificate_of_incorporation",
+      "file_name": "cert_incorporation_calderwick.pdf",
+      "subject_ref": null,
+      "upload_time": "2026-09-03T11:37:00Z",
+      "expiry_date": null,
+      "document_date": null,
+      "issue_country": "GB",
+      "scripted_quality_flags": [],
+      "scripted_fields": [
+        {
+          "field_id": "FLD-0036",
+          "document_id": "DOC-0017",
+          "name": "company_name",
+          "value": "Calderwick Logistics Ltd",
+          "confidence": "0.96",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        },
+        {
+          "field_id": "FLD-0037",
+          "document_id": "DOC-0017",
+          "name": "registration_number",
+          "value": "UK-99014477",
+          "confidence": "0.95",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        },
+        {
+          "field_id": "FLD-0038",
+          "document_id": "DOC-0017",
+          "name": "registered_address",
+          "value": "14 Marlow Court, Leeds LS11 9RB, United Kingdom",
+          "confidence": "0.91",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        }
+      ]
+    },
+    {
+      "document_type": "registry_extract",
+      "file_name": "registry_extract_calderwick.pdf",
+      "subject_ref": null,
+      "upload_time": "2026-09-03T11:39:00Z",
+      "expiry_date": null,
+      "document_date": null,
+      "issue_country": "GB",
+      "scripted_quality_flags": [],
+      "scripted_fields": [
+        {
+          "field_id": "FLD-0039",
+          "document_id": "DOC-0018",
+          "name": "company_name",
+          "value": "Calderwick Logistics Ltd",
+          "confidence": "0.94",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        },
+        {
+          "field_id": "FLD-0040",
+          "document_id": "DOC-0018",
+          "name": "registration_number",
+          "value": "UK-99014477",
+          "confidence": "0.95",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        },
+        {
+          "field_id": "FLD-0041",
+          "document_id": "DOC-0018",
+          "name": "registered_address",
+          "value": "Unit 7 Calderwick Way, Leeds LS12 4QT, United Kingdom",
+          "confidence": "0.58",
+          "source_page": "1",
+          "corrected_by_analyst": "true"
+        },
+        {
+          "field_id": "FLD-0042",
+          "document_id": "DOC-0018",
+          "name": "entity_status",
+          "value": "active",
+          "confidence": "0.93",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        }
+      ]
+    },
+    {
+      "document_type": "tax_registration_certificate",
+      "file_name": "vat_certificate_calderwick.pdf",
+      "subject_ref": null,
+      "upload_time": "2026-09-03T11:41:00Z",
+      "expiry_date": null,
+      "document_date": null,
+      "issue_country": null,
+      "scripted_quality_flags": [],
+      "scripted_fields": [
+        {
+          "field_id": "FLD-0043",
+          "document_id": "DOC-0019",
+          "name": "vat_number",
+          "value": "GB-VAT-771902845",
+          "confidence": "0.9",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        }
+      ]
+    },
+    {
+      "document_type": "director_register",
+      "file_name": "director_register_calderwick.pdf",
+      "subject_ref": null,
+      "upload_time": "2026-09-03T11:43:00Z",
+      "expiry_date": null,
+      "document_date": null,
+      "issue_country": null,
+      "scripted_quality_flags": [],
+      "scripted_fields": [
+        {
+          "field_id": "FLD-0044",
+          "document_id": "DOC-0020",
+          "name": "director_name",
+          "value": "Marcus Ellersby",
+          "confidence": "0.93",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        },
+        {
+          "field_id": "FLD-0045",
+          "document_id": "DOC-0020",
+          "name": "director_name_2",
+          "value": "Roisin Delamere",
+          "confidence": "0.92",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        }
+      ]
+    },
+    {
+      "document_type": "authorised_signatory_list",
+      "file_name": "signatory_list_calderwick.pdf",
+      "subject_ref": null,
+      "upload_time": "2026-09-03T11:45:00Z",
+      "expiry_date": null,
+      "document_date": null,
+      "issue_country": null,
+      "scripted_quality_flags": [],
+      "scripted_fields": [
+        {
+          "field_id": "FLD-0046",
+          "document_id": "DOC-0021",
+          "name": "signatory_name",
+          "value": "Marcus Ellersby",
+          "confidence": "0.91",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        }
+      ]
+    },
+    {
+      "document_type": "ubo_declaration",
+      "file_name": "ubo_declaration_calderwick.pdf",
+      "subject_ref": null,
+      "upload_time": "2026-09-03T11:47:00Z",
+      "expiry_date": null,
+      "document_date": null,
+      "issue_country": null,
+      "scripted_quality_flags": [],
+      "scripted_fields": [
+        {
+          "field_id": "FLD-0047",
+          "document_id": "DOC-0022",
+          "name": "ubo_name",
+          "value": "Torvald Kellingray",
+          "confidence": "0.93",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        },
+        {
+          "field_id": "FLD-0048",
+          "document_id": "DOC-0022",
+          "name": "ownership_percentage",
+          "value": "60.0",
+          "confidence": "0.92",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        },
+        {
+          "field_id": "FLD-0049",
+          "document_id": "DOC-0022",
+          "name": "control_basis",
+          "value": "direct shareholding",
+          "confidence": "0.89",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        }
+      ]
+    },
+    {
+      "document_type": "id_document",
+      "file_name": "passport_ellersby_m.jpg",
+      "subject_ref": "IND-0004",
+      "upload_time": "2026-09-03T11:49:00Z",
+      "expiry_date": "2030-02-14",
+      "document_date": null,
+      "issue_country": "GB",
+      "scripted_quality_flags": [],
+      "scripted_fields": [
+        {
+          "field_id": "FLD-0050",
+          "document_id": "DOC-0023",
+          "name": "full_name",
+          "value": "Marcus Ellersby",
+          "confidence": "0.96",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        },
+        {
+          "field_id": "FLD-0051",
+          "document_id": "DOC-0023",
+          "name": "expiry_date",
+          "value": "2030-02-14",
+          "confidence": "0.94",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        }
+      ]
+    },
+    {
+      "document_type": "id_document",
+      "file_name": "passport_delamere_r.jpg",
+      "subject_ref": "IND-0005",
+      "upload_time": "2026-09-03T11:51:00Z",
+      "expiry_date": "2032-07-06",
+      "document_date": null,
+      "issue_country": "IE",
+      "scripted_quality_flags": [],
+      "scripted_fields": [
+        {
+          "field_id": "FLD-0052",
+          "document_id": "DOC-0024",
+          "name": "full_name",
+          "value": "Roisin Delamere",
+          "confidence": "0.95",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        },
+        {
+          "field_id": "FLD-0053",
+          "document_id": "DOC-0024",
+          "name": "expiry_date",
+          "value": "2032-07-06",
+          "confidence": "0.93",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        }
+      ]
+    },
+    {
+      "document_type": "id_document",
+      "file_name": "passport_kellingray_t.jpg",
+      "subject_ref": "IND-0006",
+      "upload_time": "2026-09-03T11:53:00Z",
+      "expiry_date": "2028-11-30",
+      "document_date": null,
+      "issue_country": "GB",
+      "scripted_quality_flags": [],
+      "scripted_fields": [
+        {
+          "field_id": "FLD-0054",
+          "document_id": "DOC-0025",
+          "name": "full_name",
+          "value": "Torvald Kellingray",
+          "confidence": "0.94",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        },
+        {
+          "field_id": "FLD-0055",
+          "document_id": "DOC-0025",
+          "name": "expiry_date",
+          "value": "2028-11-30",
+          "confidence": "0.92",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        }
+      ]
+    },
+    {
+      "document_type": "proof_of_address",
+      "file_name": "poa_ellersby_aug2026.pdf",
+      "subject_ref": "IND-0004",
+      "upload_time": "2026-09-03T11:55:00Z",
+      "expiry_date": null,
+      "document_date": "2026-08-19",
+      "issue_country": "GB",
+      "scripted_quality_flags": [],
+      "scripted_fields": [
+        {
+          "field_id": "FLD-0056",
+          "document_id": "DOC-0026",
+          "name": "document_date",
+          "value": "2026-08-19",
+          "confidence": "0.92",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        }
+      ]
+    },
+    {
+      "document_type": "proof_of_address",
+      "file_name": "poa_delamere_aug2026.pdf",
+      "subject_ref": "IND-0005",
+      "upload_time": "2026-09-03T11:57:00Z",
+      "expiry_date": null,
+      "document_date": "2026-08-22",
+      "issue_country": "GB",
+      "scripted_quality_flags": [],
+      "scripted_fields": [
+        {
+          "field_id": "FLD-0057",
+          "document_id": "DOC-0027",
+          "name": "document_date",
+          "value": "2026-08-22",
+          "confidence": "0.91",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        }
+      ]
+    },
+    {
+      "document_type": "proof_of_address",
+      "file_name": "poa_kellingray_jul2026.pdf",
+      "subject_ref": "IND-0006",
+      "upload_time": "2026-09-03T11:59:00Z",
+      "expiry_date": null,
+      "document_date": "2026-07-30",
+      "issue_country": "GB",
+      "scripted_quality_flags": [],
+      "scripted_fields": [
+        {
+          "field_id": "FLD-0058",
+          "document_id": "DOC-0028",
+          "name": "document_date",
+          "value": "2026-07-30",
+          "confidence": "0.9",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        }
+      ]
+    },
+    {
+      "document_type": "source_of_funds_declaration",
+      "file_name": "source_of_funds_calderwick.pdf",
+      "subject_ref": null,
+      "upload_time": "2026-09-03T12:01:00Z",
+      "expiry_date": null,
+      "document_date": null,
+      "issue_country": null,
+      "scripted_quality_flags": [],
+      "scripted_fields": [
+        {
+          "field_id": "FLD-0059",
+          "document_id": "DOC-0029",
+          "name": "declared_source",
+          "value": "Haulage contract revenue from three national retail clients",
+          "confidence": "0.88",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        }
+      ]
+    },
+    {
+      "document_type": "business_activity_description",
+      "file_name": "business_activity_calderwick.pdf",
+      "subject_ref": null,
+      "upload_time": "2026-09-03T12:03:00Z",
+      "expiry_date": null,
+      "document_date": null,
+      "issue_country": null,
+      "scripted_quality_flags": [],
+      "scripted_fields": [
+        {
+          "field_id": "FLD-0060",
+          "document_id": "DOC-0030",
+          "name": "declared_industry",
+          "value": "Road freight transport",
+          "confidence": "0.91",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        }
+      ]
+    },
+    {
+      "document_type": "bank_statement",
+      "file_name": "bank_statement_calderwick_aug2026.pdf",
+      "subject_ref": null,
+      "upload_time": "2026-09-03T12:05:00Z",
+      "expiry_date": null,
+      "document_date": null,
+      "issue_country": null,
+      "scripted_quality_flags": [],
+      "scripted_fields": [
+        {
+          "field_id": "FLD-0061",
+          "document_id": "DOC-0031",
+          "name": "account_holder",
+          "value": "Calderwick Logistics Ltd",
+          "confidence": "0.89",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        }
+      ]
+    }
+  ],
+  "analyst_releases": [],
+  "field_corrections": [
+    {
+      "file_name": "registry_extract_calderwick.pdf",
+      "name": "registered_address",
+      "value": "Unit 7 Calderwick Way, Leeds LS12 4QT, United Kingdom",
+      "analyst_id": "analyst.r.toome",
+      "reason": "Analyst corrected low-confidence field FLD-0041 (registered_address) on document DOC-0018"
+    }
+  ],
+  "field_acceptances": [],
+  "scripted_registry": [
+    {
+      "check_id": "REG-0002",
+      "case_id": "WAL-ONB-0003",
+      "applicant_id": "APP-0003",
+      "provider_name": "MockRegistryHub UK",
+      "company_status": "active",
+      "registry_legal_name": "Calderwick Logistics Ltd",
+      "registry_number": "UK-99014477",
+      "registry_address": "Enterprise House, 14 Bell Lane, Leeds LS11 9PT, United Kingdom",
+      "registry_directors": "Marcus Ellersby|Roisin Delamere",
+      "name_match": "match",
+      "number_match": "match",
+      "address_match": "mismatch",
+      "director_match": "match",
+      "ubo_supported_by_registry": "true",
+      "high_risk_jurisdiction_or_industry": "false",
+      "confidence": "0.88",
+      "result": "review"
+    }
+  ],
+  "scripted_identity": [
+    {
+      "check_id": "IDC-0002",
+      "case_id": "WAL-ONB-0003",
+      "individual_id": "IND-0004",
+      "provider_name": "VerifyMock ID",
+      "document_result": "pass",
+      "liveness_result": "pass",
+      "biometric_result": "pass",
+      "address_result": "pass",
+      "name_dob_match": "match",
+      "document_expired": "false",
+      "duplicate_individual_detected": "false",
+      "result": "pass"
+    },
+    {
+      "check_id": "IDC-0003",
+      "case_id": "WAL-ONB-0003",
+      "individual_id": "IND-0005",
+      "provider_name": "VerifyMock ID",
+      "document_result": "pass",
+      "liveness_result": "pass",
+      "biometric_result": "pass",
+      "address_result": "pass",
+      "name_dob_match": "match",
+      "document_expired": "false",
+      "duplicate_individual_detected": "false",
+      "result": "pass"
+    },
+    {
+      "check_id": "IDC-0004",
+      "case_id": "WAL-ONB-0003",
+      "individual_id": "IND-0006",
+      "provider_name": "VerifyMock ID",
+      "document_result": "pass",
+      "liveness_result": "pass",
+      "biometric_result": "pass",
+      "address_result": "pass",
+      "name_dob_match": "match",
+      "document_expired": "false",
+      "duplicate_individual_detected": "false",
+      "result": "pass"
+    }
+  ],
+  "scripted_screening": [
+    {
+      "check_id": "SCR-0003",
+      "case_id": "WAL-ONB-0003",
+      "subject_type": "applicant",
+      "applicant_id": "APP-0003",
+      "individual_id": "",
+      "sanctions_result": "no_match",
+      "pep_result": "no_match",
+      "adverse_media_result": "none",
+      "severity": "none",
+      "evidence_refs": ""
+    },
+    {
+      "check_id": "SCR-0004",
+      "case_id": "WAL-ONB-0003",
+      "subject_type": "individual",
+      "applicant_id": "",
+      "individual_id": "IND-0004",
+      "sanctions_result": "no_match",
+      "pep_result": "no_match",
+      "adverse_media_result": "none",
+      "severity": "none",
+      "evidence_refs": ""
+    },
+    {
+      "check_id": "SCR-0005",
+      "case_id": "WAL-ONB-0003",
+      "subject_type": "individual",
+      "applicant_id": "",
+      "individual_id": "IND-0005",
+      "sanctions_result": "no_match",
+      "pep_result": "no_match",
+      "adverse_media_result": "none",
+      "severity": "none",
+      "evidence_refs": ""
+    },
+    {
+      "check_id": "SCR-0006",
+      "case_id": "WAL-ONB-0003",
+      "subject_type": "individual",
+      "applicant_id": "",
+      "individual_id": "IND-0006",
+      "sanctions_result": "no_match",
+      "pep_result": "no_match",
+      "adverse_media_result": "none",
+      "severity": "none",
+      "evidence_refs": ""
+    }
+  ]
+}

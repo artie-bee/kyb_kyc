@@ -1,0 +1,4 @@
+# A PDF is binary. Without this, git would "fix" its line endings and corrupt it.
+*.pdf binary
+*.jpg binary
+*.png binary

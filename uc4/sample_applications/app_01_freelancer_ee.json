@@ -1,0 +1,7 @@
+{"application_id": "PORTAL-1001", "source_channel": "portal", "programme_type": "direct",
+ "applicant": {"legal_name": "Kadri Saar", "trading_name": "Saar Design", "entity_type": "sole_trader",
+   "country": "EE", "business_activity": "Freelance UX design", "expected_usage": "Software subscriptions, ~EUR 800/month"},
+ "ownership": {"ownership_layers": 0, "has_corporate_shareholder": false, "has_trust_or_nominee": false},
+ "individuals": [{"ref": "p1", "role": "sole_trader", "full_name": "Kadri Saar", "date_of_birth": "1991-03-14",
+   "nationality": "EE", "residence_country": "EE"}],
+ "flags": {"high_risk_industry": false}}

@@ -1,0 +1,275 @@
+<!doctype html>
+<html lang="en" data-theme="auto">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Operations dashboard &middot; Wallester UC4</title>
+<link rel="stylesheet" href="dashboard.css">
+</head>
+<body>
+<div class="shell">
+
+  <aside class="rail">
+    <div class="rail__brand">Wallester UC4</div>
+
+    <nav class="rail__nav" aria-label="Screens">
+      <span class="rail__label">Screen</span>
+      <a class="navitem navitem--on" href="#" aria-current="page">Operations dashboard</a>
+      <a class="navitem navitem--off" href="#" aria-disabled="true">Case detail</a>
+      <a class="navitem navitem--off" href="#" aria-disabled="true">Customer view</a>
+      <a class="navitem navitem--off" href="#" aria-disabled="true">Agent reuse</a>
+      <a class="navitem navitem--off" href="#" aria-disabled="true">Audit export</a>
+    </nav>
+
+    <div class="rail__foot">
+      <div class="kv"><span>Knowledge base</span><code>kb-2026.09-poc-v8</code></div>
+      <div class="kv"><span>Generated</span><code>2026-09-25 11:41 UTC</code></div>
+      <button class="theme" type="button" id="theme">Toggle theme</button>
+    </div>
+  </aside>
+
+  <main class="main">
+    <header class="page">
+      <div>
+        <h1>Operations dashboard</h1>
+        <p class="sub">Every case, its owner and what it is waiting for.</p>
+      </div>
+    </header>
+
+    <section class="stats" aria-label="Summary">
+      <div class="stat"><span class="stat__k">Cases</span><span class="stat__v num">14</span></div>
+      <div class="stat"><span class="stat__k">Open</span><span class="stat__v num">13</span></div>
+      <div class="stat"><span class="stat__k">With holds</span><span class="stat__v num">9</span></div>
+      <div class="stat"><span class="stat__k">Restricted findings</span><span class="stat__v num">3</span></div>
+    </section>
+
+    <section class="filters" aria-label="Filters">
+      <fieldset>
+        <legend>Status</legend>
+        <div class="opts">
+            <label class="opt"><input type="checkbox" name="status" value="analyst_review_required" checked><span>analyst_review_required</span></label>
+            <label class="opt"><input type="checkbox" name="status" value="approved" checked><span>approved</span></label>
+            <label class="opt"><input type="checkbox" name="status" value="enhanced_due_diligence" checked><span>enhanced_due_diligence</span></label>
+            <label class="opt"><input type="checkbox" name="status" value="ready_for_decision" checked><span>ready_for_decision</span></label>
+            <label class="opt"><input type="checkbox" name="status" value="resubmission_required" checked><span>resubmission_required</span></label>
+            <label class="opt"><input type="checkbox" name="status" value="submitted" checked><span>submitted</span></label>
+        </div>
+      </fieldset>
+      <fieldset>
+        <legend>Next action owner</legend>
+        <div class="opts">
+            <label class="opt"><input type="checkbox" name="owner" value="analyst" checked><span>analyst</span></label>
+            <label class="opt"><input type="checkbox" name="owner" value="compliance" checked><span>compliance</span></label>
+            <label class="opt"><input type="checkbox" name="owner" value="customer" checked><span>customer</span></label>
+            <label class="opt"><input type="checkbox" name="owner" value="system" checked><span>system</span></label>
+        </div>
+      </fieldset>
+    </section>
+
+    <p class="count-line"><span id="shown">14</span> of 14 cases</p>
+
+    <div class="tablewrap">
+      <table id="cases">
+        <thead>
+          <tr>
+            <th scope="col" data-sort="text">Case</th>
+            <th scope="col" data-sort="text">Applicant</th>
+            <th scope="col" data-sort="text">Type</th>
+            <th scope="col" data-sort="text">Status</th>
+            <th scope="col" data-sort="text">Owner</th>
+            <th scope="col" data-sort="text">Band</th>
+            <th scope="col" data-sort="num" class="ta-r">Score</th>
+            <th scope="col" data-sort="num" class="ta-r">Holds</th>
+            <th scope="col">Hold detail</th>
+          </tr>
+        </thead>
+        <tbody>
+        <tr data-status="approved" data-owner="system"
+            data-open="0">
+          <td class="cell-id"><span class="id">WAL-ONB-0001</span></td>
+          <td class="cell-name">Kaari Mets</td>
+          <td class="cell-type"><span class="type">freelancer_sole_trader</span></td>
+          <td><span class="chip chip--ok"><span class="chip__dot"></span>approved</span></td>
+          <td><span class="chip chip--neutral"><span class="chip__dot"></span>system</span></td>
+          <td><span class="chip chip--ok"><span class="chip__dot"></span>low</span></td>
+          <td class="ta-r"><span class="num">0</span></td>
+          <td class="ta-r"><span class="muted">0</span></td>
+          <td class="cell-detail"><span class="muted">&mdash;</span></td>
+        </tr>
+        <tr data-status="resubmission_required" data-owner="customer"
+            data-open="1">
+          <td class="cell-id"><span class="id">WAL-ONB-0002</span></td>
+          <td class="cell-name">Northbridge Craft Supplies Ltd</td>
+          <td class="cell-type"><span class="type">sme_corporate</span></td>
+          <td><span class="chip chip--warn"><span class="chip__dot"></span>resubmission_required</span></td>
+          <td><span class="chip chip--warn"><span class="chip__dot"></span>customer</span></td>
+          <td><span class="muted" title="not scored yet">&mdash;</span></td>
+          <td class="ta-r"><span class="muted" title="not scored yet">&mdash;</span></td>
+          <td class="ta-r"><span class="count">1</span></td>
+          <td class="cell-detail"><span class="detail" title="resubmission (customer)">resubmission (customer)</span></td>
+        </tr>
+        <tr data-status="analyst_review_required" data-owner="analyst"
+            data-open="1">
+          <td class="cell-id"><span class="id">WAL-ONB-0003</span></td>
+          <td class="cell-name">Calderwick Logistics Ltd</td>
+          <td class="cell-type"><span class="type">sme_corporate</span></td>
+          <td><span class="chip chip--warn"><span class="chip__dot"></span>analyst_review_required</span></td>
+          <td><span class="chip chip--info"><span class="chip__dot"></span>analyst</span></td>
+          <td><span class="muted" title="not scored yet">&mdash;</span></td>
+          <td class="ta-r"><span class="muted" title="not scored yet">&mdash;</span></td>
+          <td class="ta-r"><span class="count">1</span></td>
+          <td class="cell-detail"><span class="detail" title="insufficient_evidence (analyst)">insufficient_evidence (analyst)</span></td>
+        </tr>
+        <tr data-status="analyst_review_required" data-owner="analyst"
+            data-open="1">
+          <td class="cell-id"><span class="id">WAL-ONB-0004</span></td>
+          <td class="cell-name">Vestmark Nordic OU</td>
+          <td class="cell-type"><span class="type">complex_corporate_ubo</span></td>
+          <td><span class="chip chip--warn"><span class="chip__dot"></span>analyst_review_required</span></td>
+          <td><span class="chip chip--info"><span class="chip__dot"></span>analyst</span></td>
+          <td><span class="muted" title="not scored yet">&mdash;</span></td>
+          <td class="ta-r"><span class="muted" title="not scored yet">&mdash;</span></td>
+          <td class="ta-r"><span class="count">2</span></td>
+          <td class="cell-detail"><span class="detail" title="manual_review (analyst); insufficient_evidence (analyst)">manual_review (analyst); insufficient_evidence (analyst)</span></td>
+        </tr>
+        <tr data-status="enhanced_due_diligence" data-owner="compliance"
+            data-open="1">
+          <td class="cell-id"><span class="id">WAL-ONB-0005</span><span class="restricted" title="Restricted finding: customer messages are limited to generic templates">restricted</span></td>
+          <td class="cell-name">Quillon Marine Services Ltd</td>
+          <td class="cell-type"><span class="type">sme_corporate</span></td>
+          <td><span class="chip chip--warn"><span class="chip__dot"></span>enhanced_due_diligence</span></td>
+          <td><span class="chip chip--bad"><span class="chip__dot"></span>compliance</span></td>
+          <td><span class="chip chip--warn"><span class="chip__dot"></span>high</span></td>
+          <td class="ta-r"><span class="num">66</span></td>
+          <td class="ta-r"><span class="muted">0</span></td>
+          <td class="cell-detail"><span class="muted">&mdash;</span></td>
+        </tr>
+        <tr data-status="analyst_review_required" data-owner="analyst"
+            data-open="1">
+          <td class="cell-id"><span class="id">WAL-ONB-0006</span><span class="restricted" title="Restricted finding: customer messages are limited to generic templates">restricted</span></td>
+          <td class="cell-name">Saarvik Metall OU</td>
+          <td class="cell-type"><span class="type">sme_corporate</span></td>
+          <td><span class="chip chip--warn"><span class="chip__dot"></span>analyst_review_required</span></td>
+          <td><span class="chip chip--info"><span class="chip__dot"></span>analyst</span></td>
+          <td><span class="chip chip--bad"><span class="chip__dot"></span>critical</span></td>
+          <td class="ta-r"><span class="num">60</span></td>
+          <td class="ta-r"><span class="count">1</span></td>
+          <td class="cell-detail"><span class="detail" title="manual_review (analyst)">manual_review (analyst)</span></td>
+        </tr>
+        <tr data-status="analyst_review_required" data-owner="analyst"
+            data-open="1">
+          <td class="cell-id"><span class="id">WAL-ONB-0007</span></td>
+          <td class="cell-name">Bramforth Aggregates Ltd</td>
+          <td class="cell-type"><span class="type">sme_corporate</span></td>
+          <td><span class="chip chip--warn"><span class="chip__dot"></span>analyst_review_required</span></td>
+          <td><span class="chip chip--info"><span class="chip__dot"></span>analyst</span></td>
+          <td><span class="muted" title="not scored yet">&mdash;</span></td>
+          <td class="ta-r"><span class="muted" title="not scored yet">&mdash;</span></td>
+          <td class="ta-r"><span class="count">1</span></td>
+          <td class="cell-detail"><span class="detail" title="insufficient_evidence (analyst)">insufficient_evidence (analyst)</span></td>
+        </tr>
+        <tr data-status="submitted" data-owner="system"
+            data-open="1">
+          <td class="cell-id"><span class="id">WAL-ONB-0008</span></td>
+          <td class="cell-name">Kestrel Pay Partners OU</td>
+          <td class="cell-type"><span class="type">white_label_partner</span></td>
+          <td><span class="chip chip--neutral"><span class="chip__dot"></span>submitted</span></td>
+          <td><span class="chip chip--neutral"><span class="chip__dot"></span>system</span></td>
+          <td><span class="muted" title="not scored yet">&mdash;</span></td>
+          <td class="ta-r"><span class="muted" title="not scored yet">&mdash;</span></td>
+          <td class="ta-r"><span class="muted">0</span></td>
+          <td class="cell-detail"><span class="muted">&mdash;</span></td>
+        </tr>
+        <tr data-status="ready_for_decision" data-owner="analyst"
+            data-open="1">
+          <td class="cell-id"><span class="id">WAL-ONB-0009</span></td>
+          <td class="cell-name">Parnu Kohviubade OU</td>
+          <td class="cell-type"><span class="type">sme_corporate</span></td>
+          <td><span class="chip chip--info"><span class="chip__dot"></span>ready_for_decision</span></td>
+          <td><span class="chip chip--info"><span class="chip__dot"></span>analyst</span></td>
+          <td><span class="chip chip--ok"><span class="chip__dot"></span>low</span></td>
+          <td class="ta-r"><span class="num">0</span></td>
+          <td class="ta-r"><span class="muted">0</span></td>
+          <td class="cell-detail"><span class="muted">&mdash;</span></td>
+        </tr>
+        <tr data-status="ready_for_decision" data-owner="analyst"
+            data-open="1">
+          <td class="cell-id"><span class="id">WAL-ONB-0010</span></td>
+          <td class="cell-name">Thornbury Analytics Ltd</td>
+          <td class="cell-type"><span class="type">complex_corporate_ubo</span></td>
+          <td><span class="chip chip--info"><span class="chip__dot"></span>ready_for_decision</span></td>
+          <td><span class="chip chip--info"><span class="chip__dot"></span>analyst</span></td>
+          <td><span class="chip chip--ok"><span class="chip__dot"></span>low</span></td>
+          <td class="ta-r"><span class="num">15</span></td>
+          <td class="ta-r"><span class="muted">0</span></td>
+          <td class="cell-detail"><span class="muted">&mdash;</span></td>
+        </tr>
+        <tr data-status="analyst_review_required" data-owner="analyst"
+            data-open="1">
+          <td class="cell-id"><span class="id">WAL-ONB-0011</span></td>
+          <td class="cell-name">Ardenhall Joinery Ltd</td>
+          <td class="cell-type"><span class="type">sme_corporate</span></td>
+          <td><span class="chip chip--warn"><span class="chip__dot"></span>analyst_review_required</span></td>
+          <td><span class="chip chip--info"><span class="chip__dot"></span>analyst</span></td>
+          <td><span class="chip chip--warn"><span class="chip__dot"></span>high</span></td>
+          <td class="ta-r"><span class="num">60</span></td>
+          <td class="ta-r"><span class="count">1</span></td>
+          <td class="cell-detail"><span class="detail" title="eligibility (analyst)">eligibility (analyst)</span></td>
+        </tr>
+        <tr data-status="analyst_review_required" data-owner="compliance"
+            data-open="1">
+          <td class="cell-id"><span class="id">WAL-ONB-0012</span><span class="restricted" title="Restricted finding: customer messages are limited to generic templates">restricted</span></td>
+          <td class="cell-name">Solvarn Baltic OU</td>
+          <td class="cell-type"><span class="type">sme_corporate</span></td>
+          <td><span class="chip chip--warn"><span class="chip__dot"></span>analyst_review_required</span></td>
+          <td><span class="chip chip--bad"><span class="chip__dot"></span>compliance</span></td>
+          <td><span class="chip chip--bad"><span class="chip__dot"></span>critical</span></td>
+          <td class="ta-r"><span class="num">70</span></td>
+          <td class="ta-r"><span class="count">1</span></td>
+          <td class="cell-detail"><span class="detail" title="sanctions_escalation (compliance)">sanctions_escalation (compliance)</span></td>
+        </tr>
+        <tr data-status="analyst_review_required" data-owner="analyst"
+            data-open="1">
+          <td class="cell-id"><span class="id">WAL-ONB-0013</span></td>
+          <td class="cell-name">Pemberly Tooling Ltd</td>
+          <td class="cell-type"><span class="type">sme_corporate</span></td>
+          <td><span class="chip chip--warn"><span class="chip__dot"></span>analyst_review_required</span></td>
+          <td><span class="chip chip--info"><span class="chip__dot"></span>analyst</span></td>
+          <td><span class="chip chip--warn"><span class="chip__dot"></span>insufficient_evidence</span></td>
+          <td class="ta-r"><span class="muted" title="not scored yet">&mdash;</span></td>
+          <td class="ta-r"><span class="count">2</span></td>
+          <td class="cell-detail"><span class="detail" title="identity_failed (analyst); insufficient_evidence (analyst)">identity_failed (analyst); insufficient_evidence (analyst)</span></td>
+        </tr>
+        <tr data-status="resubmission_required" data-owner="customer"
+            data-open="1">
+          <td class="cell-id"><span class="id">WAL-ONB-0014</span></td>
+          <td class="cell-name">Elise Kaarma</td>
+          <td class="cell-type"><span class="type">freelancer_sole_trader</span></td>
+          <td><span class="chip chip--warn"><span class="chip__dot"></span>resubmission_required</span></td>
+          <td><span class="chip chip--warn"><span class="chip__dot"></span>customer</span></td>
+          <td><span class="muted" title="not scored yet">&mdash;</span></td>
+          <td class="ta-r"><span class="muted" title="not scored yet">&mdash;</span></td>
+          <td class="ta-r"><span class="count">1</span></td>
+          <td class="cell-detail"><span class="detail" title="resubmission (customer)">resubmission (customer)</span></td>
+        </tr>
+        </tbody>
+      </table>
+      <p class="empty" id="empty" hidden>No case matches these filters.</p>
+    </div>
+
+    <aside class="note">
+      <strong>Restricted findings.</strong> A case carrying one gets generic customer
+      wording only. The finding itself is never shown to the applicant.
+    </aside>
+
+    <p class="foot">
+      A dash in Band or Score means the case has not reached risk scoring &mdash; it is
+      not a score of zero. Read-only: this page is generated from the database and
+      changes nothing in it.
+    </p>
+  </main>
+
+</div>
+<script src="dashboard.js"></script>
+</body>
+</html>

@@ -1,0 +1,87 @@
+rule_id,applicant_type,jurisdiction,entity_type,requirement_area,document_type,level,condition,condition_key,applies_per_individual_role,max_age_days
+RULE-0001,freelancer_sole_trader,EE,sole_trader,entity_proof,registry_extract,required,,,,180
+RULE-0002,freelancer_sole_trader,EE,sole_trader,individual_identity,id_document,required,,,sole_trader,
+RULE-0003,freelancer_sole_trader,EE,sole_trader,individual_identity,proof_of_address,required,,,sole_trader,90
+RULE-0004,freelancer_sole_trader,EE,sole_trader,individual_identity,liveness_selfie,conditional,remote onboarding without in-person verification,remote_onboarding,sole_trader,
+RULE-0005,freelancer_sole_trader,EE,sole_trader,source_of_funds,source_of_funds_declaration,required,,,,365
+RULE-0006,freelancer_sole_trader,EE,sole_trader,business_model,business_activity_description,required,,,,
+RULE-0007,freelancer_sole_trader,EE,sole_trader,risk_specific,website_or_platform_details,optional,,,,
+RULE-0008,sme_corporate,EE,private_limited_company,entity_proof,certificate_of_incorporation,required,,,,
+RULE-0009,sme_corporate,EE,private_limited_company,entity_proof,registry_extract,required,,,,90
+RULE-0010,sme_corporate,EE,private_limited_company,entity_proof,tax_registration_certificate,required,,,,
+RULE-0011,sme_corporate,EE,private_limited_company,directors_officers,director_register,required,,,,90
+RULE-0012,sme_corporate,EE,private_limited_company,directors_officers,authorised_signatory_list,required,,,,
+RULE-0013,sme_corporate,EE,private_limited_company,directors_officers,board_resolution,conditional,authorised signatory is not a registered director,signatory_not_director,,
+RULE-0014,sme_corporate,EE,private_limited_company,ownership_ubo,ubo_declaration,required,,,,365
+RULE-0015,sme_corporate,EE,private_limited_company,individual_identity,id_document,required,,,director|ubo|authorised_signatory,
+RULE-0016,sme_corporate,EE,private_limited_company,individual_identity,proof_of_address,required,,,director|ubo,90
+RULE-0017,sme_corporate,EE,private_limited_company,individual_identity,liveness_selfie,conditional,remote onboarding without in-person verification,remote_onboarding,director,
+RULE-0018,sme_corporate,EE,private_limited_company,source_of_funds,source_of_funds_declaration,required,,,,365
+RULE-0019,sme_corporate,EE,private_limited_company,business_model,business_activity_description,required,,,,
+RULE-0020,sme_corporate,EE,private_limited_company,risk_specific,bank_statement,conditional,expected monthly card spend above 50000 EUR,spend_above_50k,,90
+RULE-0021,complex_corporate_ubo,EE,private_limited_company,entity_proof,certificate_of_incorporation,required,,,,
+RULE-0022,complex_corporate_ubo,EE,private_limited_company,entity_proof,registry_extract,required,,,,90
+RULE-0023,complex_corporate_ubo,EE,private_limited_company,entity_proof,tax_registration_certificate,required,,,,
+RULE-0024,complex_corporate_ubo,EE,private_limited_company,directors_officers,director_register,required,,,,90
+RULE-0025,complex_corporate_ubo,EE,private_limited_company,directors_officers,authorised_signatory_list,required,,,,
+RULE-0026,complex_corporate_ubo,EE,private_limited_company,directors_officers,board_resolution,conditional,authorised signatory is not a registered director,signatory_not_director,,
+RULE-0027,complex_corporate_ubo,EE,private_limited_company,ownership_ubo,ubo_declaration,required,,,,365
+RULE-0028,complex_corporate_ubo,EE,private_limited_company,individual_identity,id_document,required,,,director|ubo|authorised_signatory,
+RULE-0029,complex_corporate_ubo,EE,private_limited_company,individual_identity,proof_of_address,required,,,director|ubo,90
+RULE-0030,complex_corporate_ubo,EE,private_limited_company,individual_identity,liveness_selfie,conditional,remote onboarding without in-person verification,remote_onboarding,director,
+RULE-0031,complex_corporate_ubo,EE,private_limited_company,source_of_funds,source_of_funds_declaration,required,,,,365
+RULE-0032,complex_corporate_ubo,EE,private_limited_company,business_model,business_activity_description,required,,,,
+RULE-0033,complex_corporate_ubo,EE,private_limited_company,risk_specific,bank_statement,conditional,expected monthly card spend above 50000 EUR,spend_above_50k,,90
+RULE-0034,complex_corporate_ubo,EE,private_limited_company,ownership_ubo,ownership_chart,required,,,,365
+RULE-0035,complex_corporate_ubo,EE,private_limited_company,ownership_ubo,shareholder_register,required,,,,90
+RULE-0036,complex_corporate_ubo,EE,private_limited_company,ownership_ubo,nominee_trust_explanation,conditional,nominee or trust entity present in the ownership chain,nominee_or_trust_in_chain,,
+RULE-0037,complex_corporate_ubo,EE,private_limited_company,risk_specific,source_of_wealth_statement,conditional,UBO holds 25 percent or more through an indirect ownership chain,ubo_indirect_25pct_or_more,,365
+RULE-0038,white_label_partner,EE,private_limited_company,entity_proof,certificate_of_incorporation,required,,,,
+RULE-0039,white_label_partner,EE,private_limited_company,entity_proof,registry_extract,required,,,,90
+RULE-0040,white_label_partner,EE,private_limited_company,directors_officers,director_register,required,,,,90
+RULE-0041,white_label_partner,EE,private_limited_company,ownership_ubo,ubo_declaration,required,,,,365
+RULE-0042,white_label_partner,EE,private_limited_company,business_model,programme_business_plan,required,,,,
+RULE-0043,white_label_partner,EE,private_limited_company,risk_specific,website_or_platform_details,required,,,,
+RULE-0044,freelancer_sole_trader,UK,sole_trader,entity_proof,registry_extract,conditional,registered with a national trade or business register,registered_with_trade_register,,180
+RULE-0045,freelancer_sole_trader,UK,sole_trader,individual_identity,id_document,required,,,sole_trader,
+RULE-0046,freelancer_sole_trader,UK,sole_trader,individual_identity,proof_of_address,required,,,sole_trader,120
+RULE-0047,freelancer_sole_trader,UK,sole_trader,individual_identity,liveness_selfie,conditional,remote onboarding without in-person verification,remote_onboarding,sole_trader,
+RULE-0048,freelancer_sole_trader,UK,sole_trader,source_of_funds,source_of_funds_declaration,required,,,,365
+RULE-0049,freelancer_sole_trader,UK,sole_trader,business_model,business_activity_description,required,,,,
+RULE-0050,freelancer_sole_trader,UK,sole_trader,risk_specific,website_or_platform_details,optional,,,,
+RULE-0051,sme_corporate,UK,private_limited_company,entity_proof,certificate_of_incorporation,required,,,,
+RULE-0052,sme_corporate,UK,private_limited_company,entity_proof,registry_extract,required,,,,90
+RULE-0053,sme_corporate,UK,private_limited_company,entity_proof,tax_registration_certificate,conditional,company is VAT registered,vat_registered,,
+RULE-0054,sme_corporate,UK,private_limited_company,directors_officers,director_register,required,,,,90
+RULE-0055,sme_corporate,UK,private_limited_company,directors_officers,authorised_signatory_list,required,,,,
+RULE-0056,sme_corporate,UK,private_limited_company,directors_officers,board_resolution,conditional,authorised signatory is not a registered director,signatory_not_director,,
+RULE-0057,sme_corporate,UK,private_limited_company,ownership_ubo,ubo_declaration,required,,,,365
+RULE-0058,sme_corporate,UK,private_limited_company,individual_identity,id_document,required,,,director|ubo|authorised_signatory,
+RULE-0059,sme_corporate,UK,private_limited_company,individual_identity,proof_of_address,required,,,director|ubo,120
+RULE-0060,sme_corporate,UK,private_limited_company,individual_identity,liveness_selfie,conditional,remote onboarding without in-person verification,remote_onboarding,director,
+RULE-0061,sme_corporate,UK,private_limited_company,source_of_funds,source_of_funds_declaration,required,,,,365
+RULE-0062,sme_corporate,UK,private_limited_company,business_model,business_activity_description,required,,,,
+RULE-0063,sme_corporate,UK,private_limited_company,risk_specific,bank_statement,conditional,expected monthly card spend above 50000 EUR,spend_above_50k,,90
+RULE-0064,complex_corporate_ubo,UK,private_limited_company,entity_proof,certificate_of_incorporation,required,,,,
+RULE-0065,complex_corporate_ubo,UK,private_limited_company,entity_proof,registry_extract,required,,,,90
+RULE-0066,complex_corporate_ubo,UK,private_limited_company,entity_proof,tax_registration_certificate,conditional,company is VAT registered,vat_registered,,
+RULE-0067,complex_corporate_ubo,UK,private_limited_company,directors_officers,director_register,required,,,,90
+RULE-0068,complex_corporate_ubo,UK,private_limited_company,directors_officers,authorised_signatory_list,required,,,,
+RULE-0069,complex_corporate_ubo,UK,private_limited_company,directors_officers,board_resolution,conditional,authorised signatory is not a registered director,signatory_not_director,,
+RULE-0070,complex_corporate_ubo,UK,private_limited_company,ownership_ubo,ubo_declaration,required,,,,365
+RULE-0071,complex_corporate_ubo,UK,private_limited_company,individual_identity,id_document,required,,,director|ubo|authorised_signatory,
+RULE-0072,complex_corporate_ubo,UK,private_limited_company,individual_identity,proof_of_address,required,,,director|ubo,120
+RULE-0073,complex_corporate_ubo,UK,private_limited_company,individual_identity,liveness_selfie,conditional,remote onboarding without in-person verification,remote_onboarding,director,
+RULE-0074,complex_corporate_ubo,UK,private_limited_company,source_of_funds,source_of_funds_declaration,required,,,,365
+RULE-0075,complex_corporate_ubo,UK,private_limited_company,business_model,business_activity_description,required,,,,
+RULE-0076,complex_corporate_ubo,UK,private_limited_company,risk_specific,bank_statement,conditional,expected monthly card spend above 50000 EUR,spend_above_50k,,90
+RULE-0077,complex_corporate_ubo,UK,private_limited_company,ownership_ubo,ownership_chart,required,,,,365
+RULE-0078,complex_corporate_ubo,UK,private_limited_company,ownership_ubo,shareholder_register,required,,,,90
+RULE-0079,complex_corporate_ubo,UK,private_limited_company,ownership_ubo,nominee_trust_explanation,conditional,nominee or trust entity present in the ownership chain,nominee_or_trust_in_chain,,
+RULE-0080,complex_corporate_ubo,UK,private_limited_company,risk_specific,source_of_wealth_statement,conditional,UBO holds 25 percent or more through an indirect ownership chain,ubo_indirect_25pct_or_more,,365
+RULE-0081,white_label_partner,UK,private_limited_company,entity_proof,certificate_of_incorporation,required,,,,
+RULE-0082,white_label_partner,UK,private_limited_company,entity_proof,registry_extract,required,,,,90
+RULE-0083,white_label_partner,UK,private_limited_company,directors_officers,director_register,required,,,,90
+RULE-0084,white_label_partner,UK,private_limited_company,ownership_ubo,ubo_declaration,required,,,,365
+RULE-0085,white_label_partner,UK,private_limited_company,business_model,programme_business_plan,required,,,,
+RULE-0086,white_label_partner,UK,private_limited_company,risk_specific,website_or_platform_details,required,,,,

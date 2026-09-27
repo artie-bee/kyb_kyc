@@ -1,0 +1,4 @@
+{"application_id": "PORTAL-1009", "source_channel": "portal", "programme_type": "direct",
+ "applicant": {"legal_name": "Solvia Consulting LLC", "entity_type": "private_limited_company", "country": "AE",
+   "business_activity": "Management consulting"},
+ "individuals": [{"ref": "p1", "role": "director", "full_name": "Rami Haddad", "nationality": "AE", "residence_country": "AE"}]}

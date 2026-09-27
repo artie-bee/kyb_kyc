@@ -1,0 +1,348 @@
+{
+  "application_id": "PORTAL-WAL-ONB-0002",
+  "source_channel": "portal",
+  "programme_type": "direct",
+  "applicant": {
+    "legal_name": "Northbridge Craft Supplies Ltd",
+    "trading_name": "Northbridge Crafts",
+    "registration_number": "UK-99010288",
+    "entity_type": "private_limited_company",
+    "country": "GB",
+    "business_activity": "Wholesale of craft and hobby supplies to independent retailers",
+    "expected_usage": "Up to 12 cards; around 25000 GBP per month on stock and logistics",
+    "vat_registered": false
+  },
+  "ownership": {
+    "ownership_layers": 0,
+    "has_corporate_shareholder": false,
+    "has_trust_or_nominee": false
+  },
+  "individuals": [
+    {
+      "ref": "IND-0002",
+      "role": "director",
+      "full_name": "Denton Halliwell",
+      "date_of_birth": "1978-06-02",
+      "nationality": "GB",
+      "residence_country": "GB",
+      "relationship_to_entity": "Registered director and primary application contact"
+    },
+    {
+      "ref": "IND-0003",
+      "role": "director",
+      "full_name": "Priya Nankivell",
+      "date_of_birth": "1985-11-19",
+      "nationality": "GB",
+      "residence_country": "GB",
+      "relationship_to_entity": "Registered director and authorised signatory"
+    }
+  ],
+  "ubos": [],
+  "flags": {
+    "spend_above_50k": false,
+    "nominee_or_trust_in_chain": false,
+    "ubo_indirect_25pct_or_more": false,
+    "signatory_not_director": false,
+    "vat_registered": false
+  },
+  "documents": [
+    {
+      "document_type": "certificate_of_incorporation",
+      "file_name": "cert_incorporation_northbridge.pdf",
+      "subject_ref": null,
+      "upload_time": "2026-09-02T10:12:00Z",
+      "expiry_date": null,
+      "document_date": null,
+      "issue_country": "GB",
+      "scripted_quality_flags": [],
+      "scripted_fields": [
+        {
+          "field_id": "FLD-0017",
+          "document_id": "DOC-0007",
+          "name": "company_name",
+          "value": "Northbridge Craft Supplies Ltd",
+          "confidence": "0.96",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        },
+        {
+          "field_id": "FLD-0018",
+          "document_id": "DOC-0007",
+          "name": "registration_number",
+          "value": "UK-99010288",
+          "confidence": "0.95",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        },
+        {
+          "field_id": "FLD-0019",
+          "document_id": "DOC-0007",
+          "name": "incorporation_date",
+          "value": "2019-04-11",
+          "confidence": "0.93",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        }
+      ]
+    },
+    {
+      "document_type": "registry_extract",
+      "file_name": "registry_extract_northbridge.pdf",
+      "subject_ref": null,
+      "upload_time": "2026-09-02T10:14:00Z",
+      "expiry_date": null,
+      "document_date": null,
+      "issue_country": "GB",
+      "scripted_quality_flags": [],
+      "scripted_fields": [
+        {
+          "field_id": "FLD-0020",
+          "document_id": "DOC-0008",
+          "name": "company_name",
+          "value": "Northbridge Craft Supplies Ltd",
+          "confidence": "0.95",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        },
+        {
+          "field_id": "FLD-0021",
+          "document_id": "DOC-0008",
+          "name": "registered_address",
+          "value": "Suite 3, 88 Fettlers Row, Sheffield S3 8PQ, United Kingdom",
+          "confidence": "0.91",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        },
+        {
+          "field_id": "FLD-0022",
+          "document_id": "DOC-0008",
+          "name": "entity_status",
+          "value": "active",
+          "confidence": "0.94",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        },
+        {
+          "field_id": "FLD-0023",
+          "document_id": "DOC-0008",
+          "name": "registration_number",
+          "value": "UK-99010288",
+          "confidence": "0.95",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        }
+      ]
+    },
+    {
+      "document_type": "director_register",
+      "file_name": "director_register_northbridge.pdf",
+      "subject_ref": null,
+      "upload_time": "2026-09-02T10:16:00Z",
+      "expiry_date": null,
+      "document_date": null,
+      "issue_country": null,
+      "scripted_quality_flags": [],
+      "scripted_fields": [
+        {
+          "field_id": "FLD-0024",
+          "document_id": "DOC-0009",
+          "name": "director_name",
+          "value": "Denton Halliwell",
+          "confidence": "0.92",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        },
+        {
+          "field_id": "FLD-0025",
+          "document_id": "DOC-0009",
+          "name": "director_name_2",
+          "value": "Priya Nankivell",
+          "confidence": "0.9",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        }
+      ]
+    },
+    {
+      "document_type": "authorised_signatory_list",
+      "file_name": "signatory_list_northbridge.pdf",
+      "subject_ref": null,
+      "upload_time": "2026-09-02T10:18:00Z",
+      "expiry_date": null,
+      "document_date": null,
+      "issue_country": null,
+      "scripted_quality_flags": [],
+      "scripted_fields": [
+        {
+          "field_id": "FLD-0026",
+          "document_id": "DOC-0010",
+          "name": "signatory_name",
+          "value": "Priya Nankivell",
+          "confidence": "0.89",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        }
+      ]
+    },
+    {
+      "document_type": "id_document",
+      "file_name": "director_id_halliwell_scan.jpg",
+      "subject_ref": "IND-0002",
+      "upload_time": "2026-09-02T10:20:00Z",
+      "expiry_date": null,
+      "document_date": null,
+      "issue_country": null,
+      "scripted_quality_flags": [
+        "blurred_unreadable"
+      ],
+      "scripted_fields": []
+    },
+    {
+      "document_type": "id_document",
+      "file_name": "passport_nankivell_p.jpg",
+      "subject_ref": "IND-0003",
+      "upload_time": "2026-09-02T10:22:00Z",
+      "expiry_date": "2029-09-30",
+      "document_date": null,
+      "issue_country": "GB",
+      "scripted_quality_flags": [],
+      "scripted_fields": [
+        {
+          "field_id": "FLD-0027",
+          "document_id": "DOC-0012",
+          "name": "full_name",
+          "value": "Priya Nankivell",
+          "confidence": "0.96",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        },
+        {
+          "field_id": "FLD-0028",
+          "document_id": "DOC-0012",
+          "name": "date_of_birth",
+          "value": "1985-11-19",
+          "confidence": "0.95",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        },
+        {
+          "field_id": "FLD-0029",
+          "document_id": "DOC-0012",
+          "name": "expiry_date",
+          "value": "2029-09-30",
+          "confidence": "0.94",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        }
+      ]
+    },
+    {
+      "document_type": "proof_of_address",
+      "file_name": "poa_halliwell_jul2026.pdf",
+      "subject_ref": "IND-0002",
+      "upload_time": "2026-09-02T10:24:00Z",
+      "expiry_date": null,
+      "document_date": "2026-07-28",
+      "issue_country": "GB",
+      "scripted_quality_flags": [],
+      "scripted_fields": [
+        {
+          "field_id": "FLD-0030",
+          "document_id": "DOC-0013",
+          "name": "address",
+          "value": "12 Sowerby Lane, Sheffield S7 2LT, United Kingdom",
+          "confidence": "0.9",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        },
+        {
+          "field_id": "FLD-0031",
+          "document_id": "DOC-0013",
+          "name": "document_date",
+          "value": "2026-07-28",
+          "confidence": "0.92",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        }
+      ]
+    },
+    {
+      "document_type": "proof_of_address",
+      "file_name": "poa_nankivell_aug2026.pdf",
+      "subject_ref": "IND-0003",
+      "upload_time": "2026-09-02T10:26:00Z",
+      "expiry_date": null,
+      "document_date": "2026-08-05",
+      "issue_country": "GB",
+      "scripted_quality_flags": [],
+      "scripted_fields": [
+        {
+          "field_id": "FLD-0032",
+          "document_id": "DOC-0014",
+          "name": "address",
+          "value": "4 Carrowbrook Court, Sheffield S11 9DD, United Kingdom",
+          "confidence": "0.91",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        },
+        {
+          "field_id": "FLD-0033",
+          "document_id": "DOC-0014",
+          "name": "document_date",
+          "value": "2026-08-05",
+          "confidence": "0.93",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        }
+      ]
+    },
+    {
+      "document_type": "source_of_funds_declaration",
+      "file_name": "source_of_funds_northbridge.pdf",
+      "subject_ref": null,
+      "upload_time": "2026-09-02T10:28:00Z",
+      "expiry_date": null,
+      "document_date": null,
+      "issue_country": null,
+      "scripted_quality_flags": [],
+      "scripted_fields": [
+        {
+          "field_id": "FLD-0034",
+          "document_id": "DOC-0015",
+          "name": "declared_source",
+          "value": "Trading revenue from wholesale supply contracts",
+          "confidence": "0.88",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        }
+      ]
+    },
+    {
+      "document_type": "business_activity_description",
+      "file_name": "business_activity_northbridge.pdf",
+      "subject_ref": null,
+      "upload_time": "2026-09-02T10:30:00Z",
+      "expiry_date": null,
+      "document_date": null,
+      "issue_country": null,
+      "scripted_quality_flags": [],
+      "scripted_fields": [
+        {
+          "field_id": "FLD-0035",
+          "document_id": "DOC-0016",
+          "name": "declared_industry",
+          "value": "Wholesale of craft and hobby goods",
+          "confidence": "0.9",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        }
+      ]
+    }
+  ],
+  "analyst_releases": [],
+  "field_corrections": [],
+  "field_acceptances": [],
+  "scripted_registry": [],
+  "scripted_identity": [],
+  "scripted_screening": []
+}

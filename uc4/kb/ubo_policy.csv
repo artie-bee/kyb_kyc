@@ -1,0 +1,8 @@
+rule_id,rule,parameter,outcome,description
+UB-01,ubo_threshold_percent,25,threshold,A beneficial owner is anyone holding 25 percent or more of the applicant
+UB-02,effective_ownership,multiply_along_chain,computation,Ownership through intermediate companies is multiplied along the chain: 70 percent of a holding company that owns 45 percent of the applicant is 31.5 percent effective
+UB-03,verify_at_or_above_threshold,25,must_verify,Every declared owner at or above the threshold must be verified before the case can be decided
+UB-04,ubo_supported_by_registry,false,finding,The register does not corroborate the declared beneficial ownership; non-blocking but flagged for enhanced due diligence at the risk step
+UB-05,declared_vs_registry,mismatch,finding,A declared owner does not appear on the register or vice versa; non-blocking finding carried to the risk step
+UB-06,ownership_total,100,finding,Declared ownership percentages that do not add up to a whole are a finding for the analyst to resolve
+UB-07,below_threshold_not_verified,25,no_action,An owner below the threshold does not have to be verified and is recorded only

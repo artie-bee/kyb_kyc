@@ -1,0 +1,4 @@
+{"application_id": "PARTNER-3008", "source_channel": "email", "programme_type": "white_label",
+ "applicant": {"legal_name": "Brightpay Platforms Ltd", "registration_number": "15100442", "entity_type": "private_limited_company",
+   "country": "GB", "business_activity": "Embedded payments platform", "expected_usage": "White-label card programme"},
+ "individuals": []}

@@ -1,0 +1,645 @@
+{
+  "application_id": "PORTAL-WAL-ONB-0004",
+  "source_channel": "portal",
+  "programme_type": "direct",
+  "applicant": {
+    "legal_name": "Vestmark Nordic OU",
+    "trading_name": "Vestmark",
+    "registration_number": "EE-90012345",
+    "entity_type": "private_limited_company",
+    "country": "EE",
+    "business_activity": "Import and distribution of marine equipment",
+    "expected_usage": "Up to 15 cards; around 35000 EUR per month",
+    "vat_registered": true
+  },
+  "ownership": {
+    "ownership_layers": 3,
+    "has_corporate_shareholder": true,
+    "has_trust_or_nominee": false
+  },
+  "individuals": [
+    {
+      "ref": "IND-0007",
+      "role": "director",
+      "full_name": "Lembit Vaher",
+      "date_of_birth": "1971-02-11",
+      "nationality": "EE",
+      "residence_country": "EE",
+      "relationship_to_entity": "Managing director"
+    },
+    {
+      "ref": "IND-0008",
+      "role": "director",
+      "full_name": "Anneli Sormus",
+      "date_of_birth": "1980-07-30",
+      "nationality": "EE",
+      "residence_country": "EE",
+      "relationship_to_entity": "Director and holder of 24.5 percent of shares directly"
+    },
+    {
+      "ref": "IND-0009",
+      "role": "ubo",
+      "full_name": "Ruben Halvorsen",
+      "date_of_birth": "1966-12-05",
+      "nationality": "NO",
+      "residence_country": "NO",
+      "relationship_to_entity": "Declared indirect beneficial owner through two intermediate companies"
+    }
+  ],
+  "ubos": [
+    {
+      "individual_ref": "IND-0008",
+      "ownership_percentage": 24.5,
+      "ownership_chain_percentages": [
+        24.5
+      ],
+      "control_type": "direct_shareholding",
+      "ownership_path": "Vestmark Nordic OU"
+    },
+    {
+      "individual_ref": "IND-0009",
+      "ownership_percentage": 31.5,
+      "ownership_chain_percentages": [
+        70.0,
+        45.0
+      ],
+      "control_type": "indirect_shareholding",
+      "ownership_path": "Harboe Holdings OU > Lindval Mid Holdings SA > Vestmark Nordic OU"
+    }
+  ],
+  "flags": {
+    "spend_above_50k": false,
+    "nominee_or_trust_in_chain": false,
+    "ubo_indirect_25pct_or_more": true,
+    "signatory_not_director": false,
+    "vat_registered": true
+  },
+  "documents": [
+    {
+      "document_type": "certificate_of_incorporation",
+      "file_name": "cert_incorporation_vestmark.pdf",
+      "subject_ref": null,
+      "upload_time": "2026-09-07T10:32:00Z",
+      "expiry_date": null,
+      "document_date": null,
+      "issue_country": "EE",
+      "scripted_quality_flags": [],
+      "scripted_fields": [
+        {
+          "field_id": "FLD-0062",
+          "document_id": "DOC-0032",
+          "name": "company_name",
+          "value": "Vestmark Nordic OU",
+          "confidence": "0.95",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        },
+        {
+          "field_id": "FLD-0063",
+          "document_id": "DOC-0032",
+          "name": "registration_number",
+          "value": "EE-90012345",
+          "confidence": "0.94",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        }
+      ]
+    },
+    {
+      "document_type": "registry_extract",
+      "file_name": "registry_extract_vestmark.pdf",
+      "subject_ref": null,
+      "upload_time": "2026-09-07T10:34:00Z",
+      "expiry_date": null,
+      "document_date": null,
+      "issue_country": "EE",
+      "scripted_quality_flags": [],
+      "scripted_fields": [
+        {
+          "field_id": "FLD-0064",
+          "document_id": "DOC-0033",
+          "name": "company_name",
+          "value": "Vestmark Nordic OU",
+          "confidence": "0.95",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        },
+        {
+          "field_id": "FLD-0065",
+          "document_id": "DOC-0033",
+          "name": "registration_number",
+          "value": "EE-90012345",
+          "confidence": "0.94",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        },
+        {
+          "field_id": "FLD-0066",
+          "document_id": "DOC-0033",
+          "name": "registered_address",
+          "value": "Sadama 14, 10111 Tallinn, Estonia",
+          "confidence": "0.92",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        },
+        {
+          "field_id": "FLD-0067",
+          "document_id": "DOC-0033",
+          "name": "entity_status",
+          "value": "active",
+          "confidence": "0.94",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        },
+        {
+          "field_id": "FLD-0068",
+          "document_id": "DOC-0033",
+          "name": "registered_shareholder",
+          "value": "Lindval Mid Holdings SA",
+          "confidence": "0.86",
+          "source_page": "2",
+          "corrected_by_analyst": "false"
+        }
+      ]
+    },
+    {
+      "document_type": "tax_registration_certificate",
+      "file_name": "tax_registration_vestmark.pdf",
+      "subject_ref": null,
+      "upload_time": "2026-09-07T10:36:00Z",
+      "expiry_date": null,
+      "document_date": null,
+      "issue_country": null,
+      "scripted_quality_flags": [],
+      "scripted_fields": [
+        {
+          "field_id": "FLD-0069",
+          "document_id": "DOC-0034",
+          "name": "tax_number",
+          "value": "EE-TAX-90012345",
+          "confidence": "0.91",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        }
+      ]
+    },
+    {
+      "document_type": "director_register",
+      "file_name": "director_register_vestmark.pdf",
+      "subject_ref": null,
+      "upload_time": "2026-09-07T10:38:00Z",
+      "expiry_date": null,
+      "document_date": null,
+      "issue_country": null,
+      "scripted_quality_flags": [],
+      "scripted_fields": [
+        {
+          "field_id": "FLD-0070",
+          "document_id": "DOC-0035",
+          "name": "director_name",
+          "value": "Lembit Vaher",
+          "confidence": "0.93",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        },
+        {
+          "field_id": "FLD-0071",
+          "document_id": "DOC-0035",
+          "name": "director_name_2",
+          "value": "Anneli Sormus",
+          "confidence": "0.91",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        }
+      ]
+    },
+    {
+      "document_type": "authorised_signatory_list",
+      "file_name": "signatory_list_vestmark.pdf",
+      "subject_ref": null,
+      "upload_time": "2026-09-07T10:40:00Z",
+      "expiry_date": null,
+      "document_date": null,
+      "issue_country": null,
+      "scripted_quality_flags": [],
+      "scripted_fields": [
+        {
+          "field_id": "FLD-0072",
+          "document_id": "DOC-0036",
+          "name": "signatory_name",
+          "value": "Lembit Vaher",
+          "confidence": "0.9",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        }
+      ]
+    },
+    {
+      "document_type": "ubo_declaration",
+      "file_name": "ubo_declaration_vestmark.pdf",
+      "subject_ref": null,
+      "upload_time": "2026-09-07T10:42:00Z",
+      "expiry_date": null,
+      "document_date": null,
+      "issue_country": null,
+      "scripted_quality_flags": [],
+      "scripted_fields": [
+        {
+          "field_id": "FLD-0073",
+          "document_id": "DOC-0037",
+          "name": "ubo_name",
+          "value": "Ruben Halvorsen",
+          "confidence": "0.88",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        },
+        {
+          "field_id": "FLD-0074",
+          "document_id": "DOC-0037",
+          "name": "ownership_percentage",
+          "value": "31.5",
+          "confidence": "0.74",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        },
+        {
+          "field_id": "FLD-0075",
+          "document_id": "DOC-0037",
+          "name": "indirect_ownership_path",
+          "value": "Harboe Holdings OU > Lindval Mid Holdings SA > Vestmark Nordic OU",
+          "confidence": "0.41",
+          "source_page": "2",
+          "corrected_by_analyst": "false"
+        },
+        {
+          "field_id": "FLD-0076",
+          "document_id": "DOC-0037",
+          "name": "ubo_name_2",
+          "value": "Anneli Sormus",
+          "confidence": "0.87",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        }
+      ]
+    },
+    {
+      "document_type": "ownership_chart",
+      "file_name": "ownership_chart_vestmark.pdf",
+      "subject_ref": null,
+      "upload_time": "2026-09-07T10:44:00Z",
+      "expiry_date": null,
+      "document_date": null,
+      "issue_country": null,
+      "scripted_quality_flags": [
+        "missing_pages"
+      ],
+      "scripted_fields": [
+        {
+          "field_id": "FLD-0077",
+          "document_id": "DOC-0038",
+          "name": "intermediate_entity",
+          "value": "Lindval Mid Holdings SA",
+          "confidence": "0.55",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        }
+      ]
+    },
+    {
+      "document_type": "shareholder_register",
+      "file_name": "shareholder_register_vestmark.pdf",
+      "subject_ref": null,
+      "upload_time": "2026-09-07T10:46:00Z",
+      "expiry_date": null,
+      "document_date": null,
+      "issue_country": null,
+      "scripted_quality_flags": [],
+      "scripted_fields": [
+        {
+          "field_id": "FLD-0078",
+          "document_id": "DOC-0039",
+          "name": "shareholder_name",
+          "value": "Lindval Mid Holdings SA",
+          "confidence": "0.87",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        },
+        {
+          "field_id": "FLD-0079",
+          "document_id": "DOC-0039",
+          "name": "shareholder_name_2",
+          "value": "Anneli Sormus",
+          "confidence": "0.89",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        }
+      ]
+    },
+    {
+      "document_type": "id_document",
+      "file_name": "id_card_vaher_l.jpg",
+      "subject_ref": "IND-0007",
+      "upload_time": "2026-09-07T10:48:00Z",
+      "expiry_date": "2029-05-22",
+      "document_date": null,
+      "issue_country": "EE",
+      "scripted_quality_flags": [],
+      "scripted_fields": [
+        {
+          "field_id": "FLD-0080",
+          "document_id": "DOC-0040",
+          "name": "full_name",
+          "value": "Lembit Vaher",
+          "confidence": "0.95",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        }
+      ]
+    },
+    {
+      "document_type": "id_document",
+      "file_name": "id_card_sormus_a.jpg",
+      "subject_ref": "IND-0008",
+      "upload_time": "2026-09-07T10:50:00Z",
+      "expiry_date": "2031-01-09",
+      "document_date": null,
+      "issue_country": "EE",
+      "scripted_quality_flags": [],
+      "scripted_fields": [
+        {
+          "field_id": "FLD-0081",
+          "document_id": "DOC-0041",
+          "name": "full_name",
+          "value": "Anneli Sormus",
+          "confidence": "0.94",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        }
+      ]
+    },
+    {
+      "document_type": "id_document",
+      "file_name": "passport_halvorsen_r.jpg",
+      "subject_ref": "IND-0009",
+      "upload_time": "2026-09-07T10:52:00Z",
+      "expiry_date": "2030-08-17",
+      "document_date": null,
+      "issue_country": "NO",
+      "scripted_quality_flags": [],
+      "scripted_fields": [
+        {
+          "field_id": "FLD-0082",
+          "document_id": "DOC-0042",
+          "name": "full_name",
+          "value": "Ruben Halvorsen",
+          "confidence": "0.93",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        }
+      ]
+    },
+    {
+      "document_type": "proof_of_address",
+      "file_name": "poa_vaher_aug2026.pdf",
+      "subject_ref": "IND-0007",
+      "upload_time": "2026-09-07T10:54:00Z",
+      "expiry_date": null,
+      "document_date": "2026-08-25",
+      "issue_country": "EE",
+      "scripted_quality_flags": [],
+      "scripted_fields": [
+        {
+          "field_id": "FLD-0083",
+          "document_id": "DOC-0043",
+          "name": "document_date",
+          "value": "2026-08-25",
+          "confidence": "0.92",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        }
+      ]
+    },
+    {
+      "document_type": "proof_of_address",
+      "file_name": "poa_sormus_aug2026.pdf",
+      "subject_ref": "IND-0008",
+      "upload_time": "2026-09-07T10:56:00Z",
+      "expiry_date": null,
+      "document_date": "2026-08-27",
+      "issue_country": "EE",
+      "scripted_quality_flags": [],
+      "scripted_fields": [
+        {
+          "field_id": "FLD-0084",
+          "document_id": "DOC-0044",
+          "name": "document_date",
+          "value": "2026-08-27",
+          "confidence": "0.91",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        }
+      ]
+    },
+    {
+      "document_type": "proof_of_address",
+      "file_name": "poa_halvorsen_jul2026.pdf",
+      "subject_ref": "IND-0009",
+      "upload_time": "2026-09-07T10:58:00Z",
+      "expiry_date": null,
+      "document_date": "2026-07-15",
+      "issue_country": "NO",
+      "scripted_quality_flags": [],
+      "scripted_fields": [
+        {
+          "field_id": "FLD-0085",
+          "document_id": "DOC-0045",
+          "name": "document_date",
+          "value": "2026-07-15",
+          "confidence": "0.88",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        }
+      ]
+    },
+    {
+      "document_type": "source_of_funds_declaration",
+      "file_name": "source_of_funds_vestmark.pdf",
+      "subject_ref": null,
+      "upload_time": "2026-09-07T11:00:00Z",
+      "expiry_date": null,
+      "document_date": null,
+      "issue_country": null,
+      "scripted_quality_flags": [],
+      "scripted_fields": [
+        {
+          "field_id": "FLD-0086",
+          "document_id": "DOC-0046",
+          "name": "declared_source",
+          "value": "Distribution margin on marine equipment imports",
+          "confidence": "0.86",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        }
+      ]
+    },
+    {
+      "document_type": "business_activity_description",
+      "file_name": "business_activity_vestmark.pdf",
+      "subject_ref": null,
+      "upload_time": "2026-09-07T11:02:00Z",
+      "expiry_date": null,
+      "document_date": null,
+      "issue_country": null,
+      "scripted_quality_flags": [],
+      "scripted_fields": [
+        {
+          "field_id": "FLD-0087",
+          "document_id": "DOC-0047",
+          "name": "declared_industry",
+          "value": "Wholesale of marine equipment",
+          "confidence": "0.9",
+          "source_page": "1",
+          "corrected_by_analyst": "false"
+        }
+      ]
+    }
+  ],
+  "analyst_releases": [
+    {
+      "file_name": "ownership_chart_vestmark.pdf",
+      "analyst_id": "analyst.m.sild",
+      "decision": "accept",
+      "reason": "the missing annex lists dormant subsidiaries only and does not affect the beneficial ownership chain, which is legible on the pages supplied"
+    }
+  ],
+  "field_corrections": [],
+  "field_acceptances": [
+    {
+      "name": "indirect_ownership_path",
+      "file_name": "ubo_declaration_vestmark.pdf",
+      "analyst_id": "analyst.m.sild",
+      "reason": "checked against the original declaration, the chain is transcribed correctly despite the low OCR confidence"
+    },
+    {
+      "name": "intermediate_entity",
+      "file_name": "ownership_chart_vestmark.pdf",
+      "analyst_id": "analyst.m.sild",
+      "reason": "the entity name matches the shareholder register and the UBO declaration, so the faint scan is corroborated"
+    }
+  ],
+  "scripted_registry": [
+    {
+      "check_id": "REG-0003",
+      "case_id": "WAL-ONB-0004",
+      "applicant_id": "APP-0004",
+      "provider_name": "MockRegistryHub EE",
+      "company_status": "active",
+      "registry_legal_name": "Vestmark Nordic OU",
+      "registry_number": "EE-90012345",
+      "registry_address": "Sadama 14, 10111 Tallinn, Estonia",
+      "registry_directors": "Lembit Vaher|Anneli Sormus",
+      "name_match": "match",
+      "number_match": "match",
+      "address_match": "match",
+      "director_match": "match",
+      "ubo_supported_by_registry": "false",
+      "high_risk_jurisdiction_or_industry": "false",
+      "confidence": "0.52",
+      "result": "review"
+    }
+  ],
+  "scripted_identity": [
+    {
+      "check_id": "IDC-0005",
+      "case_id": "WAL-ONB-0004",
+      "individual_id": "IND-0007",
+      "provider_name": "VerifyMock ID",
+      "document_result": "pass",
+      "liveness_result": "pass",
+      "biometric_result": "pass",
+      "address_result": "pass",
+      "name_dob_match": "match",
+      "document_expired": "false",
+      "duplicate_individual_detected": "false",
+      "result": "pass"
+    },
+    {
+      "check_id": "IDC-0006",
+      "case_id": "WAL-ONB-0004",
+      "individual_id": "IND-0008",
+      "provider_name": "VerifyMock ID",
+      "document_result": "pass",
+      "liveness_result": "pass",
+      "biometric_result": "pass",
+      "address_result": "pass",
+      "name_dob_match": "match",
+      "document_expired": "false",
+      "duplicate_individual_detected": "false",
+      "result": "pass"
+    },
+    {
+      "check_id": "IDC-0007",
+      "case_id": "WAL-ONB-0004",
+      "individual_id": "IND-0009",
+      "provider_name": "VerifyMock ID",
+      "document_result": "pass",
+      "liveness_result": "pass",
+      "biometric_result": "pass",
+      "address_result": "pass",
+      "name_dob_match": "match",
+      "document_expired": "false",
+      "duplicate_individual_detected": "false",
+      "result": "pass"
+    }
+  ],
+  "scripted_screening": [
+    {
+      "check_id": "SCR-0007",
+      "case_id": "WAL-ONB-0004",
+      "subject_type": "applicant",
+      "applicant_id": "APP-0004",
+      "individual_id": "",
+      "sanctions_result": "no_match",
+      "pep_result": "no_match",
+      "adverse_media_result": "none",
+      "severity": "none",
+      "evidence_refs": ""
+    },
+    {
+      "check_id": "SCR-0008",
+      "case_id": "WAL-ONB-0004",
+      "subject_type": "individual",
+      "applicant_id": "",
+      "individual_id": "IND-0007",
+      "sanctions_result": "no_match",
+      "pep_result": "no_match",
+      "adverse_media_result": "none",
+      "severity": "none",
+      "evidence_refs": ""
+    },
+    {
+      "check_id": "SCR-0009",
+      "case_id": "WAL-ONB-0004",
+      "subject_type": "individual",
+      "applicant_id": "",
+      "individual_id": "IND-0008",
+      "sanctions_result": "no_match",
+      "pep_result": "no_match",
+      "adverse_media_result": "none",
+      "severity": "none",
+      "evidence_refs": ""
+    },
+    {
+      "check_id": "SCR-0010",
+      "case_id": "WAL-ONB-0004",
+      "subject_type": "individual",
+      "applicant_id": "",
+      "individual_id": "IND-0009",
+      "sanctions_result": "no_match",
+      "pep_result": "no_match",
+      "adverse_media_result": "none",
+      "severity": "none",
+      "evidence_refs": ""
+    }
+  ]
+}
