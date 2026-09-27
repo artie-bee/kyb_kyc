@@ -162,8 +162,9 @@ Whatever is behind an interface, three rules hold:
 
 ## The demo app
 
-`app/` is a Streamlit front end and nothing more. It reads the database directly
-but **never writes to it**: every action calls the orchestrator function that
+`web/` is the front end: plain HTML and CSS over `http.server`, served by
+`tools/serve.py`. `app/` holds the functions it calls. Both read the database
+directly but **never write to it**: every action calls the orchestrator function that
 owns the rule, so holds, role checks and the sanctions rules apply on screen
 exactly as they do in the pipeline. `app/customer_view.py` is a plain function
 rather than part of the page, so a test can render what the applicant would see
@@ -184,6 +185,6 @@ python tools/compare_to_dataset.py        # score against the dataset
 python tools/export_case.py               # audit bundle per case
 python tools/make_sample_documents.py     # demo document files
 python tools/evaluate_live.py             # live vs mock, needs an API key
-streamlit run app/main.py                 # the demo screens
+python tools/serve.py                     # the demo screens
 python -m pytest tests -q
 ```

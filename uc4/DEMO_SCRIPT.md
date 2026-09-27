@@ -10,9 +10,9 @@ Total running time: about 35 minutes (5 min opening, 25 min scenarios, 5 min clo
 
 **Setup checklist (10 minutes before the demo):**
 
-- [ ] Open the orchestrator folder in VS Code and run `streamlit run app/main.py`.
+- [ ] Open the orchestrator folder in VS Code and run `python tools/serve.py` (it opens http://127.0.0.1:8700/).
 - [ ] Click **Reset demo** in the sidebar. All 14 cases should stop at their first human action (11 open holds, 0 decisions, 0 communications).
-- [ ] Check the sidebar shows the **MOCK** badge, and the role is set to **analyst**.
+- [ ] Check no LIVE badge shows in the sidebar (mock mode shows none), and the decision form's role is set to **analyst**.
 - [ ] Close every other browser tab and notification. Zoom the browser to 110–125% so the room can read it.
 - [ ] Have the sample documents folder open in a second window, in case a preview fails.
 - [ ] Fallback: if the app breaks, stop it, check out the tag `v0.1-mock-complete`, and restart.
@@ -27,7 +27,7 @@ Total running time: about 35 minutes (5 min opening, 25 min scenarios, 5 min clo
 
 Then show the **operations dashboard** (10.1).
 
-**Point out:** every case has a status, an owner and a next action, and ageing is visible at a glance. Mention the **MOCK** badge: everything today runs on synthetic data, with no live customer or identity data.
+**Point out:** every case has a status, an owner and a next action, and ageing is visible at a glance. Mention that it runs in mock mode: everything today runs on synthetic data, with no live customer or identity data.
 
 **Proves:** *Better status visibility* · *Synthetic-data readiness* · *No weak-compliance implication*
 
@@ -133,7 +133,7 @@ Be precise here. This POC is a standalone build that *represents* the reuse spli
 
 1. Open Case 6. Status: **analyst review required**; band **critical** (the sanctions floor, not the score).
 2. **Decision tab, as analyst:** there is no **approve** to attempt. Point at the panel headed *Not offered at band `critical`*, which lists approve and conditional approve and the bands that do allow them. Then choose **escalate** and record it as **analyst**. The app shows the backend's refusal — *"analyst.demo is analyst, but the band is critical, so this decision is compliance's to take"*. Read it aloud.
-3. Switch the sidebar role to **compliance**. Record **escalate**, with an escalation target and reason.
+3. Set the role on the decision form to **compliance**. Record **escalate**, with an escalation target and reason.
 4. **Customer view:** the escalation you just recorded sent the applicant one message, and it is generic — their application is with the onboarding team for an additional manual review step, and no further documents are needed. That is everything they have ever been sent. Nothing mentions sanctions, screening or matches.
 5. Optional: mention that the database itself blocks any attempt to change a sanctions match to "no match." Only a human decision can resolve it.
 
@@ -182,7 +182,7 @@ Be precise here. This POC is a standalone build that *represents* the reuse spli
 | Evidence-pack quality | Scenarios 3, 4 and 5 |
 | No weak-compliance implication | Opening and close wording |
 | White-label not over-scoped | Scenario 7 |
-| Synthetic-data readiness | Opening — MOCK badge |
+| Synthetic-data readiness | Opening — mock mode |
 | Auditability | Scenarios 1, 3 and 6; close — audit export |
 
 ---

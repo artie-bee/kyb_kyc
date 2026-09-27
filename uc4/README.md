@@ -64,9 +64,11 @@ tests/test_step8_end_to_end.py 17 tests - all 14 cases through Steps 1-8:
 tests/test_sample_documents.py 5 tests - printed values match extracted_field
 tests/test_live_mode.py       10 tests - live mode stays opt-in and never passes on failure
 tests/test_llm_providers.py   provider layer - three providers, one set of guarantees
-tests/test_app.py             25 tests - no SQL writes in app/, every screen renders,
-                              the customer view leaks nothing, reuse points at real
-                              KB files, and a human action carries the case forward
+tests/test_app.py             12 tests - no SQL writes in app/ or web/, the customer
+                              view leaks nothing, reuse points at real KB files, and
+                              a human action carries the case forward
+tests/test_web.py             the console - every screen and tab renders, actions
+                              redirect, and the backend's refusals reach the screen
 tests/test_schema_sync.py     6 tests - fails if the dataset or database gains a
                               column or enum value the schema file does not describe
 
@@ -74,7 +76,7 @@ tests/test_schema_sync.py     6 tests - fails if the dataset or database gains a
 
 ```
 pip install -r requirements.txt
-streamlit run app/main.py
+python tools/serve.py      # http://127.0.0.1:8700/, opens a browser
 ```
 
 Screens: operations dashboard, case detail (timeline, checklist, documents and
@@ -86,15 +88,16 @@ A human action on screen carries the case forward: releasing a document or
 correcting a field clears the hold and the orchestrator resumes from there, so
 case 4 reaches band high / 69 and case 3 medium / 43 as they do in the pipeline.
 
-The sidebar carries a role switch (analyst / compliance), a mode badge showing
-**MOCK**, and a "Reset demo" button that rebuilds the database to the demo start
-state - every case run as far as the pipeline can take it alone, with the
-releases and decisions left to make on screen.
+The role (analyst / compliance) is chosen on the decision form, and the backend
+checks it. The sidebar carries a "Reset demo" button that rebuilds the database
+to the demo start state - every case run as far as the pipeline can take it
+alone, with the releases and decisions left to make on screen. A badge appears
+only when a live provider is selected; mock mode shows none.
 
 **The app never writes to the database.** Every action calls the orchestrator's
 own function, so a refusal you see - "cannot approve while holds are open",
 "compliance role required" - is the real rule refusing. `tests/test_app.py`
-scans `app/` for SQL writes and fails if it finds any.
+scans `app/` and `web/` for SQL writes and fails if it finds any.
 
 ## Run
 # On Windows PowerShell the shell does not expand the glob, so expand it explicitly:

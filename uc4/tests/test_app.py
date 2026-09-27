@@ -38,61 +38,6 @@ def demo():
     return conn
 
 
-SCREENS = ["Operations dashboard", "Case detail", "Customer view",
-           "Agent reuse", "Audit export"]
-# One clean case, one held at Step 3, one with a sanctions match, one closed.
-SMOKE_CASES = ["WAL-ONB-0001", "WAL-ONB-0004", "WAL-ONB-0012", "WAL-ONB-0014"]
-
-
-def _app():
-    from streamlit.testing.v1 import AppTest
-    return AppTest.from_file(str(ROOT / "app" / "main.py"), default_timeout=180)
-
-
-@pytest.mark.parametrize("screen", SCREENS)
-def test_every_screen_renders_without_error(screen):
-    """Runs the real app script. Catches the kind of fault that only appears
-    when a table is actually built - a column of mixed types, say."""
-    at = _app().run()
-    assert not at.exception, f"dashboard failed: {at.exception}"
-    if screen != "Operations dashboard":
-        at.radio(key="screen").set_value(screen).run()
-        assert not at.exception, f"{screen} failed: {at.exception}"
-    assert at.header, f"{screen} rendered no heading"
-
-
-@pytest.mark.parametrize("case_id", SMOKE_CASES)
-def test_case_detail_renders_for_a_spread_of_cases(case_id):
-    at = _app().run()
-    at.radio(key="screen").set_value("Case detail").run()
-    at.selectbox(key="case").set_value(case_id).run()
-    assert not at.exception, f"case detail failed for {case_id}: {at.exception}"
-    assert any(case_id in h.value for h in at.header)
-
-
-@pytest.mark.parametrize("case_id", ["WAL-ONB-0006", "WAL-ONB-0012"])
-def test_the_customer_screen_renders_for_the_sensitive_cases(case_id):
-    at = _app().run()
-    at.radio(key="screen").set_value("Customer view").run()
-    at.selectbox(key="case").set_value(case_id).run()
-    assert not at.exception, f"customer view failed for {case_id}: {at.exception}"
-    # nothing on the rendered page carries restricted wording
-    shown = " ".join(
-        [e.value for e in at.markdown] + [e.value for e in at.info]
-        + [e.value for e in at.caption] + [h.value for h in at.header]
-        + [s.value for s in at.subheader])
-    assert not scan(shown), f"{case_id} customer screen shows {scan(shown)}"
-    assert not at.error, "the customer screen refused to render"
-
-
-def test_the_live_option_is_shown_but_disabled():
-    at = _app().run()
-    mode = at.radio(key="mode")
-    assert mode.disabled is True
-    assert mode.options == ["Mock", "Live - pending API access"]
-    assert mode.value == "Mock"
-
-
 def test_a_human_action_carries_the_case_forward(tmp_path):
     """The demo depends on this. Releasing a document or correcting a field
     clears the hold; the case then has to move on by itself, or the presenter is
@@ -202,35 +147,13 @@ def test_the_reuse_screen_names_a_real_kb_file_for_every_override():
             assert f["rules"] > 0, f"{f['file']} has no rules in it"
 
 
-def test_the_reuse_screen_renders():
-    at = _app().run()
-    at.radio(key="screen").set_value("Agent reuse").run()
-    assert not at.exception, f"agent reuse failed: {at.exception}"
-    assert any("10.9" in h.value for h in at.header)
-    assert at.dataframe and len(at.dataframe[0].value) == 6
-
-
-def test_only_the_white_label_case_shows_the_future_phase_panel(demo):
+def test_only_the_white_label_case_has_a_future_phase(demo):
     """Case 8 is the white-label partner. No other case has a future phase."""
     from app import data
 
     white_label = [r["case_id"] for r in demo.execute("SELECT case_id FROM onboarding_case")
                    if data.is_white_label(demo, r["case_id"])]
     assert white_label == ["WAL-ONB-0008"]
-
-    for case_id in ("WAL-ONB-0008", "WAL-ONB-0001", "WAL-ONB-0004"):
-        at = _app().run()
-        at.radio(key="screen").set_value("Case detail").run()
-        at.selectbox(key="case").set_value(case_id).run()
-        assert not at.exception, f"{case_id} failed: {at.exception}"
-        headings = [s.value for s in at.subheader]
-        if case_id == "WAL-ONB-0008":
-            assert "Future phase" in headings, "case 8 must show the future phase panel"
-            captions = [c.value for c in at.caption]
-            assert sum(1 for c in captions if c == "future phase, not in this POC") == 5
-        else:
-            assert "Future phase" not in headings, (
-                f"{case_id} is not white-label and must not show a future phase")
 
 
 def test_the_future_phase_steps_are_the_ones_the_branch_audits(demo):
