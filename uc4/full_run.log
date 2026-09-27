@@ -1,0 +1,6 @@
+﻿provider=groq  model=qwen/qwen3.8-27b
+quality:    25/30 documents agree
+extraction: 60/69 field values agree
+failed:     62 call(s) - listed in the report
+
+written to C:\Users\artlptp255user\Downloads\wallester_uc4_kb_orchestrator_v1\uc4\eval_report.md
