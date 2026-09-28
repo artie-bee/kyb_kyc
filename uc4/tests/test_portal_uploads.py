@@ -260,7 +260,7 @@ def test_optional_items_are_labelled_and_not_counted(demo):
     assert len(optional) == 1
     assert (cl["still_needed"], cl["total_needed"]) == (0, 6)
     page = Browser(demo["portal"]).open_as("WAL-ONB-0001").get("/checklist")[1]
-    assert "0 of 6 still needed" in words(page)
+    assert "6 accepted · 0 under review · 0 still needed" in words(page)
     assert '<span class="item__optional">optional</span>' in row(
         page, optional[0]["checklist_item_id"])
 

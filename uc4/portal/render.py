@@ -174,9 +174,12 @@ def checklist(view, cl) -> str:
     types = ", ".join(t.upper() for t in cl["accepted_types"])
     head = ('<header class="phero"><h1>Documents needed</h1>'
             '<p class="sub">' + e(cl["applicant_name"]) + "</p></header>"
-            '<div class="needbar"><span class="needbar__count"><strong>'
-            + str(cl["still_needed"]) + " of " + str(cl["total_needed"])
-            + "</strong> still needed</span>"
+            '<div class="needbar"><span class="needbar__count">'
+            '<strong>' + str(cl["accepted"]) + "</strong> accepted &middot; "
+            '<strong>' + str(cl["under_review"]) + "</strong> under review &middot; "
+            '<strong>' + str(cl["still_needed"]) + "</strong> still needed"
+            + (" <span class=\"needbar__optional\">(plus " + str(cl["optional"]) + " optional)</span>"
+               if cl["optional"] else "") + "</span>"
             '<span class="needbar__types">Accepted files: ' + e(types) + ", up to "
             + str(cl["max_mb"]) + " MB.</span></div>")
     out = [head]

@@ -218,7 +218,7 @@ returns, read fresh from the `checklist_item` rows on every request. The portal
 names no document type and counts nothing itself.
 
 - **Shown:** required items; optional items, labelled *optional* and left out of
-  "X of Y still needed"; items an analyst adds later (console, Checklist tab,
+  the three header counts; items an analyst adds later (console, Checklist tab,
   *Request another document*), which appear at once and are named generically
   on a case with a restricted finding. **Not shown:** waived items, and
   conditions the form did not answer until an analyst confirms they apply

@@ -238,34 +238,42 @@ def test_every_replayed_result_is_labelled(site):
     docs = [r[0] for r in conn.execute("SELECT document_id FROM document WHERE case_id = ?",
                                        (case_id,))]
     assert len(docs) == 12
-    for action in ("document_quality_checked", "fields_extracted"):
-        for (payload,) in conn.execute("SELECT payload_summary FROM audit_event"
-                                       " WHERE case_id = ? AND action = ?", (case_id, action)):
-            assert LABEL in payload, (action, payload)
-    assert data.recognised_documents(conn, case_id) == set(docs)
+    # The blurred ID never reaches the replay: the sharpness rule refuses it
+    # first (QR-13), so that one verdict is the heuristic's and says so.
+    for (payload,) in conn.execute("SELECT payload_summary FROM audit_event WHERE case_id = ?"
+                                   " AND action = 'document_quality_checked'", (case_id,)):
+        assert LABEL in payload or ("rules=QR-13" in payload and "checker=not called" in payload), \
+            payload
+    for (payload,) in conn.execute("SELECT payload_summary FROM audit_event WHERE case_id = ?"
+                                   " AND action = 'fields_extracted'", (case_id,)):
+        assert LABEL in payload, payload
+    replayed = data.recognised_documents(conn, case_id)
+    assert len(replayed) == 11 and replayed == set(docs) - {docs[0]}
 
     page = console.case_detail(conn, case_id, tab="Documents")
     replayed_fields = conn.execute(
         "SELECT COUNT(*) FROM extracted_field f JOIN document d USING (document_id)"
         " WHERE d.case_id = ?", (case_id,)).fetchone()[0]
-    assert page.count(LABEL) == len(docs) + replayed_fields, "every document and every field"
+    assert page.count(LABEL) == len(replayed) + replayed_fields, "every replay, doc and field"
 
 
 def test_live_mode_ignores_the_manifest(site):
     """A pack file judged by a live checker gets the live verdict, not the
-    manifest's: here a checker that finds the blurred ID perfectly clean."""
+    manifest's: here a checker that finds the clear ID is the wrong document,
+    where the manifest would have passed it."""
     class LiveChecker(QualityChecker):
         mode, version = "live", "test-live"
 
         def check(self, document):
-            return QualityVerdict(flags=[], confidence=0.99)
+            return QualityVerdict(flags=["wrong_document_type"], confidence=0.99)
 
     browser, case_id = start(site)
     item = items_by_name(site["conn"], case_id)["Identity document (passport or ID card) - "
                                                 "Kristiina Vaher"]
-    blurred = (site["pack"] / "07_identity_document_BLURRED.jpg").read_bytes()
+    clear = (site["pack"] / "08_identity_document_clear.jpg").read_bytes()
+    assert demo_samples.recognise(clear)["quality_flags"] == []
     result = document_quality.receive_upload(site["conn"], case_id, item["checklist_item_id"],
-                                             "id.jpg", blurred, data.kb(), checker=LiveChecker())
+                                             "id.jpg", clear, data.kb(), checker=LiveChecker())
     site["conn"].commit()
-    assert result.quality_status == "accepted_for_checks"
+    assert result.quality_status == "resubmission_required", "the live verdict, not the replay"
     assert not data.recognised_documents(site["conn"], case_id)

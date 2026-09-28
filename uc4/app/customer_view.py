@@ -156,7 +156,7 @@ def _items(conn, case_id: str) -> list:
 
 
 def _needed(item) -> bool:
-    """Counts towards "X of Y still needed": everything shown except optional
+    """Counts towards the three header numbers: everything shown except optional
     items. A conditional item that is shown is one that applies."""
     return item["level"] != "optional"
 
@@ -287,6 +287,7 @@ def customer_checklist(conn, case_id: str, kb: KnowledgeBase | None = None) -> d
     restricted = bool(case["restricted_finding"])
 
     items, needed, still_needed = [], 0, 0
+    counts = {ACCEPTED: 0, UNDER_REVIEW: 0}
     for item in _items(conn, case_id):
         docs = conn.execute(
             "SELECT d.* FROM checklist_item_document cid JOIN document d USING (document_id)"
@@ -304,6 +305,8 @@ def customer_checklist(conn, case_id: str, kb: KnowledgeBase | None = None) -> d
             # yet, or an upload we had to send back. A file that is in and
             # being looked at is not owed.
             still_needed += status in (NOT_UPLOADED, RESUBMIT)
+            if status in counts:
+                counts[status] += 1
         items.append({
             "checklist_item_id": item["item_id"],
             "document": GENERIC_DOCUMENT if generic else DOCUMENT_LABELS.get(
@@ -322,8 +325,13 @@ def customer_checklist(conn, case_id: str, kb: KnowledgeBase | None = None) -> d
     return {
         "applicant_name": applicant["legal_name"] if applicant else "",
         "items": items,
+        # The three header numbers, over the items the customer must supply:
+        # they always add up to total_needed. Optional items are counted apart.
+        "accepted": counts[ACCEPTED],
+        "under_review": counts[UNDER_REVIEW],
         "still_needed": still_needed,
         "total_needed": needed,
+        "optional": sum(1 for i in items if i["optional"]),
         "accepted_types": [x for x in extensions if x != "jpeg"],
         "accept_attr": ",".join("." + x for x in extensions),
         "max_mb": document_quality.MAX_UPLOAD_BYTES // (1024 * 1024),

@@ -108,14 +108,16 @@ def visual_holds(conn, case_id):
 
 # ---------------------------------------------------------------------------
 
-def test_an_unrecognised_blurred_id_stays_held_and_the_case_never_gets_ready(conn, pack):
+def test_an_unrecognised_id_stays_held_and_the_case_never_gets_ready(conn, pack):
+    """A sharp ID the manifest does not know: the blur rule passes it, nothing
+    in mock mode can judge the rest, so it waits for a person. (A blurred one is
+    refused outright by QR-13 - see tests/test_blur_check.py.)"""
     case_id = lumen_harbour(conn)
     data.choose_demo_scenario(conn, case_id, "clean", "analyst.test")
     files = pack_files(pack)
-    blurred = (pack["folder"] / "07_identity_document_BLURRED.jpg").read_bytes()
     for name, path in files.items():
         if name == ID_ITEM:
-            upload(conn, case_id, name, unrecognised(blurred), "my_id_BLURRED.jpg")
+            upload(conn, case_id, name, unrecognised(path.read_bytes()), "my_id.jpg")
         else:
             upload(conn, case_id, name, path.read_bytes(), path.name)
 
@@ -134,7 +136,7 @@ def test_an_unrecognised_blurred_id_stays_held_and_the_case_never_gets_ready(con
     # Only an analyst's decision on the document moves it: here, send it back.
     held = conn.execute("SELECT document_id FROM document WHERE case_id = ?"
                         " AND quality_status = 'manual_review_required'", (case_id,)).fetchone()[0]
-    data.release_document(conn, held, "analyst.test", "request_resubmission", "blurred")
+    data.release_document(conn, held, "analyst.test", "request_resubmission", "not legible")
     assert not visual_holds(conn, case_id)
     assert items(conn, case_id)[ID_ITEM]["status"] == "Resubmission needed"
 

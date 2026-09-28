@@ -721,3 +721,12 @@ DEMO_SAMPLE_LABEL = demo_samples.LABEL
 
 def recognised_documents(conn, case_id: str) -> set:
     return demo_samples.recognised_documents(conn, case_id)
+
+
+def rescreen_document(conn, document_id, actor, reason):
+    """Step 3 again on a stored portal upload; the case carries on if it can."""
+    result = document_quality.rescreen_document(conn, document_id, actor, reason, kb(),
+                                                checker=get_upload_checker(QUALITY_CHECKER_MODE))
+    conn.commit()
+    carry_on(conn, result.case_id)
+    return result

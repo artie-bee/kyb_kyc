@@ -86,7 +86,7 @@ Be precise here. This POC is a standalone build that *represents* the reuse spli
 Both are synthetic specimens. Never upload a real document.
 
 1. **Console, Case 2:** click **Copy customer link** under the case header, then **Copy**. The link opens this one application only. It carries no case number and expires after 14 days.
-2. **Portal:** paste the link into the second tab. Open **Documents needed**. The header reads **2 of 11 still needed**.
+2. **Portal:** paste the link into the second tab. Open **Documents needed**. The header reads **9 accepted · 0 under review · 2 still needed**.
    - *Identity document (passport or ID card) - Denton Halliwell* shows **Resubmission needed**, the reason *"We could not read this document clearly…"*, and *Previous upload: director_id_halliwell_scan.jpg (replaced when you upload a new one)*.
    - *Declaration of beneficial owners* shows **Not uploaded yet**.
 3. **Portal:** upload `halliwell_id_clear.jpg` against the identity document and `northbridge_ownership_declaration.pdf` against the declaration. Each upload answers *"Thank you. We have your file and it is now under review."* Both rows now say **Under review**.
@@ -112,7 +112,7 @@ Both are synthetic specimens. Never upload a real document.
    Each value is recorded as **entered by an analyst**, never as extracted.
 7. **Console, Checks tab:** the case has run on into verification. Step 5 made its calls: registry (2 attempts), identity for both directors, and screening for all three subjects.
    - *Expect this:* the dataset scripts no provider answers for case 2, so the mock providers report no answer. The registry shows **unavailable**, the Risk tab reads **insufficient evidence, not scored**, and the case is held for an analyst.
-8. **Portal:** refresh. **0 of 11 still needed**. *My application* shows *Documents reviewed: done* and *Verification and review: "Further review is needed before we can finish…"*. There is no mention of providers, holds or evidence.
+8. **Portal:** refresh. **11 accepted · 0 under review · 0 still needed**. *My application* shows *Documents reviewed: done* and *Verification and review: "Further review is needed before we can finish…"*. There is no mention of providers, holds or evidence.
 
 **What to say:** "The customer fixed it themselves, in their own words and their own time. Nobody chased them by email. The blurred copy isn't thrown away; it's kept, marked as replaced. And when the paid checks finally ran and a provider didn't answer, the system didn't wave the case through. It stopped and put it on an analyst's desk. The customer, meanwhile, sees nothing but a calm 'further review'."
 
@@ -219,9 +219,9 @@ Both are synthetic specimens. Never upload a real document.
    - tick *Every detail here is made up for the demo*.
 
    Point out that nothing on the form asks what *kind* of applicant this is. The system decides that from the facts (here, *SME company*).
-2. **Portal:** the customer lands on *My application*, signed in to the new case (reference **WAL-DEMO-0001**). Click **Documents needed**: **11 of 11 still needed**, one row per document, each with its own upload area.
+2. **Portal:** the customer lands on *My application*, signed in to the new case (reference **WAL-DEMO-0001**). Click **Documents needed**: **0 accepted · 0 under review · 11 still needed**, one row per document, each with its own upload area.
 3. **Portal, the refusal:** upload `07_identity_document_BLURRED.jpg` against *Identity document (passport or ID card) - Kristiina Vaher*. It is refused in plain words: *"We could not accept this file. We could not read this document clearly. Please upload a sharp, complete copy of the original."* The row now shows **Resubmission needed**.
-4. **Portal:** upload `08_identity_document_clear.jpg` against the same row, then the ten other files, each against the item named in `FORM_VALUES.md`. Each one answers *"…now under review"*: nothing is read until the whole checklist is in. The last file sets off the run and answers *"Your file has been accepted"*. The header reads **0 of 11 still needed**.
+4. **Portal:** upload `08_identity_document_clear.jpg` against the same row, then the ten other files, each against the item named in `FORM_VALUES.md`. Each one answers *"…now under review"*: nothing is read until the whole checklist is in. The last file sets off the run and answers *"Your file has been accepted"*. The header reads **11 accepted · 0 under review · 0 still needed**.
 5. **Console** (http://127.0.0.1:8700/): open **WAL-DEMO-0001** from the dashboard.
    - **Status: ready_for_decision**, owner analyst, type *sme_corporate*, no open holds.
    - **Documents tab:** all 12 uploads are marked *uploaded by applicant*. The blurred ID is still in the history. Every document and every field reads **mock: recognised demo sample file**, and there are no typed-in fields.
