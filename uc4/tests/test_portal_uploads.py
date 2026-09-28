@@ -27,6 +27,7 @@ from app import data                                                  # noqa: E4
 from app.customer_view import (CUSTOMER_STATUSES, DOCUMENT_LABELS,    # noqa: E402
                                GENERIC_DOCUMENT, customer_checklist, leaks, visible_text)
 from orchestrator import db                                           # noqa: E402
+from orchestrator.clock import DEMO_START                             # noqa: E402
 from orchestrator.kb import KnowledgeBase                             # noqa: E402
 from orchestrator.steps import communication, document_quality       # noqa: E402
 from orchestrator.steps.requirement_pack import awaiting_confirmation  # noqa: E402
@@ -498,7 +499,7 @@ def test_case_2_end_to_end_portal_upload_console_release_through_step_5(demo):
 
 def test_case_14_an_upload_stops_the_reminders(demo, tmp_path):
     conn = demo["conn"]
-    later = communication.FakeClock(date.today() + timedelta(days=40))
+    later = communication.FakeClock(DEMO_START + timedelta(days=40))
 
     # Without an upload, forty silent days close the case (a separate copy).
     control_path = tmp_path / "control.db"

@@ -33,7 +33,7 @@ sys.path.insert(0, str(ROOT))
 
 from app import data                                                  # noqa: E402
 from app.customer_view import customer_checklist, leaks, visible_text  # noqa: E402
-from orchestrator import db                                           # noqa: E402
+from orchestrator import clock, db                                    # noqa: E402
 from orchestrator.demo_scenarios import ScenarioRefused               # noqa: E402
 from orchestrator.providers import SIMULATED                          # noqa: E402
 from orchestrator.steps import document_quality                       # noqa: E402
@@ -145,7 +145,7 @@ def typed_values(conn, case_id, fields) -> dict:
     entered = application["applicant"]
     directors = [p["full_name"] for p in application["individuals"]
                  if p["role"] in ("director", "sole_trader")]
-    recent = (date.today() - timedelta(days=10)).isoformat()
+    recent = (clock.current().today() - timedelta(days=10)).isoformat()
     known = {"company_name": entered["legal_name"], "legal_name": entered["legal_name"],
              "registration_number": entered["registration_number"],
              "registered_address": entered["registered_address"], "address":

@@ -30,7 +30,7 @@ from dataclasses import dataclass, field
 from datetime import date
 from pathlib import Path
 
-from .. import db
+from .. import clock, db
 from ..kb import KnowledgeBase
 from .. import holds
 from .. import llm_client
@@ -122,7 +122,7 @@ def run_date_rules(doc_type: str, dates: dict, max_age_days: str | None,
     Step 3 calls this with the dates the quality checker read off the page;
     Step 4 calls it again with the dates OCR extracted, and compares.
     """
-    today = today or date.today()
+    today = today or clock.current().today()
     flags = set()
     for rule in kb.quality_rules_for(doc_type):
         if rule["check_name"] not in DATE_CHECKS:
@@ -167,7 +167,7 @@ def accepted_documents(conn, case_id: str) -> list:
 def run(conn, case_id: str, application: dict, kb: KnowledgeBase,
         checker: QualityChecker | None = None, today: date | None = None) -> QualityResult:
     checker = checker or MockQualityChecker()
-    today = today or date.today()
+    today = today or clock.current().today()
     documents = application.get("documents", [])
 
     case = conn.execute("SELECT * FROM onboarding_case WHERE case_id = ?", (case_id,)).fetchone()

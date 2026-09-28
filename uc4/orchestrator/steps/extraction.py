@@ -23,7 +23,7 @@ Anything outstanding -> analyst_review_required, owner analyst.
 from dataclasses import dataclass, field
 from datetime import date
 
-from .. import db
+from .. import clock, db
 from .. import holds
 from .. import llm_client
 from ..extractor import (Extractor, MockExtractor,
@@ -62,7 +62,7 @@ def _date_fields(doc_type: str, values: dict) -> dict:
 def run(conn, case_id: str, application: dict, kb: KnowledgeBase,
         extractor: Extractor | None = None, today: date | None = None) -> ExtractionSummary:
     extractor = extractor or MockExtractor()
-    today = today or date.today()
+    today = today or clock.current().today()
 
     # The ONLY way documents enter this step.
     documents = document_quality.accepted_documents(conn, case_id)
@@ -386,7 +386,7 @@ def enter_fields(conn, document_id: str, analyst_id: str, values: dict,
     screen applies; one that fails sends the document back to the customer.
     """
     kb = kb or KnowledgeBase()
-    today = today or date.today()
+    today = today or clock.current().today()
     if not (analyst_id or "").strip():
         raise ValueError("the analyst typing in the fields must be identified")
     doc = conn.execute("SELECT * FROM document WHERE document_id = ?",

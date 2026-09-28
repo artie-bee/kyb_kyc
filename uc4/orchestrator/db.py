@@ -7,8 +7,9 @@ their own tables with the same column names as the ER diagram.
 """
 
 import sqlite3
-from datetime import datetime, timezone
 from pathlib import Path
+
+from . import clock
 
 SCHEMA = """
 CREATE TABLE IF NOT EXISTS applicant (
@@ -302,7 +303,8 @@ def connect(path: str | Path = "onboarding.db",
 
 
 def now() -> str:
-    return datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+    """The timestamp for a row, from the one injected clock (orchestrator/clock.py)."""
+    return clock.stamp()
 
 
 def next_id(conn: sqlite3.Connection, table: str, prefix: str | None = None) -> str:

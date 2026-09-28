@@ -17,7 +17,7 @@ from pathlib import Path
 UC4 = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(UC4))
 
-from orchestrator import (db, demo_scenarios, holds, live_mode,           # noqa: E402
+from orchestrator import (clock, db, demo_scenarios, holds, live_mode,    # noqa: E402
                           portal_access)
 from orchestrator.kb import KnowledgeBase                                  # noqa: E402
 from orchestrator.quality_checker import get_upload_checker                # noqa: E402
@@ -100,11 +100,7 @@ def _rows(conn, sql, params=()):
 
 
 def ageing_days(created_at: str) -> int:
-    try:
-        created = datetime.fromisoformat(created_at.replace("Z", "+00:00"))
-    except (ValueError, AttributeError):
-        return 0
-    return (datetime.now(timezone.utc) - created).days
+    return clock.days_since(created_at)
 
 
 def dashboard(conn) -> list[dict]:

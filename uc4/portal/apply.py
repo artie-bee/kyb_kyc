@@ -17,6 +17,8 @@ app/data.submit_application, which calls the existing intake.
 import re
 from datetime import date
 
+from orchestrator import clock
+
 # The legal forms offered. The value is what intake's AT rules read.
 ENTITY_TYPES = [
     ("private_limited_company", "Private limited company (Ltd, OÜ)"),
@@ -122,7 +124,7 @@ def _person_errors(row: dict, label: str) -> list[str]:
         errors.append(f"{label}: date of birth is needed, as YYYY-MM-DD")
     else:
         try:
-            if date.fromisoformat(row["dob"]) >= date.today():
+            if date.fromisoformat(row["dob"]) >= clock.current().today():
                 errors.append(f"{label}: date of birth must be in the past")
         except ValueError:
             errors.append(f"{label}: date of birth is not a real date")

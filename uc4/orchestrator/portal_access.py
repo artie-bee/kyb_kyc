@@ -18,9 +18,9 @@ This module writes; the portal only calls it. Every issue and revoke is audited.
 
 import hashlib
 import secrets
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timedelta
 
-from . import db, settings
+from . import clock, db, settings
 
 ACTOR = "step.portal_access"
 
@@ -41,7 +41,7 @@ def issue(conn, case_id: str, issued_by: str, kb=None, valid_days: float | None 
                     (case_id,)).fetchone() is None:
         raise KeyError(f"no such case {case_id}")
     days = settings.PORTAL_LINK_DAYS if valid_days is None else valid_days
-    expires = _stamp(datetime.now(timezone.utc) + timedelta(days=days))
+    expires = _stamp(clock.current().now() + timedelta(days=days))
     token = secrets.token_urlsafe(24)
     conn.execute("INSERT INTO portal_token (token_hash, case_id, issued_by, issued_at,"
                  " expires_at) VALUES (?,?,?,?,?)",
