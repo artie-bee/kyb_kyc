@@ -33,7 +33,7 @@ from pathlib import Path
 UC4 = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(UC4))
 
-from orchestrator import db, holds                                    # noqa: E402
+from orchestrator import clock, db, holds                             # noqa: E402
 from orchestrator.kb import KnowledgeBase                             # noqa: E402
 from orchestrator.steps import risk_assessment                        # noqa: E402
 from tools.run_demo import run as run_demo                            # noqa: E402
@@ -642,11 +642,7 @@ def section_timeline(c) -> list:
 # ---------------------------------------------------------------------------
 
 def ageing_days(created_at):
-    try:
-        created = datetime.fromisoformat((created_at or "").replace("Z", "+00:00"))
-    except (ValueError, AttributeError):
-        return 0
-    return (datetime.now(timezone.utc) - created).days
+    return clock.days_since(created_at)
 
 
 def dashboard_row(c) -> list:
@@ -984,8 +980,11 @@ def generate(out_dir: Path = DEFAULT_OUT, pdf: bool = True,
     import json
     from tools.dataset_to_applications import DEFAULT_OUT as APPLICATIONS
 
-    conn = db.connect(":memory:")
-    run_demo(conn, verbose=False)
+    # Built and written on the demo's own fixed clock, so every stamp, every
+    # "waited N days" and every age in the guide is the same whenever it is run.
+    with clock.use(clock.FakeClock(clock.DEMO_START)):
+        conn = db.connect(":memory:")
+        run_demo(conn, verbose=False)
     kb = KnowledgeBase()
 
     applications = {}
@@ -995,7 +994,8 @@ def generate(out_dir: Path = DEFAULT_OUT, pdf: bool = True,
         applications[case_id] = app
 
     stamp = generated_at or datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
-    text = build(conn, kb, applications, stamp)
+    with clock.use(clock.FakeClock(clock.DEMO_START)):
+        text = build(conn, kb, applications, stamp)
 
     out_dir.mkdir(parents=True, exist_ok=True)
     md_path = out_dir / "CASE_GUIDE.md"

@@ -1,0 +1,7 @@
+reason_code,customer_text,version,approval_status
+document_unreadable,"We could not read this document clearly. Please upload a sharp, complete copy of the original.",1.0,approved
+document_expired,This document has expired. Please upload one that is still valid.,1.0,approved
+proof_of_address_too_old,This document is too old. Please upload one dated within the last {days} days.,1.0,approved
+document_incomplete,Part of this document is missing. Please upload the complete document with every page.,1.0,approved
+wrong_document,This is not the document we asked for. Please upload the document named on this row.,1.0,approved
+*,Please upload a new copy of this document.,1.0,approved

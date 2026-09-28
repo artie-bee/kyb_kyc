@@ -364,7 +364,7 @@ def test_release_request_resubmission_sends_the_case_back_to_the_customer():
                         ).fetchone()
     out = analyst_review.release_document(
         conn, held["document_id"], "analyst.m.sild", "request_resubmission",
-        "the annex is needed in full to confirm the chain")
+        "the annex is needed in full to confirm the chain", reason_code="document_incomplete")
     assert out.document_status == "resubmission_required"
     quality = [h for h in holds.open_holds(conn, held["case_id"])
                if h.placed_by_step == "step.document_quality"]

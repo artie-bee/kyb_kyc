@@ -1,5 +1,5 @@
 {
-  "kb_version": "kb-2026.09-poc-v8",
+  "kb_version": "kb-2026.09-poc-v12",
   "items": {
     "applicant_type_rules": {
       "file": "applicant_type_rules.csv",
@@ -18,7 +18,7 @@
     },
     "document_quality_rules": {
       "file": "document_quality_rules.csv",
-      "version": "1.1",
+      "version": "1.2",
       "brief_section": "5.3 - Document quality and resubmission"
     },
     "extraction_fields": {
@@ -85,6 +85,21 @@
       "file": "decision_reason_codes.csv",
       "version": "1.0",
       "brief_section": "5.10 - Analyst decision, reason vocabulary"
+    },
+    "resubmission_reason_text": {
+      "file": "resubmission_reason_text.csv",
+      "version": "1.1",
+      "brief_section": "5.9 - Approved customer wording for why a document must be sent again"
+    },
+    "document_guidance": {
+      "file": "document_guidance.csv",
+      "version": "1.0",
+      "brief_section": "10 - Customer guidance shown before an upload"
+    },
+    "customer_status_wording": {
+      "file": "customer_status_wording.csv",
+      "version": "1.0",
+      "brief_section": "5.9 / 11.3 - Customer-safe status wording, both front ends"
     }
   }
 }

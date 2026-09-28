@@ -5,7 +5,9 @@ Run the console.
     python tools/serve.py --port 8700 --no-browser
 
 Plain HTML and CSS over the orchestrator - no Streamlit, no framework, no build
-step. The database is rebuilt to the demo start state on first run if it is not
+step. With WALLESTER_UC4_EXTRACTION_FOR_NEW_UPLOADS=live_if_available it also
+runs the background reader for new portal uploads (orchestrator/live_reading.py).
+The database is rebuilt to the demo start state on first run if it is not
 there; "Reset demo" in the sidebar does it again on demand.
 """
 
@@ -38,6 +40,10 @@ def main() -> None:
     httpd = server.serve(args.port, args.host)
     print(f"Wallester UC4 console on {url}")
     print(f"  mode: {data.mode_badge()}    knowledge base: {data.kb().version}")
+    if data.settings.EXTRACTION_FOR_NEW_UPLOADS == data.live_reading.LIVE:
+        data.start_live_reader()
+        print(f"  new portal uploads: read by the live model in the background "
+              f"(one call every {data.settings.LIVE_READ_INTERVAL}s at most)")
     print("  ctrl-c to stop")
     if not args.no_browser:
         webbrowser.open(url)

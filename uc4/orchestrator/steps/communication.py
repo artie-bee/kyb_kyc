@@ -23,7 +23,7 @@ import re
 from dataclasses import dataclass, field
 from datetime import date, timedelta
 
-from .. import db, holds
+from .. import clock, db, holds
 from ..kb import KnowledgeBase
 
 ACTOR = "step.communication"
@@ -62,23 +62,10 @@ class CommunicationResult:
 # Clock - real or fake, so the resubmission loop can be tested without waiting
 # ---------------------------------------------------------------------------
 
-class Clock:
-    def today(self) -> date:
-        return date.today()
-
-
-class FakeClock(Clock):
-    """A clock the tests move by hand."""
-
-    def __init__(self, start: date):
-        self._today = start
-
-    def today(self) -> date:
-        return self._today
-
-    def advance(self, days: int) -> date:
-        self._today += timedelta(days=days)
-        return self._today
+# The one clock lives in orchestrator/clock.py; these names are kept so the
+# resubmission loop reads as it always has.
+Clock = clock.Clock
+FakeClock = clock.FakeClock
 
 
 # ---------------------------------------------------------------------------

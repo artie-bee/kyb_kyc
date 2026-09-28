@@ -6,3 +6,7 @@ anthropic>=0.40
 
 # Tests
 pytest>=8.0
+
+# Blur check on PDF uploads (Step 3, rule QR-13) - rasterises each page.
+# Without it a PDF is not measured and the rule does not fire.
+pypdfium2>=4.0

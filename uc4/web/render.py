@@ -27,7 +27,7 @@ from app.customer_view import customer_view, leaks                    # noqa: E4
 
 STATIC = Path(__file__).resolve().parent / "static"
 
-SCREENS = [("Operations dashboard", "/"), ("Case detail", "/case/"),
+SCREENS = [("Operations dashboard", "/"), ("My queue", "/queue"), ("Case detail", "/case/"),
            ("Customer view", "/customer/"), ("Agent reuse", "/reuse"),
            ("Audit export", "/export/")]
 
@@ -158,7 +158,16 @@ def page(title, body, active, conn=None, case_id=None, role="analyst",
                   + options + "</select></div>")
 
     flash_html = ""
-    if flash:
+    if flash and flash[0] == "link":
+        flash_html = note(
+            "<p>Send this link to the customer. It opens their application only, and "
+            "stops working after the expiry shown in the audit trail. It is shown this "
+            "once.</p>"
+            '<div class="btn-row"><input type="text" class="linkbox" id="customer-link" '
+            'readonly value="' + e(flash[1]) + '">'
+            '<button class="btn btn--primary" type="button" data-copy="customer-link">'
+            "Copy</button></div>", "ok", "Customer link")
+    elif flash:
         kind, text = flash
         flash_html = note(e(text), "bad" if kind == "err" else "ok",
                           "Refused" if kind == "err" else "Done")
@@ -325,6 +334,10 @@ def case_detail(conn, case_id, tab="Timeline", role="analyst",
                       + "</code>" + extra + "</p><ul>" + steps + "</ul>",
                       "info", "Future phase")
 
+    demo = _demo_panel(conn, case_id, reviewer) if data.is_demo_case(case_id) else ""
+    demo += _reassessment_panel(conn, case_id)
+    why = _why_here(conn, case_id, role)
+
     tabs = "".join('<a class="tab' + (" tab--on" if t == tab else "") + '" href="/case/'
                    + e(case_id) + "?tab=" + e(t) + '">' + e(t) + "</a>"
                    for t in TABS)
@@ -349,8 +362,116 @@ def case_detail(conn, case_id, tab="Timeline", role="analyst",
         '<span class="stat__v stat__v--sm"><span class="type">'
         + e(case["applicant_type"] or "-") + "</span></span></div>"
         "</section>"
-        + holds_html + restricted + future
+        '<form method="post" action="/action/customer-link" class="btn-row linkform">'
+        '<input type="hidden" name="case_id" value="' + e(case_id) + '">'
+        '<input type="hidden" name="back" value="/case/' + e(case_id) + "?tab=" + e(tab) + '">'
+        '<button class="btn" type="submit">Copy customer link</button>'
+        '<a class="btn" href="/queue/next?after=' + e(case_id) + '">Next case</a></form>'
+        + why + holds_html + restricted + future + demo
         + '<nav class="tabs">' + tabs + "</nav>" + inner)
+
+
+def _why_here(conn, case_id, role) -> str:
+    """One plain line per open hold, and the existing action that clears it -
+    shown as a button only when this role may use it."""
+    rows = data.why_here(conn, case_id, role)
+    if not rows:
+        return ""
+    items = []
+    for r in rows:
+        action = r["action"]
+        if action and r["permitted"]:
+            href = ("/case/" + e(case_id) + ("?tab=" + e(action["tab"]) if action["tab"]
+                                             else "#reassess"))
+            control = ('<a class="btn btn--primary" href="' + href + '" data-route="'
+                       + e(action["route"]) + '" data-function="' + e(action["function"])
+                       + '">' + e(action["label"]) + "</a>")
+        elif action:
+            control = ('<span class="muted">' + e(action["label"]) + " - for "
+                       + e(r["owner"]) + "</span>")
+        else:
+            control = ""
+        items.append('<li class="why__row"><span class="why__line">' + e(r["line"])
+                     + "</span>" + control + "</li>")
+    return ('<section class="why" aria-label="Why is this case here?">'
+            '<h2 class="why__title">Why is this case here?</h2><ul>' + "".join(items)
+            + "</ul></section>")
+
+
+def queue_page(conn, role="analyst", **kw) -> str:
+    """The cases this role can act on now, most urgent first."""
+    rows = data.queue(conn, role)
+    first = rows[0]["case_id"] if rows else None
+    body = [table(["Case", "Why it is here", "Band", "What you can do"],
+                  [['<a href="/case/' + e(r["case_id"]) + '">' + e(r["case_id"]) + "</a>",
+                    e(r["why"]), cell(r["band"]),
+                    e(", ".join(a.replace("_", " ") for a in r["actions"]))] for r in rows],
+                  "Nothing needs you as " + role + " right now.")]
+    start = ('<p><a class="btn btn--primary" href="/case/' + e(first) + '">Start with '
+             + e(first) + "</a></p>" if first else "")
+    # Viewing as another role uses the existing /action/settings route: it only
+    # changes whose queue is shown, and every action still checks the role.
+    picker = ('<form method="post" action="/action/settings" class="btn-row rolepick">'
+              '<input type="hidden" name="back" value="/queue">'
+              '<label for="queue-role">View as</label><select name="role" id="queue-role">'
+              + "".join('<option value="' + r + '"' + (" selected" if r == role else "") + ">"
+                        + r + "</option>" for r in ("analyst", "compliance"))
+              + '</select><button class="btn" type="submit">Show my queue</button></form>')
+    return ('<header class="page"><h1>My queue</h1><p class="sub">Cases you can act on as '
+            "<strong>" + e(role) + "</strong>: critical and sanctions cases first, then the "
+            "worst open hold, then the risk band, then the oldest.</p></header>"
+            + picker + start + "".join(body))
+
+
+def _reassessment_panel(conn, case_id) -> str:
+    """New evidence arrived after the assessment: the analyst decides whether it
+    changes anything. The paid checks run again only from here."""
+    hold = data.reassessment_hold(conn, case_id)
+    if hold is None:
+        return ""
+    back = "/case/" + e(case_id)
+    return '<div id="reassess"></div>' + note(
+        "<p>A document arrived after the paid checks answered. It has been screened; "
+        "once it has been read (Documents tab), choose one. The risk band stays as it "
+        "is until you do.</p>"
+        '<form method="post" action="/action/reassess">'
+        '<input type="hidden" name="case_id" value="' + e(case_id) + '">'
+        '<input type="hidden" name="back" value="' + back + '">'
+        '<div class="field"><label>Reason</label><input type="text" name="reason" required>'
+        "</div>"
+        '<div class="btn-row">'
+        '<button class="btn btn--primary" name="choice" value="rerun">Re-run verification'
+        "</button>"
+        '<button class="btn" name="choice" value="keep">Keep the assessment</button></div>'
+        '<p class="foot">Re-running replaces the registry, identity and risk results; the '
+        "previous ones are archived in the audit trail. Screening results are kept as they "
+        "are.</p></form>", "warn", "New evidence after assessment")
+
+
+def _demo_panel(conn, case_id, reviewer="analyst.demo") -> str:
+    """A case made in the portal's demo form: say so, and let the analyst choose
+    what the simulated providers will find. Console only - the portal has no
+    route, form or word for this."""
+    current = data.demo_scenario(conn, case_id)
+    back = "/case/" + e(case_id)
+    if data.document_stage_open(conn, case_id):
+        options = "".join('<option value="' + e(k) + '"' + (" selected" if k == current else "")
+                          + ">" + e(v) + "</option>" for k, v in data.DEMO_SCENARIOS.items())
+        control = ('<form method="post" action="/action/demo-scenario" class="btn-row">'
+                   '<input type="hidden" name="case_id" value="' + e(case_id) + '">'
+                   '<input type="hidden" name="back" value="' + back + '">'
+                   '<select name="scenario" aria-label="Demo scenario">' + options + "</select>"
+                   '<button class="btn btn--primary" type="submit">Set scenario</button></form>'
+                   '<p class="foot">Applies when Steps 5 and 6 run. The choice is audited, and '
+                   "fixed once the providers have answered.</p>")
+    else:
+        control = ("<p>Scenario <code>" + e(current) + "</code> &mdash; fixed: the simulated "
+                   "providers have already answered on this case.</p>")
+    return note("Made in the customer portal's demo application form, with synthetic data. "
+                "Every registry, identity and screening result on this case is a <strong>"
+                + e(data.SIMULATED) + "</strong>, not a real check. The case is left out of "
+                "every dataset comparison, and Reset demo deletes it."
+                "<h3>Demo scenario</h3>" + control, "info", "Demo case")
 
 
 def _tab_timeline(conn, case_id, **kw):
@@ -427,7 +548,7 @@ def _tab_checklist(conn, case_id, **kw):
                    + '</span><span class="group__tally">' + str(in_hand) + " of "
                    + str(len(group)) + " accepted</span></div>")
         for i in group:
-            out.append(_check_row(i))
+            out.append(_check_row(i, case_id))
         out.append("</section>")
 
     # Anything with a level the KB has added since this list was written still
@@ -437,13 +558,51 @@ def _tab_checklist(conn, case_id, **kw):
     if rest:
         out.append('<section class="group"><div class="group__head">'
                    '<span class="group__name">Other</span></div>')
-        out.extend(_check_row(i) for i in rest)
+        out.extend(_check_row(i, case_id) for i in rest)
         out.append("</section>")
+    out.append(_add_item_form(conn, case_id))
     return "".join(out)
 
 
-def _check_row(item) -> str:
+def _add_item_form(conn, case_id) -> str:
+    """Ask the customer for one more document after the pack was built. It
+    appears on their checklist at once, by a generic name on a restricted case."""
+    types = "".join('<option value="' + e(t) + '">' + e(t.replace("_", " ")) + "</option>"
+                    for t in data.addable_document_types())
+    people = '<option value="">The business, not a person</option>' + "".join(
+        '<option value="' + e(p["individual_id"]) + '">' + e(p["full_name"]) + "</option>"
+        for p in data.people(conn, case_id))
+    return ('<form method="post" action="/action/add-item" class="panel">'
+            '<input type="hidden" name="case_id" value="' + e(case_id) + '">'
+            '<input type="hidden" name="back" value="/case/' + e(case_id) + '?tab=Checklist">'
+            '<h3>Request another document</h3>'
+            '<div class="formgrid">'
+            '<div class="field"><label>Document</label><select name="document_type">'
+            + types + "</select></div>"
+            '<div class="field"><label>For</label><select name="subject">' + people
+            + "</select></div>"
+            '<div class="field"><label>Reason (internal)</label>'
+            '<input type="text" name="reason" required></div></div>'
+            '<button class="btn btn--primary" type="submit">Add to the checklist</button>'
+            '<p class="foot">Added as required. The customer sees it on their checklist at '
+            "once; send the matching approved message from the Communications tab.</p>"
+            "</form>")
+
+
+def _check_row(item, case_id="") -> str:
     tone, mark, plain = CHECK_STATUS.get(item["status"], ("none", "?", item["status"]))
+    confirm = ""
+    if item.get("awaiting_confirmation"):
+        plain = "awaiting your confirmation"
+        confirm = ('<form method="post" action="/action/confirm-condition" class="btn-row '
+                   'check__confirm">'
+                   '<input type="hidden" name="item_id" value="' + e(item["item_id"]) + '">'
+                   '<input type="hidden" name="back" value="/case/' + e(case_id)
+                   + '?tab=Checklist">'
+                   '<input type="text" name="reason" placeholder="Reason" required>'
+                   '<button class="btn" name="applies" value="yes">Applies</button>'
+                   '<button class="btn" name="applies" value="no">Does not apply</button>'
+                   "</form>")
     if item["file_name"]:
         file_html = '<span class="check__file">' + e(item["file_name"]) + "</span>"
     else:
@@ -461,43 +620,94 @@ def _check_row(item) -> str:
             '<span class="check__side">' + attempts
             + chip(plain, tone=("neutral" if tone == "none" else tone))
             + '<span class="check__ids">' + e(item["rule_id"]) + " &middot; "
-            + e(item["item_id"]) + "</span></span></div>")
+            + e(item["item_id"]) + "</span></span>" + confirm + "</div>")
 
 
 def _tab_documents(conn, case_id, role="analyst", reviewer="analyst.demo", **kw):
     out = ["<h2>Documents and extraction</h2>"]
-    for doc in data.documents(conn, case_id):
+    names = data.uploaded_names(conn, case_id)
+    recognised = data.recognised_documents(conn, case_id)
+    documents = data.documents(conn, case_id)
+    by_id = {d["document_id"]: d for d in documents}
+    replaced = data.replaced_by(conn, case_id)      # new document id -> the one it replaced
+    # Hybrid mode: which documents the live model judged or read, and which are
+    # still waiting for it. Three sources of a value, never shown as one another:
+    # read by the live model, a recognised demo sample, typed in by an analyst.
+    live = data.live_read_documents(conn, case_id)
+    queued = data.live_queued_documents(conn, case_id)
+    in_queue = data.live_queue_length(conn) if queued else 0
+    reading = ("Reading automatically... (" + str(in_queue) + " in queue)")
+    sample_fields = data.recognised_fields(conn, case_id)
+    stale = data.recognised_awaiting(conn, case_id)
+    if stale:
+        out.append(
+            note(str(len(stale)) + " document(s) waiting to be typed in are recognised demo "
+                 "sample files (" + ", ".join(e(d["document_id"]) for d in stale) + "). Their "
+                 "fields are on record, so they can be read instead of typed.", "info",
+                 "Recognised demo samples")
+            + '<form method="post" action="/action/read-recognised">'
+            '<input type="hidden" name="case_id" value="' + e(case_id) + '">'
+            '<input type="hidden" name="back" value="/case/' + e(case_id) + '?tab=Documents">'
+            '<button class="btn btn--primary" type="submit">Read their recorded fields'
+            "</button></form>")
+    for doc in documents:
+        replayed = doc["document_id"] in recognised
         held = doc["quality_status"] == "manual_review_required"
-        flags = ('<span class="type">[' + e(doc["quality_flags"]) + "]</span>"
-                 if doc["quality_flags"] else "")
-        summary = ("<summary>" + e(doc["file_name"])
+        waiting = doc["document_id"] in queued and doc["quality_status"] != "superseded"
+        # The visual-check marker says what Step 3 could not do. Once a person
+        # has looked, it no longer describes the document, so it is not shown.
+        shown_flags = [f for f in (doc["quality_flags"] or "").split("|")
+                       if f and not (f in ("visual_check_not_run", "live_read_queued")
+                                     and not held)]
+        flags = ('<span class="type">[' + e("|".join(shown_flags)) + "]</span>"
+                 if shown_flags else "")
+        if doc["released_by"] and not held and doc["quality_status"] != "superseded":
+            flags += chip("released by " + doc["released_by"], tone="ok")
+        own_name = names.get(doc["file_name"])
+        by_applicant = (chip("uploaded by applicant", tone="info")
+                        if own_name is not None else "")
+        summary = ("<summary>" + e(own_name or doc["file_name"])
                    + chip(doc["quality_status"],
                           {"accepted_for_checks": "ok",
                            "manual_review_required": "warn",
-                           "resubmission_required": "bad"})
+                           "resubmission_required": "bad",
+                           "superseded": "neutral"})
+                   + by_applicant
+                   + (chip(data.DEMO_SAMPLE_LABEL, tone="warn") if replayed else "")
+                   + (chip(data.LIVE_READ_LABEL, tone="info")
+                      if doc["document_id"] in live["quality"] else "")
+                   + (chip(reading, tone="info") if waiting else "")
                    + flags + "</summary>")
 
-        if doc["sample_path"]:
-            href = "/doc/" + e(doc["document_id"])
-            if doc["sample_path"].suffix.lower() in (".jpg", ".jpeg", ".png"):
-                left = ('<div class="filecard"><img src="' + href + '" alt="'
-                        + e(doc["file_name"]) + '">'
-                        '<a class="btn" href="' + href + '" download>Open the file</a></div>')
-            else:
-                left = ('<div class="filecard"><p class="muted">PDF: '
-                        + e(doc["sample_path"].name) + "</p>"
-                        '<a class="btn" href="' + href + '" download>Open the file</a></div>')
-        else:
-            left = ('<div class="filecard"><p class="muted">No sample file '
-                    "generated for this document.</p></div>")
+        left = _preview(doc)
+        old = by_id.get(replaced.get(doc["document_id"], ""))
+        if old is not None:
+            # A replacement: the new file and the one it replaced, side by side.
+            left = ('<div class="compare"><div><span class="compare__label">This upload'
+                    "</span>" + left + '</div><div><span class="compare__label">Replaced ('
+                    + e(old["document_id"]) + ")</span>" + _preview(old) + "</div></div>")
 
         right = ["<p><strong>Screen verdict:</strong> "
                  + cell(doc["quality_status_at_screen"]) + "</p>"]
+        if own_name is not None:
+            right.append("<p><strong>Uploaded by the applicant</strong> as "
+                         + e(own_name) + '; stored as <span class="type">'
+                         + e(doc["file_name"]) + "</span></p>")
+        if doc["quality_status"] == "superseded":
+            right.append(note("Replaced by a newer upload on the same checklist item. Kept "
+                              "on the record; nothing downstream reads it.", "info"))
         if doc["resubmission_reasons"]:
             right.append("<p><strong>Reasons:</strong> " + e(doc["resubmission_reasons"]) + "</p>")
         if doc["released_by"]:
             right.append(note("Released by " + e(doc["released_by"]) + ": "
                               + e(doc["release_reason"]), "info"))
+        if doc["document_id"] in live["quality"]:
+            right.append("<p><strong>Quality check:</strong> " + chip(
+                live["quality"][doc["document_id"]], tone="info") + "</p>")
+        if waiting:
+            right.append(note("This upload is queued for the live model, which will check "
+                              "it and read its fields. Nothing to do yet; you can still "
+                              "decide on it or type the fields in now.", "info", reading))
         if held:
             right.append(note("Accept keeps the document and lets the case carry "
                               "on. Request resubmission sends it back to the "
@@ -512,29 +722,50 @@ def _tab_documents(conn, case_id, role="analyst", reviewer="analyst.demo", **kw)
                 '<form method="post" action="/action/release-document">'
                 '<input type="hidden" name="document_id" value="' + e(doc["document_id"]) + '">'
                 '<input type="hidden" name="back" value="/case/' + e(case_id) + '?tab=Documents">'
-                '<div class="field"><label>Reason</label>'
+                '<div class="field"><label>Reason (internal, on the record)</label>'
                 '<input type="text" name="reason" required></div>'
+                '<div class="field"><label>If sending it back: what the customer is told'
+                "</label><select name=\"reason_code\"><option value=\"\">Choose a reason..."
+                "</option>" + "".join(
+                    '<option value="' + e(code) + '">' + e(text) + "</option>"
+                    for code, text in data.resubmission_reasons()) + "</select></div>"
                 '<div class="btn-row">'
-                '<button class="btn btn--primary" name="choice" value="accept">Accept</button>'
+                '<button class="btn btn--primary" name="choice" value="accept"'
+                ' data-shortcut="a">Accept</button>'
                 '<button class="btn" name="choice" value="request_resubmission">'
                 "Request resubmission</button></div></form>")
 
         fields = ""
+        awaiting = [f for f in doc["fields"] if f["entry_method"] == "awaiting_analyst_entry"]
         if doc["fields"]:
             rows = []
             for f in doc["fields"]:
-                low = f["needs_analyst_correction"] and not f["corrected_by_analyst"]
-                if f["corrected_by_analyst"]:
+                if f["entry_method"] == "awaiting_analyst_entry":
+                    continue                    # typed in through the form below
+                keyed = f["entry_method"] == "entered_by_analyst"
+                low = (f["needs_analyst_correction"] and not f["corrected_by_analyst"]
+                       and not keyed)
+                if keyed:
+                    state = chip("entered by an analyst", tone="info")
+                elif replayed or doc["document_id"] in sample_fields:
+                    state = chip(data.DEMO_SAMPLE_LABEL, tone="warn")
+                elif doc["document_id"] in live["fields"]:
+                    state = chip(live["fields"][doc["document_id"]], tone="info") + (
+                        chip("below the confidence floor", tone="bad") if low else "")
+                elif f["corrected_by_analyst"]:
                     state = chip("corrected by an analyst", tone="ok")
                 elif low:
                     state = chip("below the confidence floor", tone="bad")
                 else:
                     state = ""
-                value = e(f["value"]) if f["value"] is not None else em_dash("not read")
-                rows.append('<div class="fieldrow"><span class="type">' + e(f["name"])
+                value = e(f["value"]) if f["value"] is not None else em_dash("not given")
+                # A typed-in value has no machine confidence to show.
+                confidence = em_dash("typed in, not read") if keyed else (
+                    "%.2f" % float(f["confidence"]))
+                rows.append('<div class="fieldrow' + (" fieldrow--low" if low else "")
+                            + '"><span class="type">' + e(f["name"])
                             + "</span><span>" + value + '</span><span class="num">'
-                            + ("%.2f" % float(f["confidence"])) + "</span><span>"
-                            + state + "</span></div>")
+                            + confidence + "</span><span>" + state + "</span></div>")
                 if low:
                     back = "/case/" + e(case_id) + "?tab=Documents"
                     rows.append(
@@ -553,19 +784,76 @@ def _tab_documents(conn, case_id, role="analyst", reviewer="analyst.demo", **kw)
                         '<div class="field"><label>Reason</label>'
                         '<input type="text" name="reason" required></div>'
                         '<div class="btn-row">'
-                        '<button class="btn" name="how" value="accept">Accept as read</button>'
-                        '<button class="btn btn--primary" name="how" value="correct">Correct</button>'
+                        '<button class="btn" name="how" value="accept" data-shortcut="a">'
+                        "Accept as read</button>"
+                        '<button class="btn btn--primary" name="how" value="correct"'
+                        ' data-shortcut="c">Correct</button>'
                         "</div></form>")
-            fields = "<h3>Extracted fields</h3>" + "".join(rows)
+            if rows:
+                # Beside the preview, so each value is read against the file.
+                right.append("<h3>Fields</h3>" + "".join(rows))
+        if awaiting:
+            # Beside the preview, so the analyst types what the file says.
+            right.append(_entry_form(case_id, doc, awaiting,
+                                     data.live_unavailable_reason(conn, doc["document_id"])))
+            held = True
 
         cls = "doc doc--held" if held else "doc"
         opened = " open" if held else ""
-        out.append('<details class="' + cls + '"' + opened + ">"
-                   + summary + '<div class="body"><div class="grid2">' + left
-                   + "<div>" + "".join(right) + "</div></div>" + fields + "</div></details>")
+        body_right = "".join(right)
+        hint = ('<p class="kbd-hint" aria-hidden="true">A: Accept &middot; C: Correct</p>'
+                if "data-shortcut=" in body_right else "")
+        out.append('<details class="' + cls + '"' + opened + ' data-review tabindex="-1">'
+                   + summary + '<div class="body">' + hint + '<div class="grid2">' + left
+                   + "<div>" + body_right + "</div></div></div></details>")
     if len(out) == 1:
         out.append('<p class="empty">No documents on this case.</p>')
     return "".join(out)
+
+
+def _preview(doc) -> str:
+    if doc["sample_path"]:
+        href = "/doc/" + e(doc["document_id"])
+        if doc["sample_path"].suffix.lower() in (".jpg", ".jpeg", ".png"):
+            return ('<div class="filecard"><img src="' + href + '" alt="'
+                    + e(doc["file_name"]) + '">'
+                    '<a class="btn" href="' + href + '" download>Open the file</a></div>')
+        return ('<div class="filecard"><p class="muted">PDF: '
+                + e(doc["sample_path"].name) + "</p>"
+                '<a class="btn" href="' + href + '" download>Open the file</a></div>')
+    return ('<div class="filecard"><p class="muted">No sample file '
+            "generated for this document.</p></div>")
+
+
+def _entry_form(case_id, doc, awaiting, unavailable=None) -> str:
+    """Mock mode: nothing reads an uploaded file, so the analyst types in what
+    it says. Recorded as entered_by_analyst - never as extracted. In hybrid mode
+    this is also the fallback when the live model could not read it, and the
+    reason is shown."""
+    required = set(data.kb().required_fields_for(doc["document_type"]))
+    # Every input starts EMPTY. Nothing the customer declared is offered here:
+    # the value typed is what the document says, or the comparison it feeds
+    # would only be the application compared with itself.
+    inputs = "".join(
+        '<div class="field"><label>' + e(f["name"].replace("_", " "))
+        + (" (required)" if f["name"] in required else "") + "</label>"
+        '<input type="text" value="" autocomplete="off" name="f_' + e(f["name"]) + '"'
+        + (" required" if f["name"] in required else "")
+        + (' placeholder="YYYY-MM-DD"' if f["name"].endswith("date") or f["name"] == "date_of_birth"
+           else "") + "></div>"
+        for f in awaiting)
+    return ('<form method="post" action="/action/enter-fields" class="panel">'
+            '<input type="hidden" name="document_id" value="' + e(doc["document_id"]) + '">'
+            '<input type="hidden" name="back" value="/case/' + e(case_id) + '?tab=Documents">'
+            + (note("Automatic reading unavailable: " + e(unavailable.rstrip("."))
+                    + ". Type in the fields instead.", "bad") if unavailable else "")
+            + note("Fields not read automatically in mock mode. Open the file, then type in "
+                   "what it says. Each value is recorded as <strong>entered by an "
+                   "analyst</strong>, under your name, and never as extracted. Dates typed "
+                   "here go through the same expiry and age rules as the quality screen.",
+                   "warn", "Type in this document's fields")
+            + '<div class="formgrid">' + inputs + "</div>"
+            '<button class="btn btn--primary" type="submit">Save the fields</button></form>')
 
 
 def _tab_people(conn, case_id, **kw):
@@ -606,7 +894,13 @@ def _tab_people(conn, case_id, **kw):
 
 def _tab_checks(conn, case_id, **kw):
     result = data.checks(conn, case_id)
-    out = ["<h2>Registry</h2>"]
+    out = []
+    if data.is_demo_case(case_id) and (result["registry"] or result["identity"]
+                                       or result["screening"]):
+        out.append(note("Every result on this tab is a <strong>" + e(data.SIMULATED)
+                        + "</strong> (scenario <code>" + e(data.demo_scenario(conn, case_id))
+                        + "</code>). None of it is a real check.", "warn", "Simulated"))
+    out.append("<h2>Registry</h2>")
     if not result["registry"]:
         out.append('<p class="empty">No registry check was run: the case did not '
                    "reach the paid step.</p>")
@@ -628,8 +922,8 @@ def _tab_checks(conn, case_id, **kw):
                         "documents.", "ok" if supported else "warn"))
         rows = [[e(name), cell(held), cell(got), chip(outcome, RESULT_TONE)]
                 for name, held, got, outcome in result["comparisons"]]
-        out.append(table(["Compared", "The register holds", "Extracted from documents",
-                          "Result"], rows))
+        out.append(table(["Compared", "The register holds",
+                          "From the documents (read, corrected or typed in)", "Result"], rows))
         out.append('<p class="foot">Match results are computed here by comparing the '
                    "two columns, corrections included &mdash; not taken from the "
                    "provider.</p>")
@@ -641,9 +935,11 @@ def _tab_checks(conn, case_id, **kw):
              chip(r["biometric_result"], RESULT_TONE),
              cell(r["name_dob_match"]), cell(r["document_expired"]),
              cell(r["duplicate_individual_detected"]),
-             chip(r["result"], RESULT_TONE)] for r in result["identity"]]
+             chip(r["result"], RESULT_TONE),
+             '<span class="type">' + e(r["provider_name"]) + "</span>"]
+            for r in result["identity"]]
     out.append(table(["Check", "Subject", "Document", "Liveness", "Biometric",
-                      "Name/DOB", "Expired", "Duplicate", "Result"], rows,
+                      "Name/DOB", "Expired", "Duplicate", "Result", "Provider"], rows,
                      "No identity checks were run."))
 
     out.append("<h2>Screening</h2>")
@@ -652,10 +948,11 @@ def _tab_checks(conn, case_id, **kw):
              chip(r["pep_result"], RESULT_TONE),
              chip(r["adverse_media_result"], RESULT_TONE),
              chip(r["severity"], RESULT_TONE),
-             '<span class="type">' + e(r["evidence_refs"] or "") + "</span>"]
+             '<span class="type">' + e(r["evidence_refs"] or "") + "</span>",
+             '<span class="type">' + e(r["provider_name"]) + "</span>"]
             for r in result["screening"]]
     out.append(table(["Check", "Subject", "Sanctions", "PEP", "Adverse media",
-                      "Severity", "Provider refs"], rows, "No screening was run."))
+                      "Severity", "Provider refs", "Provider"], rows, "No screening was run."))
     if result["screening"]:
         out.append(note("Internal only. None of this may be repeated to the "
                         "applicant.", "bad"))

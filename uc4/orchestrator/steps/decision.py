@@ -62,22 +62,21 @@ class DecisionResult:
     problems: list[str] = field(default_factory=list)
 
 
-def record_decision(conn, case_id: str, reviewer: str, reviewer_role: str, decision: str,
-                    reason_code: str, rationale: str, evidence_relied_on,
-                    override_reason: str | None = None, escalation_target: str | None = None,
-                    kb: KnowledgeBase | None = None,
-                    chooser: communication.TemplateChooser | None = None) -> DecisionResult:
-    kb = kb or KnowledgeBase()
+def check_permitted(conn, case_id: str, reviewer_role: str, decision: str,
+                    kb: KnowledgeBase, reviewer: str = "this reviewer"):
+    """Whether this role may record this decision on this case now: the
+    taxonomy's band and role rules, and no approval over an open hold. Raises
+    DecisionRefused with the reason; returns (case, band, recommended).
+
+    The one place those rules are checked - record_decision() calls it, and so
+    do the console's queue and "why is this case here" panel, so a screen can
+    never offer what the backend would refuse.
+    """
     rule = kb.decision_taxonomy.get(decision)
     if rule is None:
         raise DecisionRefused(
             f"'{decision}' is not a decision in the taxonomy; "
             f"choose from {sorted(kb.decision_taxonomy)}")
-    if not (rationale or "").strip() and rule["requires_reason"].lower() == "true":
-        raise DecisionRefused("a decision needs a rationale")
-    if not (reviewer or "").strip():
-        raise DecisionRefused("the reviewer must be identified")
-
     case = conn.execute("SELECT * FROM onboarding_case WHERE case_id = ?", (case_id,)).fetchone()
     assessment = conn.execute("SELECT * FROM risk_assessment WHERE case_id = ?",
                               (case_id,)).fetchone()
@@ -112,6 +111,42 @@ def record_decision(conn, case_id: str, reviewer: str, reviewer_role: str, decis
         raise DecisionRefused(
             f"{reviewer} is {reviewer_role}, but {why}, so this decision is compliance's "
             f"to take")
+
+    return case, band, recommended
+
+
+def permitted_decisions(conn, case_id: str, reviewer_role: str,
+                        kb: KnowledgeBase | None = None) -> list[str]:
+    """Every decision check_permitted() allows this role on this case now."""
+    kb = kb or KnowledgeBase()
+    out = []
+    for decision in kb.decision_taxonomy:
+        try:
+            check_permitted(conn, case_id, reviewer_role, decision, kb)
+        except DecisionRefused:
+            continue
+        out.append(decision)
+    return out
+
+
+def record_decision(conn, case_id: str, reviewer: str, reviewer_role: str, decision: str,
+                    reason_code: str, rationale: str, evidence_relied_on,
+                    override_reason: str | None = None, escalation_target: str | None = None,
+                    kb: KnowledgeBase | None = None,
+                    chooser: communication.TemplateChooser | None = None) -> DecisionResult:
+    kb = kb or KnowledgeBase()
+    rule = kb.decision_taxonomy.get(decision)
+    if rule is None:
+        raise DecisionRefused(
+            f"'{decision}' is not a decision in the taxonomy; "
+            f"choose from {sorted(kb.decision_taxonomy)}")
+    if not (rationale or "").strip() and rule["requires_reason"].lower() == "true":
+        raise DecisionRefused("a decision needs a rationale")
+    if not (reviewer or "").strip():
+        raise DecisionRefused("the reviewer must be identified")
+
+    case, band, recommended = check_permitted(conn, case_id, reviewer_role, decision, kb,
+                                              reviewer=reviewer)
 
     # 4. override is computed, never claimed
     override = decision != recommended

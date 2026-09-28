@@ -45,6 +45,22 @@ class KnowledgeBase:
                                        for r in _read_csv("communication_schedule.csv")}
         self.adverse_media_categories = {r["category"]: r
                                          for r in _read_csv("adverse_media_categories.csv")}
+        # The approved wording a customer is shown for why a document must be
+        # sent again, by reason code; "*" is the wording for any other reason.
+        # Tips shown under a document before upload. Guidance only: they create
+        # no requirement and replace no check, and "{max_age_days}" is filled
+        # from the requirement rule behind each item, never typed here.
+        self.document_guidance = {}
+        for r in _read_csv("document_guidance.csv"):
+            self.document_guidance.setdefault(r["document_type"], []).append(r["tip"])
+        # What a customer is told about where their application stands, by a
+        # neutral wording key. No internal status name appears in the file; the
+        # mapping from status to key is in app/customer_view.py.
+        self.customer_status_wording = {r["wording_key"]: r["customer_wording"]
+                                        for r in _read_csv("customer_status_wording.csv")}
+        self.resubmission_reason_text = {
+            r["reason_code"]: r for r in _read_csv("resubmission_reason_text.csv")
+            if r["approval_status"] == "approved"}
 
     def reason_codes_for(self, decision: str | None = None) -> list[dict]:
         """The reason codes the KB permits, narrowed to one decision if given.

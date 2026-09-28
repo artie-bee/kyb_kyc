@@ -264,6 +264,112 @@ class LiveIdentityProvider(IdentityProvider):
             "Run with the mock provider (the default) until it is.")
 
 
+# ---------------------------------------------------------------------------
+# Simulated providers - for applications typed into the portal's demo form
+# ---------------------------------------------------------------------------
+#
+# A demo application has no scripted dataset row to replay, and no real
+# provider is wired up. So these answer from what the customer entered: by
+# default a clean result that mirrors the entered details, or the demo scenario
+# an analyst chose in the console. Nothing they say is a real check, and every
+# row they produce says so - the provider name IS the label, so it lands in
+# registry_check, identity_check and screening_check, and in the audit trail as
+# the actor of every provider event.
+
+SIMULATED = "Simulated provider response"
+DEMO_SCENARIOS = {
+    "clean": "Clean: every check mirrors what the customer entered",
+    "address_mismatch": "Address mismatch: the register holds a different registered address",
+    "pep_match": "PEP match: the first beneficial owner (or director) is a politically "
+                 "exposed person",
+    "possible_sanctions_match": "Possible sanctions match on the first director",
+}
+# Where the address_mismatch scenario says the register has the company.
+_MISMATCHED_ADDRESS = "Suite 9, 400 Register Row (address held on the simulated register)"
+
+
+def is_demo_application(application: dict) -> bool:
+    return application.get("origin") == "portal_demo"
+
+
+def _people(application: dict, *roles: str) -> list[dict]:
+    return [p for p in application.get("individuals", []) if p.get("role") in roles]
+
+
+class SimulatedRegistryProvider(RegistryProvider):
+    """What the register would hold if it agreed with the customer - unless the
+    scenario says otherwise. The comparison is still Step 5's own."""
+
+    mode = "simulated"
+    name = SIMULATED
+
+    def __init__(self, application: dict, scenario: str = "clean"):
+        self.application, self.scenario = application, scenario
+
+    def lookup(self, applicant: dict, case: dict) -> RegistryResponse:
+        entered = self.application.get("applicant", {})
+        address = (_MISMATCHED_ADDRESS if self.scenario == "address_mismatch"
+                   else entered.get("registered_address"))
+        return RegistryResponse(
+            available=True, provider_name=f"{SIMULATED} ({self.scenario})",
+            company_status="active", legal_name=entered.get("legal_name"),
+            number=entered.get("registration_number"), address=address,
+            directors=[p["full_name"] for p in _people(self.application,
+                                                        "director", "sole_trader")],
+            ubo_supported_by_registry=True, high_risk_jurisdiction_or_industry=False,
+            confidence=None)
+
+
+class SimulatedIdentityProvider(IdentityProvider):
+    """Every person passes: the demo scenarios are about the company and
+    screening, and a failed identity check is already shown by case 13."""
+
+    mode = "simulated"
+    name = SIMULATED
+
+    def __init__(self, application: dict, scenario: str = "clean"):
+        self.application, self.scenario = application, scenario
+
+    def verify(self, individual: dict, case: dict) -> IdentityResponse:
+        return IdentityResponse(
+            available=True, provider_name=f"{SIMULATED} ({self.scenario})",
+            individual_id=individual["individual_id"], document_result="pass",
+            liveness_result="pass", biometric_result="pass", address_result="pass",
+            name_dob_match="match", document_expired=False,
+            duplicate_individual_detected=False, result="pass")
+
+
+class SimulatedScreeningProvider(ScreeningProvider):
+    """No match for anyone, unless the scenario puts one on a named subject."""
+
+    mode = "simulated"
+    name = SIMULATED
+
+    def __init__(self, application: dict, scenario: str = "clean"):
+        self.application, self.scenario = application, scenario
+        owners = {u["individual_ref"] for u in application.get("ubos", [])}
+        by_ref = {p["ref"]: p["full_name"] for p in application.get("individuals", [])}
+        directors = [p["full_name"] for p in _people(application, "director", "sole_trader")]
+        owner_names = [by_ref[r] for r in sorted(owners) if r in by_ref]
+        self.pep_subject = (owner_names or directors or [None])[0]
+        self.sanctions_subject = (directors or owner_names or [None])[0]
+
+    def screen(self, subject: dict, case: dict) -> ScreeningResponse:
+        name = subject.get("full_name")
+        pep = self.scenario == "pep_match" and name and name == self.pep_subject
+        hit = (self.scenario == "possible_sanctions_match" and name
+               and name == self.sanctions_subject)
+        return ScreeningResponse(
+            available=True, provider_name=f"{SIMULATED} ({self.scenario})",
+            subject_type=subject["subject_type"], individual_id=subject.get("individual_id"),
+            applicant_id=subject.get("applicant_id"),
+            sanctions_result="possible_match" if hit else "no_match",
+            pep_result="pep_match" if pep else "no_match",
+            adverse_media_result="none",
+            severity="critical" if hit else "medium" if pep else "none",
+            evidence_refs=[f"SIMULATED-{self.scenario}"] if (pep or hit) else [])
+
+
 REGISTRY_PROVIDERS = {"mock": MockRegistryProvider, "live": LiveRegistryProvider}
 SCREENING_PROVIDERS = {"mock": MockScreeningProvider, "live": LiveScreeningProvider}
 IDENTITY_PROVIDERS = {"mock": MockIdentityProvider, "live": LiveIdentityProvider}
@@ -274,6 +380,10 @@ def get_providers(mode: str = "mock", application: dict | None = None):
     if mode not in REGISTRY_PROVIDERS:
         raise ValueError(f"unknown provider mode '{mode}'; choose from {sorted(REGISTRY_PROVIDERS)}")
     application = application or {}
+    if mode == "mock" and is_demo_application(application):
+        scenario = application.get("demo_scenario") or "clean"
+        return (SimulatedRegistryProvider(application, scenario),
+                SimulatedIdentityProvider(application, scenario))
     if mode == "mock":
         registry = {r["case_id"]: r for r in application.get("scripted_registry", [])}
         identity = {(r["case_id"], r["individual_id"]): r
@@ -289,6 +399,44 @@ def get_screening_provider(mode: str = "mock", application: dict | None = None):
                          f"choose from {sorted(SCREENING_PROVIDERS)}")
     if mode != "mock":
         return SCREENING_PROVIDERS[mode]()
+    if is_demo_application(application or {}):
+        return SimulatedScreeningProvider(application,
+                                          (application or {}).get("demo_scenario") or "clean")
     rows = (application or {}).get("scripted_screening", [])
     scripted = {(r["case_id"], r["individual_id"] or ""): r for r in rows}
     return MockScreeningProvider(scripted)
+
+
+# ---------------------------------------------------------------------------
+# "Look up my company" on the portal's demo application form
+# ---------------------------------------------------------------------------
+
+SIMULATED_LOOKUP = "Simulated registry lookup"
+
+
+def lookup_register(registration_number: str) -> dict | None:
+    """What the MOCK register holds for a registration number: the dataset's
+    scripted registry rows, plus the demo upload pack's company. Demo only, and
+    labelled so wherever it is shown. It fills two form fields the customer can
+    still edit; Step 5 compares the register with the DOCUMENTS, never with what
+    this lookup put on the form."""
+    import csv
+    import json
+    from pathlib import Path
+    number = (registration_number or "").strip().upper()
+    if not number:
+        return None
+    uc4 = Path(__file__).resolve().parents[1]
+    rows = uc4.parent / "wallester_uc4_dataset" / "registry_check.csv"
+    if rows.exists():
+        for r in csv.DictReader(open(rows, encoding="utf-8")):
+            if (r.get("registry_number") or "").upper() == number and r.get("registry_legal_name"):
+                return {"legal_name": r["registry_legal_name"],
+                        "registered_address": r.get("registry_address") or "",
+                        "source": SIMULATED_LOOKUP}
+    from . import demo_samples
+    for company in demo_samples.registers():
+        if (company.get("number") or "").upper() == number:
+            return {"legal_name": company["name"], "registered_address": company["address"],
+                    "source": SIMULATED_LOOKUP}
+    return None

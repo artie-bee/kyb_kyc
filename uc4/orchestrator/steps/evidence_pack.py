@@ -100,7 +100,7 @@ def build(conn, case_id: str, kb: KnowledgeBase) -> dict:
     if registry and registry["result"] != "pass":
         missing.append(f"registry check {registry['check_id']} returned {registry['result']}")
 
-    return {
+    pack = {
         "case_id": case_id,
         "applicant_summary": (
             f"{applicant['legal_name']}, {applicant['entity_type']} registered in "
@@ -145,6 +145,13 @@ def build(conn, case_id: str, kb: KnowledgeBase) -> dict:
         "missing_or_conflicting_evidence": " ".join(missing),
         "recommended_next_action": assessment["recommended_action"] if assessment else "",
     }
+    if db.is_demo_case(case_id):
+        # A demo case's provider results come from the simulated providers. The
+        # pack says so, beside the results, so nobody reads them as real checks.
+        pack["provider_results"]["simulated"] = (
+            "Simulated provider response: every registry, identity and screening "
+            "result on this demo case was simulated, none is a real check")
+    return pack
 
 
 def run(conn, case_id: str, application: dict, kb: KnowledgeBase,

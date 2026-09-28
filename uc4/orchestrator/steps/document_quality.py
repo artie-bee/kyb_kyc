@@ -22,19 +22,40 @@ is the only supported way for a later step to ask what it may work with, and
 the case itself only moves to extraction when every required item is accepted.
 """
 
+import hashlib
+import json
+import re
+import secrets
 from dataclasses import dataclass, field
 from datetime import date
+from pathlib import Path
 
-from .. import db
+from .. import clock, db, reassessment, sharpness
 from ..kb import KnowledgeBase
 from .. import holds
 from .. import llm_client
+from .. import settings
 from ..quality_checker import (QualityChecker, MockQualityChecker,
-                               UnknownQualityFlag)
+                               UnknownQualityFlag, MockUploadChecker, VISUAL_CHECK_NOT_RUN)
+from ..virus_scanner import CLEAN, UNAVAILABLE, VirusScanner, get_virus_scanner
+from .requirement_pack import shown_to_customer
 
 ACTOR = "step.document_quality"
 MAX_ATTEMPTS = 3
 ACCEPTED = "accepted_for_checks"
+# quality_status of an upload a newer one has replaced on the same item. Kept,
+# never deleted, so the history stays on the record; nothing downstream reads it.
+SUPERSEDED = "superseded"
+# Written into quality_flags on a document held only because nobody has done
+# the visual check yet (mock mode). It is a marker, not a fault: the risk step
+# does not score it as a quality problem.
+VISUAL_MARKER = "visual_check_not_run"
+# A portal upload waiting in the queue for the live model (orchestrator/live_reading.py).
+QUEUED_MARKER = "live_read_queued"
+LIVE_QUEUED = "reading automatically"
+# Each marker is a per-document hold: its reason, and what it is waiting for.
+_PER_DOCUMENT = {VISUAL_MARKER: (VISUAL_CHECK_NOT_RUN, "waiting for an analyst to look at it"),
+                 QUEUED_MARKER: (LIVE_QUEUED, "waiting for the live model")}
 
 # document.quality_status -> checklist_item.status
 ITEM_STATUS = {
@@ -107,7 +128,7 @@ def run_date_rules(doc_type: str, dates: dict, max_age_days: str | None,
     Step 3 calls this with the dates the quality checker read off the page;
     Step 4 calls it again with the dates OCR extracted, and compares.
     """
-    today = today or date.today()
+    today = today or clock.current().today()
     flags = set()
     for rule in kb.quality_rules_for(doc_type):
         if rule["check_name"] not in DATE_CHECKS:
@@ -152,7 +173,7 @@ def accepted_documents(conn, case_id: str) -> list:
 def run(conn, case_id: str, application: dict, kb: KnowledgeBase,
         checker: QualityChecker | None = None, today: date | None = None) -> QualityResult:
     checker = checker or MockQualityChecker()
-    today = today or date.today()
+    today = today or clock.current().today()
     documents = application.get("documents", [])
 
     case = conn.execute("SELECT * FROM onboarding_case WHERE case_id = ?", (case_id,)).fetchone()
@@ -170,12 +191,17 @@ def run(conn, case_id: str, application: dict, kb: KnowledgeBase,
     problems = []
 
     for doc in documents:
-        subject = ref_to_id.get(doc.get("subject_ref")) if doc.get("subject_ref") else None
+        # A portal upload already knows its person and its checklist item; an
+        # application names people by the ref the customer wrote.
+        subject = doc.get("subject_individual_id") or (
+            ref_to_id.get(doc.get("subject_ref")) if doc.get("subject_ref") else None)
 
         # 1. Which checklist item does this document answer?
         item = next((i for i in items
-                     if i["document_type"] == doc["document_type"]
-                     and (i["subject_individual_id"] or None) == subject), None)
+                     if i["item_id"] == doc.get("item_id")
+                     or (not doc.get("item_id")
+                         and i["document_type"] == doc["document_type"]
+                         and (i["subject_individual_id"] or None) == subject)), None)
         if item is None:
             msg = (f"Uploaded {doc['document_type']} ({doc['file_name']}) matches no checklist "
                    f"item on this case")
@@ -192,6 +218,24 @@ def run(conn, case_id: str, application: dict, kb: KnowledgeBase,
             flag = _run_deterministic(rule, doc, {}, rule_max_age, today)
             if flag:
                 flags.add(flag)
+
+        # 2b. Sharpness (QR-13): a deterministic heuristic on the file itself,
+        #     in mock and live mode alike, and before the checker - a file too
+        #     blurred to read never costs a model call. It needs the file, so a
+        #     scripted dataset document (no file in hand) is not measured.
+        sharp_note, sharp_rule = "", None
+        rule = next((r for r in kb.quality_rules_for(doc["document_type"])
+                     if r["check_name"] == "sharpness_below_threshold"), None)
+        if rule and not flags and doc.get("file_path"):
+            value, threshold = sharpness.measure(doc["file_path"]), float(rule["parameter"])
+            if value is None:
+                sharp_note = f"; sharpness not measured ({rule['rule_id']}, threshold {threshold:g})"
+            else:
+                sharp_note = (f"; sharpness={value:g} (threshold {threshold:g}, {rule['rule_id']}, "
+                              f"{'below: too blurred' if value < threshold else 'passes'})")
+                if value < threshold:
+                    flags.add(rule["failure_flag"])
+                    sharp_rule = rule
 
         # 3. The checker. It returns the judgement flags AND the dates it read off
         #    the page - nothing has been extracted yet, so this is the only place
@@ -224,8 +268,20 @@ def run(conn, case_id: str, application: dict, kb: KnowledgeBase,
 
         # 4. Combine into one outcome for the document.
         status, reasons, fired = _resolve(flags, doc["document_type"], kb)
+        if sharp_rule:
+            # The flag came from the heuristic, so the heuristic is the rule that
+            # fired, not the model rule that shares its flag.
+            first = next(r["rule_id"] for r in kb.quality_rules_for(doc["document_type"])
+                         if r["failure_flag"] == sharp_rule["failure_flag"])
+            fired = [sharp_rule["rule_id"] if f == first else f for f in fired]
         if ai_failed:
             status, note = "manual_review_required", f"quality check failed: {ai_failed}"
+        elif verdict is not None and verdict.hold_reason and status == ACCEPTED:
+            # The deterministic rules passed it; the visual half was not done by
+            # anyone. A person does it before the document counts as accepted.
+            status = "manual_review_required"
+            flags.add(verdict.hold_marker or VISUAL_MARKER)
+            problems.append(f"{doc['file_name']}: {verdict.hold_reason}")
         counts[status] += 1
 
         # 5. Record it.
@@ -259,12 +315,17 @@ def run(conn, case_id: str, application: dict, kb: KnowledgeBase,
             conn.execute("UPDATE checklist_item SET status = ?, resubmission_attempts = ? "
                          "WHERE item_id = ?", (item_status, attempts, item["item_id"]))
 
-        db.audit(conn, case_id, "ai_agent" if verdict else "system", ACTOR,
+        # A checker that made no judgement (deterministic rules only) is not an
+        # AI verdict and is not recorded as one.
+        judged = verdict is not None and getattr(checker, "uses_judgement", True)
+        db.audit(conn, case_id, "ai_agent" if judged else "system", ACTOR,
                  "document_quality_checked",
                  f"{doc_id} ({doc['document_type']}, {doc['file_name']}) -> {status}"
                  f"; flags={'|'.join(sorted(flags)) or 'none'}"
                  f"; rules={','.join(fired) or 'none fired'}"
-                 f"; checker={checker.mode}",
+                 f"; checker={checker.mode if verdict or ai_failed else 'not called'}"
+                 + sharp_note
+                 + (f"; {verdict.source_label}" if verdict and verdict.source_label else ""),
                  checker.version or kb.version)
 
     return route_case(conn, case_id, kb, len(documents), problems)
@@ -286,7 +347,9 @@ def route_case(conn, case_id: str, kb: KnowledgeBase,
     # counting it again would hold the case open forever. Documents matching no
     # checklist item are counted too, so an unsolicited failure is not lost.
     docs = conn.execute(
-        "SELECT d.quality_status FROM document d WHERE d.case_id = ? AND d.document_id IN ("
+        "SELECT d.document_id, d.document_type, d.quality_status, d.quality_flags"
+        " FROM document d WHERE d.case_id = ?"
+        " AND d.document_id IN ("
         "  SELECT MAX(cid.document_id) FROM checklist_item_document cid"
         "  JOIN document d2 ON d2.document_id = cid.document_id"
         "  WHERE d2.case_id = ? GROUP BY cid.item_id"
@@ -309,15 +372,36 @@ def route_case(conn, case_id: str, kb: KnowledgeBase,
 
     # This step re-runs after an analyst release, so it lifts its own holds first
     # and places whatever the current picture warrants. It never touches another
-    # step's hold.
-    holds.release_own(conn, case_id, ACTOR, "document quality re-evaluated", kb)
+    # step's hold. The one exception is the visual-check hold, which belongs to a
+    # single document: each stays until that document is dealt with, so one
+    # document is never held back by another's hold.
+    visual_docs = {d["document_id"]: d for d in docs
+                   if d["quality_status"] == "manual_review_required"
+                   and _marker(d["quality_flags"])}
+    visual_holds = {}
+    for h in holds.open_holds(conn, case_id):
+        if h.placed_by_step != ACTOR:
+            continue
+        doc_id = visual_hold_document(h.reason)
+        if doc_id and doc_id in visual_docs:
+            visual_holds[doc_id] = h            # still applies: keep it as it is
+        else:
+            holds.release(conn, h.hold_id, ACTOR, "document quality re-evaluated",
+                          by_step=ACTOR, kb=kb)
+    for doc_id, d in visual_docs.items():
+        if doc_id not in visual_holds:
+            reason, waiting = _PER_DOCUMENT[_marker(d["quality_flags"])]
+            holds.place(conn, case_id, ACTOR, "manual_review",
+                        f"{reason}: {doc_id} ({d['document_type']}) {waiting}", "analyst", kb)
 
     if held or counts["manual_review_required"]:
         n = len(held) or counts["manual_review_required"]
         summary = f"{n} item(s) need an analyst"
-        holds.place(conn, case_id, ACTOR, "manual_review",
-                    f"{n} document(s) flagged for an analyst at the quality screen",
-                    "analyst", kb)
+        visual = len(visual_docs)
+        if n > visual:
+            holds.place(conn, case_id, ACTOR, "manual_review",
+                        f"{n - visual} document(s) flagged for an analyst at the quality screen",
+                        "analyst", kb)
     elif to_resend or counts["resubmission_required"]:
         n = len(to_resend) or counts["resubmission_required"]
         summary = f"{n} item(s) must be resubmitted"
@@ -356,3 +440,289 @@ def route_case(conn, case_id: str, kb: KnowledgeBase,
     return QualityResult(case_id, documents_checked, counts[ACCEPTED],
                          counts["resubmission_required"], counts["manual_review_required"],
                          status, next_step, problems)
+
+
+# ---------------------------------------------------------------------------
+# A file from the customer portal
+# ---------------------------------------------------------------------------
+
+# Where uploaded files are kept. Git-ignored: the portal is a demo, and nothing a
+# visitor uploads belongs in the repository.
+UPLOADS = Path(__file__).resolve().parents[2] / "uploads"
+MAX_UPLOAD_BYTES = settings.MAX_UPLOAD_MB * 1024 * 1024
+# What each accepted extension must actually start with. The extension is the
+# customer's claim; the first bytes are the file's.
+_SIGNATURES = {"pdf": b"%PDF-", "jpg": b"\xff\xd8\xff", "jpeg": b"\xff\xd8\xff",
+               "png": b"\x89PNG\r\n\x1a\n"}
+OPEN_FOR_UPLOAD = ("pending", "resubmission_requested")
+CLOSED_STATUSES = ("approved", "rejected", "closed_withdrawn")
+
+
+class UploadRefused(ValueError):
+    """The upload was not taken. The message is written for the customer: it
+    says what to do and nothing about how the case is being assessed."""
+
+
+@dataclass
+class UploadResult:
+    case_id: str
+    item_id: str
+    document_id: str
+    file_name: str
+    quality_status: str
+    case_status: str
+    next_step: str | None
+
+
+def accepted_extensions(kb: KnowledgeBase) -> list[str]:
+    """The upload formats, from QR-01 - the same list the quality screen applies."""
+    rule = next(r for r in kb.document_quality_rules if r["check_name"] == "unsupported_file_type")
+    return [x for x in rule["parameter"].split(";") if x]
+
+
+# The tables the paid checks write. Once any of them holds a row for a case, the
+# document stage is over: Steps 5 to 7 have run on the documents as they were,
+# and a new file now would need those steps re-run, which they are not built to
+# do. The onboarding team asks for anything further by message.
+_PAID_CHECK_TABLES = ("registry_check", "identity_check", "screening_check", "risk_assessment")
+
+
+def document_stage_open(conn, case_id: str) -> bool:
+    """True while the case is still collecting documents: nothing paid has run."""
+    return not any(conn.execute(f"SELECT 1 FROM {t} WHERE case_id = ? LIMIT 1",
+                                (case_id,)).fetchone() for t in _PAID_CHECK_TABLES)
+
+
+def _refuse(conn, case_id, why_internal, customer_text, kb):
+    db.audit(conn, case_id, "applicant", "customer", "portal_upload_refused",
+             why_internal, kb.version)
+    raise UploadRefused(customer_text)
+
+
+def _refusal_text(kind: str, kb: KnowledgeBase, ext: str = "") -> str:
+    """What the customer is told. Every line here reaches the portal, which scans
+    it for restricted wording - so none of it may say "match", for one."""
+    allowed = [a.upper() for a in accepted_extensions(kb) if a != "jpeg"]
+    return {
+        "not_requested": "We have not asked you for this document, so it cannot be uploaded.",
+        "closed": "This application is closed, so we cannot take new documents for it.",
+        "have_it": "We already have this document, so there is nothing to upload for it.",
+        "file_type": "We accept " + ", ".join(allowed[:-1]) + " and " + allowed[-1]
+                     + " files only. Please choose a file of one of those types.",
+        "empty": "The file was empty. Please choose it again.",
+        "too_large": f"The file is larger than {MAX_UPLOAD_BYTES // (1024 * 1024)} MB. "
+                     "Please upload a smaller copy.",
+        "mismatch": f"This file is not really a {ext.upper()}, although its name ends in "
+                    f".{ext}. Please upload the original file rather than a renamed one.",
+        "scan_unavailable": "We could not check this file just now. Please try again later.",
+        "scan_failed": "We cannot accept this file. Please upload a different copy.",
+    }[kind]
+
+
+def receive_upload(conn, case_id: str, item_id: str, original_name: str, content: bytes,
+                   kb: KnowledgeBase, checker: QualityChecker | None = None,
+                   uploads_dir: Path | None = None,
+                   scanner: VirusScanner | None = None) -> UploadResult:
+    """Take one file from the customer portal against one checklist item.
+
+    The only way a portal upload enters the pipeline, and it screens the file
+    with the same Step 3 run() that screens every scripted document - there is
+    no second quality-check path.
+
+      1. refused at the door, before anything is stored or counted against the
+         customer: the case is closed, the item is not one we asked for (never
+         requested, waived, or a condition an analyst has not confirmed), the
+         item is already accepted or being looked at, or the file is the wrong
+         type, empty, over the size limit, or its bytes do not match its
+         extension;
+      2. virus-scanned; a scan that did not answer is a refusal, not a pass;
+      3. stored outside any web-served folder under a random name, with its
+         SHA-256 in the audit trail and the customer's own file name beside it;
+      4. any earlier upload on the item is marked superseded and kept;
+      5. screened by Step 3 for this item only. In mock mode the deterministic
+         rules run for real and the visual half is held for an analyst
+         ("visual check not run in mock mode"); in live mode the real checker
+         runs. The three-attempt limit is Step 3's own.
+
+    The caller carries the case on (app/data.upload_document calls resume):
+    this step cannot import the orchestrator that imports it.
+    """
+    uploads_dir = uploads_dir or UPLOADS
+    case = conn.execute("SELECT * FROM onboarding_case WHERE case_id = ?", (case_id,)).fetchone()
+    if case is None:
+        raise KeyError(f"no such case {case_id}")
+    item = conn.execute(
+        "SELECT i.* FROM checklist_item i JOIN requirement_pack p USING (pack_id)"
+        " WHERE p.case_id = ? AND i.item_id = ?", (case_id, item_id)).fetchone()
+    if item is None:
+        _refuse(conn, case_id, f"upload against {item_id}, which is not on this case",
+                _refusal_text("not_requested", kb), kb)
+    if case["status"] in CLOSED_STATUSES:
+        _refuse(conn, case_id, f"upload against {item_id} on a case that is {case['status']}",
+                _refusal_text("closed", kb), kb)
+    if not shown_to_customer(item):
+        _refuse(conn, case_id, f"upload against {item_id}, which the customer is not asked for "
+                               f"({item['status']}{', condition unconfirmed' if item['status'] != 'waived' else ''})",
+                _refusal_text("not_requested", kb), kb)
+    if item["status"] not in OPEN_FOR_UPLOAD:
+        _refuse(conn, case_id, f"upload against {item_id}, which is {item['status']}",
+                _refusal_text("have_it", kb), kb)
+
+    name = Path((original_name or "").replace("\\", "/")).name.strip()
+    ext = name.rsplit(".", 1)[-1].lower() if "." in name else ""
+    allowed = accepted_extensions(kb)
+    if ext not in allowed:
+        _refuse(conn, case_id, f"{name!r} refused: extension {ext or '(none)'} not in {allowed}",
+                _refusal_text("file_type", kb), kb)
+    if not content:
+        _refuse(conn, case_id, f"{name!r} refused: empty file", _refusal_text("empty", kb), kb)
+    if len(content) > MAX_UPLOAD_BYTES:
+        _refuse(conn, case_id, f"{name!r} refused: {len(content)} bytes, over the "
+                               f"{MAX_UPLOAD_BYTES} limit", _refusal_text("too_large", kb), kb)
+    if not content.startswith(_SIGNATURES.get(ext, b"\0\0\0\0")):
+        _refuse(conn, case_id, f"{name!r} refused: content does not match .{ext}",
+                _refusal_text("mismatch", kb, ext), kb)
+
+    scanner = scanner or get_virus_scanner()
+    scan = scanner.scan(content, name)
+    db.audit(conn, case_id, "system", scanner.name, "upload_virus_scanned",
+             f"{name!r} for {item_id}: {scan.verdict}; mode={scanner.mode}; {scan.detail}",
+             kb.version)
+    if scan.verdict != CLEAN:
+        _refuse(conn, case_id, f"{name!r} refused: virus scan {scan.verdict}",
+                _refusal_text("scan_unavailable" if scan.verdict == UNAVAILABLE
+                              else "scan_failed", kb), kb)
+
+    digest = hashlib.sha256(content).hexdigest()
+    stored = f"{secrets.token_hex(16)}.{ext}"
+    target = uploads_dir / case_id / stored
+    target.parent.mkdir(parents=True, exist_ok=True)
+    target.write_bytes(content)
+    # The customer's own name for the file goes in the audit trail, beside the
+    # random one it is stored under: that is the only place it is kept.
+    db.audit(conn, case_id, "applicant", "customer", "document_uploaded",
+             f"{json.dumps(name)} received through the customer portal for {item_id} "
+             f"({item['document_type']}); {len(content)} bytes; sha256 {digest}; "
+             f"stored as {stored}", kb.version)
+
+    earlier = [r["document_id"] for r in conn.execute(
+        "SELECT d.document_id FROM checklist_item_document cid JOIN document d"
+        " USING (document_id) WHERE cid.item_id = ? AND d.quality_status != ?",
+        (item_id, SUPERSEDED))]
+    for old in earlier:
+        conn.execute("UPDATE document SET quality_status = ? WHERE document_id = ?",
+                     (SUPERSEDED, old))
+    if earlier:
+        db.audit(conn, case_id, "system", ACTOR, "document_superseded",
+                 f"{', '.join(earlier)} on {item_id} superseded by the customer's new upload; "
+                 f"kept on the record", kb.version)
+
+    paid_checks_open = document_stage_open(conn, case_id)
+    doc = {"document_type": item["document_type"], "file_name": stored,
+           "file_path": str(target), "item_id": item_id,
+           "subject_individual_id": item["subject_individual_id"],
+           "upload_time": db.now(), "issue_country": None}
+    # The one quality-check path: the same run() every scripted document goes through.
+    result = run(conn, case_id, {"documents": [doc]}, kb,
+                 checker=checker or MockUploadChecker())
+    document = conn.execute(
+        "SELECT MAX(document_id) AS document_id FROM checklist_item_document WHERE item_id = ?",
+        (item_id,)).fetchone()["document_id"]
+    status = conn.execute("SELECT quality_status FROM document WHERE document_id = ?",
+                          (document,)).fetchone()["quality_status"]
+    # After the assessment, a new file is evidence for an analyst to weigh; it
+    # does not move the case, or its risk band, by itself.
+    if not paid_checks_open:
+        reassessment.place(conn, case_id, document, kb)
+        holds.apply_status(conn, case_id, kb, case["status"], case["next_action_owner"])
+    # The customer has answered for this item: it drops out of any reminder.
+    db.audit(conn, case_id, "system", ACTOR, "reminders_stopped",
+             f"{item_id} ({item['document_type']}): the customer has sent it; no further "
+             f"reminders about this item", kb.version)
+    return UploadResult(case_id, item_id, document, stored, status, result.status,
+                        result.next_step)
+
+
+_UPLOAD_EVENT = re.compile(r'^(".*?(?<!\\)") received through the customer portal .* '
+                           r"stored as (\S+)$", re.S)
+
+
+def uploaded_names(conn, case_id: str) -> dict:
+    """{stored file name: the customer's own file name} for every portal upload
+    on the case, read from the audit trail, where the upload recorded both."""
+    out = {}
+    for (payload,) in conn.execute(
+            "SELECT payload_summary FROM audit_event WHERE case_id = ?"
+            " AND action = 'document_uploaded'", (case_id,)):
+        m = _UPLOAD_EVENT.match(payload)
+        if m:
+            out[m.group(2)] = json.loads(m.group(1))
+    return out
+
+
+def _marker(flags: str | None) -> str | None:
+    """The per-document hold marker on a document's flags, if it has one."""
+    present = (flags or "").split("|")
+    return next((m for m in _PER_DOCUMENT if m in present), None)
+
+
+_VISUAL_HOLD = re.compile(r"^manual_review: (?:" + "|".join(
+    re.escape(reason) for reason, _ in _PER_DOCUMENT.values()) + r"): (DOC-\d+) ")
+
+
+def visual_hold_document(reason: str) -> str | None:
+    """The document a per-document hold is for, from its reason: a visual check
+    not run, or a file queued for the live model."""
+    m = _VISUAL_HOLD.match(reason or "")
+    return m.group(1) if m else None
+
+
+def rescreen_document(conn, document_id: str, actor: str, reason: str, kb: KnowledgeBase,
+                      checker: QualityChecker | None = None,
+                      uploads_dir: Path | None = None) -> UploadResult:
+    """Run Step 3 again on a portal upload already on file - after a quality
+    rule was added, say. The same stored file goes through the same run() as a
+    new document row; the old row is marked superseded and kept, so both
+    verdicts stay on the record. It is not a new attempt by the customer, so it
+    does not count towards the three-attempt limit.
+    """
+    uploads_dir = uploads_dir or UPLOADS
+    if not (actor or "").strip() or not (reason or "").strip():
+        raise ValueError("a re-screen needs a named actor and a reason")
+    doc = conn.execute("SELECT * FROM document WHERE document_id = ?", (document_id,)).fetchone()
+    if doc is None:
+        raise KeyError(f"no such document {document_id}")
+    link = conn.execute("SELECT item_id FROM checklist_item_document WHERE document_id = ?",
+                        (document_id,)).fetchone()
+    current = link and conn.execute(
+        "SELECT MAX(document_id) FROM checklist_item_document WHERE item_id = ?",
+        (link["item_id"],)).fetchone()[0]
+    if not link or current != document_id or doc["quality_status"] == SUPERSEDED:
+        raise ValueError(f"{document_id} is not the current document on its checklist item")
+    path = uploads_dir / doc["case_id"] / doc["file_name"]
+    if not path.exists():
+        raise ValueError(f"{document_id} is not a portal upload with its file on hand")
+
+    item = conn.execute("SELECT * FROM checklist_item WHERE item_id = ?",
+                        (link["item_id"],)).fetchone()
+    db.audit(conn, doc["case_id"], "system", actor, "document_rescreened",
+             f"{document_id} re-screened by Step 3 ({kb.version}); reason: {reason}", kb.version)
+    conn.execute("UPDATE document SET quality_status = ? WHERE document_id = ?",
+                 (SUPERSEDED, document_id))
+    run(conn, doc["case_id"],
+        {"documents": [{"document_type": doc["document_type"], "file_name": doc["file_name"],
+                        "file_path": str(path), "item_id": item["item_id"],
+                        "subject_individual_id": item["subject_individual_id"],
+                        "upload_time": doc["upload_time"], "issue_country": None}]},
+        kb, checker=checker or MockUploadChecker())
+    # The customer sent this file once; screening it again is not another try.
+    conn.execute("UPDATE checklist_item SET resubmission_attempts = ? WHERE item_id = ?",
+                 (item["resubmission_attempts"], item["item_id"]))
+    new = conn.execute("SELECT MAX(document_id) FROM checklist_item_document WHERE item_id = ?",
+                       (item["item_id"],)).fetchone()[0]
+    status = conn.execute("SELECT quality_status FROM document WHERE document_id = ?",
+                          (new,)).fetchone()[0]
+    case_status = conn.execute("SELECT status FROM onboarding_case WHERE case_id = ?",
+                               (doc["case_id"],)).fetchone()[0]
+    return UploadResult(doc["case_id"], item["item_id"], new, doc["file_name"], status,
+                        case_status, None)

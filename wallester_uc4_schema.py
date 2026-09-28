@@ -354,6 +354,8 @@ DB_TABLES = {
     "extracted_field": [
         "field_id", "document_id", "name", "value", "confidence", "source_page",
         "corrected_by_analyst", "needs_analyst_correction",
+        # extracted by a machine, or typed in by an analyst (mock-mode uploads)
+        "entry_method",
     ],
     "finding": [
         "finding_id", "case_id", "source", "rule_id", "summary", "evidence_refs", "blocking",
@@ -381,6 +383,10 @@ DB_TABLES = {
     ],
     "outbox": [
         "outbox_id", "communication_id", "case_id", "audience", "body", "sent_at",
+    ],
+    # customer portal access; only the hash of each token is stored
+    "portal_token": [
+        "token_hash", "case_id", "issued_by", "issued_at", "revoked_at", "expires_at",
     ],
     "registry_check": [
         "check_id", "case_id", "applicant_id", "provider_name", "company_status",
@@ -424,6 +430,12 @@ DB_ONLY = {
 DB_ENUMS = {
     ("document", "quality_status_at_screen"): ["pending", "accepted_for_checks", "resubmission_required", "manual_review_required"],
     ("finding", "source"): ["registry", "identity", "ubo"],
+    ("extracted_field", "entry_method"): ["extracted", "awaiting_analyst_entry",
+                                          "entered_by_analyst"],
+    # the live status adds 'superseded' (an upload replaced by a newer one on the
+    # same item); quality_status_at_screen never takes it
+    ("document", "quality_status"): ["pending", "accepted_for_checks", "resubmission_required",
+                                     "manual_review_required", "superseded"],
 }
 
 

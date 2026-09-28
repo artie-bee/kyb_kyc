@@ -23,7 +23,7 @@ so releasing the last held document moves the case on by itself.
 
 from dataclasses import dataclass
 
-from .. import db
+from .. import db, holds
 from ..kb import KnowledgeBase
 from . import document_quality
 
@@ -46,12 +46,24 @@ class ReleaseResult:
     next_step: str | None
 
 
+def resubmission_reason_codes(kb: KnowledgeBase) -> list[str]:
+    """The approved reasons an analyst may give the customer for sending a
+    document back: kb/resubmission_reason_text.csv, less the catch-all."""
+    return [code for code in kb.resubmission_reason_text if code != "*"]
+
+
 def release_document(conn, document_id: str, analyst_id: str, decision: str, reason: str,
-                     kb: KnowledgeBase | None = None) -> ReleaseResult:
+                     kb: KnowledgeBase | None = None,
+                     reason_code: str | None = None) -> ReleaseResult:
     """Record an analyst's decision on a held document and re-route the case.
 
     A reason is required. An override with no stated reason is not auditable, and
-    this is precisely the point where a human is overruling the system.
+    this is precisely the point where a human is overruling the system. Sending a
+    document back also needs `reason_code`, one of the approved customer reasons,
+    which is what the customer is told.
+
+    Only this document's own hold is lifted, in the analyst's name; any other
+    document stays exactly as it was.
     """
     if decision not in DECISIONS:
         raise ValueError(f"decision must be one of {DECISIONS}, not {decision!r}")
@@ -61,6 +73,10 @@ def release_document(conn, document_id: str, analyst_id: str, decision: str, rea
         raise ValueError("the releasing analyst must be identified")
 
     kb = kb or KnowledgeBase()
+    if decision == "request_resubmission" and reason_code not in resubmission_reason_codes(kb):
+        raise ValueError(
+            "choose the reason the customer will be given from the approved list "
+            f"{resubmission_reason_codes(kb)}")
     doc = conn.execute("SELECT * FROM document WHERE document_id = ?", (document_id,)).fetchone()
     if doc is None:
         raise KeyError(f"no such document {document_id}")
@@ -72,8 +88,10 @@ def release_document(conn, document_id: str, analyst_id: str, decision: str, rea
     new_status, item_status = _OUTCOME[decision]
     conn.execute(
         "UPDATE document SET quality_status = ?, resubmission_required = ?, released_by = ?,"
-        " release_reason = ? WHERE document_id = ?",
-        (new_status, int(decision == "request_resubmission"), analyst_id, reason, document_id))
+        " release_reason = ?, resubmission_reasons = ? WHERE document_id = ?",
+        (new_status, int(decision == "request_resubmission"), analyst_id, reason,
+         reason_code if decision == "request_resubmission" else doc["resubmission_reasons"],
+         document_id))
 
     item = conn.execute(
         "SELECT item_id, resubmission_attempts FROM checklist_item WHERE item_id = "
@@ -89,6 +107,10 @@ def release_document(conn, document_id: str, analyst_id: str, decision: str, rea
              f"(flags {doc['quality_flags'] or 'none'}) overridden; reason: {reason}",
              kb.version)
 
+    # This document's own visual-check hold, released by the person who looked.
+    for h in holds.open_holds(conn, doc["case_id"]):
+        if document_quality.visual_hold_document(h.reason) == document_id:
+            holds.release(conn, h.hold_id, analyst_id, f"{decision}: {reason}", kb=kb)
     routed = document_quality.route_case(conn, doc["case_id"], kb)
     return ReleaseResult(document_id, decision, new_status, routed.status, routed.next_step)
 

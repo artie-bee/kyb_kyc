@@ -1,0 +1,294 @@
+{
+  "label": "mock: recognised demo sample file",
+  "company": "Vaher Studio OÜ",
+  "register": {
+    "number": "16880342",
+    "name": "Vaher Studio OÜ",
+    "address": "Rüütli 18, 51007 Tartu, Estonia"
+  },
+  "note": "Fictional documents (marked SPECIMEN / fictional issuer) for Vaher Studio OÜ. Fixed bytes: the proof of address is dated 2026-09-10 and ages like a real one.",
+  "files": {
+    "7319dcb36c2708a334f5c9f9120b2868d76002427a9a0555fb8fe077c11537df": {
+      "file": "01_certificate_of_incorporation.pdf",
+      "document_type": "certificate_of_incorporation",
+      "person": null,
+      "quality_flags": [],
+      "expiry_date": null,
+      "document_date": null,
+      "fields": [
+        {
+          "name": "company_name",
+          "value": "Vaher Studio OÜ",
+          "confidence": 0.98,
+          "source_page": 1
+        },
+        {
+          "name": "registration_number",
+          "value": "16880342",
+          "confidence": 0.98,
+          "source_page": 1
+        },
+        {
+          "name": "incorporation_date",
+          "value": "2023-02-14",
+          "confidence": 0.98,
+          "source_page": 1
+        },
+        {
+          "name": "registered_address",
+          "value": "Rüütli 18, 51007 Tartu, Estonia",
+          "confidence": 0.98,
+          "source_page": 1
+        }
+      ]
+    },
+    "af206d3bc9fad256405d982051e8157df55643965a1d3ffa3def529b176dd1cf": {
+      "file": "02_company_registration_extract.pdf",
+      "document_type": "registry_extract",
+      "person": null,
+      "quality_flags": [],
+      "expiry_date": null,
+      "document_date": null,
+      "fields": [
+        {
+          "name": "company_name",
+          "value": "Vaher Studio OÜ",
+          "confidence": 0.98,
+          "source_page": 1
+        },
+        {
+          "name": "legal_name",
+          "value": "Vaher Studio OÜ",
+          "confidence": 0.98,
+          "source_page": 1
+        },
+        {
+          "name": "registration_number",
+          "value": "16880342",
+          "confidence": 0.98,
+          "source_page": 1
+        },
+        {
+          "name": "registered_address",
+          "value": "Rüütli 18, 51007 Tartu, Estonia",
+          "confidence": 0.98,
+          "source_page": 1
+        },
+        {
+          "name": "entity_status",
+          "value": "active",
+          "confidence": 0.98,
+          "source_page": 1
+        }
+      ]
+    },
+    "a3164155e69b6c85d9719ed162d1a90a5f6fde81bdf436ead562e4a456851480": {
+      "file": "03_tax_registration_certificate.pdf",
+      "document_type": "tax_registration_certificate",
+      "person": null,
+      "quality_flags": [],
+      "expiry_date": null,
+      "document_date": null,
+      "fields": [
+        {
+          "name": "vat_number",
+          "value": "EE102889341",
+          "confidence": 0.98,
+          "source_page": 1
+        }
+      ]
+    },
+    "0a2e0cc7bbba3eb8a84094da195ebc368968a19bf9dacff81fac400143f428f3": {
+      "file": "04_register_of_directors.pdf",
+      "document_type": "director_register",
+      "person": null,
+      "quality_flags": [],
+      "expiry_date": null,
+      "document_date": null,
+      "fields": [
+        {
+          "name": "director_name",
+          "value": "Kristiina Vaher",
+          "confidence": 0.98,
+          "source_page": 1
+        },
+        {
+          "name": "appointment_date",
+          "value": "2023-02-14",
+          "confidence": 0.98,
+          "source_page": 1
+        }
+      ]
+    },
+    "5b3172fc067865c143719fc1006d1de1ad7d358a73e5d466ba9dac8522927979": {
+      "file": "05_list_of_authorised_signatories.pdf",
+      "document_type": "authorised_signatory_list",
+      "person": null,
+      "quality_flags": [],
+      "expiry_date": null,
+      "document_date": null,
+      "fields": [
+        {
+          "name": "signatory_name",
+          "value": "Kristiina Vaher",
+          "confidence": 0.98,
+          "source_page": 1
+        }
+      ]
+    },
+    "8711b1bc45dd345c3218b85afb153c032dde20998f2f1884ace9569d61be0dde": {
+      "file": "06_declaration_of_beneficial_owners.pdf",
+      "document_type": "ubo_declaration",
+      "person": null,
+      "quality_flags": [],
+      "expiry_date": null,
+      "document_date": null,
+      "fields": [
+        {
+          "name": "ubo_name",
+          "value": "Kristiina Vaher",
+          "confidence": 0.98,
+          "source_page": 1
+        },
+        {
+          "name": "ownership_percentage",
+          "value": "100",
+          "confidence": 0.98,
+          "source_page": 1
+        },
+        {
+          "name": "control_basis",
+          "value": "Direct, via share ownership",
+          "confidence": 0.98,
+          "source_page": 1
+        }
+      ]
+    },
+    "51f6af8032f0290a8285533506f38fdf6942fe88e8a1c16d1ad85fef3f8f1e69": {
+      "file": "07_identity_document_kristiina_vaher.jpg",
+      "document_type": "id_document",
+      "person": "Kristiina Vaher",
+      "quality_flags": [],
+      "expiry_date": "2031-03-31",
+      "document_date": null,
+      "fields": [
+        {
+          "name": "full_name",
+          "value": "Kristiina Vaher",
+          "confidence": 0.98,
+          "source_page": 1
+        },
+        {
+          "name": "date_of_birth",
+          "value": "1990-06-14",
+          "confidence": 0.98,
+          "source_page": 1
+        },
+        {
+          "name": "document_number",
+          "value": "SPEC-EE-4417283",
+          "confidence": 0.98,
+          "source_page": 1
+        },
+        {
+          "name": "expiry_date",
+          "value": "2031-03-31",
+          "confidence": 0.98,
+          "source_page": 1
+        }
+      ]
+    },
+    "2afef757adc97840d22a9075fa831cdab5f9f9d44b4a71b5ff3b36e4489b9f7c": {
+      "file": "07b_identity_document_kristiina_vaher_BLURRED.jpg",
+      "document_type": "id_document",
+      "person": "Kristiina Vaher",
+      "quality_flags": [
+        "blurred_unreadable"
+      ],
+      "expiry_date": null,
+      "document_date": null,
+      "fields": []
+    },
+    "e5441532f9b8e296bce95f105b3b1ac4343fcaac5a295f5163b9a879dff710d9": {
+      "file": "08_proof_of_address_kristiina_vaher.pdf",
+      "document_type": "proof_of_address",
+      "person": "Kristiina Vaher",
+      "quality_flags": [],
+      "expiry_date": null,
+      "document_date": "2026-09-10",
+      "fields": [
+        {
+          "name": "document_date",
+          "value": "2026-09-10",
+          "confidence": 0.98,
+          "source_page": 1
+        },
+        {
+          "name": "full_name",
+          "value": "Kristiina Vaher",
+          "confidence": 0.98,
+          "source_page": 1
+        },
+        {
+          "name": "address",
+          "value": "Vanemuise 42-7, 51003 Tartu, Estonia",
+          "confidence": 0.98,
+          "source_page": 1
+        },
+        {
+          "name": "issuer",
+          "value": "Tartu Energy Demo AS",
+          "confidence": 0.98,
+          "source_page": 1
+        }
+      ]
+    },
+    "f86d668349d8a6f629396a7a957032b16ebbcd9dc460754ddb98482bc8fb9e86": {
+      "file": "09_selfie_kristiina_vaher.jpg",
+      "document_type": "liveness_selfie",
+      "person": "Kristiina Vaher",
+      "quality_flags": [],
+      "expiry_date": null,
+      "document_date": null,
+      "fields": []
+    },
+    "66a824641b7ab06b705ef3ef7c3c6bdaef0fd8c50af4295c379bbdfda68d08c6": {
+      "file": "10_source_of_funds_declaration.pdf",
+      "document_type": "source_of_funds_declaration",
+      "person": null,
+      "quality_flags": [],
+      "expiry_date": null,
+      "document_date": null,
+      "fields": [
+        {
+          "name": "declared_source",
+          "value": "Client payments for design services",
+          "confidence": 0.98,
+          "source_page": 1
+        },
+        {
+          "name": "expected_monthly_volume",
+          "value": "EUR 3,000",
+          "confidence": 0.98,
+          "source_page": 1
+        }
+      ]
+    },
+    "02fcdc0aa48cbbba8fba91d018a6dd3ad293e75016623bf3bfdf9d38a85dc289": {
+      "file": "11_business_activity_description.pdf",
+      "document_type": "business_activity_description",
+      "person": null,
+      "quality_flags": [],
+      "expiry_date": null,
+      "document_date": null,
+      "fields": [
+        {
+          "name": "declared_industry",
+          "value": "Graphic design and branding services for small businesses",
+          "confidence": 0.98,
+          "source_page": 1
+        }
+      ]
+    }
+  }
+}

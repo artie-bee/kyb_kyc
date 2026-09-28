@@ -98,10 +98,12 @@ def extracted_values(conn, case_id: str) -> dict:
     correcting it: this is what the register is compared against.
     """
     values = {}
+    # A superseded upload is history: a customer's wrong file, replaced by the
+    # right one, must not feed the comparison it was replaced to correct.
     for r in conn.execute(
             "SELECT f.name, f.value, f.corrected_by_analyst, d.document_type"
             " FROM extracted_field f JOIN document d USING (document_id)"
-            " WHERE d.case_id = ? AND f.value IS NOT NULL"
+            " WHERE d.case_id = ? AND f.value IS NOT NULL AND d.quality_status != 'superseded'"
             " ORDER BY f.corrected_by_analyst", (case_id,)):
         values.setdefault(r["name"], []).append(r["value"])
         if r["corrected_by_analyst"]:
@@ -179,12 +181,20 @@ def run(conn, case_id: str, application: dict, kb: KnowledgeBase,
         registry_result, fired = UNAVAILABLE, [rule["rule_id"]]
     else:
         # Match results are COMPUTED from what the register holds vs what was extracted.
+        # Who the DOCUMENTS say runs the business - never who the application
+        # says. A company's register of directors names them; a sole trader has
+        # none, and is named by their own identity document. If no document
+        # names anyone, there is nothing to compare, and "unavailable" is not a
+        # match.
         declared_directors = [v for name in ("director_name", "director_name_2")
                               for v in values.get(name, [])]
         if not declared_directors:
-            declared_directors = [r["full_name"] for r in conn.execute(
-                "SELECT full_name FROM individual WHERE applicant_id = ? AND role IN "
-                "('director','sole_trader')", (case["applicant_id"],))]
+            declared_directors = [r["value"] for r in conn.execute(
+                "SELECT f.value FROM extracted_field f JOIN document d USING (document_id)"
+                " JOIN individual i ON i.individual_id = d.subject_individual_id"
+                " WHERE d.case_id = ? AND d.document_type = 'id_document'"
+                " AND d.quality_status != 'superseded' AND i.role = 'sole_trader'"
+                " AND f.name = 'full_name' AND f.value IS NOT NULL", (case_id,))]
         matches = {
             "name_match": _match(response.legal_name, (values.get("company_name")
                                                        or values.get("legal_name") or [None])[0]),

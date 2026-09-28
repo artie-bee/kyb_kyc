@@ -19,6 +19,7 @@ import pytest
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 
+from orchestrator.clock import DEMO_START                    # noqa: E402
 from orchestrator import db, holds                                        # noqa: E402
 from orchestrator.kb import KnowledgeBase                                 # noqa: E402
 from orchestrator.steps import communication, decision                    # noqa: E402
@@ -188,7 +189,7 @@ def test_an_override_is_computed_and_needs_a_reason(demo):
 
 def test_case_14_auto_withdraws_on_the_fake_clock():
     conn = db.connect(":memory:")
-    clock = communication.FakeClock(date.today())
+    clock = communication.FakeClock(DEMO_START)
     run(conn, clock=clock, verbose=False)
 
     case = conn.execute("SELECT * FROM onboarding_case WHERE case_id = 'WAL-ONB-0014'").fetchone()

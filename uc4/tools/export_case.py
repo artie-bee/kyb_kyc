@@ -20,6 +20,7 @@ from pathlib import Path
 UC4 = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(UC4))
 
+from orchestrator import clock                   # noqa: E402
 from orchestrator.kb import KnowledgeBase        # noqa: E402
 
 # table -> the column that ties a row to a case, or a query when it is indirect
@@ -63,8 +64,7 @@ def export(conn: sqlite3.Connection, case_id: str, kb: KnowledgeBase) -> dict:
 
     return {
         "case_id": case_id,
-        "exported_at": __import__("datetime").datetime.now(
-            __import__("datetime").timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+        "exported_at": clock.stamp(),
         "kb_version": kb.version,
         "kb_items": json.loads((UC4 / "kb" / "kb_manifest.json").read_text())["items"],
         "model_and_prompt_versions": versions,

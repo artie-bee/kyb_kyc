@@ -10,3 +10,5 @@ sample_documents/
 *.log
 .env
 .env.*
+uploads/
+portal_applications/

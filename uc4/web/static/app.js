@@ -24,6 +24,46 @@
     try { localStorage.setItem(KEY, next); } catch (e) { /* nothing to do */ }
   });
 
+  // ---- copy the customer link --------------------------------------------
+  // Without the script the link is still on the page, selectable by hand.
+  Array.prototype.forEach.call(document.querySelectorAll("[data-copy]"), function (btn) {
+    btn.addEventListener("click", function () {
+      var box = document.getElementById(btn.getAttribute("data-copy"));
+      if (!box) return;
+      box.select();
+      var done = function () { btn.textContent = "Copied"; };
+      if (navigator.clipboard) {
+        navigator.clipboard.writeText(box.value).then(done, function () {
+          document.execCommand("copy"); done();
+        });
+      } else { document.execCommand("copy"); done(); }
+    });
+  });
+
+  // ---- review shortcuts: A accept, C correct ------------------------------
+  // They press the SAME buttons a mouse would - so the same form, the same
+  // required reason, the same backend check. Active only when focus is inside a
+  // review area, and never while typing in a field.
+  document.addEventListener("keydown", function (ev) {
+    if (ev.defaultPrevented || ev.ctrlKey || ev.metaKey || ev.altKey) return;
+    var t = ev.target;
+    if (!t || t.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName)) return;
+    var key = (ev.key || "").toLowerCase();
+    if (key !== "a" && key !== "c") return;
+    var area = t.closest ? t.closest("[data-review]") : null;
+    if (!area) return;
+    var btn = area.querySelector('[data-shortcut="' + key + '"]');
+    if (!btn) return;
+    ev.preventDefault();
+    btn.click();
+  });
+  // Clicking anywhere in a review area gives it focus, so the keys apply there.
+  Array.prototype.forEach.call(document.querySelectorAll("[data-review]"), function (area) {
+    area.addEventListener("click", function (ev) {
+      if (!ev.target.closest("a, button, input, select, textarea, label, summary")) area.focus();
+    });
+  });
+
   // ---- case picker ------------------------------------------------------
   var picker = document.getElementById("casepick");
   if (picker) picker.addEventListener("change", function () {
