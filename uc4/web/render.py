@@ -325,6 +325,8 @@ def case_detail(conn, case_id, tab="Timeline", role="analyst",
                       + "</code>" + extra + "</p><ul>" + steps + "</ul>",
                       "info", "Future phase")
 
+    demo = _demo_panel(conn, case_id, reviewer) if data.is_demo_case(case_id) else ""
+
     tabs = "".join('<a class="tab' + (" tab--on" if t == tab else "") + '" href="/case/'
                    + e(case_id) + "?tab=" + e(t) + '">' + e(t) + "</a>"
                    for t in TABS)
@@ -349,8 +351,34 @@ def case_detail(conn, case_id, tab="Timeline", role="analyst",
         '<span class="stat__v stat__v--sm"><span class="type">'
         + e(case["applicant_type"] or "-") + "</span></span></div>"
         "</section>"
-        + holds_html + restricted + future
+        + holds_html + restricted + future + demo
         + '<nav class="tabs">' + tabs + "</nav>" + inner)
+
+
+def _demo_panel(conn, case_id, reviewer="analyst.demo") -> str:
+    """A case made in the portal's demo form: say so, and let the analyst choose
+    what the simulated providers will find. Console only - the portal has no
+    route, form or word for this."""
+    current = data.demo_scenario(conn, case_id)
+    back = "/case/" + e(case_id)
+    if data.document_stage_open(conn, case_id):
+        options = "".join('<option value="' + e(k) + '"' + (" selected" if k == current else "")
+                          + ">" + e(v) + "</option>" for k, v in data.DEMO_SCENARIOS.items())
+        control = ('<form method="post" action="/action/demo-scenario" class="btn-row">'
+                   '<input type="hidden" name="case_id" value="' + e(case_id) + '">'
+                   '<input type="hidden" name="back" value="' + back + '">'
+                   '<select name="scenario" aria-label="Demo scenario">' + options + "</select>"
+                   '<button class="btn btn--primary" type="submit">Set scenario</button></form>'
+                   '<p class="foot">Applies when Steps 5 and 6 run. The choice is audited, and '
+                   "fixed once the providers have answered.</p>")
+    else:
+        control = ("<p>Scenario <code>" + e(current) + "</code> &mdash; fixed: the simulated "
+                   "providers have already answered on this case.</p>")
+    return note("Made in the customer portal's demo application form, with synthetic data. "
+                "Every registry, identity and screening result on this case is a <strong>"
+                + e(data.SIMULATED) + "</strong>, not a real check. The case is left out of "
+                "every dataset comparison, and Reset demo deletes it."
+                "<h3>Demo scenario</h3>" + control, "info", "Demo case")
 
 
 def _tab_timeline(conn, case_id, **kw):
@@ -520,21 +548,30 @@ def _tab_documents(conn, case_id, role="analyst", reviewer="analyst.demo", **kw)
                 "Request resubmission</button></div></form>")
 
         fields = ""
+        awaiting = [f for f in doc["fields"] if f["entry_method"] == "awaiting_analyst_entry"]
         if doc["fields"]:
             rows = []
             for f in doc["fields"]:
-                low = f["needs_analyst_correction"] and not f["corrected_by_analyst"]
-                if f["corrected_by_analyst"]:
+                if f["entry_method"] == "awaiting_analyst_entry":
+                    continue                    # typed in through the form below
+                keyed = f["entry_method"] == "entered_by_analyst"
+                low = (f["needs_analyst_correction"] and not f["corrected_by_analyst"]
+                       and not keyed)
+                if keyed:
+                    state = chip("entered by an analyst", tone="info")
+                elif f["corrected_by_analyst"]:
                     state = chip("corrected by an analyst", tone="ok")
                 elif low:
                     state = chip("below the confidence floor", tone="bad")
                 else:
                     state = ""
-                value = e(f["value"]) if f["value"] is not None else em_dash("not read")
+                value = e(f["value"]) if f["value"] is not None else em_dash("not given")
+                # A typed-in value has no machine confidence to show.
+                confidence = em_dash("typed in, not read") if keyed else (
+                    "%.2f" % float(f["confidence"]))
                 rows.append('<div class="fieldrow"><span class="type">' + e(f["name"])
                             + "</span><span>" + value + '</span><span class="num">'
-                            + ("%.2f" % float(f["confidence"])) + "</span><span>"
-                            + state + "</span></div>")
+                            + confidence + "</span><span>" + state + "</span></div>")
                 if low:
                     back = "/case/" + e(case_id) + "?tab=Documents"
                     rows.append(
@@ -556,7 +593,11 @@ def _tab_documents(conn, case_id, role="analyst", reviewer="analyst.demo", **kw)
                         '<button class="btn" name="how" value="accept">Accept as read</button>'
                         '<button class="btn btn--primary" name="how" value="correct">Correct</button>'
                         "</div></form>")
-            fields = "<h3>Extracted fields</h3>" + "".join(rows)
+            if rows:
+                fields = "<h3>Fields</h3>" + "".join(rows)
+        if awaiting:
+            fields += _entry_form(case_id, doc, awaiting)
+            held = True
 
         cls = "doc doc--held" if held else "doc"
         opened = " open" if held else ""
@@ -566,6 +607,30 @@ def _tab_documents(conn, case_id, role="analyst", reviewer="analyst.demo", **kw)
     if len(out) == 1:
         out.append('<p class="empty">No documents on this case.</p>')
     return "".join(out)
+
+
+def _entry_form(case_id, doc, awaiting) -> str:
+    """Mock mode: nothing reads an uploaded file, so the analyst types in what
+    it says. Recorded as entered_by_analyst - never as extracted."""
+    required = set(data.kb().required_fields_for(doc["document_type"]))
+    inputs = "".join(
+        '<div class="field"><label>' + e(f["name"].replace("_", " "))
+        + (" (required)" if f["name"] in required else "") + "</label>"
+        '<input type="text" name="f_' + e(f["name"]) + '"'
+        + (" required" if f["name"] in required else "")
+        + (' placeholder="YYYY-MM-DD"' if f["name"].endswith("date") or f["name"] == "date_of_birth"
+           else "") + "></div>"
+        for f in awaiting)
+    return ('<form method="post" action="/action/enter-fields" class="panel">'
+            '<input type="hidden" name="document_id" value="' + e(doc["document_id"]) + '">'
+            '<input type="hidden" name="back" value="/case/' + e(case_id) + '?tab=Documents">'
+            + note("Fields not read automatically in mock mode. Open the file, then type in "
+                   "what it says. Each value is recorded as <strong>entered by an "
+                   "analyst</strong>, under your name, and never as extracted. Dates typed "
+                   "here go through the same expiry and age rules as the quality screen.",
+                   "warn", "Type in this document's fields")
+            + '<div class="formgrid">' + inputs + "</div>"
+            '<button class="btn btn--primary" type="submit">Save the fields</button></form>')
 
 
 def _tab_people(conn, case_id, **kw):
@@ -606,7 +671,13 @@ def _tab_people(conn, case_id, **kw):
 
 def _tab_checks(conn, case_id, **kw):
     result = data.checks(conn, case_id)
-    out = ["<h2>Registry</h2>"]
+    out = []
+    if data.is_demo_case(case_id) and (result["registry"] or result["identity"]
+                                       or result["screening"]):
+        out.append(note("Every result on this tab is a <strong>" + e(data.SIMULATED)
+                        + "</strong> (scenario <code>" + e(data.demo_scenario(conn, case_id))
+                        + "</code>). None of it is a real check.", "warn", "Simulated"))
+    out.append("<h2>Registry</h2>")
     if not result["registry"]:
         out.append('<p class="empty">No registry check was run: the case did not '
                    "reach the paid step.</p>")
@@ -628,8 +699,8 @@ def _tab_checks(conn, case_id, **kw):
                         "documents.", "ok" if supported else "warn"))
         rows = [[e(name), cell(held), cell(got), chip(outcome, RESULT_TONE)]
                 for name, held, got, outcome in result["comparisons"]]
-        out.append(table(["Compared", "The register holds", "Extracted from documents",
-                          "Result"], rows))
+        out.append(table(["Compared", "The register holds",
+                          "From the documents (read, corrected or typed in)", "Result"], rows))
         out.append('<p class="foot">Match results are computed here by comparing the '
                    "two columns, corrections included &mdash; not taken from the "
                    "provider.</p>")
@@ -641,9 +712,11 @@ def _tab_checks(conn, case_id, **kw):
              chip(r["biometric_result"], RESULT_TONE),
              cell(r["name_dob_match"]), cell(r["document_expired"]),
              cell(r["duplicate_individual_detected"]),
-             chip(r["result"], RESULT_TONE)] for r in result["identity"]]
+             chip(r["result"], RESULT_TONE),
+             '<span class="type">' + e(r["provider_name"]) + "</span>"]
+            for r in result["identity"]]
     out.append(table(["Check", "Subject", "Document", "Liveness", "Biometric",
-                      "Name/DOB", "Expired", "Duplicate", "Result"], rows,
+                      "Name/DOB", "Expired", "Duplicate", "Result", "Provider"], rows,
                      "No identity checks were run."))
 
     out.append("<h2>Screening</h2>")
@@ -652,10 +725,11 @@ def _tab_checks(conn, case_id, **kw):
              chip(r["pep_result"], RESULT_TONE),
              chip(r["adverse_media_result"], RESULT_TONE),
              chip(r["severity"], RESULT_TONE),
-             '<span class="type">' + e(r["evidence_refs"] or "") + "</span>"]
+             '<span class="type">' + e(r["evidence_refs"] or "") + "</span>",
+             '<span class="type">' + e(r["provider_name"]) + "</span>"]
             for r in result["screening"]]
     out.append(table(["Check", "Subject", "Sanctions", "PEP", "Adverse media",
-                      "Severity", "Provider refs"], rows, "No screening was run."))
+                      "Severity", "Provider refs", "Provider"], rows, "No screening was run."))
     if result["screening"]:
         out.append(note("Internal only. None of this may be repeated to the "
                         "applicant.", "bad"))

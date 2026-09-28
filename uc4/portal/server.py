@@ -40,7 +40,7 @@ sys.path.insert(0, str(UC4))
 from app import data                                                  # noqa: E402
 from app.customer_view import customer_checklist, customer_view, leaks  # noqa: E402
 from orchestrator.steps.document_quality import MAX_UPLOAD_BYTES, UploadRefused  # noqa: E402
-from portal import render                                             # noqa: E402
+from portal import apply, render, render_form                         # noqa: E402
 
 STATIC = Path(__file__).resolve().parent / "static"
 COOKIE = "wal_portal"
@@ -160,6 +160,12 @@ class Handler(BaseHTTPRequestHandler):
                         return self._page(render.page("Choose a demo customer",
                                                       render.demo_selector(customers),
                                                       flash=flash, demo=demo))
+                    if path == "/apply":
+                        if not demo:
+                            return self._page(render.page("Not found", render.not_found()), 404)
+                        return self._page(render.page(
+                            "Apply", render_form.application_form(apply.BUSINESS, {}),
+                            flash=flash, demo=demo))
                     if path not in ("/", "/checklist", "/messages"):
                         return self._page(render.page("Not found", render.not_found(),
                                                       demo=demo), 404)
@@ -226,6 +232,8 @@ class Handler(BaseHTTPRequestHandler):
                 try:
                     if path == "/demo/open" and self.server.demo:
                         return self._demo_open(conn, _urlencoded(body))
+                    if path == "/apply" and self.server.demo:
+                        return self._apply(conn, _urlencoded(body))
                     if path == "/signout":
                         token = self._token()
                         if token:
@@ -254,6 +262,44 @@ class Handler(BaseHTTPRequestHandler):
             data.end_portal_session(conn, old)
         token = data.issue_portal_access(conn, case_id, "demo.case_selector")
         return self._redirect("/", cookies=[_session_cookie(token)])
+
+    def _apply(self, conn, form):
+        """One step of the demo application form.
+
+        A step that moves forward or back renders the next page straight from
+        the POST: nothing has been stored yet, so a refresh repeats nothing.
+        Only sending the finished application changes anything, and that one
+        redirects (303), as every other action here does.
+        """
+        answers = apply.known_answers(form)
+        try:
+            step = min(max(int(form.get("step") or apply.BUSINESS), apply.BUSINESS),
+                       apply.REVIEW)
+        except ValueError:
+            step = apply.BUSINESS
+        demo = self.server.demo
+
+        def show(n, errors=None):
+            return self._page(render.page("Apply", render_form.application_form(
+                n, answers, errors), demo=demo))
+
+        if form.get("nav") == "back":
+            return show(apply.previous_step(step, answers))
+        errors = apply.validate(step, answers)
+        if errors:
+            return show(step, errors)
+        if form.get("nav") != "submit" or step != apply.REVIEW:
+            return show(apply.next_step(step, answers))
+
+        application = apply.build_application(answers, "PORTAL-" + secrets.token_hex(4))
+        case_id = data.submit_application(conn, application)
+        old = self._token()
+        if old:
+            data.end_portal_session(conn, old)
+        token = data.issue_portal_access(conn, case_id, "portal.demo_application")
+        key = self._flash_put("ok", "We have your application. Your checklist shows the "
+                                    "documents we need.")
+        return self._redirect("/?m=" + key, cookies=[_session_cookie(token)])
 
     def _upload(self, conn, body):
         case_id = data.portal_case(conn, self._token())

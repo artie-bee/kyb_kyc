@@ -17,13 +17,17 @@ from pathlib import Path
 UC4 = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(UC4))
 
-from orchestrator import db, holds, live_mode, portal_access               # noqa: E402
+from orchestrator import (db, demo_scenarios, holds, live_mode,           # noqa: E402
+                          portal_access)
 from orchestrator.kb import KnowledgeBase                                  # noqa: E402
 from orchestrator.quality_checker import get_upload_checker                # noqa: E402
 from orchestrator.steps import (analyst_review, communication, decision,   # noqa: E402
                                 document_quality, evidence_pack, extraction,
                                 verification)
-from orchestrator.orchestrator import QUALITY_CHECKER_MODE, resume         # noqa: E402
+from orchestrator.orchestrator import (QUALITY_CHECKER_MODE,              # noqa: E402
+                                       process_application, resume)
+from orchestrator.providers import DEMO_SCENARIOS, SIMULATED               # noqa: E402
+from orchestrator.steps.intake import DEMO_ORIGIN                          # noqa: E402
 from tools.export_case import export                                       # noqa: E402
 from tools.run_demo import run as run_demo                                 # noqa: E402
 from tools.dataset_to_applications import DEFAULT_OUT as APPLICATIONS       # noqa: E402
@@ -31,6 +35,10 @@ from tools.dataset_to_applications import DEFAULT_OUT as APPLICATIONS       # no
 DB_PATH = UC4 / "onboarding.db"
 SAMPLE_DOCS = UC4 / "sample_documents"
 UPLOADS = document_quality.UPLOADS
+# Applications typed into the portal's demo form, one JSON file per WAL-DEMO-
+# case - the same shape as the dataset's application files, and like them not a
+# table. Git-ignored, and emptied by Reset demo.
+PORTAL_APPLICATIONS = UC4 / "portal_applications"
 
 
 # ---------------------------------------------------------------------------
@@ -51,10 +59,27 @@ def reset_demo(path: Path = DB_PATH) -> None:
     """
     if path.exists():
         path.unlink()
+    # Rebuilding the database drops every WAL-DEMO- case with it. Their saved
+    # applications and every file uploaded through the portal go too - but only
+    # for the demo's own database, never for a copy a test is resetting.
+    if Path(path).resolve() == DB_PATH.resolve():
+        _clear(PORTAL_APPLICATIONS, "*.json")
+        _clear(UPLOADS, "*/*")
     conn = db.connect(path)
     run_demo(conn, verbose=False, stop_before_human_actions=True)
     conn.commit()
     conn.close()
+
+
+def _clear(folder: Path, pattern: str) -> None:
+    if not folder.exists():
+        return
+    for f in folder.glob(pattern):
+        if f.is_file():
+            f.unlink()
+    for d in sorted((p for p in folder.glob("*") if p.is_dir()), reverse=True):
+        if not any(d.iterdir()):
+            d.rmdir()
 
 
 def mode_badge() -> str:
@@ -412,9 +437,22 @@ def export_bundle(conn, case_id: str) -> dict:
 # Actions - each one calls the orchestrator, never the database
 # ---------------------------------------------------------------------------
 
-def _application(case_id: str) -> dict:
-    """The application this case was built from, for the steps that need it."""
+def _application(case_id: str, conn=None) -> dict:
+    """The application this case was built from, for the steps that need it.
+
+    A demo case's application is the one the portal saved, with the demo
+    scenario the analyst chose (read from the audit trail) for the simulated
+    providers.
+    """
     import json
+    if db.is_demo_case(case_id):
+        path = PORTAL_APPLICATIONS / f"{case_id}.json"
+        if not path.exists():
+            raise FileNotFoundError(f"no saved demo application for {case_id}")
+        application = json.loads(path.read_text(encoding="utf-8"))
+        if conn is not None:
+            application["demo_scenario"] = demo_scenarios.current(conn, case_id)
+        return application
     matches = sorted(APPLICATIONS.glob(f"*{case_id}.json"))
     if not matches:
         raise FileNotFoundError(
@@ -432,7 +470,7 @@ def carry_on(conn, case_id: str) -> dict:
     """
     if open_holds(conn, case_id):
         return {"stopped_at": "holds", "reason": "holds are still open"}
-    trace = resume(conn, case_id, _application(case_id), kb())
+    trace = resume(conn, case_id, _application(case_id, conn), kb())
     conn.commit()
     return trace
 
@@ -541,3 +579,72 @@ def end_portal_session(conn, token):
     ended = portal_access.revoke(conn, token, "customer", kb())
     conn.commit()
     return ended
+
+
+# ---------------------------------------------------------------------------
+# Demo applications from the portal (phase 2) - synthetic data only
+# ---------------------------------------------------------------------------
+
+def submit_application(conn, application: dict) -> str:
+    """A demo application typed into the portal, through intake like any other.
+
+    The applicant type is never taken from the form: whatever the form sent is
+    dropped, and Step 1 classifies from the facts with the AT rules. The saved
+    application is what the later steps read, exactly as they read a dataset
+    application file.
+    """
+    import json
+    application = {k: v for k, v in application.items()
+                   if k not in ("applicant_type", "route", "case_id")}
+    application["origin"] = DEMO_ORIGIN
+    application["source_channel"] = "portal"
+    trace = process_application(conn, application, kb())
+    case_id = trace["intake"]["case_id"]
+    PORTAL_APPLICATIONS.mkdir(parents=True, exist_ok=True)
+    (PORTAL_APPLICATIONS / f"{case_id}.json").write_text(
+        json.dumps(application, indent=2, ensure_ascii=False), encoding="utf-8")
+    conn.commit()
+    return case_id
+
+
+def awaiting_fields(conn, case_id: str) -> dict:
+    """Per document, the fields waiting for an analyst to type them in."""
+    out = {}
+    for doc in conn.execute("SELECT document_id FROM document WHERE case_id = ?"
+                            " ORDER BY document_id", (case_id,)):
+        rows = [dict(r) for r in extraction.fields_awaiting_entry(conn, doc["document_id"])]
+        if rows:
+            required = set(kb().required_fields_for(conn.execute(
+                "SELECT document_type FROM document WHERE document_id = ?",
+                (doc["document_id"],)).fetchone()[0]))
+            for r in rows:
+                r["required"] = r["name"] in required
+            out[doc["document_id"]] = rows
+    return out
+
+
+def enter_fields(conn, document_id, analyst_id, values):
+    case_id = conn.execute("SELECT case_id FROM document WHERE document_id = ?",
+                           (document_id,)).fetchone()[0]
+    result = extraction.enter_fields(conn, document_id, analyst_id, values, kb())
+    conn.commit()
+    carry_on(conn, case_id)
+    return result
+
+
+def demo_scenario(conn, case_id: str) -> str:
+    return demo_scenarios.current(conn, case_id)
+
+
+def choose_demo_scenario(conn, case_id, scenario, analyst_id):
+    chosen = demo_scenarios.choose(conn, case_id, scenario, analyst_id, kb())
+    conn.commit()
+    return chosen
+
+
+def is_demo_case(case_id: str) -> bool:
+    return db.is_demo_case(case_id)
+
+
+def document_stage_open(conn, case_id: str) -> bool:
+    return document_quality.document_stage_open(conn, case_id)

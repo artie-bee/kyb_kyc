@@ -33,7 +33,7 @@ from ..kb import KnowledgeBase
 from .. import holds
 from .. import llm_client
 from ..quality_checker import (QualityChecker, MockQualityChecker,
-                               UnknownQualityFlag, UnscriptedUploadChecker)
+                               UnknownQualityFlag, DeterministicOnlyUploadChecker)
 
 ACTOR = "step.document_quality"
 MAX_ATTEMPTS = 3
@@ -267,7 +267,10 @@ def run(conn, case_id: str, application: dict, kb: KnowledgeBase,
             conn.execute("UPDATE checklist_item SET status = ?, resubmission_attempts = ? "
                          "WHERE item_id = ?", (item_status, attempts, item["item_id"]))
 
-        db.audit(conn, case_id, "ai_agent" if verdict else "system", ACTOR,
+        # A checker that made no judgement (deterministic rules only) is not an
+        # AI verdict and is not recorded as one.
+        judged = verdict is not None and getattr(checker, "uses_judgement", True)
+        db.audit(conn, case_id, "ai_agent" if judged else "system", ACTOR,
                  "document_quality_checked",
                  f"{doc_id} ({doc['document_type']}, {doc['file_name']}) -> {status}"
                  f"; flags={'|'.join(sorted(flags)) or 'none'}"
@@ -435,9 +438,10 @@ def receive_upload(conn, case_id: str, item_id: str, original_name: str, content
     with its hash, and screened by Step 3 exactly like any other document, and
     the new document supersedes the one before it on that item.
 
-    Pass the checker from quality_checker.get_upload_checker(). With none given
-    the file is held for an analyst: there is no scripted verdict to replay, and
-    an empty one would accept a file nobody has looked at.
+    Pass the checker from quality_checker.get_upload_checker(). With none given,
+    or in mock mode, only the deterministic rules run - there is no scripted
+    verdict to replay - and Step 4 holds the file for an analyst to read and
+    type in, so nothing downstream relies on a file no person has looked at.
     """
     uploads_dir = uploads_dir or UPLOADS
     case = conn.execute("SELECT * FROM onboarding_case WHERE case_id = ?", (case_id,)).fetchone()
@@ -500,7 +504,7 @@ def receive_upload(conn, case_id: str, item_id: str, original_name: str, content
            "subject_individual_id": item["subject_individual_id"],
            "upload_time": db.now(), "issue_country": None}
     result = run(conn, case_id, {"documents": [doc]}, kb,
-                 checker=checker or UnscriptedUploadChecker())
+                 checker=checker or DeterministicOnlyUploadChecker())
     document = conn.execute(
         "SELECT MAX(document_id) AS document_id FROM checklist_item_document WHERE item_id = ?",
         (item_id,)).fetchone()["document_id"]

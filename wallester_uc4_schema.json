@@ -3045,6 +3045,18 @@
                   "string",
                   "null"
                 ]
+              },
+              "entry_method": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "enum": [
+                  "awaiting_analyst_entry",
+                  "entered_by_analyst",
+                  "extracted",
+                  ""
+                ]
               }
             },
             "required": [
@@ -3055,7 +3067,8 @@
               "confidence",
               "source_page",
               "corrected_by_analyst",
-              "needs_analyst_correction"
+              "needs_analyst_correction",
+              "entry_method"
             ],
             "additionalProperties": false
           }

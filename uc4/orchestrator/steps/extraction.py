@@ -82,7 +82,29 @@ def run(conn, case_id: str, application: dict, kb: KnowledgeBase,
     for doc in documents:
         doc_type = doc["document_type"]
         expected = kb.fields_for(doc_type)
-        payload = payload_by_name.get(doc["file_name"], {})
+        payload = payload_by_name.get(doc["file_name"])
+
+        if payload is None:
+            # A file uploaded through the portal: nothing about it is scripted.
+            upload = document_quality.UPLOADS / case_id / doc["file_name"]
+            if extractor.mode == "mock":
+                # Nothing in mock mode can read it, and a value nobody read must
+                # not look like one a machine did. Each field it should yield is
+                # set up empty, for an analyst to type in from the file.
+                for f in expected:
+                    conn.execute(
+                        "INSERT INTO extracted_field (field_id, document_id, name, value,"
+                        " confidence, source_page, corrected_by_analyst,"
+                        " needs_analyst_correction, entry_method)"
+                        " VALUES (?,?,?,NULL,0,NULL,0,1,'awaiting_analyst_entry')",
+                        (db.next_id(conn, "extracted_field"), doc["document_id"], f["field_name"]))
+                db.audit(conn, case_id, "system", ACTOR, "fields_awaiting_analyst_entry",
+                         f"{doc['document_id']} ({doc_type}, {doc['file_name']}): fields not "
+                         f"read automatically in mock mode; {len(expected)} field(s) set up for "
+                         f"an analyst to type in from the file", kb.version)
+                continue
+            payload = {"file_name": doc["file_name"], "document_type": doc_type,
+                       "file_path": str(upload) if upload.exists() else None}
 
         try:
             result = extractor.extract(payload, expected)
@@ -177,7 +199,12 @@ def route_case(conn, case_id: str, kb: KnowledgeBase, documents_read: int = 0,
     problems = problems or []
     outstanding = conn.execute(
         "SELECT COUNT(*) FROM extracted_field f JOIN document d USING (document_id) "
-        "WHERE d.case_id = ? AND f.needs_analyst_correction = 1 AND f.corrected_by_analyst = 0",
+        "WHERE d.case_id = ? AND f.needs_analyst_correction = 1 AND f.corrected_by_analyst = 0"
+        " AND f.entry_method = 'extracted'", (case_id,)).fetchone()[0]
+    # Documents whose fields nobody has read yet (mock mode, portal uploads).
+    awaiting = conn.execute(
+        "SELECT COUNT(DISTINCT f.document_id) FROM extracted_field f JOIN document d"
+        " USING (document_id) WHERE d.case_id = ? AND f.entry_method = 'awaiting_analyst_entry'",
         (case_id,)).fetchone()[0]
     held = conn.execute(
         "SELECT COUNT(*) FROM document WHERE case_id = ? AND quality_status = "
@@ -190,6 +217,10 @@ def route_case(conn, case_id: str, kb: KnowledgeBase, documents_read: int = 0,
 
     holds.release_own(conn, case_id, ACTOR, "extraction re-evaluated", kb)
 
+    if awaiting:
+        holds.place(conn, case_id, ACTOR, "manual_review",
+                    f"fields not read automatically in mock mode: {awaiting} document(s) "
+                    f"need their fields typed in by an analyst from the file", "analyst", kb)
     if outstanding or held:
         # `held` counts every document waiting on an analyst, whatever put it
         # there - a date conflict found here, or a fault found at the quality
@@ -201,6 +232,8 @@ def route_case(conn, case_id: str, kb: KnowledgeBase, documents_read: int = 0,
                     f"{outstanding} extracted field(s) cannot be relied on as read"
                     + (f" and {held} document(s) are still held for an analyst" if held else ""),
                     "analyst", kb)
+    elif awaiting:
+        summary = f"{awaiting} document(s) waiting for an analyst to type their fields in"
     elif required_open:
         summary = (f"{required_open} required checklist item(s) still outstanding; "
                    f"verification stays closed")
@@ -329,3 +362,87 @@ def correct_field(conn, field_id: str, analyst_id: str, value: str, reason: str,
              f"read as {row['value']!r} at confidence {row['confidence']}, "
              f"set to {value!r}; reason: {reason}", kb.version)
     return {"field_id": field_id, "value": value, "corrected_by_analyst": True}
+
+
+def fields_awaiting_entry(conn, document_id: str) -> list:
+    """The fields of one document still waiting for an analyst to type them in."""
+    return conn.execute(
+        "SELECT * FROM extracted_field WHERE document_id = ?"
+        " AND entry_method = 'awaiting_analyst_entry' ORDER BY field_id",
+        (document_id,)).fetchall()
+
+
+def enter_fields(conn, document_id: str, analyst_id: str, values: dict,
+                 kb: KnowledgeBase | None = None, today: date | None = None) -> dict:
+    """An analyst reads an uploaded file and types in what it says.
+
+    Mock mode only: nothing else can read a portal upload there. Each value is
+    recorded as entered_by_analyst - never as extracted, and never as a
+    correction, because nothing was read for it to correct - and it is what
+    every later step reads, exactly as an extracted value would be.
+
+    Every required field must be given. An optional one left blank stays blank.
+    The dates typed in go through the same expiry and age rules the quality
+    screen applies; one that fails sends the document back to the customer.
+    """
+    kb = kb or KnowledgeBase()
+    today = today or date.today()
+    if not (analyst_id or "").strip():
+        raise ValueError("the analyst typing in the fields must be identified")
+    doc = conn.execute("SELECT * FROM document WHERE document_id = ?",
+                       (document_id,)).fetchone()
+    if doc is None:
+        raise KeyError(f"no such document {document_id}")
+    pending = fields_awaiting_entry(conn, document_id)
+    if not pending:
+        raise ValueError(f"{document_id} has no fields waiting to be typed in")
+
+    required = set(kb.required_fields_for(doc["document_type"]))
+    given = {k: (v or "").strip() for k, v in (values or {}).items()}
+    missing = sorted(f["name"] for f in pending if f["name"] in required and not given.get(f["name"]))
+    if missing:
+        raise ValueError(f"required field(s) not given: {', '.join(missing)}")
+    for name in ("expiry_date", "document_date", "date_of_birth", "incorporation_date"):
+        if given.get(name):
+            try:
+                date.fromisoformat(given[name])
+            except ValueError:
+                raise ValueError(f"{name} must be a date written as YYYY-MM-DD") from None
+
+    for f in pending:
+        value = given.get(f["name"]) or None
+        conn.execute(
+            "UPDATE extracted_field SET value = ?, needs_analyst_correction = 0,"
+            " entry_method = 'entered_by_analyst' WHERE field_id = ?", (value, f["field_id"]))
+    entered = [f["name"] for f in pending if given.get(f["name"])]
+    db.audit(conn, doc["case_id"], "analyst", analyst_id, "fields_entered_by_analyst",
+             f"{document_id} ({doc['document_type']}, {doc['file_name']}): {len(entered)} "
+             f"field(s) typed in by {analyst_id} from the file ({', '.join(entered) or 'none'}); "
+             f"recorded as entered_by_analyst, not as extracted", kb.version)
+
+    # The dates typed in meet the rules the quality screen could not run.
+    max_age = {r["document_type"]: r["max_age_days"] for r in kb.requirement_rules}
+    flags = document_quality.run_date_rules(
+        doc["document_type"], _date_fields(doc["document_type"], given),
+        max_age.get(doc["document_type"]), kb, today)
+    sent_back = None
+    if flags:
+        status, reasons, fired = document_quality._resolve(flags, doc["document_type"], kb)
+        conn.execute("UPDATE document SET quality_status = ?, quality_flags = ?,"
+                     " resubmission_required = ?, resubmission_reasons = ?"
+                     " WHERE document_id = ?",
+                     (status, "|".join(sorted(flags)), int(status == "resubmission_required"),
+                      "|".join(reasons), document_id))
+        _set_item_status(conn, document_id, document_quality.ITEM_STATUS[status])
+        if status == "resubmission_required":
+            conn.execute("UPDATE checklist_item SET resubmission_attempts ="
+                         " resubmission_attempts + 1 WHERE item_id = (SELECT item_id FROM"
+                         " checklist_item_document WHERE document_id = ?)", (document_id,))
+        sent_back = status
+        db.audit(conn, doc["case_id"], "system", ACTOR, "entered_dates_failed_rules",
+                 f"{document_id}: the dates typed in fire {sorted(flags)} "
+                 f"({','.join(fired)}); document -> {status}", kb.version)
+        document_quality.route_case(conn, doc["case_id"], kb)
+    route_case(conn, doc["case_id"], kb)
+    return {"document_id": document_id, "entered": entered, "date_rules": sorted(flags),
+            "document_status": sent_back}

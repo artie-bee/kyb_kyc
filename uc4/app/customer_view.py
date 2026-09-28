@@ -156,13 +156,38 @@ def _items(conn, case_id: str) -> list:
         (case_id,)).fetchall()
 
 
+def _still_being_read(conn, document_id: str | None, kb: KnowledgeBase) -> bool:
+    """An accepted file whose fields have not been read yet: waiting for an
+    analyst to type them in (mock mode), or not yet reached by extraction at all.
+    To the customer it has been received, not accepted - nobody has read it."""
+    if document_id is None:
+        return False
+    rows = conn.execute(
+        "SELECT entry_method FROM extracted_field WHERE document_id = ?",
+        (document_id,)).fetchall()
+    if rows:
+        return any(r["entry_method"] == "awaiting_analyst_entry" for r in rows)
+    doc_type = conn.execute("SELECT document_type FROM document WHERE document_id = ?",
+                            (document_id,)).fetchone()["document_type"]
+    return bool(kb.fields_for(doc_type))
+
+
+def _current_document(conn, item_id: str) -> str | None:
+    row = conn.execute("SELECT MAX(document_id) FROM checklist_item_document WHERE item_id = ?",
+                       (item_id,)).fetchone()
+    return row[0] if row else None
+
+
 def _steps(conn, case_id: str, case, applied_on: str) -> list[dict]:
     """The five customer steps, each done / current / todo / skipped, with one
     plain line. Read from the checklist and the case status - never from holds,
     bands or findings, which is why nothing here can carry one."""
     status = case["status"]
+    kb = KnowledgeBase()
     items = _items(conn, case_id)
-    required_open = [i for i in items if i["level"] == "required" and i["status"] != "accepted"]
+    required_open = [i for i in items if i["level"] == "required" and (
+        i["status"] != "accepted"
+        or _still_being_read(conn, _current_document(conn, i["item_id"]), kb))]
     owed = [i for i in items if i["level"] == "required" and i["status"] in OPEN_FOR_UPLOAD]
     closed = status in CLOSED_STATUSES
 
@@ -209,9 +234,9 @@ def _steps(conn, case_id: str, case, applied_on: str) -> list[dict]:
             for n, (title, (state, line)) in enumerate(zip(STEP_TITLES, steps), 1)]
 
 
-def _item_status(item, current) -> str:
+def _item_status(item, current, being_read=False) -> str:
     if item["status"] == "accepted":
-        return ACCEPTED
+        return RECEIVED if being_read else ACCEPTED
     if item["status"] == "manual_review":
         return UNDER_REVIEW
     if item["status"] == "resubmission_requested":
@@ -251,7 +276,9 @@ def customer_checklist(conn, case_id: str, kb: KnowledgeBase | None = None) -> d
         current = docs[-1] if docs else None
         if current is None and item["level"] != "required" and not collecting:
             continue        # an optional item nobody sent, once no more are being taken
-        status = _item_status(item, current)
+        status = _item_status(item, current,
+                              _still_being_read(conn, current["document_id"] if current else None,
+                                                kb))
         history = [{"file_name": d["file_name"],
                     "uploaded": (d["upload_time"] or "").replace("T", " ").rstrip("Z")[:16],
                     "label": status if d is current else REPLACED}

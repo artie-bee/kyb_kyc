@@ -299,21 +299,29 @@ def test_an_upload_is_a_plain_form_post_and_reaches_the_console(demo):
     after = customer.get(where)[1]
     assert "We have received your file" in words(after)
     card = item_block(after, "Denton Halliwell")
-    assert "Under review" in card, "an unscripted upload in mock mode waits for a person"
+    # Mock mode: the deterministic rules pass it, and nobody has read it yet, so
+    # to the customer it is received - not accepted.
+    assert "Received" in card and "Accepted" not in card.split("Upload history")[0]
     assert "Replaced by a newer upload" in card and "Upload history (2)" in card
-    assert "Send file" not in card, "nothing more to upload while it is being looked at"
+    assert "Send file" not in card, "nothing more to upload for an item we have"
 
     conn = data.connect(demo["db"])
     doc = conn.execute("SELECT * FROM document WHERE case_id = 'WAL-ONB-0002'"
                        " ORDER BY document_id DESC LIMIT 1").fetchone()
     assert doc["file_name"].startswith("new_passport__")
-    assert doc["quality_status"] == "manual_review_required"
+    assert doc["quality_status"] == "accepted_for_checks", "deterministic rules only"
+    screened = conn.execute(
+        "SELECT actor_type, payload_summary FROM audit_event WHERE case_id = 'WAL-ONB-0002'"
+        " AND action = 'document_quality_checked' ORDER BY event_id DESC LIMIT 1").fetchone()
+    assert screened["actor_type"] == "system", "no AI verdict was given, so none is claimed"
+    assert "checker=deterministic_only" in screened["payload_summary"]
     stored = demo["uploads"] / "WAL-ONB-0002" / doc["file_name"]
     assert stored.read_bytes() == JPEG, "the file must arrive byte for byte"
     actions = [r["action"] for r in conn.execute(
         "SELECT action FROM audit_event WHERE case_id = 'WAL-ONB-0002'")]
     assert "document_uploaded" in actions and "portal_access_issued" in actions
-    assert any(h.owner == "analyst" for h in data.open_holds(conn, "WAL-ONB-0002"))
+    # the UBO declaration is still owed, so the case waits on the customer
+    assert any(h.owner == "customer" for h in data.open_holds(conn, "WAL-ONB-0002"))
     conn.close()
 
 

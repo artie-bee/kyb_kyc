@@ -97,8 +97,11 @@ def gather_facts(conn, case_id: str, kb: KnowledgeBase) -> tuple[dict, dict]:
     note("identity_check_failed", failed_id, [r["check_id"] for r in failed_id])
     dupes = [r for r in identity if r["duplicate_individual_detected"] == "True"]
     note("identity_duplicate", dupes, [r["check_id"] for r in dupes])
+    # A value an analyst typed in from the file has no machine confidence to be
+    # low; only a machine reading can be "accepted as read".
     accepted = [f for f in fields
-                if float(f["confidence"]) < CONFIDENCE_FLOOR
+                if f["entry_method"] == "extracted"
+                and float(f["confidence"]) < CONFIDENCE_FLOOR
                 and not f["corrected_by_analyst"] and not f["needs_analyst_correction"]]
     note("low_confidence_accepted_as_read", accepted, [f["field_id"] for f in accepted])
     corrected = [f for f in fields if f["corrected_by_analyst"]]

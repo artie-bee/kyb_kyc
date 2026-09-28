@@ -141,6 +141,39 @@ h2 { font-size:17px; font-weight:600; margin:28px 0 10px; }
 .pick__name { font-weight:560; display:block; }
 .pick__ref { font-family:var(--mono); font-size:12px; color:var(--fg-faint); }
 
+/* ---------- 5. The demo application form -------------------------------- */
+
+.fsteps { list-style:none; margin:0 0 18px; padding:0; display:flex; flex-wrap:wrap; gap:6px; }
+.fsteps__item { font-size:12.5px; padding:4px 10px; border-radius:99px;
+                border:1px solid var(--line); color:var(--fg-faint); background:var(--surface); }
+.fsteps__item--done { color:var(--ok); border-color:var(--ok-line); background:var(--ok-bg); }
+.fsteps__item--current { color:#fff; background:var(--accent); border-color:var(--accent);
+                         font-weight:560; }
+
+.apply { background:var(--surface); border:1px solid var(--line); border-radius:var(--r);
+         padding:6px 18px 18px; }
+.apply .field { margin-bottom:14px; }
+.apply .field label { font-size:12px; }
+.apply input[type=date], .apply input[type=email], .apply input[type=number] {
+  font:inherit; font-size:14px; color:var(--fg); background:var(--surface);
+  border:1px solid var(--line); border-radius:4px; padding:6px 9px; width:100%; }
+.person { border:1px solid var(--line-soft); border-radius:var(--r); margin:0 0 14px;
+          padding:8px 14px 2px; }
+.person legend { font-weight:600; font-size:14px; padding:0 6px; }
+.radios { display:flex; flex-direction:column; gap:4px; padding-top:2px; }
+.radio { display:flex; gap:8px; align-items:center; font-size:14.5px; color:var(--fg);
+         text-transform:none; letter-spacing:0; }
+.apply__nav { margin-top:16px; }
+.review { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1.4fr); gap:6px 16px;
+          margin:0 0 18px; font-size:14px; }
+.review dt { color:var(--fg-mute); }
+.review dd { margin:0; }
+
+@media (max-width:560px) {
+  .review { grid-template-columns:1fr; }
+  .review dd { margin-bottom:6px; }
+}
+
 @media (max-width:560px) {
   .pmain { padding:20px 16px 40px; }
   .phead__in { padding:12px 16px; }

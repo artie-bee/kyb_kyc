@@ -354,6 +354,8 @@ DB_TABLES = {
     "extracted_field": [
         "field_id", "document_id", "name", "value", "confidence", "source_page",
         "corrected_by_analyst", "needs_analyst_correction",
+        # extracted by a machine, or typed in by an analyst (mock-mode uploads)
+        "entry_method",
     ],
     "finding": [
         "finding_id", "case_id", "source", "rule_id", "summary", "evidence_refs", "blocking",
@@ -428,6 +430,8 @@ DB_ONLY = {
 DB_ENUMS = {
     ("document", "quality_status_at_screen"): ["pending", "accepted_for_checks", "resubmission_required", "manual_review_required"],
     ("finding", "source"): ["registry", "identity", "ubo"],
+    ("extracted_field", "entry_method"): ["extracted", "awaiting_analyst_entry",
+                                          "entered_by_analyst"],
 }
 
 

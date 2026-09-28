@@ -308,6 +308,20 @@ class Handler(BaseHTTPRequestHandler):
                 extra = " (recorded as a " + str(result.override_direction) + " override)"
             return "Recorded " + result.decision + " as " + role + extra
 
+        if path == "/action/enter-fields":
+            values = {k[2:]: v for k, v in form.items() if k.startswith("f_")}
+            result = data.enter_fields(conn, form["document_id"], reviewer, values)
+            extra = (" The dates typed in fire " + ", ".join(result["date_rules"])
+                     + "; the document goes back to the customer."
+                     if result["date_rules"] else "")
+            return ("Document " + result["document_id"] + ": " + str(len(result["entered"]))
+                    + " field(s) entered by " + reviewer + "." + extra)
+
+        if path == "/action/demo-scenario":
+            chosen = data.choose_demo_scenario(conn, form["case_id"], form.get("scenario", ""),
+                                               reviewer)
+            return "Demo scenario for " + form["case_id"] + ": " + chosen
+
         if path == "/action/send-message":
             result = data.send_message(conn, form["case_id"],
                                        form["situation"], reviewer)

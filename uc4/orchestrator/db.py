@@ -91,7 +91,13 @@ CREATE TABLE IF NOT EXISTS extracted_field (
     corrected_by_analyst INTEGER NOT NULL DEFAULT 0,
     -- set when the value is unusable as read: missing, or below the confidence
     -- floor. An analyst supplies the value; the orchestrator never guesses it.
-    needs_analyst_correction INTEGER NOT NULL DEFAULT 0
+    needs_analyst_correction INTEGER NOT NULL DEFAULT 0,
+    -- how the value got here. 'extracted' is a machine reading (OCR or a live
+    -- model). In mock mode nothing reads an uploaded file, so an analyst types
+    -- the values from it: 'awaiting_analyst_entry' until they do, then
+    -- 'entered_by_analyst'. A keyed value is never recorded as extracted.
+    entry_method TEXT NOT NULL DEFAULT 'extracted'
+        CHECK (entry_method IN ('extracted', 'awaiting_analyst_entry', 'entered_by_analyst'))
 );
 CREATE TABLE IF NOT EXISTS registry_check (
     check_id TEXT PRIMARY KEY,
@@ -254,6 +260,25 @@ ID_PREFIX = {
 }
 
 
+# Cases created through the customer portal's demo application form. They are
+# numbered on their own, never mixed into the dataset's WAL-ONB- sequence, and
+# every dataset comparison leaves them out.
+DEMO_CASE_PREFIX = "WAL-DEMO-"
+
+
+def is_demo_case(case_id: str | None) -> bool:
+    return bool(case_id) and case_id.startswith(DEMO_CASE_PREFIX)
+
+
+# Columns added after a database may already exist. CREATE TABLE IF NOT EXISTS
+# leaves an older table as it was, so each one is added here if it is missing.
+_ADDED_COLUMNS = (
+    ("extracted_field", "entry_method",
+     "TEXT NOT NULL DEFAULT 'extracted' CHECK (entry_method IN "
+     "('extracted', 'awaiting_analyst_entry', 'entered_by_analyst'))"),
+)
+
+
 def connect(path: str | Path = "onboarding.db",
             same_thread_only: bool = True) -> sqlite3.Connection:
     """Open the store.
@@ -267,6 +292,9 @@ def connect(path: str | Path = "onboarding.db",
     conn.row_factory = sqlite3.Row
     conn.execute("PRAGMA foreign_keys = ON")
     conn.executescript(SCHEMA)
+    for table, column, decl in _ADDED_COLUMNS:
+        if column not in {r[1] for r in conn.execute(f"PRAGMA table_info({table})")}:
+            conn.execute(f"ALTER TABLE {table} ADD COLUMN {column} {decl}")
     return conn
 
 
@@ -274,10 +302,17 @@ def now() -> str:
     return datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
 
 
-def next_id(conn: sqlite3.Connection, table: str) -> str:
-    col, prefix = ID_PREFIX[table]
+def next_id(conn: sqlite3.Connection, table: str, prefix: str | None = None) -> str:
+    col, default = ID_PREFIX[table]
+    prefix = prefix or default
     width = 6 if table in ("audit_event", "checklist_item") else 4
-    (count,) = conn.execute(f"SELECT COUNT(*) FROM {table}").fetchone()
+    if table == "onboarding_case":
+        # Each case series counts itself, so a demo case never takes a number
+        # from the dataset's sequence or the other way round.
+        (count,) = conn.execute(f"SELECT COUNT(*) FROM {table} WHERE {col} LIKE ?",
+                                (prefix + "%",)).fetchone()
+    else:
+        (count,) = conn.execute(f"SELECT COUNT(*) FROM {table}").fetchone()
     return f"{prefix}{count + 1:0{width}d}"
 
 

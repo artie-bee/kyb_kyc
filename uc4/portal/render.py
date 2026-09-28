@@ -217,6 +217,8 @@ def demo_selector(customers) -> str:
             '<p class="sub">Open the portal as any applicant in the demo, without typing '
             "any details. A real customer arrives from the link in our email instead, and "
             "only ever sees their own application.</p></header>"
+            '<p class="cta"><a class="btn btn--primary" href="/apply">Start a new demo '
+            "application</a></p>"
             '<ul class="picks">' + rows + "</ul>")
 
 

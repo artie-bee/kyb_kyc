@@ -185,30 +185,33 @@ def get_checker(mode: str = "mock") -> QualityChecker:
     return CHECKERS[mode]()
 
 
-class NoAutomatedCheck(ValueError):
-    """There is no automated checker for this file, so nobody has looked at it."""
-
-
-class UnscriptedUploadChecker(QualityChecker):
+class DeterministicOnlyUploadChecker(QualityChecker):
     """The checker for a real upload while the pipeline runs in mock mode.
 
     The mock checker replays a verdict scripted on the document. A file that
-    arrived through the portal has no script, and replaying an empty one would
-    accept it unseen - a pass nobody gave. So this checker declines, and Step 3
-    treats a checker that could not answer the way it treats any other: the
-    document goes to an analyst, never through.
+    arrived through the portal has no script, and nothing in mock mode can look
+    at it. So this checker makes no judgement at all: it returns no flags and
+    reads no dates, and Step 3 applies only its deterministic rules - file type
+    and page count - for real.
+
+    That is not a pass anybody gave. Step 4 then holds the document for an
+    analyst, who reads it and types its fields in ("fields not read
+    automatically in mock mode"), so a person has looked at every such file
+    before anything downstream relies on it - and the dates they type are run
+    through the expiry and age rules then.
     """
 
-    mode = "unscripted_upload"
+    mode = "deterministic_only"
     version = None
+    uses_judgement = False
 
     def check(self, document: dict) -> QualityVerdict:
-        raise NoAutomatedCheck(
-            "no automated quality check runs on uploaded files in mock mode; "
-            "an analyst must look at this one")
+        return QualityVerdict(flags=[], confidence=0.0,
+                              notes="mock mode: deterministic rules only; no automated "
+                                    "judgement was made on this file").validate()
 
 
 def get_upload_checker(mode: str = "mock") -> QualityChecker:
     """The checker for a file a customer uploaded. Live modes read the file; mock
-    mode has nothing to replay, so the file is held for a person instead."""
-    return UnscriptedUploadChecker() if mode == "mock" else get_checker(mode)
+    mode runs the deterministic rules only, and extraction holds it for a person."""
+    return DeterministicOnlyUploadChecker() if mode == "mock" else get_checker(mode)

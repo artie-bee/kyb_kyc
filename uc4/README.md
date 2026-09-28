@@ -142,6 +142,44 @@ The rules it keeps:
 
 Uploaded files go to `uploads/<case_id>/` (git-ignored).
 
+### Phase 2: new demo applications (demo only, synthetic data)
+
+**Start a new demo application** on `/demo` opens a six-step form: business,
+contact, people, owners (with percentages, held directly or through a company),
+a few yes/no facts, then check and send. It works with JavaScript off. Answers
+travel between steps as hidden fields, so nothing is stored until it is sent.
+
+- **The customer never chooses an applicant type.** Sending calls the existing
+  intake (`process_application`), and Step 1 classifies from the facts with the
+  AT rules. A form field that tries to name a type is dropped on arrival.
+- **Cases are `WAL-DEMO-0001`, `WAL-DEMO-0002`, ...** with source channel
+  `portal`, numbered apart from the dataset's `WAL-ONB-` series. Every query in
+  `tools/compare_to_dataset.py` leaves them out, and the scores are unchanged.
+  The submitted application is saved to `portal_applications/<case_id>.json`
+  (git-ignored), the same shape as a dataset application file. **Reset demo**
+  deletes the cases, those files and every portal upload.
+- **Reading uploads.** In live mode the real checker and extractor read the
+  file. In mock mode the deterministic quality rules run for real, and then
+  Step 4 holds the case: *"fields not read automatically in mock mode"*. The
+  console's Documents tab shows a form where the analyst types the fields in
+  from the file. Each value is recorded as `entry_method = entered_by_analyst`,
+  never as extracted and never as a correction. Typed dates go through the
+  expiry and age rules. The customer sees **Received** until the file is read.
+  The typed values then go through the existing checks against the customer's
+  entered details.
+- **Simulated providers.** A demo case's registry, identity and screening
+  results mirror what the customer entered, and every one is labelled
+  *"Simulated provider response"*. The label is the provider name, so it
+  appears on every check row, as the actor on every provider audit event, and
+  in the evidence pack. The console's **Demo scenario** control (on the case
+  page, console only) picks clean / address mismatch / PEP match / possible
+  sanctions match. The choice is an audit event and is read back from the audit
+  trail. It is fixed once the providers have answered.
+- **No new tables.** `extracted_field` gains one column, `entry_method`, added
+  in place to an existing database.
+
+`tests/test_portal_phase2.py` covers each rule above.
+
 ## Run
 # On Windows PowerShell the shell does not expand the glob, so expand it explicitly:
 python -m orchestrator.orchestrator (Get-ChildItem sample_applications\from_dataset\*.json | ForEach-Object FullName)
