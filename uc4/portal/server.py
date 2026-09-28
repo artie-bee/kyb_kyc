@@ -38,7 +38,8 @@ UC4 = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(UC4))
 
 from app import data                                                  # noqa: E402
-from app.customer_view import customer_checklist, customer_view, leaks  # noqa: E402
+from app.customer_view import (customer_checklist, customer_view,        # noqa: E402
+                               leaks, next_step)
 from orchestrator.steps.document_quality import MAX_UPLOAD_BYTES, UploadRefused  # noqa: E402
 from portal import apply, render, render_form                         # noqa: E402
 
@@ -176,15 +177,19 @@ class Handler(BaseHTTPRequestHandler):
                         return self._page(render.page("Sign in", render.signed_out(demo),
                                                       demo=demo), 401)
                     view = customer_view(conn, case_id)
+                    # Re-read on every request: the card follows the records.
+                    cl = customer_checklist(conn, case_id)
+                    step = next_step(cl, view)
                     if path == "/":
                         body, title, active = render.application(view), "My application", \
                             "My application"
                     elif path == "/checklist":
-                        body = render.checklist(view, customer_checklist(conn, case_id))
+                        body = render.checklist(view, cl)
                         title = active = "Documents needed"
                     else:
                         body, title, active = render.messages(view), "Messages", "Messages"
-                    return self._page(render.page(title, body, view, active, flash, demo))
+                    return self._page(render.page(title, body, view, active, flash, demo,
+                                                  step=step, cl=cl))
                 finally:
                     conn.close()
         except Exception:
@@ -279,10 +284,17 @@ class Handler(BaseHTTPRequestHandler):
             step = apply.BUSINESS
         demo = self.server.demo
 
-        def show(n, errors=None):
+        def show(n, errors=None, notice=""):
             return self._page(render.page("Apply", render_form.application_form(
-                n, answers, errors), demo=demo))
+                n, answers, errors, notice), demo=demo))
 
+        if form.get("nav") == "lookup":
+            # Fills two fields; they stay editable, and nothing is checked here.
+            found = data.lookup_company(answers.get("registration_number", ""))
+            if found:
+                answers["legal_name"] = found["legal_name"]
+                answers["registered_address"] = found["registered_address"]
+            return show(apply.BUSINESS, notice=render_form.lookup_note(found))
         if form.get("nav") == "back":
             return show(apply.previous_step(step, answers))
         errors = apply.validate(step, answers)

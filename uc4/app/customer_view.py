@@ -37,35 +37,33 @@ from orchestrator.steps.document_quality import (CLOSED_STATUSES,          # noq
 from orchestrator.steps.requirement_pack import (ADDED_RULE_ID,            # noqa: E402
                                                  shown_to_customer)
 
-# Internal status -> what the applicant is told. Deliberately vague where the
-# internal status would give away a finding.
-PLAIN_STATUS = {
-    "submitted": "We have your application and are getting started.",
-    "document_quality_review": "We are checking the documents you sent.",
-    "resubmission_required": "We need one or more documents again before we can "
-                             "carry on. Details are in the message we sent you.",
-    "verification_in_progress": "Your application is with us and the checks are under way.",
-    "analyst_review_required": "Your application is with our onboarding team. "
-                               "There is nothing you need to do at the moment.",
-    "enhanced_due_diligence": "Your application is with our onboarding team. "
-                              "There is nothing you need to do at the moment.",
-    "ready_for_decision": "The checks are complete and your application is with us "
-                          "for a final look.",
-    "approved": "Your account is open.",
-    "rejected": "We are not able to open an account at this time.",
-    "closed_withdrawn": "We closed this application because we did not hear back. "
-                        "You are welcome to apply again.",
+# Internal status -> what the applicant is told. The wording itself is in
+# kb/customer_status_wording.csv, under neutral keys, so the file a customer's
+# words come from holds no internal status name at all; only this mapping
+# knows both. Deliberately vague where the internal status would give away a
+# finding: two review statuses share one key.
+STATUS_WORDING_KEY = {
+    "submitted": "getting_started",
+    "document_quality_review": "checking_documents",
+    "resubmission_required": "documents_again",
+    "verification_in_progress": "checks_under_way",
+    "analyst_review_required": "with_the_team",
+    "enhanced_due_diligence": "with_the_team",
+    "ready_for_decision": "final_look",
+    "approved": "account_open",
+    "rejected": "not_able",
+    "closed_withdrawn": "closed_no_reply",
 }
-FALLBACK = "Your application is with us."
+_WORDING = KnowledgeBase().customer_status_wording
+PLAIN_STATUS = {status: _WORDING[key] for status, key in STATUS_WORDING_KEY.items()}
+FALLBACK = _WORDING["in_progress"]
 
 # Every review state reads the same, whatever is being reviewed. A customer
 # whose case has a sanctions hit and one whose identity answer went missing see
 # identical words, so the wording itself can never tell them which it is.
-REVIEW_LINE = ("Further review is needed before we can finish. Your application is with "
-               "our onboarding team for an additional review step.")
+REVIEW_LINE = _WORDING["further_review"]
 REVIEW_STATUSES = ("analyst_review_required", "enhanced_due_diligence")
-PARTNER_LINE = ("This application uses a separate partner onboarding process. Our "
-                "programme delivery team will contact you about the next steps.")
+PARTNER_LINE = _WORDING["partner_process"]
 
 STEP_TITLES = ("Application submitted", "Documents reviewed", "Your action",
                "Verification and review", "Outcome")
@@ -260,6 +258,47 @@ def _reason(current, rule: dict | None, kb: KnowledgeBase) -> str:
     return texts[code]["customer_text"].format(days=(rule or {}).get("max_age_days") or "90")
 
 
+def _tips(item, rule: dict | None, kb: KnowledgeBase) -> list[str]:
+    """kb/document_guidance.csv for this document type. A tip naming an age is
+    filled from the requirement rule that asked for this item; if that rule sets
+    no age, the tip is left out rather than stating a limit nobody set."""
+    out = []
+    for tip in kb.document_guidance.get(item["document_type"], []):
+        if "{max_age_days}" in tip:
+            days = (rule or {}).get("max_age_days")
+            if not days:
+                continue
+            tip = tip.replace("{max_age_days}", days)
+        out.append(tip)
+    return out
+
+
+def next_step(cl: dict, view: dict) -> dict:
+    """The single most useful thing the customer can do now, from their
+    checklist as it stands. kind is "upload" (with the item to upload), or
+    "nothing"; text is plain wording only - no holds, findings or statuses."""
+    if view.get("partner"):
+        return {"kind": "nothing", "text": view["status_text"], "item": None}
+    if view.get("closed"):
+        return {"kind": "nothing", "text": view["status_text"], "item": None}
+    for item in cl["items"]:
+        if item["can_upload"] and item["status"] == RESUBMIT and not item["optional"]:
+            return {"kind": "upload", "item": item,
+                    "text": "Upload a clearer copy: " + _label(item)}
+    for item in cl["items"]:
+        if item["can_upload"] and item["status"] == NOT_UPLOADED and not item["optional"]:
+            more = cl["still_needed"] - 1
+            return {"kind": "upload", "item": item,
+                    "text": "Upload your " + _label(item)[0].lower() + _label(item)[1:]
+                    + (f" ({more} more after this)" if more > 0 else "")}
+    return {"kind": "nothing", "item": None,
+            "text": "Nothing to do right now. We'll message you when there's an update."}
+
+
+def _label(item) -> str:
+    return item["document"] + (" - " + item["person"] if item["person"] else "")
+
+
 def customer_checklist(conn, case_id: str, kb: KnowledgeBase | None = None) -> dict:
     """The customer's checklist: what the backend says this case needs, read
     fresh from the checklist_item rows every time. The portal only displays it.
@@ -317,6 +356,8 @@ def customer_checklist(conn, case_id: str, kb: KnowledgeBase | None = None) -> d
             "reason": _reason(current, rules.get(item["rule_id"]), kb) if status == RESUBMIT
             else "",
             "can_upload": open_case and item["status"] in OPEN_FOR_UPLOAD,
+            # guidance only, never a requirement; ages come from the item's rule
+            "tips": [] if generic else _tips(item, rules.get(item["rule_id"]), kb),
             # newest first; a portal upload by the customer's own file name
             "previous_uploads": [names.get(d["file_name"], d["file_name"])
                                  for d in reversed(docs)],

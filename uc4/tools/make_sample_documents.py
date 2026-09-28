@@ -482,7 +482,11 @@ def build_demo_pack(out: Path, today=None) -> dict:
         }
     (folder / "manifest.json").write_text(json.dumps(
         {"label": demo_samples.LABEL, "generated_for": today.isoformat(),
-         "company": PACK_COMPANY, "files": files}, indent=2, ensure_ascii=False) + "\n",
+         "company": PACK_COMPANY,
+         # what the simulated register holds for the pack's company, for the
+         # form's "Look up my company"
+         "register": {"number": PACK_REG, "name": PACK_COMPANY, "address": PACK_ADDRESS},
+         "files": files}, indent=2, ensure_ascii=False) + "\n",
         encoding="utf-8")
 
     lines = [f"# Demo upload pack - {PACK_COMPANY}", "",

@@ -44,7 +44,24 @@ def chip(value) -> str:
 # Chrome
 # ---------------------------------------------------------------------------
 
-def page(title, body, view=None, active=None, flash=None, demo=False) -> str:
+def next_step_card(step, cl) -> str:
+    """The single most useful thing to do now, at the top of the page. Built
+    from customer_view.next_step(), which reads the checklist as it stands."""
+    if step is None:
+        return ""
+    body = '<p class="nextstep__text">' + e(step["text"]) + "</p>"
+    item = step.get("item")
+    if step["kind"] == "upload" and item is not None:
+        if item["reason"]:
+            body += '<p class="nextstep__reason">' + e(item["reason"]) + "</p>"
+        body += _upload_area(item, cl, prefix="next-file-")
+    tone = "upload" if step["kind"] == "upload" else "quiet"
+    return ('<section class="nextstep nextstep--' + tone + '" aria-label="Next step">'
+            '<span class="nextstep__label">Next step</span>' + body + "</section>")
+
+
+def page(title, body, view=None, active=None, flash=None, demo=False, step=None,
+         cl=None) -> str:
     """The shell every portal page shares: banner, header, one calm column."""
     nav = ""
     who = ""
@@ -78,7 +95,8 @@ def page(title, body, view=None, active=None, flash=None, demo=False) -> str:
         + who + "</div>" + ('<div class="phead__in phead__in--nav">' + nav + switch + "</div>"
                             if nav or switch else "")
         + "</header>\n"
-        '<main class="pmain">\n' + flash_html + body + "\n</main>\n"
+        '<main class="pmain">\n' + flash_html + next_step_card(step, cl) + body
+        + "\n</main>\n"
         '<footer class="pfoot"><button class="btn btn--quiet" type="button" id="theme" hidden>'
         "Switch light / dark</button></footer>\n"
         '<script src="/static/portal.js" defer></script>\n</body>\n</html>\n')
@@ -136,8 +154,8 @@ DOC_ICON = ('<svg class="item__icon" viewBox="0 0 20 20" aria-hidden="true" focu
             ' stroke-width="1.5" stroke-linejoin="round"/></svg>')
 
 
-def _upload_area(item, cl) -> str:
-    field_id = "file-" + item["checklist_item_id"]
+def _upload_area(item, cl, prefix="file-") -> str:
+    field_id = prefix + item["checklist_item_id"]
     return (
         '<form class="upload" method="post" action="/upload" enctype="multipart/form-data">'
         '<input type="hidden" name="item_id" value="' + e(item["checklist_item_id"]) + '">'
@@ -162,12 +180,16 @@ def _item(item, cl) -> str:
                     '<span class="item__file">' + e(item["previous_uploads"][0]) + "</span>"
                     " (replaced when you upload a new one)</p>")
     form = _upload_area(item, cl) if item["can_upload"] else ""
+    # Tips help before an upload; they are guidance, not requirements.
+    tips = ('<div class="item__tips">' + "".join('<p class="item__tip">' + e(t) + "</p>"
+                                                 for t in item["tips"])
+            + "</div>" if item["can_upload"] and item.get("tips") else "")
     tone = {"Accepted": "ok", "Resubmission needed": "warn"}.get(item["status"], "none")
     return ('<li class="item item--' + tone + '" id="item-' + e(item["checklist_item_id"]) + '">'
             '<div class="item__top">' + DOC_ICON
             + '<div class="item__what"><span class="item__doc">' + e(name) + "</span>"
             + optional + "</div>" + chip(item["status"]) + "</div>"
-            + reason + previous + form + "</li>")
+            + reason + previous + tips + form + "</li>")
 
 
 def checklist(view, cl) -> str:

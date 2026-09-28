@@ -27,7 +27,7 @@ from app.customer_view import customer_view, leaks                    # noqa: E4
 
 STATIC = Path(__file__).resolve().parent / "static"
 
-SCREENS = [("Operations dashboard", "/"), ("Case detail", "/case/"),
+SCREENS = [("Operations dashboard", "/"), ("My queue", "/queue"), ("Case detail", "/case/"),
            ("Customer view", "/customer/"), ("Agent reuse", "/reuse"),
            ("Audit export", "/export/")]
 
@@ -336,6 +336,7 @@ def case_detail(conn, case_id, tab="Timeline", role="analyst",
 
     demo = _demo_panel(conn, case_id, reviewer) if data.is_demo_case(case_id) else ""
     demo += _reassessment_panel(conn, case_id)
+    why = _why_here(conn, case_id, role)
 
     tabs = "".join('<a class="tab' + (" tab--on" if t == tab else "") + '" href="/case/'
                    + e(case_id) + "?tab=" + e(t) + '">' + e(t) + "</a>"
@@ -364,9 +365,54 @@ def case_detail(conn, case_id, tab="Timeline", role="analyst",
         '<form method="post" action="/action/customer-link" class="btn-row linkform">'
         '<input type="hidden" name="case_id" value="' + e(case_id) + '">'
         '<input type="hidden" name="back" value="/case/' + e(case_id) + "?tab=" + e(tab) + '">'
-        '<button class="btn" type="submit">Copy customer link</button></form>'
-        + holds_html + restricted + future + demo
+        '<button class="btn" type="submit">Copy customer link</button>'
+        '<a class="btn" href="/queue/next?after=' + e(case_id) + '">Next case</a></form>'
+        + why + holds_html + restricted + future + demo
         + '<nav class="tabs">' + tabs + "</nav>" + inner)
+
+
+def _why_here(conn, case_id, role) -> str:
+    """One plain line per open hold, and the existing action that clears it -
+    shown as a button only when this role may use it."""
+    rows = data.why_here(conn, case_id, role)
+    if not rows:
+        return ""
+    items = []
+    for r in rows:
+        action = r["action"]
+        if action and r["permitted"]:
+            href = ("/case/" + e(case_id) + ("?tab=" + e(action["tab"]) if action["tab"]
+                                             else "#reassess"))
+            control = ('<a class="btn btn--primary" href="' + href + '" data-route="'
+                       + e(action["route"]) + '" data-function="' + e(action["function"])
+                       + '">' + e(action["label"]) + "</a>")
+        elif action:
+            control = ('<span class="muted">' + e(action["label"]) + " - for "
+                       + e(r["owner"]) + "</span>")
+        else:
+            control = ""
+        items.append('<li class="why__row"><span class="why__line">' + e(r["line"])
+                     + "</span>" + control + "</li>")
+    return ('<section class="why" aria-label="Why is this case here?">'
+            '<h2 class="why__title">Why is this case here?</h2><ul>' + "".join(items)
+            + "</ul></section>")
+
+
+def queue_page(conn, role="analyst", **kw) -> str:
+    """The cases this role can act on now, most urgent first."""
+    rows = data.queue(conn, role)
+    first = rows[0]["case_id"] if rows else None
+    body = [table(["Case", "Why it is here", "Band", "What you can do"],
+                  [['<a href="/case/' + e(r["case_id"]) + '">' + e(r["case_id"]) + "</a>",
+                    e(r["why"]), cell(r["band"]),
+                    e(", ".join(a.replace("_", " ") for a in r["actions"]))] for r in rows],
+                  "Nothing needs you as " + role + " right now.")]
+    start = ('<p><a class="btn btn--primary" href="/case/' + e(first) + '">Start with '
+             + e(first) + "</a></p>" if first else "")
+    return ('<header class="page"><h1>My queue</h1><p class="sub">Cases you can act on as '
+            "<strong>" + e(role) + "</strong>: the worst open hold first, then the risk band, "
+            "then the oldest. Switch role on the decision form.</p></header>"
+            + start + "".join(body))
 
 
 def _reassessment_panel(conn, case_id) -> str:
@@ -376,7 +422,7 @@ def _reassessment_panel(conn, case_id) -> str:
     if hold is None:
         return ""
     back = "/case/" + e(case_id)
-    return note(
+    return '<div id="reassess"></div>' + note(
         "<p>A document arrived after the paid checks answered. It has been screened; "
         "once it has been read (Documents tab), choose one. The risk band stays as it "
         "is until you do.</p>"
@@ -573,7 +619,10 @@ def _tab_documents(conn, case_id, role="analyst", reviewer="analyst.demo", **kw)
     out = ["<h2>Documents and extraction</h2>"]
     names = data.uploaded_names(conn, case_id)
     recognised = data.recognised_documents(conn, case_id)
-    for doc in data.documents(conn, case_id):
+    documents = data.documents(conn, case_id)
+    by_id = {d["document_id"]: d for d in documents}
+    replaced = data.replaced_by(conn, case_id)      # new document id -> the one it replaced
+    for doc in documents:
         replayed = doc["document_id"] in recognised
         held = doc["quality_status"] == "manual_review_required"
         flags = ('<span class="type">[' + e(doc["quality_flags"]) + "]</span>"
@@ -591,19 +640,13 @@ def _tab_documents(conn, case_id, role="analyst", reviewer="analyst.demo", **kw)
                    + (chip(data.DEMO_SAMPLE_LABEL, tone="warn") if replayed else "")
                    + flags + "</summary>")
 
-        if doc["sample_path"]:
-            href = "/doc/" + e(doc["document_id"])
-            if doc["sample_path"].suffix.lower() in (".jpg", ".jpeg", ".png"):
-                left = ('<div class="filecard"><img src="' + href + '" alt="'
-                        + e(doc["file_name"]) + '">'
-                        '<a class="btn" href="' + href + '" download>Open the file</a></div>')
-            else:
-                left = ('<div class="filecard"><p class="muted">PDF: '
-                        + e(doc["sample_path"].name) + "</p>"
-                        '<a class="btn" href="' + href + '" download>Open the file</a></div>')
-        else:
-            left = ('<div class="filecard"><p class="muted">No sample file '
-                    "generated for this document.</p></div>")
+        left = _preview(doc)
+        old = by_id.get(replaced.get(doc["document_id"], ""))
+        if old is not None:
+            # A replacement: the new file and the one it replaced, side by side.
+            left = ('<div class="compare"><div><span class="compare__label">This upload'
+                    "</span>" + left + '</div><div><span class="compare__label">Replaced ('
+                    + e(old["document_id"]) + ")</span>" + _preview(old) + "</div></div>")
 
         right = ["<p><strong>Screen verdict:</strong> "
                  + cell(doc["quality_status_at_screen"]) + "</p>"]
@@ -636,7 +679,8 @@ def _tab_documents(conn, case_id, role="analyst", reviewer="analyst.demo", **kw)
                 '<div class="field"><label>Reason</label>'
                 '<input type="text" name="reason" required></div>'
                 '<div class="btn-row">'
-                '<button class="btn btn--primary" name="choice" value="accept">Accept</button>'
+                '<button class="btn btn--primary" name="choice" value="accept"'
+                ' data-shortcut="a">Accept</button>'
                 '<button class="btn" name="choice" value="request_resubmission">'
                 "Request resubmission</button></div></form>")
 
@@ -664,7 +708,8 @@ def _tab_documents(conn, case_id, role="analyst", reviewer="analyst.demo", **kw)
                 # A typed-in value has no machine confidence to show.
                 confidence = em_dash("typed in, not read") if keyed else (
                     "%.2f" % float(f["confidence"]))
-                rows.append('<div class="fieldrow"><span class="type">' + e(f["name"])
+                rows.append('<div class="fieldrow' + (" fieldrow--low" if low else "")
+                            + '"><span class="type">' + e(f["name"])
                             + "</span><span>" + value + '</span><span class="num">'
                             + confidence + "</span><span>" + state + "</span></div>")
                 if low:
@@ -685,11 +730,14 @@ def _tab_documents(conn, case_id, role="analyst", reviewer="analyst.demo", **kw)
                         '<div class="field"><label>Reason</label>'
                         '<input type="text" name="reason" required></div>'
                         '<div class="btn-row">'
-                        '<button class="btn" name="how" value="accept">Accept as read</button>'
-                        '<button class="btn btn--primary" name="how" value="correct">Correct</button>'
+                        '<button class="btn" name="how" value="accept" data-shortcut="a">'
+                        "Accept as read</button>"
+                        '<button class="btn btn--primary" name="how" value="correct"'
+                        ' data-shortcut="c">Correct</button>'
                         "</div></form>")
             if rows:
-                fields = "<h3>Fields</h3>" + "".join(rows)
+                # Beside the preview, so each value is read against the file.
+                right.append("<h3>Fields</h3>" + "".join(rows))
         if awaiting:
             # Beside the preview, so the analyst types what the file says.
             right.append(_entry_form(case_id, doc, awaiting))
@@ -698,12 +746,28 @@ def _tab_documents(conn, case_id, role="analyst", reviewer="analyst.demo", **kw)
         cls = "doc doc--held" if held else "doc"
         opened = " open" if held else ""
         body_right = "".join(right)
-        out.append('<details class="' + cls + '"' + opened + ">"
-                   + summary + '<div class="body"><div class="grid2">' + left
-                   + "<div>" + body_right + "</div></div>" + fields + "</div></details>")
+        hint = ('<p class="kbd-hint" aria-hidden="true">A: Accept &middot; C: Correct</p>'
+                if "data-shortcut=" in body_right else "")
+        out.append('<details class="' + cls + '"' + opened + ' data-review tabindex="-1">'
+                   + summary + '<div class="body">' + hint + '<div class="grid2">' + left
+                   + "<div>" + body_right + "</div></div></div></details>")
     if len(out) == 1:
         out.append('<p class="empty">No documents on this case.</p>')
     return "".join(out)
+
+
+def _preview(doc) -> str:
+    if doc["sample_path"]:
+        href = "/doc/" + e(doc["document_id"])
+        if doc["sample_path"].suffix.lower() in (".jpg", ".jpeg", ".png"):
+            return ('<div class="filecard"><img src="' + href + '" alt="'
+                    + e(doc["file_name"]) + '">'
+                    '<a class="btn" href="' + href + '" download>Open the file</a></div>')
+        return ('<div class="filecard"><p class="muted">PDF: '
+                + e(doc["sample_path"].name) + "</p>"
+                '<a class="btn" href="' + href + '" download>Open the file</a></div>')
+    return ('<div class="filecard"><p class="muted">No sample file '
+            "generated for this document.</p></div>")
 
 
 def _entry_form(case_id, doc, awaiting) -> str:

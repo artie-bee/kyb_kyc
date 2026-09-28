@@ -173,6 +173,17 @@ class Handler(BaseHTTPRequestHandler):
                 if path == "/":
                     body = render.dashboard(conn)
                     title, active, case_id = "Operations dashboard", "Operations dashboard", None
+                elif path == "/queue":
+                    body = render.queue_page(conn, role=role)
+                    title, active, case_id = "My queue", "My queue", None
+                elif path == "/queue/next":
+                    # Only ever a case this role can act on; never one it cannot.
+                    after = query.get("after", [None])[0]
+                    target = data.next_in_queue(conn, role, after)
+                    if target is None:
+                        return self._redirect(_with("/queue", "ok",
+                                                    "Nothing else needs you as " + role + "."))
+                    return self._redirect("/case/" + target)
                 elif path == "/reuse":
                     body = render.reuse(conn)
                     title, active, case_id = "Agent reuse", "Agent reuse", None

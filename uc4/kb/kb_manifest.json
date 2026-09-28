@@ -1,5 +1,5 @@
 {
-  "kb_version": "kb-2026.09-poc-v10",
+  "kb_version": "kb-2026.09-poc-v11",
   "items": {
     "applicant_type_rules": {
       "file": "applicant_type_rules.csv",
@@ -90,6 +90,16 @@
       "file": "resubmission_reason_text.csv",
       "version": "1.0",
       "brief_section": "5.9 - Approved customer wording for why a document must be sent again"
+    },
+    "document_guidance": {
+      "file": "document_guidance.csv",
+      "version": "1.0",
+      "brief_section": "10 - Customer guidance shown before an upload"
+    },
+    "customer_status_wording": {
+      "file": "customer_status_wording.csv",
+      "version": "1.0",
+      "brief_section": "5.9 / 11.3 - Customer-safe status wording, both front ends"
     }
   }
 }

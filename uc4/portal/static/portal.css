@@ -149,6 +149,21 @@ h2 { font-size:17px; font-weight:600; margin:28px 0 10px; }
 .dropzone__text { font-weight:560; font-size:14px; }
 .dropzone__hint { font-size:13px; color:var(--fg-faint); }
 
+/* the next-step card, and the tips under an item */
+.nextstep { border:1px solid var(--line); border-left:4px solid var(--accent);
+            border-radius:var(--r); background:var(--surface); padding:14px 16px;
+            margin-bottom:20px; }
+.nextstep--quiet { border-left-color:var(--ok); }
+.nextstep__label { display:block; font-size:12px; text-transform:uppercase;
+                   letter-spacing:.07em; color:var(--fg-faint); font-weight:600;
+                   margin-bottom:4px; }
+.nextstep__text { margin:0; font-weight:600; font-size:16px; }
+.nextstep__reason { margin:6px 0 0; color:var(--fg-mute); }
+.item__tips { margin:10px 0 0; font-size:13.5px; color:var(--fg-mute); }
+.item__tip { margin:2px 0; padding-left:14px; position:relative; }
+.item__tip::before { content:"2"; position:absolute; left:2px; color:var(--fg-faint); }
+.lookup { margin-top:6px; }
+
 /* ---------- 3. Messages -------------------------------------------------- */
 
 .msgs { list-style:none; margin:0; padding:0; }

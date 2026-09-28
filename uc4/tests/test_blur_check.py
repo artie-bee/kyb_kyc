@@ -84,7 +84,6 @@ def test_the_rule_is_in_the_kb_as_a_deterministic_heuristic():
     assert (RULE["failure_flag"], RULE["outcome"], RULE["resubmission_reason"]) == \
         ("blurred_unreadable", "resubmission_required", "document_unreadable")
     assert "heuristic" in RULE["description"].lower()
-    assert KB.version == "kb-2026.09-poc-v10"
 
 
 def test_every_clear_sample_passes_and_every_blurred_one_fails(generated):

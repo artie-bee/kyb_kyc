@@ -730,3 +730,146 @@ def rescreen_document(conn, document_id, actor, reason):
     conn.commit()
     carry_on(conn, result.case_id)
     return result
+
+
+# ---------------------------------------------------------------------------
+# Usability: "why is this case here", the queue, the company lookup
+# ---------------------------------------------------------------------------
+# Presentational only. Every action named here is an existing console route
+# that calls an existing function, and whether a role may use it comes from
+# the rules already in force: a staff hold is released by the role that owns
+# it (the console's existing "only <owner> can release" rule), anyone may chase
+# the customer on a customer hold, and a decision is offered only when
+# decision.check_permitted() - the check record_decision() itself runs - allows
+# it. Nothing here grants, widens or bypasses a permission.
+
+from orchestrator.steps import decision as _decision                      # noqa: E402
+
+# (placed_by_step, hold code) -> the existing action that clears it.
+# (label, tab, route, function). A code of "*" matches any code from that step.
+HOLD_ACTIONS = {
+    ("step.document_quality", "manual_review"):
+        ("Review the held document", "Documents", "/action/release-document", "release_document"),
+    ("step.document_quality", "resubmission"):
+        ("Send the customer a request", "Communications", "/action/send-message", "send_message"),
+    ("step.document_quality", "insufficient_evidence"):
+        ("Send the customer a request", "Communications", "/action/send-message", "send_message"),
+    ("step.extraction", "manual_review"):
+        ("Type in the fields", "Documents", "/action/enter-fields", "enter_fields"),
+    ("step.extraction", "insufficient_evidence"):
+        ("Accept or correct the fields", "Documents", "/action/field", "correct_field"),
+    ("step.verification", "*"):
+        ("Record a decision", "Decision", "/action/record-decision", "record_decision"),
+    ("step.screening", "*"):
+        ("Record a decision", "Decision", "/action/record-decision", "record_decision"),
+    ("step.reassessment", "*"):
+        ("Re-run verification or keep the assessment", "", "/action/reassess",
+         "rerun_verification"),
+}
+DECIDE = ("Record a decision", "Decision", "/action/record-decision", "record_decision")
+CLOSED_STATUSES = ("approved", "rejected", "closed_withdrawn")
+_BAND_RANK = {"critical": 0, "high": 1, "insufficient_evidence": 2, "medium": 3, "low": 4}
+
+
+def _action_for(hold):
+    return (HOLD_ACTIONS.get((hold.placed_by_step, hold.code))
+            or HOLD_ACTIONS.get((hold.placed_by_step, "*")))
+
+
+def _may(conn, case_id, role, hold, action) -> bool:
+    if action is None:
+        return False
+    if action[3] == "record_decision":
+        # A decision is governed by the decision rules alone - exactly what
+        # record_decision() enforces - whoever owns the hold it would settle.
+        return bool(_decision.permitted_decisions(conn, case_id, role, kb()))
+    # Releasing, typing or correcting: the role that owns the hold does it.
+    return hold.owner in ("customer", role)
+
+
+def why_here(conn, case_id: str, role: str) -> list[dict]:
+    """One plain line per open hold, with the existing action that clears it and
+    whether this role may use it."""
+    out = []
+    for hold in holds.open_holds(conn, case_id):
+        action = _action_for(hold)
+        out.append({"hold_id": hold.hold_id, "owner": hold.owner,
+                    "line": hold.reason.split(": ", 1)[-1],
+                    "action": dict(zip(("label", "tab", "route", "function"), action))
+                    if action else None,
+                    "permitted": _may(conn, case_id, role, hold, action)})
+    return out
+
+
+def _actionable(conn, case_id: str, role: str) -> list[str]:
+    """The actions this role may take on this case now. Waiting on the customer
+    alone is not in a queue: the case is with the applicant, not with staff."""
+    status = conn.execute("SELECT status FROM onboarding_case WHERE case_id = ?",
+                          (case_id,)).fetchone()[0]
+    if status in CLOSED_STATUSES:
+        return []
+    staff = [h for h in holds.open_holds(conn, case_id) if h.owner != "customer"]
+    acts = [_action_for(h)[3] for h in staff if _may(conn, case_id, role, h, _action_for(h))]
+    assessed = conn.execute("SELECT 1 FROM risk_assessment WHERE case_id = ?",
+                            (case_id,)).fetchone()
+    if not staff and assessed and _decision.permitted_decisions(conn, case_id, role, kb()):
+        acts.append("record_decision")
+    return acts
+
+
+def queue(conn, role: str) -> list[dict]:
+    """Cases this role can act on now, most urgent first: critical or sanctions
+    cases, then the worst open hold (compliance before analyst, in the hold
+    precedence of orchestrator/holds.py), then the more severe band, then the
+    oldest."""
+    rows = []
+    for case in conn.execute("SELECT case_id, created_at FROM onboarding_case").fetchall():
+        acts = _actionable(conn, case["case_id"], role)
+        if not acts:
+            continue
+        worst = holds.worst(conn, case["case_id"])
+        band = conn.execute("SELECT risk_band FROM risk_assessment WHERE case_id = ?",
+                            (case["case_id"],)).fetchone()
+        sanctions = conn.execute(
+            "SELECT 1 FROM screening_check WHERE case_id = ? AND sanctions_result IN"
+            " ('possible_match', 'clear_match') LIMIT 1", (case["case_id"],)).fetchone()
+        urgent = bool(sanctions) or (band is not None and band[0] == "critical")
+        key = (0 if urgent else 1,
+               (holds.OWNER_RANK[worst.owner], holds.HOLD_CODES.index(worst.code))
+               if worst and worst.owner != "customer" else (9, 9),
+               _BAND_RANK.get(band[0] if band else "", 5), case["created_at"], case["case_id"])
+        rows.append({"case_id": case["case_id"], "key": key, "actions": sorted(set(acts)),
+                     "band": band[0] if band else "",
+                     "why": worst.reason.split(": ", 1)[-1] if worst else "ready for a decision"})
+    return sorted(rows, key=lambda r: r["key"])
+
+
+def next_in_queue(conn, role: str, after: str | None = None) -> str | None:
+    """The next eligible case after `after` in this role's queue, or the first."""
+    ids = [r["case_id"] for r in queue(conn, role)]
+    if not ids:
+        return None
+    if after in ids:
+        rest = ids[ids.index(after) + 1:]
+        return rest[0] if rest else ids[0] if ids[0] != after else None
+    return ids[0]
+
+
+def lookup_company(registration_number: str) -> dict | None:
+    """The simulated registry lookup behind "Look up my company"."""
+    from orchestrator.providers import lookup_register
+    return lookup_register(registration_number)
+
+
+def replaced_by(conn, case_id: str) -> dict:
+    """{document id: the document it replaced} for every re-upload on the case."""
+    out = {}
+    for (item_id,) in conn.execute(
+            "SELECT DISTINCT cid.item_id FROM checklist_item_document cid JOIN document d"
+            " USING (document_id) WHERE d.case_id = ?", (case_id,)).fetchall():
+        docs = [r[0] for r in conn.execute(
+            "SELECT document_id FROM checklist_item_document WHERE item_id = ?"
+            " ORDER BY document_id", (item_id,))]
+        for older, newer in zip(docs, docs[1:]):
+            out[newer] = older
+    return out

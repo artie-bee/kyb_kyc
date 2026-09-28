@@ -1,0 +1,43 @@
+document_type,tip
+authorised_signatory_list,List everyone who may act for the business and sign on its behalf
+authorised_signatory_list,Make sure each person's name is spelled as on their identity document
+bank_statement,Use a statement dated within the last {max_age_days} days
+bank_statement,Show the business name and the account holder on the page
+bank_statement,Include every page of the statement
+board_resolution,Upload the signed resolution that authorises the account
+board_resolution,Make sure the date and the signatures are visible
+business_activity_description,Say in plain words what the business sells and to whom
+business_activity_description,Mention how you expect to use the cards
+certificate_of_incorporation,Upload the certificate issued by the official register
+certificate_of_incorporation,Make sure the company name and registration number are readable
+director_register,Use an extract dated within the last {max_age_days} days
+director_register,Show every current director's full name
+id_document,Use a passport or national ID card that has not expired
+id_document,Photograph it flat in good light so every corner and all the text is visible
+id_document,Avoid glare and shadows; a scan of the original works best
+liveness_selfie,Take the selfie in good light with your face fully visible
+liveness_selfie,Remove sunglasses or anything covering your face
+nominee_trust_explanation,Explain who holds the shares on whose behalf
+nominee_trust_explanation,Name the people who ultimately own or control the business
+ownership_chart,Use a chart dated within the last {max_age_days} days
+ownership_chart,Show every company between the business and the people who own it
+ownership_chart,Give the percentage held at each step
+programme_business_plan,Describe the card programme you plan to run and who it is for
+programme_business_plan,Include expected volumes and the markets you will serve
+proof_of_address,Use a bill or statement dated within the last {max_age_days} days
+proof_of_address,Make sure your name and full address are on the page
+proof_of_address,A screenshot of an online account is not accepted; upload the document itself
+registry_extract,Use an extract dated within the last {max_age_days} days
+registry_extract,Download it from the official register rather than taking a photo
+shareholder_register,Use a register dated within the last {max_age_days} days
+shareholder_register,Show every shareholder and the percentage each one holds
+source_of_funds_declaration,Use a declaration dated within the last {max_age_days} days
+source_of_funds_declaration,Say where the money that will pass through the account comes from
+source_of_wealth_statement,Use a statement dated within the last {max_age_days} days
+source_of_wealth_statement,Explain how the owner built up their wealth in plain words
+tax_registration_certificate,Upload the certificate issued by the tax authority
+tax_registration_certificate,Make sure the tax number is readable
+ubo_declaration,Use a declaration dated within the last {max_age_days} days
+ubo_declaration,List everyone who owns 25% or more and the percentage each holds
+website_or_platform_details,Give the web address customers use to buy from you
+website_or_platform_details,Add a screenshot of the checkout or the main product page if it helps
