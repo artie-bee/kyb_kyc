@@ -21,7 +21,7 @@ from dataclasses import dataclass, field
 from datetime import date
 from pathlib import Path
 
-from . import live_mode, llm_client
+from . import demo_samples, live_mode, llm_client
 
 # The quality_flags vocabulary. Anything outside this set is rejected.
 ALLOWED_FLAGS = frozenset({
@@ -58,6 +58,9 @@ class QualityVerdict:
     # Set by a checker that could not do the visual half of the check (mock mode,
     # a real upload). Step 3 then holds the document for a person, for this reason.
     hold_reason: str | None = None
+    # Set when the verdict was replayed rather than judged - a recognised demo
+    # sample file in mock mode. Step 3 writes it into the audit row.
+    source_label: str | None = None
 
     def validate(self) -> "QualityVerdict":
         unknown = [f for f in self.flags if f not in ALLOWED_FLAGS]
@@ -210,6 +213,20 @@ class MockUploadChecker(QualityChecker):
     uses_judgement = False
 
     def check(self, document: dict) -> QualityVerdict:
+        # A file from the demo upload pack has a verdict on record: replay it,
+        # and say that it was replayed. A pack file sent against the wrong
+        # checklist item is the wrong document, whatever its own verdict.
+        sample = demo_samples.recognise(path=document.get("file_path"))
+        if sample is not None:
+            flags = list(sample.get("quality_flags") or [])
+            if sample["document_type"] != document.get("document_type"):
+                flags.append("wrong_document_type")
+            return QualityVerdict(flags=flags, confidence=1.0,
+                                  notes=f"{demo_samples.LABEL} ({sample['file']})",
+                                  expiry_date=sample.get("expiry_date") or None,
+                                  document_date=sample.get("document_date") or None,
+                                  source_label=f"{demo_samples.LABEL} ({sample['file']})"
+                                  ).validate()
         return QualityVerdict(flags=[], confidence=0.0,
                               notes="mock mode: no automated visual check was run",
                               hold_reason=VISUAL_CHECK_NOT_RUN).validate()

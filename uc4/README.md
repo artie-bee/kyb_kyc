@@ -248,6 +248,22 @@ names no document type and counts nothing itself.
 
 `tests/test_portal_uploads.py` covers each rule above.
 
+### The demo upload pack (Scenario 8)
+
+`python tools/make_sample_documents.py` also writes `sample_documents/demo_pack/`
+for one fictional company, Lumen Harbour OU:
+- one file for every checklist item its facts produce, plus one blurred ID;
+- `FORM_VALUES.md`, listing what to type into the form and which file goes
+  with which item;
+- `manifest.json`, recording each file's SHA-256, verdict and fields.
+
+In mock mode a pack file is recognised by its contents and its verdict and
+fields are replayed (`orchestrator/demo_samples.py`). Every replayed result is
+labelled *"mock: recognised demo sample file"* in the audit trail and on the
+console. Any other file keeps the visual-check hold and typed-in fields. Live
+mode ignores the manifest. Generate the pack on the demo day: its proof of
+address is dated from the day it is made. `tests/test_demo_pack.py` covers it.
+
 ### Uploads after the assessment
 
 A document that arrives once the paid checks have answered is still checked and

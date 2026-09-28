@@ -11,7 +11,7 @@ Total running time: about 35 minutes (5 min opening, 25 min scenarios, 5 min clo
 **Setup checklist (10 minutes before the demo):**
 
 - [ ] Open the orchestrator folder in VS Code and run `python tools/serve.py` (it opens http://127.0.0.1:8700/).
-- [ ] For Scenario 2b: in a second terminal run `python tools/serve_portal.py` (port 8701), and `python tools/make_sample_documents.py` once so the two upload files exist.
+- [ ] For Scenarios 2b and 8: in a second terminal run `python tools/serve_portal.py` (port 8701), and run `python tools/make_sample_documents.py` **on the demo day**. That makes the Scenario 2b files and the Scenario 8 demo upload pack, whose proof of address is dated from the day it is generated.
 - [ ] Close any old terminal still running a server: on Windows two servers can share a port, and your browser may reach the old one.
 - [ ] Click **Reset demo** in the sidebar. All 14 cases should stop at their first human action (11 open holds, 0 decisions, 0 communications).
 - [ ] Check no LIVE badge shows in the sidebar (mock mode shows none), and the decision form's role is set to **analyst**.
@@ -201,6 +201,41 @@ Both are synthetic specimens. Never upload a real document.
 **What to say:** "We understand Wallester runs two onboarding workflows. Direct business and freelancer onboarding is the first build; white-label programme onboarding is shown, recognised, and kept as a later phase, so the POC isn't over-scoped."
 
 **Proves:** *White-label not over-scoped*
+
+---
+
+## Scenario 8 — A brand-new customer, start to finish · WAL-DEMO-0001 · about 7 min
+
+**Story:** a new Estonian company, Lumen Harbour OU, applies through the customer portal. Its one director, Kristiina Vaher, owns all of it. She types in the form, uploads her documents (including one blurred ID the system sends back), and the case arrives in the console ready for a decision. Nobody chased her, and nobody re-keyed anything.
+
+**You need:** both servers running, and the demo upload pack made by `python tools/make_sample_documents.py` on the demo day. It is written to `sample_documents/demo_pack/`: 12 fictional files marked SPECIMEN, `FORM_VALUES.md`, and `manifest.json`. Open `FORM_VALUES.md` beside the browser: it lists every value to type and which file goes with which checklist item.
+
+1. **Portal** (http://127.0.0.1:8701/demo): click **Start a new demo application** and type the values from `FORM_VALUES.md`. It takes five steps of **Continue**, then **Send application**:
+   - *Your business:* Lumen Harbour OU · Private limited company · EE-16550321 · Estonia · Narva mnt 7, 10117 Tallinn · Online sales of handmade ceramics · 8000 EUR;
+   - *Contact:* Kristiina Vaher · kristiina@lumen-harbour.example;
+   - *People:* Director 1: Kristiina Vaher · 1988-04-14 · Estonia · Estonia;
+   - *Owners:* Owner 1: Kristiina Vaher · Directly · 100 (date of birth not needed; she is the director);
+   - *A few facts:* No · No · No · Yes · No;
+   - tick *Every detail here is made up for the demo*.
+
+   Point out that nothing on the form asks what *kind* of applicant this is. The system decides that from the facts (here, *SME company*).
+2. **Portal:** the customer lands on *My application*, signed in to the new case (reference **WAL-DEMO-0001**). Click **Documents needed**: **11 of 11 still needed**, one row per document, each with its own upload area.
+3. **Portal, the refusal:** upload `07_identity_document_BLURRED.jpg` against *Identity document (passport or ID card) - Kristiina Vaher*. It is refused in plain words: *"We could not accept this file. We could not read this document clearly. Please upload a sharp, complete copy of the original."* The row now shows **Resubmission needed**.
+4. **Portal:** upload `08_identity_document_clear.jpg` against the same row, then the ten other files, each against the item named in `FORM_VALUES.md`. Each one answers *"…now under review"*: nothing is read until the whole checklist is in. The last file sets off the run and answers *"Your file has been accepted"*. The header reads **0 of 11 still needed**.
+5. **Console** (http://127.0.0.1:8700/): open **WAL-DEMO-0001** from the dashboard.
+   - **Status: ready_for_decision**, owner analyst, type *sme_corporate*, no open holds.
+   - **Documents tab:** all 12 uploads are marked *uploaded by applicant*. The blurred ID is still in the history. Every document and every field reads **mock: recognised demo sample file**, and there are no typed-in fields.
+   - **Checks tab:** every result is a *Simulated provider response*. The registry comparison matches on name, number, address and directors: the values read off the files agree with what the customer typed.
+   - **Risk tab:** band **low**, score **10**. The 10 points are the blurred ID the customer had to send again. Recommended action: approve, and a person still makes the decision.
+6. **Portal:** *My application* now reads *"The checks are complete and your application is with us for a final look."*
+
+**What to say:** "That's a customer we'd never seen before, onboarded from a blank form to a decision-ready case in a few minutes. The system asked for exactly the documents her facts required. It turned back the blurred ID straight away, with a reason she could act on. It read everything else and checked it against the register. The only thing left for a person is the decision itself."
+
+**Be precise about mock mode:** the pack's files are *recognised by their contents* and their verdicts and fields are replayed from a manifest, which is why every one of them is labelled *mock: recognised demo sample file*. Any other file goes through the ordinary mock path: a visual-check hold, and an analyst types the fields in. In live mode the real checker and extractor read every file, and the manifest is ignored.
+
+**Proves:** *Reduced manual chasing* · *Better status visibility* · *Auditability* (every upload, refusal and replayed result is in the audit trail) · *Synthetic-data readiness*
+
+**Timing:** in the dry run after Reset demo, the system's own work took 1.1 seconds end to end (Reset 0.3 s, form 0.05 s, 12 uploads including the full run 0.6 s). The presenter's typing and clicking takes about 7 minutes: 3 for the form, 3 for the uploads, 1 in the console.
 
 ---
 

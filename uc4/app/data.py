@@ -708,3 +708,16 @@ def rerun_verification(conn, case_id, analyst_id, reason):
 def keep_assessment(conn, case_id, analyst_id, reason):
     from orchestrator.orchestrator import keep_assessment as keep
     return keep(conn, case_id, kb(), analyst_id, reason)
+
+
+# ---------------------------------------------------------------------------
+# Recognised demo sample files (mock mode)
+# ---------------------------------------------------------------------------
+
+from orchestrator import demo_samples                                      # noqa: E402
+
+DEMO_SAMPLE_LABEL = demo_samples.LABEL
+
+
+def recognised_documents(conn, case_id: str) -> set:
+    return demo_samples.recognised_documents(conn, case_id)

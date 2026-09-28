@@ -293,7 +293,8 @@ def run(conn, case_id: str, application: dict, kb: KnowledgeBase,
                  f"{doc_id} ({doc['document_type']}, {doc['file_name']}) -> {status}"
                  f"; flags={'|'.join(sorted(flags)) or 'none'}"
                  f"; rules={','.join(fired) or 'none fired'}"
-                 f"; checker={checker.mode}",
+                 f"; checker={checker.mode}"
+                 + (f"; {verdict.source_label}" if verdict and verdict.source_label else ""),
                  checker.version or kb.version)
 
     return route_case(conn, case_id, kb, len(documents), problems)

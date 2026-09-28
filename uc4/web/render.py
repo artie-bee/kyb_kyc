@@ -572,7 +572,9 @@ def _check_row(item, case_id="") -> str:
 def _tab_documents(conn, case_id, role="analyst", reviewer="analyst.demo", **kw):
     out = ["<h2>Documents and extraction</h2>"]
     names = data.uploaded_names(conn, case_id)
+    recognised = data.recognised_documents(conn, case_id)
     for doc in data.documents(conn, case_id):
+        replayed = doc["document_id"] in recognised
         held = doc["quality_status"] == "manual_review_required"
         flags = ('<span class="type">[' + e(doc["quality_flags"]) + "]</span>"
                  if doc["quality_flags"] else "")
@@ -585,7 +587,9 @@ def _tab_documents(conn, case_id, role="analyst", reviewer="analyst.demo", **kw)
                            "manual_review_required": "warn",
                            "resubmission_required": "bad",
                            "superseded": "neutral"})
-                   + by_applicant + flags + "</summary>")
+                   + by_applicant
+                   + (chip(data.DEMO_SAMPLE_LABEL, tone="warn") if replayed else "")
+                   + flags + "</summary>")
 
         if doc["sample_path"]:
             href = "/doc/" + e(doc["document_id"])
@@ -648,6 +652,8 @@ def _tab_documents(conn, case_id, role="analyst", reviewer="analyst.demo", **kw)
                        and not keyed)
                 if keyed:
                     state = chip("entered by an analyst", tone="info")
+                elif replayed:
+                    state = chip(data.DEMO_SAMPLE_LABEL, tone="warn")
                 elif f["corrected_by_analyst"]:
                     state = chip("corrected by an analyst", tone="ok")
                 elif low:
