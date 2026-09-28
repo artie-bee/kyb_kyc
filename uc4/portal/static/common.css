@@ -1,0 +1,146 @@
+/* Wallester UC4 - styles the customer portal shares with the console.
+
+   COPIED from web/static/app.css, never linked: the portal must not serve a
+   console path. The copy is kept honest by tests/test_portal.py, which fails if
+   a token here no longer matches the console's value, so the two products keep
+   one palette, one type ramp and one set of controls.
+
+   Portal-only layout lives in portal.css. */
+
+:root {
+  color-scheme: light dark;
+
+  --n-0:#ffffff; --n-1:#fbfcfd; --n-2:#f4f6f8; --n-3:#e9edf1; --n-4:#dde3e9;
+  --n-5:#c3ccd6; --n-6:#8f9bab; --n-7:#617082;
+  --n-8:#3d4854; --n-9:#232a33; --n-10:#151a20;
+
+  --fg:var(--n-9); --fg-mute:var(--n-7); --fg-faint:var(--n-6);
+  --bg:var(--n-2); --surface:var(--n-0); --surface-2:var(--n-1);
+  --line:var(--n-4); --line-soft:var(--n-3);
+
+  --accent:#2c5fa8; --accent-soft:#eaf0fa; --accent-line:#b0c6e4;
+
+  --ok:#2f6f4f;   --ok-bg:#eaf3ee;   --ok-line:#a9ccb9;
+  --info:#2c5fa8; --info-bg:#eaf0fa; --info-line:#b0c6e4;
+  --warn:#8a6116; --warn-bg:#faf2e2; --warn-line:#e0c894;
+  --bad:#963232;  --bad-bg:#faecec;  --bad-line:#e0b0b0;
+
+  --r:5px;
+  --mono:"IBM Plex Mono","JetBrains Mono","SFMono-Regular",Consolas,monospace;
+  --sans:Inter,"Segoe UI Variable Text","Segoe UI",system-ui,-apple-system,sans-serif;
+}
+
+/* A real dark theme with its own ramp, not an inverted light one. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --fg:#dbe2ea; --fg-mute:#93a0b0; --fg-faint:#6d7a8a;
+    --bg:#11151a; --surface:#171c22; --surface-2:#1c2229;
+    --line:#2a323b; --line-soft:#222931;
+    --accent:#7aa6e0; --accent-soft:#1b2534; --accent-line:#2d4363;
+    --ok:#79c298;   --ok-bg:#16241d;   --ok-line:#2f5442;
+    --info:#7aa6e0; --info-bg:#161f2d; --info-line:#2d4363;
+    --warn:#d9b167; --warn-bg:#2a2317; --warn-line:#59492a;
+    --bad:#e08a8a;  --bad-bg:#2b1a1a;  --bad-line:#5c3434;
+  }
+}
+:root[data-theme="dark"] {
+  --fg:#dbe2ea; --fg-mute:#93a0b0; --fg-faint:#6d7a8a;
+  --bg:#11151a; --surface:#171c22; --surface-2:#1c2229;
+  --line:#2a323b; --line-soft:#222931;
+  --accent:#7aa6e0; --accent-soft:#1b2534; --accent-line:#2d4363;
+  --ok:#79c298;   --ok-bg:#16241d;   --ok-line:#2f5442;
+  --info:#7aa6e0; --info-bg:#161f2d; --info-line:#2d4363;
+  --warn:#d9b167; --warn-bg:#2a2317; --warn-line:#59492a;
+  --bad:#e08a8a;  --bad-bg:#2b1a1a;  --bad-line:#5c3434;
+}
+
+* { box-sizing:border-box; }
+html { -webkit-text-size-adjust:100%; }
+
+body {
+  margin:0;
+  font-family:var(--sans);
+  font-size:13.5px;
+  line-height:1.5;
+  color:var(--fg);
+  background:var(--bg);
+  font-variant-numeric:tabular-nums;
+  -webkit-font-smoothing:antialiased;
+}
+
+.num, td.ta-r, th.ta-r { font-variant-numeric:tabular-nums; }
+.ta-r { text-align:right; }
+.muted { color:var(--fg-faint); }
+.mono { font-family:var(--mono); }
+a { color:var(--accent); }
+
+/* ---------- chips ------------------------------------------------------- */
+
+.chip {
+  display:inline-flex; align-items:center; gap:5px; white-space:nowrap;
+  font-size:11.5px; padding:2px 8px 2px 6px; border-radius:3px;
+  border:1px solid var(--line); background:var(--surface-2); color:var(--fg-mute);
+}
+.chip__dot { width:5px; height:5px; border-radius:50%; background:currentColor; flex:none; }
+.chip--ok   { color:var(--ok);   background:var(--ok-bg);   border-color:var(--ok-line); }
+.chip--info { color:var(--info); background:var(--info-bg); border-color:var(--info-line); }
+.chip--warn { color:var(--warn); background:var(--warn-bg); border-color:var(--warn-line); }
+.chip--bad  { color:var(--bad);  background:var(--bad-bg);  border-color:var(--bad-line); }
+
+/* ---------- banners ----------------------------------------------------- */
+
+.note {
+  margin:0 0 14px; padding:11px 14px; font-size:12.5px; color:var(--fg-mute);
+  border:1px solid var(--info-line); border-left-width:3px;
+  background:var(--info-bg); border-radius:var(--r);
+}
+.note strong { color:var(--fg); font-weight:580; }
+.note--ok   { border-color:var(--ok-line);   background:var(--ok-bg); }
+.note--warn { border-color:var(--warn-line); background:var(--warn-bg); }
+.note--bad  { border-color:var(--bad-line);  background:var(--bad-bg); }
+.note__title { display:block; color:var(--fg); font-weight:600; margin-bottom:5px; font-size:13px; }
+.note ul { margin:6px 0 0; padding-left:18px; }
+.note li { margin:3px 0; }
+
+/* ---------- forms and buttons ------------------------------------------- */
+
+form.inline { display:contents; }
+
+.field { display:flex; flex-direction:column; gap:3px; margin-bottom:10px; }
+.field label { font-size:11px; text-transform:uppercase; letter-spacing:.06em;
+               color:var(--fg-faint); }
+.field .help { font-size:11.5px; color:var(--fg-faint); }
+
+input[type=text], textarea, select {
+  font:inherit; font-size:13px; color:var(--fg);
+  background:var(--surface); border:1px solid var(--line);
+  border-radius:4px; padding:6px 9px; width:100%;
+}
+input[type=text]:focus, textarea:focus, select:focus {
+  outline:2px solid var(--accent); outline-offset:1px; border-color:var(--accent);
+}
+textarea { min-height:64px; resize:vertical; }
+
+.btn {
+  font:inherit; font-size:12.5px; font-weight:520;
+  padding:6px 13px; border-radius:4px; cursor:pointer;
+  border:1px solid var(--line); background:var(--surface-2); color:var(--fg);
+}
+.btn:hover { border-color:var(--n-5); }
+.btn--primary { background:var(--accent); border-color:var(--accent); color:#fff; }
+.btn--primary:hover { filter:brightness(1.08); }
+.btn--bad { color:var(--bad); border-color:var(--bad-line); background:var(--bad-bg); }
+.btn--wide { width:100%; }
+.btn-row { display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
+
+.msg { border:1px solid var(--line); border-radius:var(--r); background:var(--surface);
+       padding:12px 14px; margin-bottom:10px; }
+.msg__when { font-size:11px; color:var(--fg-faint); font-family:var(--mono);
+             display:block; margin-bottom:5px; }
+
+.empty { padding:26px 14px; text-align:center; color:var(--fg-faint); font-size:13px; margin:0; }
+
+a:focus-visible, button:focus-visible, input:focus-visible, summary:focus-visible,
+th:focus-visible, select:focus-visible, textarea:focus-visible {
+  outline:2px solid var(--accent); outline-offset:2px; border-radius:3px;
+}

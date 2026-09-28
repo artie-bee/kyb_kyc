@@ -183,3 +183,32 @@ def get_checker(mode: str = "mock") -> QualityChecker:
     if mode not in CHECKERS:
         raise ValueError(f"unknown checker mode '{mode}'; choose from {sorted(CHECKERS)}")
     return CHECKERS[mode]()
+
+
+class NoAutomatedCheck(ValueError):
+    """There is no automated checker for this file, so nobody has looked at it."""
+
+
+class UnscriptedUploadChecker(QualityChecker):
+    """The checker for a real upload while the pipeline runs in mock mode.
+
+    The mock checker replays a verdict scripted on the document. A file that
+    arrived through the portal has no script, and replaying an empty one would
+    accept it unseen - a pass nobody gave. So this checker declines, and Step 3
+    treats a checker that could not answer the way it treats any other: the
+    document goes to an analyst, never through.
+    """
+
+    mode = "unscripted_upload"
+    version = None
+
+    def check(self, document: dict) -> QualityVerdict:
+        raise NoAutomatedCheck(
+            "no automated quality check runs on uploaded files in mock mode; "
+            "an analyst must look at this one")
+
+
+def get_upload_checker(mode: str = "mock") -> QualityChecker:
+    """The checker for a file a customer uploaded. Live modes read the file; mock
+    mode has nothing to replay, so the file is held for a person instead."""
+    return UnscriptedUploadChecker() if mode == "mock" else get_checker(mode)

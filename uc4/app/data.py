@@ -17,17 +17,20 @@ from pathlib import Path
 UC4 = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(UC4))
 
-from orchestrator import db, holds, live_mode                              # noqa: E402
+from orchestrator import db, holds, live_mode, portal_access               # noqa: E402
 from orchestrator.kb import KnowledgeBase                                  # noqa: E402
+from orchestrator.quality_checker import get_upload_checker                # noqa: E402
 from orchestrator.steps import (analyst_review, communication, decision,   # noqa: E402
-                                evidence_pack, extraction, verification)
-from orchestrator.orchestrator import resume                               # noqa: E402
+                                document_quality, evidence_pack, extraction,
+                                verification)
+from orchestrator.orchestrator import QUALITY_CHECKER_MODE, resume         # noqa: E402
 from tools.export_case import export                                       # noqa: E402
 from tools.run_demo import run as run_demo                                 # noqa: E402
 from tools.dataset_to_applications import DEFAULT_OUT as APPLICATIONS       # noqa: E402
 
 DB_PATH = UC4 / "onboarding.db"
 SAMPLE_DOCS = UC4 / "sample_documents"
+UPLOADS = document_quality.UPLOADS
 
 
 # ---------------------------------------------------------------------------
@@ -260,9 +263,17 @@ def documents(conn, case_id: str) -> list[dict]:
     for doc in out:
         doc["fields"] = _rows(conn, "SELECT * FROM extracted_field WHERE document_id = ?"
                                     " ORDER BY field_id", (doc["document_id"],))
-        candidate = SAMPLE_DOCS / case_id / doc["file_name"]
-        doc["sample_path"] = candidate if candidate.exists() else None
+        doc["sample_path"] = document_file(case_id, doc["file_name"])
     return out
+
+
+def document_file(case_id: str, file_name: str) -> Path | None:
+    """Where a document's file is: a generated sample, or a portal upload."""
+    for root in (SAMPLE_DOCS, UPLOADS):
+        candidate = (root / case_id / file_name).resolve()
+        if str(candidate).startswith(str(root.resolve())) and candidate.exists():
+            return candidate
+    return None
 
 
 def people(conn, case_id: str) -> list[dict]:
@@ -493,3 +504,40 @@ def send_message(conn, case_id, situation, approver):
 
 def known_ids(conn, case_id: str) -> set:
     return evidence_pack.known_ids(conn, case_id)
+
+
+# ---------------------------------------------------------------------------
+# Customer portal actions - the same rule: call the orchestrator, never SQL
+# ---------------------------------------------------------------------------
+
+def upload_document(conn, case_id, item_id, file_name, content, uploads_dir=None):
+    """A customer's file, through Step 3, and the case carried on if it can be.
+
+    UploadRefused comes back to the caller with wording meant for the customer.
+    """
+    try:
+        result = document_quality.receive_upload(
+            conn, case_id, item_id, file_name, content, kb(),
+            checker=get_upload_checker(QUALITY_CHECKER_MODE), uploads_dir=uploads_dir)
+    except document_quality.UploadRefused:
+        conn.commit()           # the refusal is audited; that record must survive it
+        raise
+    conn.commit()
+    carry_on(conn, case_id)
+    return result
+
+
+def issue_portal_access(conn, case_id, issued_by):
+    token = portal_access.issue(conn, case_id, issued_by, kb())
+    conn.commit()
+    return token
+
+
+def portal_case(conn, token):
+    return portal_access.resolve(conn, token)
+
+
+def end_portal_session(conn, token):
+    ended = portal_access.revoke(conn, token, "customer", kb())
+    conn.commit()
+    return ended

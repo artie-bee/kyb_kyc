@@ -382,6 +382,10 @@ DB_TABLES = {
     "outbox": [
         "outbox_id", "communication_id", "case_id", "audience", "body", "sent_at",
     ],
+    # customer portal access; only the hash of each token is stored
+    "portal_token": [
+        "token_hash", "case_id", "issued_by", "issued_at", "revoked_at",
+    ],
     "registry_check": [
         "check_id", "case_id", "applicant_id", "provider_name", "company_status",
         "registry_legal_name", "registry_number", "registry_address", "registry_directors",

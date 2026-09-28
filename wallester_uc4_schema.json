@@ -3702,6 +3702,52 @@
             "additionalProperties": false
           }
         },
+        "portal_token": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "token_hash": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "case_id": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "issued_by": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "issued_at": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "revoked_at": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            },
+            "required": [
+              "token_hash",
+              "case_id",
+              "issued_by",
+              "issued_at",
+              "revoked_at"
+            ],
+            "additionalProperties": false
+          }
+        },
         "registry_check": {
           "type": "array",
           "items": {

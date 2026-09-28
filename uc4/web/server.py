@@ -219,9 +219,9 @@ class Handler(BaseHTTPRequestHandler):
                 (document_id,)).fetchone()
         if row is None:
             return self._html(self._not_found(document_id), 404)
-        path = (data.SAMPLE_DOCS / row["case_id"] / row["file_name"]).resolve()
-        root = data.SAMPLE_DOCS.resolve()
-        if not str(path).startswith(str(root)) or not path.exists():
+        # A generated sample, or a file a customer uploaded through the portal.
+        path = data.document_file(row["case_id"], row["file_name"])
+        if path is None:
             return self._html(self._not_found(row["file_name"]), 404)
         ctype = CONTENT_TYPES.get(path.suffix.lower(), "application/octet-stream")
         return self._send(path.read_bytes(), ctype=ctype)

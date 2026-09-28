@@ -69,6 +69,9 @@ tests/test_app.py             12 tests - no SQL writes in app/ or web/, the cust
                               a human action carries the case forward
 tests/test_web.py             the console - every screen and tab renders, actions
                               redirect, and the backend's refusals reach the screen
+tests/test_portal.py          the customer portal - one test per customer journey
+                              (cases 2, 5, 6, 8, 11, 12, 13, 14), uploads with
+                              JavaScript off, no SQL writes, no console routes
 tests/test_schema_sync.py     6 tests - fails if the dataset or database gains a
                               column or enum value the schema file does not describe
 
@@ -98,6 +101,46 @@ only when a live provider is selected; mock mode shows none.
 own function, so a refusal you see - "cannot approve while holds are open",
 "compliance role required" - is the real rule refusing. `tests/test_app.py`
 scans `app/` and `web/` for SQL writes and fails if it finds any.
+
+## Customer portal (port 8701)
+
+The applicant's side, on the same stack as the console: plain `http.server`,
+HTML built in Python, plain CSS, and one small optional script. It serves none
+of the console's routes. Run the two side by side, in two terminals:
+
+```
+python tools/serve.py           # console   http://127.0.0.1:8700/
+python tools/serve_portal.py    # portal    http://127.0.0.1:8701/demo
+```
+
+Both read and act on the same `onboarding.db`, so a file uploaded in the portal
+is waiting in the console's Documents tab for an analyst. "Reset demo" lives in
+the console only; the portal never resets anything.
+
+Screens: **My application** (five customer steps, one plain line each),
+**Documents** (each item with Not yet uploaded / Received / Under review /
+Accepted / Resubmission needed, a plain reason for resubmissions only, an upload
+form per outstanding item, and the upload history), **Messages** (everything
+sent to the applicant, in order), and **/demo**, a case selector that opens the
+portal as any of the 14 customers. `--no-demo` turns the selector off; a
+customer then needs an access link (`/access/<token>`).
+
+The rules it keeps:
+- every upload goes through `document_quality.receive_upload()`, which refuses a
+  wrong type, an empty file, a file over 10 MB, or bytes that do not match the
+  extension, before anything is stored or counted against the customer;
+- in mock mode an upload has no scripted verdict to replay, so it goes to an
+  analyst as **Under review** rather than being accepted unseen;
+- uploads are taken only at the document stage. Once any paid check has run,
+  the onboarding team asks for anything further by message;
+- only one new table, `portal_token`, holding only a hash of each token.
+  Everything else is read from the tables the console reads;
+- every page passes through `customer_view.leaks()` before it is sent, and a
+  page carrying restricted wording is refused rather than shown;
+- every page works with JavaScript off. Uploads are plain multipart form posts,
+  parsed with the standard library, so no new package was needed.
+
+Uploaded files go to `uploads/<case_id>/` (git-ignored).
 
 ## Run
 # On Windows PowerShell the shell does not expand the glob, so expand it explicitly:

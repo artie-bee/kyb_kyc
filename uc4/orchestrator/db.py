@@ -213,6 +213,15 @@ CREATE TABLE IF NOT EXISTS audit_event (
     payload_summary TEXT NOT NULL, model_or_prompt_version TEXT,
     timestamp TEXT NOT NULL
 );
+-- How an applicant reaches their own case in the customer portal. Only a hash
+-- of the token is kept, so a copy of this database does not let anyone sign in
+-- as a customer. Nothing else about the portal is stored: what it shows is read
+-- from the same tables the console reads, so the two cannot disagree.
+CREATE TABLE IF NOT EXISTS portal_token (
+    token_hash TEXT PRIMARY KEY,
+    case_id TEXT NOT NULL REFERENCES onboarding_case(case_id),
+    issued_by TEXT NOT NULL, issued_at TEXT NOT NULL, revoked_at TEXT
+);
 -- Section 12: audit history must never be modified or deleted.
 CREATE TRIGGER IF NOT EXISTS audit_no_update BEFORE UPDATE ON audit_event
 BEGIN SELECT RAISE(ABORT, 'audit_event is append-only'); END;

@@ -1,0 +1,148 @@
+/* Wallester UC4 - the customer portal's own layout.
+
+   Same palette and controls as the console (common.css), a different register:
+   one centred column, larger type, more air, no tables, no IDs beyond the
+   reference the customer's own messages quote, and no severity colour on
+   anything about the case itself. The console is a system of record; this is a
+   page a customer should be able to read once and know what to do. */
+
+body { font-size:15px; line-height:1.6; }
+
+/* ---------- the demo banner --------------------------------------------- */
+
+.demo-banner {
+  background:var(--warn-bg); color:var(--warn);
+  border-bottom:1px solid var(--warn-line);
+  text-align:center; font-size:13px; font-weight:560;
+  padding:7px 16px;
+}
+
+/* ---------- header ------------------------------------------------------ */
+
+.phead { background:var(--surface); border-bottom:1px solid var(--line); }
+.phead__in { max-width:760px; margin:0 auto; padding:14px 20px;
+             display:flex; align-items:center; justify-content:space-between;
+             gap:12px; flex-wrap:wrap; }
+.phead__in--nav { padding-top:0; padding-bottom:0; }
+.phead__brand { font-weight:650; font-size:16px; letter-spacing:-.01em;
+                color:var(--fg); text-decoration:none; }
+.phead__brand span { font-weight:400; color:var(--fg-mute); margin-left:4px; }
+.phead__who { display:flex; align-items:center; gap:10px; font-size:13.5px;
+              color:var(--fg-mute); }
+.phead__who form { margin:0; }
+.phead__demo { font-size:12.5px; color:var(--fg-faint); }
+
+.pnav { display:flex; gap:2px; overflow-x:auto; }
+.pnav__item { padding:10px 14px; font-size:14px; color:var(--fg-mute);
+              text-decoration:none; border-bottom:2px solid transparent;
+              white-space:nowrap; }
+.pnav__item:hover { color:var(--fg); }
+.pnav__item--on { color:var(--accent); border-bottom-color:var(--accent); font-weight:560; }
+
+.btn--quiet { background:transparent; border-color:transparent; color:var(--fg-mute);
+              padding:4px 8px; }
+.btn--quiet:hover { color:var(--fg); border-color:var(--line); }
+
+/* ---------- the page ---------------------------------------------------- */
+
+.pmain { max-width:760px; margin:0 auto; padding:28px 20px 56px; }
+.pfoot { max-width:760px; margin:0 auto; padding:0 20px 28px; }
+
+.phero { margin-bottom:20px; }
+.phero h1 { font-size:24px; font-weight:630; letter-spacing:-.015em; margin:0; }
+.sub { margin:4px 0 0; color:var(--fg-mute); font-size:14px; }
+h2 { font-size:17px; font-weight:600; margin:28px 0 10px; }
+.lede { font-size:15px; color:var(--fg-mute); margin:0 0 16px; }
+.hint { font-size:13.5px; color:var(--fg-faint); margin:-4px 0 12px; }
+.cta { margin:22px 0 0; }
+
+.note { font-size:14.5px; color:var(--fg); }
+.btn { font-size:14px; padding:8px 15px; }
+.btn--primary { font-weight:560; }
+
+/* ---------- 1. My application: the five steps ---------------------------- */
+
+.steps { list-style:none; margin:20px 0 0; padding:0; }
+.step { display:flex; gap:14px; position:relative; padding-bottom:18px; }
+/* the thread joining one step to the next */
+.step:not(:last-child)::before {
+  content:""; position:absolute; left:15px; top:34px; bottom:0;
+  width:2px; background:var(--line);
+}
+.step--done:not(:last-child)::before { background:var(--ok-line); }
+
+.step__n {
+  width:32px; height:32px; border-radius:50%; flex:none;
+  display:flex; align-items:center; justify-content:center;
+  font-weight:650; font-size:14px;
+  background:var(--surface); color:var(--fg-faint); border:2px solid var(--line);
+}
+.step--done .step__n { background:var(--ok-bg); color:var(--ok); border-color:var(--ok-line); }
+.step--current .step__n { background:var(--accent); color:#fff; border-color:var(--accent); }
+.step--skipped .step__n { background:var(--surface-2); color:var(--fg-faint);
+                          border-style:dashed; }
+
+.step__body { flex:1; min-width:0; padding-top:4px; }
+.step__head { display:flex; align-items:baseline; gap:10px; flex-wrap:wrap; }
+.step__title { font-weight:600; font-size:15.5px; }
+.step--todo .step__title, .step--skipped .step__title { color:var(--fg-mute); }
+.step__state { font-size:12px; color:var(--fg-faint); text-transform:uppercase;
+               letter-spacing:.06em; }
+.step--current .step__state { color:var(--accent); font-weight:600; }
+.step__line { margin:3px 0 0; color:var(--fg-mute); }
+.step--current .step__line { color:var(--fg); }
+
+/* ---------- 2. Documents ------------------------------------------------- */
+
+.items { list-style:none; margin:0; padding:0; }
+.item { background:var(--surface); border:1px solid var(--line);
+        border-left-width:4px; border-left-color:var(--n-5);
+        border-radius:var(--r); padding:14px 16px; margin-bottom:10px; }
+.item--ok { border-left-color:var(--ok); }
+.item--warn { border-left-color:var(--warn); }
+.item__top { display:flex; justify-content:space-between; align-items:flex-start;
+             gap:12px; flex-wrap:wrap; }
+.item__doc { font-weight:600; display:block; }
+.item__person { display:block; font-size:13.5px; color:var(--fg-mute); }
+.item__reason { margin:10px 0 0; padding:9px 12px; border-radius:4px;
+                background:var(--warn-bg); border:1px solid var(--warn-line);
+                font-size:14px; }
+.chip { font-size:12.5px; padding:3px 9px 3px 7px; }
+
+.upload { display:flex; flex-wrap:wrap; align-items:center; gap:8px 12px;
+          margin-top:12px; padding-top:12px; border-top:1px solid var(--line-soft); }
+.upload__label { font-size:13px; font-weight:560; color:var(--fg-mute); width:100%; }
+.upload__file { font:inherit; font-size:14px; max-width:100%; }
+.upload__go[disabled] { opacity:.6; cursor:progress; }
+
+.hist { margin-top:10px; font-size:13.5px; }
+.hist summary { cursor:pointer; color:var(--fg-mute); }
+.hist ul { list-style:none; margin:8px 0 0; padding:0; }
+.hist li { display:flex; flex-wrap:wrap; gap:4px 12px; padding:6px 0;
+           border-top:1px solid var(--line-soft); }
+.hist__file { font-family:var(--mono); font-size:12.5px; word-break:break-all;
+              flex:1 1 220px; }
+.hist__when { color:var(--fg-faint); font-size:12.5px; }
+.hist__label { color:var(--fg-mute); font-size:12.5px; }
+
+/* ---------- 3. Messages -------------------------------------------------- */
+
+.msgs { list-style:none; margin:0; padding:0; }
+.msg { padding:14px 16px; font-size:15px; }
+.msg__when { font-size:12px; }
+
+/* ---------- 4. Demo case selector ---------------------------------------- */
+
+.picks { list-style:none; margin:0; padding:0; }
+.pick { display:flex; justify-content:space-between; align-items:center; gap:12px;
+        flex-wrap:wrap; background:var(--surface); border:1px solid var(--line);
+        border-radius:var(--r); padding:11px 14px; margin-bottom:8px; }
+.pick form { margin:0; }
+.pick__name { font-weight:560; display:block; }
+.pick__ref { font-family:var(--mono); font-size:12px; color:var(--fg-faint); }
+
+@media (max-width:560px) {
+  .pmain { padding:20px 16px 40px; }
+  .phead__in { padding:12px 16px; }
+  .phero h1 { font-size:21px; }
+}
