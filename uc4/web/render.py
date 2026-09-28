@@ -691,14 +691,16 @@ def _tab_documents(conn, case_id, role="analyst", reviewer="analyst.demo", **kw)
             if rows:
                 fields = "<h3>Fields</h3>" + "".join(rows)
         if awaiting:
-            fields += _entry_form(case_id, doc, awaiting)
+            # Beside the preview, so the analyst types what the file says.
+            right.append(_entry_form(case_id, doc, awaiting))
             held = True
 
         cls = "doc doc--held" if held else "doc"
         opened = " open" if held else ""
+        body_right = "".join(right)
         out.append('<details class="' + cls + '"' + opened + ">"
                    + summary + '<div class="body"><div class="grid2">' + left
-                   + "<div>" + "".join(right) + "</div></div>" + fields + "</div></details>")
+                   + "<div>" + body_right + "</div></div>" + fields + "</div></details>")
     if len(out) == 1:
         out.append('<p class="empty">No documents on this case.</p>')
     return "".join(out)
@@ -708,10 +710,13 @@ def _entry_form(case_id, doc, awaiting) -> str:
     """Mock mode: nothing reads an uploaded file, so the analyst types in what
     it says. Recorded as entered_by_analyst - never as extracted."""
     required = set(data.kb().required_fields_for(doc["document_type"]))
+    # Every input starts EMPTY. Nothing the customer declared is offered here:
+    # the value typed is what the document says, or the comparison it feeds
+    # would only be the application compared with itself.
     inputs = "".join(
         '<div class="field"><label>' + e(f["name"].replace("_", " "))
         + (" (required)" if f["name"] in required else "") + "</label>"
-        '<input type="text" name="f_' + e(f["name"]) + '"'
+        '<input type="text" value="" autocomplete="off" name="f_' + e(f["name"]) + '"'
         + (" required" if f["name"] in required else "")
         + (' placeholder="YYYY-MM-DD"' if f["name"].endswith("date") or f["name"] == "date_of_birth"
            else "") + "></div>"

@@ -300,7 +300,10 @@ def customer_checklist(conn, case_id: str, kb: KnowledgeBase | None = None) -> d
         generic = item["rule_id"] == ADDED_RULE_ID and restricted
         if _needed(item):
             needed += 1
-            still_needed += status != ACCEPTED
+            # Still needed means the customer still owes it: nothing uploaded
+            # yet, or an upload we had to send back. A file that is in and
+            # being looked at is not owed.
+            still_needed += status in (NOT_UPLOADED, RESUBMIT)
         items.append({
             "checklist_item_id": item["item_id"],
             "document": GENERIC_DOCUMENT if generic else DOCUMENT_LABELS.get(
