@@ -335,6 +335,7 @@ def case_detail(conn, case_id, tab="Timeline", role="analyst",
                       "info", "Future phase")
 
     demo = _demo_panel(conn, case_id, reviewer) if data.is_demo_case(case_id) else ""
+    demo += _reassessment_panel(conn, case_id)
 
     tabs = "".join('<a class="tab' + (" tab--on" if t == tab else "") + '" href="/case/'
                    + e(case_id) + "?tab=" + e(t) + '">' + e(t) + "</a>"
@@ -366,6 +367,31 @@ def case_detail(conn, case_id, tab="Timeline", role="analyst",
         '<button class="btn" type="submit">Copy customer link</button></form>'
         + holds_html + restricted + future + demo
         + '<nav class="tabs">' + tabs + "</nav>" + inner)
+
+
+def _reassessment_panel(conn, case_id) -> str:
+    """New evidence arrived after the assessment: the analyst decides whether it
+    changes anything. The paid checks run again only from here."""
+    hold = data.reassessment_hold(conn, case_id)
+    if hold is None:
+        return ""
+    back = "/case/" + e(case_id)
+    return note(
+        "<p>A document arrived after the paid checks answered. It has been screened; "
+        "once it has been read (Documents tab), choose one. The risk band stays as it "
+        "is until you do.</p>"
+        '<form method="post" action="/action/reassess">'
+        '<input type="hidden" name="case_id" value="' + e(case_id) + '">'
+        '<input type="hidden" name="back" value="' + back + '">'
+        '<div class="field"><label>Reason</label><input type="text" name="reason" required>'
+        "</div>"
+        '<div class="btn-row">'
+        '<button class="btn btn--primary" name="choice" value="rerun">Re-run verification'
+        "</button>"
+        '<button class="btn" name="choice" value="keep">Keep the assessment</button></div>'
+        '<p class="foot">Re-running replaces the registry, identity and risk results; the '
+        "previous ones are archived in the audit trail. Screening results are kept as they "
+        "are.</p></form>", "warn", "New evidence after assessment")
 
 
 def _demo_panel(conn, case_id, reviewer="analyst.demo") -> str:

@@ -311,14 +311,14 @@ def next_id(conn: sqlite3.Connection, table: str, prefix: str | None = None) -> 
     col, default = ID_PREFIX[table]
     prefix = prefix or default
     width = 6 if table in ("audit_event", "checklist_item") else 4
-    if table == "onboarding_case":
-        # Each case series counts itself, so a demo case never takes a number
-        # from the dataset's sequence or the other way round.
-        (count,) = conn.execute(f"SELECT COUNT(*) FROM {table} WHERE {col} LIKE ?",
-                                (prefix + "%",)).fetchone()
-    else:
-        (count,) = conn.execute(f"SELECT COUNT(*) FROM {table}").fetchone()
-    return f"{prefix}{count + 1:0{width}d}"
+    # One past the highest number already used under this prefix. Not a row
+    # count: a re-run of verification replaces rows, and a count that drops
+    # would hand out an id another case already holds. Each case series (the
+    # dataset's WAL-ONB-, the portal's WAL-DEMO-) numbers itself.
+    (highest,) = conn.execute(
+        f"SELECT MAX(CAST(SUBSTR({col}, ?) AS INTEGER)) FROM {table} WHERE {col} LIKE ?",
+        (len(prefix) + 1, prefix + "%")).fetchone()
+    return f"{prefix}{(highest or 0) + 1:0{width}d}"
 
 
 def audit(conn, case_id, actor_type, actor_id, action, payload_summary, version=None):

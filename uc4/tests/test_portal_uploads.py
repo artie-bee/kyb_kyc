@@ -308,9 +308,15 @@ def test_a_late_document_is_read_but_the_paid_checks_do_not_run_again(demo):
     after = {t: conn.execute(f"SELECT COUNT(*) FROM {t} WHERE case_id = 'WAL-ONB-0010'")
              .fetchone()[0] for t in before}
     assert after == before, "the providers' answers stand; they are not asked again"
+    # the case waits on the analyst, not on a status the upload chose for it
+    assert data.reassessment_hold(conn, "WAL-ONB-0010") is not None
     status = conn.execute("SELECT status FROM onboarding_case WHERE case_id = 'WAL-ONB-0010'"
                           ).fetchone()[0]
-    assert status == "ready_for_decision", "back where its band put it"
+    assert status == "analyst_review_required"
+    data.keep_assessment(conn, "WAL-ONB-0010", "analyst.test", "statement changes nothing")
+    status = conn.execute("SELECT status FROM onboarding_case WHERE case_id = 'WAL-ONB-0010'"
+                          ).fetchone()[0]
+    assert status == "ready_for_decision", "kept: back where its band put it"
 
 
 def test_accepted_items_show_no_upload_and_resubmissions_always_a_reason(demo, finished):

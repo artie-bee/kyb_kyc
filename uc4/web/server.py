@@ -319,6 +319,15 @@ class Handler(BaseHTTPRequestHandler):
                 extra = " (recorded as a " + str(result.override_direction) + " override)"
             return "Recorded " + result.decision + " as " + role + extra
 
+        if path == "/action/reassess":
+            if form.get("choice") == "rerun":
+                trace = data.rerun_verification(conn, form["case_id"], reviewer,
+                                                form.get("reason", ""))
+                band = trace["risk_assessment"]["band"]
+                return "Verification re-run by " + reviewer + "; risk band now " + band + "."
+            held = data.keep_assessment(conn, form["case_id"], reviewer, form.get("reason", ""))
+            return "Assessment kept; " + str(held) + " released by " + reviewer + "."
+
         if path == "/action/customer-link":
             link = data.customer_link(conn, form["case_id"], reviewer)
             key = secrets.token_urlsafe(8)

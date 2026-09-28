@@ -30,7 +30,7 @@ from dataclasses import dataclass, field
 from datetime import date
 from pathlib import Path
 
-from .. import clock, db
+from .. import clock, db, reassessment
 from ..kb import KnowledgeBase
 from .. import holds
 from .. import llm_client
@@ -570,6 +570,7 @@ def receive_upload(conn, case_id: str, item_id: str, original_name: str, content
                  f"{', '.join(earlier)} on {item_id} superseded by the customer's new upload; "
                  f"kept on the record", kb.version)
 
+    paid_checks_open = document_stage_open(conn, case_id)
     doc = {"document_type": item["document_type"], "file_name": stored,
            "file_path": str(target), "item_id": item_id,
            "subject_individual_id": item["subject_individual_id"],
@@ -582,6 +583,11 @@ def receive_upload(conn, case_id: str, item_id: str, original_name: str, content
         (item_id,)).fetchone()["document_id"]
     status = conn.execute("SELECT quality_status FROM document WHERE document_id = ?",
                           (document,)).fetchone()["quality_status"]
+    # After the assessment, a new file is evidence for an analyst to weigh; it
+    # does not move the case, or its risk band, by itself.
+    if not paid_checks_open:
+        reassessment.place(conn, case_id, document, kb)
+        holds.apply_status(conn, case_id, kb, case["status"], case["next_action_owner"])
     # The customer has answered for this item: it drops out of any reminder.
     db.audit(conn, case_id, "system", ACTOR, "reminders_stopped",
              f"{item_id} ({item['document_type']}): the customer has sent it; no further "

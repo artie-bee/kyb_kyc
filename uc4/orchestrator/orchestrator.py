@@ -11,7 +11,7 @@ import json
 import sys
 from pathlib import Path
 
-from . import db, holds
+from . import db, holds, reassessment
 from .kb import KnowledgeBase
 from .extractor import get_extractor
 from .quality_checker import get_checker
@@ -150,18 +150,13 @@ def resume(conn, case_id: str, application: dict, kb: KnowledgeBase,
             break
         if next_step == "verification" and not document_quality.document_stage_open(conn, case_id):
             # The paid checks have already answered on this case. A document
-            # that arrived afterwards - one an analyst added during enhanced due
-            # diligence, say - has been screened and read; it does not re-run
-            # the providers, whose answers stand. The analyst reads the new
-            # document alongside them, and the case goes back to where its band
-            # put it rather than to where the re-run steps left it.
-            assessment = conn.execute("SELECT risk_band FROM risk_assessment WHERE case_id = ?",
-                                      (case_id,)).fetchone()
-            if assessment:
-                holds.apply_status(conn, case_id, kb,
-                                   *risk_assessment._clear_routing(assessment["risk_band"]))
+            # that arrived afterwards has been screened and read, and waits on
+            # the "new evidence after assessment" hold; the paid checks run again
+            # only when an analyst chooses rerun_verification(). The status is
+            # left to the holds, as always.
             trace["stopped_at"] = "verification"
-            trace["reason"] = "the paid checks have already run; they are not repeated"
+            trace["reason"] = ("the paid checks have already run; they re-run only when an "
+                               "analyst chooses to")
             break
         kwargs = {}
         if next_step == "document_quality":
@@ -198,6 +193,106 @@ def resume(conn, case_id: str, application: dict, kb: KnowledgeBase,
             break
     conn.commit()
     return trace
+
+
+# ---------------------------------------------------------------------------
+# Re-running the paid checks - an analyst's choice, never automatic
+# ---------------------------------------------------------------------------
+
+# What a re-run replaces. The schema holds one assessment per case, so the
+# previous verification and risk results are archived verbatim in the
+# append-only audit trail and then replaced. Screening is not in this list: a
+# sanctions or PEP result is never deleted, and it is not re-run either - new
+# evidence about the company does not change who was screened.
+_REPLACED_BY_RERUN = (
+    ("evidence_pack", "case_id = ?"),
+    ("risk_factor", "assessment_id IN (SELECT assessment_id FROM risk_assessment"
+                    " WHERE case_id = ?)"),
+    ("risk_assessment", "case_id = ?"),
+    ("finding", "case_id = ? AND source IN ('registry', 'identity', 'ubo')"),
+    ("identity_check", "case_id = ?"),
+    ("registry_check", "case_id = ?"),
+)
+
+
+class RerunRefused(ValueError):
+    """The paid checks cannot be re-run on this case now."""
+
+
+def rerun_verification(conn, case_id: str, application: dict, kb: KnowledgeBase,
+                       analyst_id: str, reason: str,
+                       provider_mode: str = PROVIDER_MODE,
+                       narrator_mode: str = NARRATOR_MODE) -> dict:
+    """Re-run verification and the risk assessment, because an analyst chose to.
+
+    The only path by which the paid checks run a second time. It needs a named
+    analyst and a reason, a complete checklist, and nothing else outstanding
+    (a file still being looked at or typed in must be finished first). The
+    previous results are archived in the audit trail before they are replaced,
+    the "new evidence" hold is released in the analyst's name, and then Steps 5
+    and 7 run as they did the first time. Screening results stand untouched.
+    """
+    import json
+    if not (analyst_id or "").strip():
+        raise RerunRefused("the analyst re-running verification must be identified")
+    if not (reason or "").strip():
+        raise RerunRefused("a reason is required to re-run verification")
+    if document_quality.document_stage_open(conn, case_id):
+        raise RerunRefused(f"{case_id} has not been verified yet; verification runs by itself "
+                           f"once the checklist is complete")
+    pending = [h for h in holds.open_holds(conn, case_id)
+               if h.placed_by_step in ("step.document_quality", "step.extraction")]
+    if pending:
+        raise RerunRefused(
+            f"finish reading the new evidence first: {'; '.join(h.reason for h in pending)}")
+    try:
+        verification.gate(conn, case_id)
+    except verification.VerificationGateError as e:
+        raise RerunRefused(str(e)) from None
+
+    archive = {}
+    for table, where in _REPLACED_BY_RERUN:
+        rows = [dict(r) for r in conn.execute(f"SELECT * FROM {table} WHERE {where}", (case_id,))]
+        archive[table] = rows
+    db.audit(conn, case_id, "analyst", analyst_id, "prior_assessment_archived",
+             json.dumps(archive, ensure_ascii=False, default=str), kb.version)
+    for table, where in _REPLACED_BY_RERUN:
+        conn.execute(f"DELETE FROM {table} WHERE {where}", (case_id,))
+
+    released = reassessment.release(conn, case_id, analyst_id,
+                                    f"re-running verification: {reason}", kb)
+    db.audit(conn, case_id, "analyst", analyst_id, "verification_rerun_requested",
+             f"re-running verification and the risk assessment; reason: {reason}"
+             + (f"; {released} released" if released else "")
+             + "; screening results kept as they were", kb.version)
+
+    reg, ident = get_providers(provider_mode, application)
+    trace = {"verification": verification.run(conn, case_id, application, kb,
+                                              registry_provider=reg,
+                                              identity_provider=ident).__dict__}
+    trace["risk_assessment"] = risk_assessment.run(
+        conn, case_id, application, kb, narrator=get_narrator(narrator_mode)).__dict__
+    trace["evidence_pack"] = evidence_pack.run(conn, case_id, application, kb,
+                                               narrator=get_narrator(narrator_mode)).__dict__
+    conn.commit()
+    return trace
+
+
+def keep_assessment(conn, case_id: str, kb: KnowledgeBase, analyst_id: str,
+                    reason: str) -> str | None:
+    """The analyst has read the new evidence and the assessment stands."""
+    released = reassessment.release(conn, case_id, analyst_id,
+                                    f"assessment kept after new evidence: {reason}", kb)
+    if released is None:
+        raise RerunRefused(f"{case_id} has no new evidence waiting to be reviewed")
+    band = conn.execute("SELECT risk_band FROM risk_assessment WHERE case_id = ?",
+                        (case_id,)).fetchone()
+    if band:
+        holds.apply_status(conn, case_id, kb, *risk_assessment._clear_routing(band[0]))
+    db.audit(conn, case_id, "analyst", analyst_id, "assessment_kept",
+             f"{released} released; the risk assessment stands; reason: {reason}", kb.version)
+    conn.commit()
+    return released
 
 
 def main(paths: list[str], db_path: str = "onboarding.db") -> None:

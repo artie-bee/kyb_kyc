@@ -689,3 +689,22 @@ def customer_link(conn, case_id, issued_by) -> str:
     token = portal_access.issue(conn, case_id, issued_by, kb())
     conn.commit()
     return f"{settings.PORTAL_URL}/access/{token}"
+
+
+# ---------------------------------------------------------------------------
+# New evidence after the assessment
+# ---------------------------------------------------------------------------
+
+def reassessment_hold(conn, case_id: str):
+    from orchestrator import reassessment
+    return reassessment.open_hold(conn, case_id)
+
+
+def rerun_verification(conn, case_id, analyst_id, reason):
+    from orchestrator.orchestrator import rerun_verification as rerun
+    return rerun(conn, case_id, _application(case_id, conn), kb(), analyst_id, reason)
+
+
+def keep_assessment(conn, case_id, analyst_id, reason):
+    from orchestrator.orchestrator import keep_assessment as keep
+    return keep(conn, case_id, kb(), analyst_id, reason)
