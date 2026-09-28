@@ -457,9 +457,27 @@ def test_a_link_cannot_put_its_own_words_on_the_page(journeys):
 
 def test_a_post_from_another_site_is_refused(journeys):
     customer = Customer(journeys["base"])
-    status, _ = customer.post("/demo/open", headers={"Origin": "http://evil.example"},
-                              case_id="WAL-ONB-0001")
-    assert status == 403
+    for origin in ("http://evil.example", "null"):
+        status, _ = customer.post("/demo/open", headers={"Origin": origin},
+                                  case_id="WAL-ONB-0001")
+        assert status == 403, origin
+
+
+def test_the_portals_own_forms_carry_an_origin_it_accepts(journeys):
+    """A browser posts the portal's own origin only if the referrer policy lets
+    it. Under no-referrer it sends "Origin: null" instead, and every form on the
+    portal was refused as cross-site - which is what a real browser showed."""
+    base = journeys["base"]
+    with urllib.request.urlopen(base + "/demo") as r:
+        policy = r.headers.get("Referrer-Policy")
+    assert policy == "same-origin", policy
+
+    host = base.split("//", 1)[1]
+    for origin in ("http://" + host, "http://localhost:" + host.rsplit(":", 1)[1]):
+        status, where = Customer(base).post(
+            "/demo/open", headers={"Origin": origin, "Host": origin.split("//", 1)[1]},
+            case_id="WAL-ONB-0001")
+        assert (status, where) == (303, "/"), origin
 
 
 def test_a_page_carrying_restricted_wording_is_refused_not_shown(journeys, monkeypatch):

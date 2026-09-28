@@ -51,8 +51,11 @@ CONTENT_TYPES = {".css": "text/css; charset=utf-8", ".js": "text/javascript; cha
 SECURITY_HEADERS = {
     "X-Content-Type-Options": "nosniff",
     "X-Frame-Options": "DENY",
-    # An access link carries a token in its path; it must not travel on as a referrer.
-    "Referrer-Policy": "no-referrer",
+    # An access link carries a token in its path; it must not travel to another
+    # site as a referrer. same-origin, not no-referrer: under no-referrer a
+    # browser sends "Origin: null" on every form post, even to this site, and
+    # the origin check below would refuse the portal's own forms.
+    "Referrer-Policy": "same-origin",
     "Content-Security-Policy": "default-src 'self'; form-action 'self'; frame-ancestors 'none'",
 }
 
