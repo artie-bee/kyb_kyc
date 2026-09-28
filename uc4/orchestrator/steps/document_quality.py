@@ -30,7 +30,7 @@ from dataclasses import dataclass, field
 from datetime import date
 from pathlib import Path
 
-from .. import clock, db, reassessment
+from .. import clock, db, reassessment, sharpness
 from ..kb import KnowledgeBase
 from .. import holds
 from .. import llm_client
@@ -213,6 +213,24 @@ def run(conn, case_id: str, application: dict, kb: KnowledgeBase,
             if flag:
                 flags.add(flag)
 
+        # 2b. Sharpness (QR-13): a deterministic heuristic on the file itself,
+        #     in mock and live mode alike, and before the checker - a file too
+        #     blurred to read never costs a model call. It needs the file, so a
+        #     scripted dataset document (no file in hand) is not measured.
+        sharp_note, sharp_rule = "", None
+        rule = next((r for r in kb.quality_rules_for(doc["document_type"])
+                     if r["check_name"] == "sharpness_below_threshold"), None)
+        if rule and not flags and doc.get("file_path"):
+            value, threshold = sharpness.measure(doc["file_path"]), float(rule["parameter"])
+            if value is None:
+                sharp_note = f"; sharpness not measured ({rule['rule_id']}, threshold {threshold:g})"
+            else:
+                sharp_note = (f"; sharpness={value:g} (threshold {threshold:g}, {rule['rule_id']}, "
+                              f"{'below: too blurred' if value < threshold else 'passes'})")
+                if value < threshold:
+                    flags.add(rule["failure_flag"])
+                    sharp_rule = rule
+
         # 3. The checker. It returns the judgement flags AND the dates it read off
         #    the page - nothing has been extracted yet, so this is the only place
         #    the date rules can get them. Skipped when the file is already known to
@@ -244,6 +262,12 @@ def run(conn, case_id: str, application: dict, kb: KnowledgeBase,
 
         # 4. Combine into one outcome for the document.
         status, reasons, fired = _resolve(flags, doc["document_type"], kb)
+        if sharp_rule:
+            # The flag came from the heuristic, so the heuristic is the rule that
+            # fired, not the model rule that shares its flag.
+            first = next(r["rule_id"] for r in kb.quality_rules_for(doc["document_type"])
+                         if r["failure_flag"] == sharp_rule["failure_flag"])
+            fired = [sharp_rule["rule_id"] if f == first else f for f in fired]
         if ai_failed:
             status, note = "manual_review_required", f"quality check failed: {ai_failed}"
         elif verdict is not None and verdict.hold_reason and status == ACCEPTED:
@@ -293,7 +317,9 @@ def run(conn, case_id: str, application: dict, kb: KnowledgeBase,
                  f"{doc_id} ({doc['document_type']}, {doc['file_name']}) -> {status}"
                  f"; flags={'|'.join(sorted(flags)) or 'none'}"
                  f"; rules={','.join(fired) or 'none fired'}"
-                 f"; checker={checker.mode}",
+                 f"; checker={checker.mode if verdict or ai_failed else 'not called'}"
+                 + sharp_note
+                 + (f"; {verdict.source_label}" if verdict and verdict.source_label else ""),
                  checker.version or kb.version)
 
     return route_case(conn, case_id, kb, len(documents), problems)
@@ -611,3 +637,54 @@ def uploaded_names(conn, case_id: str) -> dict:
         if m:
             out[m.group(2)] = json.loads(m.group(1))
     return out
+
+
+def rescreen_document(conn, document_id: str, actor: str, reason: str, kb: KnowledgeBase,
+                      checker: QualityChecker | None = None,
+                      uploads_dir: Path | None = None) -> UploadResult:
+    """Run Step 3 again on a portal upload already on file - after a quality
+    rule was added, say. The same stored file goes through the same run() as a
+    new document row; the old row is marked superseded and kept, so both
+    verdicts stay on the record. It is not a new attempt by the customer, so it
+    does not count towards the three-attempt limit.
+    """
+    uploads_dir = uploads_dir or UPLOADS
+    if not (actor or "").strip() or not (reason or "").strip():
+        raise ValueError("a re-screen needs a named actor and a reason")
+    doc = conn.execute("SELECT * FROM document WHERE document_id = ?", (document_id,)).fetchone()
+    if doc is None:
+        raise KeyError(f"no such document {document_id}")
+    link = conn.execute("SELECT item_id FROM checklist_item_document WHERE document_id = ?",
+                        (document_id,)).fetchone()
+    current = link and conn.execute(
+        "SELECT MAX(document_id) FROM checklist_item_document WHERE item_id = ?",
+        (link["item_id"],)).fetchone()[0]
+    if not link or current != document_id or doc["quality_status"] == SUPERSEDED:
+        raise ValueError(f"{document_id} is not the current document on its checklist item")
+    path = uploads_dir / doc["case_id"] / doc["file_name"]
+    if not path.exists():
+        raise ValueError(f"{document_id} is not a portal upload with its file on hand")
+
+    item = conn.execute("SELECT * FROM checklist_item WHERE item_id = ?",
+                        (link["item_id"],)).fetchone()
+    db.audit(conn, doc["case_id"], "system", actor, "document_rescreened",
+             f"{document_id} re-screened by Step 3 ({kb.version}); reason: {reason}", kb.version)
+    conn.execute("UPDATE document SET quality_status = ? WHERE document_id = ?",
+                 (SUPERSEDED, document_id))
+    run(conn, doc["case_id"],
+        {"documents": [{"document_type": doc["document_type"], "file_name": doc["file_name"],
+                        "file_path": str(path), "item_id": item["item_id"],
+                        "subject_individual_id": item["subject_individual_id"],
+                        "upload_time": doc["upload_time"], "issue_country": None}]},
+        kb, checker=checker or MockUploadChecker())
+    # The customer sent this file once; screening it again is not another try.
+    conn.execute("UPDATE checklist_item SET resubmission_attempts = ? WHERE item_id = ?",
+                 (item["resubmission_attempts"], item["item_id"]))
+    new = conn.execute("SELECT MAX(document_id) FROM checklist_item_document WHERE item_id = ?",
+                       (item["item_id"],)).fetchone()[0]
+    status = conn.execute("SELECT quality_status FROM document WHERE document_id = ?",
+                          (new,)).fetchone()[0]
+    case_status = conn.execute("SELECT status FROM onboarding_case WHERE case_id = ?",
+                               (doc["case_id"],)).fetchone()[0]
+    return UploadResult(doc["case_id"], item["item_id"], new, doc["file_name"], status,
+                        case_status, None)

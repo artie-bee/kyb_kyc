@@ -365,7 +365,7 @@ def test_a_customer_cannot_upload_to_someone_elses_case_or_after_the_checks(demo
     first = Customer(demo["base"]).open_as("WAL-ONB-0001")
     page = first.get("/checklist")[1]
     assert 'action="/upload"' not in page.split("optional")[0]
-    assert "0 of 6 still needed" in words(page)
+    assert "6 accepted · 0 under review · 0 still needed" in words(page)
 
 
 def test_the_pages_do_not_need_javascript(journeys):

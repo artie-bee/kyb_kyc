@@ -218,7 +218,7 @@ returns, read fresh from the `checklist_item` rows on every request. The portal
 names no document type and counts nothing itself.
 
 - **Shown:** required items; optional items, labelled *optional* and left out of
-  "X of Y still needed"; items an analyst adds later (console, Checklist tab,
+  the three header counts; items an analyst adds later (console, Checklist tab,
   *Request another document*), which appear at once and are named generically
   on a case with a restricted finding. **Not shown:** waived items, and
   conditions the form did not answer until an analyst confirms they apply
@@ -247,6 +247,22 @@ names no document type and counts nothing itself.
   any portal URL.
 
 `tests/test_portal_uploads.py` covers each rule above.
+
+### The demo upload pack (Scenario 8)
+
+`python tools/make_sample_documents.py` also writes `sample_documents/demo_pack/`
+for one fictional company, Lumen Harbour OU:
+- one file for every checklist item its facts produce, plus one blurred ID;
+- `FORM_VALUES.md`, listing what to type into the form and which file goes
+  with which item;
+- `manifest.json`, recording each file's SHA-256, verdict and fields.
+
+In mock mode a pack file is recognised by its contents and its verdict and
+fields are replayed (`orchestrator/demo_samples.py`). Every replayed result is
+labelled *"mock: recognised demo sample file"* in the audit trail and on the
+console. Any other file keeps the visual-check hold and typed-in fields. Live
+mode ignores the manifest. Generate the pack on the demo day: its proof of
+address is dated from the day it is made. `tests/test_demo_pack.py` covers it.
 
 ### Uploads after the assessment
 

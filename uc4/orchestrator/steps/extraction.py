@@ -29,6 +29,7 @@ from .. import llm_client
 from ..extractor import (Extractor, MockExtractor,
                          UnknownExtractedField)
 from ..kb import KnowledgeBase
+from .. import demo_samples
 from . import document_quality
 
 ACTOR = "step.extraction"
@@ -84,9 +85,18 @@ def run(conn, case_id: str, application: dict, kb: KnowledgeBase,
         expected = kb.fields_for(doc_type)
         payload = payload_by_name.get(doc["file_name"])
 
+        replayed = None
         if payload is None:
             # A file uploaded through the portal: nothing about it is scripted.
             upload = document_quality.UPLOADS / case_id / doc["file_name"]
+            sample = (demo_samples.recognise(path=upload)
+                      if extractor.mode == "mock" else None)
+            if sample is not None and sample["document_type"] == doc_type:
+                # A file from the demo upload pack: its fields are on record.
+                replayed = f"{demo_samples.LABEL} ({sample['file']})"
+                payload = {"file_name": doc["file_name"], "document_type": doc_type,
+                           "scripted_fields": sample.get("fields", [])}
+        if payload is None:
             if extractor.mode == "mock":
                 # Nothing in mock mode can read it, and a value nobody read must
                 # not look like one a machine did. Each field it should yield is
@@ -181,10 +191,10 @@ def run(conn, case_id: str, application: dict, kb: KnowledgeBase,
             db.audit(conn, case_id, "ai_agent", ACTOR, "extraction_low_confidence", msg,
                      extractor.version or kb.version)
 
-        db.audit(conn, case_id, "ai_agent", ACTOR, "fields_extracted",
+        db.audit(conn, case_id, "system" if replayed else "ai_agent", ACTOR, "fields_extracted",
                  f"{doc['document_id']} ({doc_type}, {doc['file_name']}): "
                  f"{len(result.fields)} field(s) read, {len(flagged)} below the floor; "
-                 f"extractor={extractor.mode}",
+                 f"extractor={extractor.mode}" + (f"; {replayed}" if replayed else ""),
                  extractor.version or kb.version)
 
     return route_case(conn, case_id, kb, len(documents), n_fields, low_conf, missing_req,

@@ -223,7 +223,7 @@ def test_each_case_shows_exactly_its_own_checklist(demo, case_id, length):
 
 def test_each_item_carries_only_what_a_customer_may_see(demo):
     allowed = {"checklist_item_id", "document", "person", "optional", "status", "reason",
-               "can_upload", "previous_uploads"}
+               "can_upload", "previous_uploads", "tips"}
     for (case_id,) in demo["conn"].execute("SELECT case_id FROM onboarding_case"):
         for item in customer_checklist(demo["conn"], case_id)["items"]:
             assert set(item) == allowed, set(item) ^ allowed
@@ -260,7 +260,7 @@ def test_optional_items_are_labelled_and_not_counted(demo):
     assert len(optional) == 1
     assert (cl["still_needed"], cl["total_needed"]) == (0, 6)
     page = Browser(demo["portal"]).open_as("WAL-ONB-0001").get("/checklist")[1]
-    assert "0 of 6 still needed" in words(page)
+    assert "6 accepted · 0 under review · 0 still needed" in words(page)
     assert '<span class="item__optional">optional</span>' in row(
         page, optional[0]["checklist_item_id"])
 

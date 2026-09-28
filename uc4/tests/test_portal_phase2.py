@@ -463,7 +463,11 @@ def test_the_scenario_control_does_not_exist_in_portal_code(portal):
     for path in sorted(PORTAL.rglob("*")):
         if path.is_file() and path.suffix in (".py", ".css", ".js"):
             text = path.read_text(encoding="utf-8").lower()
-            for word in ("scenario", "demo_scenario", "simulated", "pep_match"):
+            # The portal may say "Simulated registry lookup" (the form's company
+            # lookup is labelled so), but nothing about simulated PROVIDER results
+            # or the scenario that decides them.
+            for word in ("scenario", "demo_scenario", "simulated provider", "simulatedscreening",
+                         "simulatedregistry", "pep_match"):
                 assert word not in text, f"{path.name} mentions {word!r}"
 
     case_id = submit(portal["conn"])

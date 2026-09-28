@@ -405,3 +405,39 @@ def get_screening_provider(mode: str = "mock", application: dict | None = None):
     rows = (application or {}).get("scripted_screening", [])
     scripted = {(r["case_id"], r["individual_id"] or ""): r for r in rows}
     return MockScreeningProvider(scripted)
+
+
+# ---------------------------------------------------------------------------
+# "Look up my company" on the portal's demo application form
+# ---------------------------------------------------------------------------
+
+SIMULATED_LOOKUP = "Simulated registry lookup"
+
+
+def lookup_register(registration_number: str) -> dict | None:
+    """What the MOCK register holds for a registration number: the dataset's
+    scripted registry rows, plus the demo upload pack's company. Demo only, and
+    labelled so wherever it is shown. It fills two form fields the customer can
+    still edit; Step 5 compares the register with the DOCUMENTS, never with what
+    this lookup put on the form."""
+    import csv
+    import json
+    from pathlib import Path
+    number = (registration_number or "").strip().upper()
+    if not number:
+        return None
+    uc4 = Path(__file__).resolve().parents[1]
+    rows = uc4.parent / "wallester_uc4_dataset" / "registry_check.csv"
+    if rows.exists():
+        for r in csv.DictReader(open(rows, encoding="utf-8")):
+            if (r.get("registry_number") or "").upper() == number and r.get("registry_legal_name"):
+                return {"legal_name": r["registry_legal_name"],
+                        "registered_address": r.get("registry_address") or "",
+                        "source": SIMULATED_LOOKUP}
+    manifest = uc4 / "sample_documents" / "demo_pack" / "manifest.json"
+    if manifest.exists():
+        company = json.loads(manifest.read_text(encoding="utf-8")).get("register") or {}
+        if (company.get("number") or "").upper() == number:
+            return {"legal_name": company["name"], "registered_address": company["address"],
+                    "source": SIMULATED_LOOKUP}
+    return None

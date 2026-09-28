@@ -154,6 +154,15 @@ def resume(conn, case_id: str, application: dict, kb: KnowledgeBase,
             # the "new evidence after assessment" hold; the paid checks run again
             # only when an analyst chooses rerun_verification(). The status is
             # left to the holds, as always.
+            # Re-routing the earlier steps just now set their own "clear"
+            # status; on an assessed case that is wrong. The status is derived
+            # from the open holds as always, and with none open the case sits
+            # where its risk band put it.
+            assessment = conn.execute("SELECT risk_band FROM risk_assessment WHERE case_id = ?",
+                                      (case_id,)).fetchone()
+            if assessment:
+                holds.apply_status(conn, case_id, kb,
+                                   *risk_assessment._clear_routing(assessment["risk_band"]))
             trace["stopped_at"] = "verification"
             trace["reason"] = ("the paid checks have already run; they re-run only when an "
                                "analyst chooses to")
