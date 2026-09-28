@@ -19,6 +19,7 @@ action. The outcome travels back in the query string and is shown once.
 """
 
 import json
+import secrets
 import sys
 import threading
 import traceback
@@ -43,6 +44,9 @@ STATIC = Path(__file__).resolve().parent / "static"
 # which shows up as a page that hangs rather than one that errors.
 _lock = threading.RLock()
 _conn = None
+# Customer links made by "Copy customer link", held under a random key until the
+# page that shows them is loaded once.
+_links: dict[str, str] = {}
 
 
 def connection():
@@ -132,7 +136,10 @@ class Handler(BaseHTTPRequestHandler):
         path = url.path
         query = parse_qs(url.query)
         flash = None
-        if "ok" in query:
+        if "link" in query:
+            link = _links.pop(query["link"][0], None)
+            flash = ("link", link) if link else None
+        elif "ok" in query:
             flash = ("ok", query["ok"][0])
         elif "err" in query:
             flash = ("err", query["err"][0])
@@ -262,6 +269,10 @@ class Handler(BaseHTTPRequestHandler):
         try:
             with _lock:
                 message = self._run(path, form, role, reviewer)
+            if isinstance(message, tuple) and message[0] == "link":
+                # The link carries a token; it is held here under a random key
+                # and shown once, never put in the console's own address bar.
+                return self._redirect(_with(back, "link", message[1]), cookies=cookies)
             return self._redirect(_with(back, "ok", message), cookies=cookies)
         except KeyError:
             return self._html(self._not_found(path), 404)
@@ -307,6 +318,27 @@ class Handler(BaseHTTPRequestHandler):
             if result.override_flag:
                 extra = " (recorded as a " + str(result.override_direction) + " override)"
             return "Recorded " + result.decision + " as " + role + extra
+
+        if path == "/action/customer-link":
+            link = data.customer_link(conn, form["case_id"], reviewer)
+            key = secrets.token_urlsafe(8)
+            if len(_links) > 200:
+                _links.clear()
+            _links[key] = link
+            return ("link", key)
+
+        if path == "/action/confirm-condition":
+            result = data.confirm_condition(conn, form["item_id"], reviewer,
+                                            form.get("applies") == "yes", form.get("reason", ""))
+            return ("Checklist item " + result["item_id"] + ": "
+                    + ("applies, and is now asked of the customer" if result["status"] == "pending"
+                       else "does not apply, and is waived"))
+
+        if path == "/action/add-item":
+            item_id = data.add_checklist_item(conn, form["case_id"], form.get("document_type", ""),
+                                              reviewer, form.get("reason", ""),
+                                              form.get("subject") or None)
+            return "Checklist item " + item_id + " added; the customer sees it now."
 
         if path == "/action/enter-fields":
             values = {k[2:]: v for k, v in form.items() if k.startswith("f_")}

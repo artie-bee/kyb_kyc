@@ -16,13 +16,14 @@ import html
 
 BANNER = "Demo portal - do not upload real documents."
 
-NAV = [("My application", "/"), ("Documents", "/checklist"), ("Messages", "/messages")]
+NAV = [("My application", "/"), ("Documents needed", "/checklist"),
+       ("Messages", "/messages")]
 
 STATE_WORD = {"done": "Done", "current": "In progress", "todo": "Not started",
               "skipped": "Not completed"}
-STATUS_TONE = {"Accepted": "ok", "Under review": "info", "Received": "info",
-               "Resubmission needed": "warn", "Not yet uploaded": "neutral",
-               "Replaced by a newer upload": "neutral"}
+# The four statuses customer_checklist() returns, and the colour of each.
+STATUS_TONE = {"Accepted": "ok", "Under review": "info", "Resubmission needed": "warn",
+               "Not uploaded yet": "neutral"}
 
 
 def e(value) -> str:
@@ -63,7 +64,7 @@ def page(title, body, view=None, active=None, flash=None, demo=False) -> str:
     if flash:
         kind, text = flash
         flash_html = note(e(text), "ok" if kind == "ok" else "warn",
-                          "Thank you" if kind == "ok" else "We could not take that file")
+                          "Done" if kind == "ok" else "We could not take that file")
 
     return (
         '<!doctype html>\n<html lang="en">\n<head>\n<meta charset="utf-8">\n'
@@ -121,69 +122,72 @@ def application(view) -> str:
 
 
 # ---------------------------------------------------------------------------
-# 2. Checklist
+# 2. Documents needed
 # ---------------------------------------------------------------------------
+#
+# Everything on this page comes from customer_view.customer_checklist(), read
+# fresh for every request. This module decides nothing about what a case
+# needs: it names no document type and counts nothing itself.
 
-def _upload_form(item, cl) -> str:
-    field_id = "file-" + item["item_id"]
+# A document glyph, for every row. Decorative: the name beside it says it all.
+DOC_ICON = ('<svg class="item__icon" viewBox="0 0 20 20" aria-hidden="true" focusable="false">'
+            '<path d="M5 2h7l4 4v12H5z" fill="none" stroke="currentColor" stroke-width="1.5"'
+            ' stroke-linejoin="round"/><path d="M12 2v4h4" fill="none" stroke="currentColor"'
+            ' stroke-width="1.5" stroke-linejoin="round"/></svg>')
+
+
+def _upload_area(item, cl) -> str:
+    field_id = "file-" + item["checklist_item_id"]
     return (
         '<form class="upload" method="post" action="/upload" enctype="multipart/form-data">'
-        '<input type="hidden" name="item_id" value="' + e(item["item_id"]) + '">'
-        '<label class="upload__label" for="' + field_id + '">'
-        + ("Upload a new copy" if item["status"] == "Resubmission needed" else "Upload")
-        + "</label>"
+        '<input type="hidden" name="item_id" value="' + e(item["checklist_item_id"]) + '">'
+        '<label class="dropzone" for="' + field_id + '">'
+        '<span class="dropzone__text">'
+        + ("Upload a new copy" if item["status"] == "Resubmission needed" else "Upload a file")
+        + '</span><span class="dropzone__hint" hidden>or drag it here</span>'
         '<input class="upload__file" type="file" name="file" id="' + field_id + '" required'
-        ' accept="' + e(cl["accept_attr"]) + '">'
+        ' accept="' + e(cl["accept_attr"]) + '"></label>'
         '<button class="btn btn--primary upload__go" type="submit">Send file</button>'
         "</form>")
 
 
 def _item(item, cl) -> str:
-    person = ('<span class="item__person">For ' + e(item["person"]) + "</span>"
-              if item["person"] else "")
+    name = item["document"] + (" - " + item["person"] if item["person"] else "")
+    optional = ('<span class="item__optional">optional</span>' if item["optional"] else "")
     reason = ('<p class="item__reason">' + e(item["reason"]) + "</p>"
               if item["reason"] else "")
-    form = _upload_form(item, cl) if item["can_upload"] else ""
-    history = ""
-    if item["history"]:
-        rows = "".join('<li><span class="hist__file">' + e(h["file_name"]) + "</span>"
-                       '<span class="hist__when">' + e(h["uploaded"]) + "</span>"
-                       '<span class="hist__label">' + e(h["label"]) + "</span></li>"
-                       for h in item["history"])
-        history = ('<details class="hist"><summary>Upload history ('
-                   + str(len(item["history"])) + ")</summary><ul>" + rows + "</ul></details>")
+    previous = ""
+    if item["can_upload"] and item["previous_uploads"]:
+        previous = ('<p class="item__prev">Previous upload: '
+                    '<span class="item__file">' + e(item["previous_uploads"][0]) + "</span>"
+                    " (replaced when you upload a new one)</p>")
+    form = _upload_area(item, cl) if item["can_upload"] else ""
     tone = {"Accepted": "ok", "Resubmission needed": "warn"}.get(item["status"], "none")
-    return ('<li class="item item--' + tone + '" id="item-' + e(item["item_id"]) + '">'
-            '<div class="item__top"><div><span class="item__doc">' + e(item["document"])
-            + "</span>" + person + "</div>" + chip(item["status"]) + "</div>"
-            + reason + form + history + "</li>")
+    return ('<li class="item item--' + tone + '" id="item-' + e(item["checklist_item_id"]) + '">'
+            '<div class="item__top">' + DOC_ICON
+            + '<div class="item__what"><span class="item__doc">' + e(name) + "</span>"
+            + optional + "</div>" + chip(item["status"]) + "</div>"
+            + reason + previous + form + "</li>")
 
 
 def checklist(view, cl) -> str:
-    if view["partner"]:
-        return _heading(view) + note(e(view["status_text"]), "info", "Partner programme")
-
     types = ", ".join(t.upper() for t in cl["accepted_types"])
-    if cl["collecting"]:
-        intro = ('<p class="lede">Upload each document below. We accept ' + e(types)
-                 + " files up to " + str(cl["max_mb"]) + " MB.</p>")
-    elif view["closed"]:
-        intro = note("This application is closed, so we are not taking new documents for it.",
-                     "info")
+    head = ('<header class="phero"><h1>Documents needed</h1>'
+            '<p class="sub">' + e(cl["applicant_name"]) + "</p></header>"
+            '<div class="needbar"><span class="needbar__count"><strong>'
+            + str(cl["still_needed"]) + " of " + str(cl["total_needed"])
+            + "</strong> still needed</span>"
+            '<span class="needbar__types">Accepted files: ' + e(types) + ", up to "
+            + str(cl["max_mb"]) + " MB.</span></div>")
+    out = [head]
+    if cl["partner"]:
+        out.append(note(e(view["status_text"]), "info", "Partner programme"))
+    if not cl["open"]:
+        out.append(note("This application is closed, so we are not taking new documents "
+                        "for it.", "info"))
+    if cl["items"]:
+        out.append('<ul class="items">' + "".join(_item(i, cl) for i in cl["items"]) + "</ul>")
     else:
-        intro = note("Your documents are with our onboarding team. If anything else is "
-                     "needed, we will ask you in a message.", "info")
-
-    out = [_heading(view), intro]
-    if cl["required"]:
-        out.append("<h2>Documents we need</h2><ul class=\"items\">"
-                   + "".join(_item(i, cl) for i in cl["required"]) + "</ul>")
-    if cl["other"]:
-        out.append("<h2>If they apply to you</h2>"
-                   '<p class="hint">Only send these if they apply to your business. If one '
-                   "is needed, we will ask you.</p><ul class=\"items\">"
-                   + "".join(_item(i, cl) for i in cl["other"]) + "</ul>")
-    if not cl["required"] and not cl["other"]:
         out.append('<p class="empty">We will list the documents we need from you here.</p>')
     return "".join(out)
 

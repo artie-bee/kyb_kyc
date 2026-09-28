@@ -158,7 +158,16 @@ def page(title, body, active, conn=None, case_id=None, role="analyst",
                   + options + "</select></div>")
 
     flash_html = ""
-    if flash:
+    if flash and flash[0] == "link":
+        flash_html = note(
+            "<p>Send this link to the customer. It opens their application only, and "
+            "stops working after the expiry shown in the audit trail. It is shown this "
+            "once.</p>"
+            '<div class="btn-row"><input type="text" class="linkbox" id="customer-link" '
+            'readonly value="' + e(flash[1]) + '">'
+            '<button class="btn btn--primary" type="button" data-copy="customer-link">'
+            "Copy</button></div>", "ok", "Customer link")
+    elif flash:
         kind, text = flash
         flash_html = note(e(text), "bad" if kind == "err" else "ok",
                           "Refused" if kind == "err" else "Done")
@@ -351,6 +360,10 @@ def case_detail(conn, case_id, tab="Timeline", role="analyst",
         '<span class="stat__v stat__v--sm"><span class="type">'
         + e(case["applicant_type"] or "-") + "</span></span></div>"
         "</section>"
+        '<form method="post" action="/action/customer-link" class="btn-row linkform">'
+        '<input type="hidden" name="case_id" value="' + e(case_id) + '">'
+        '<input type="hidden" name="back" value="/case/' + e(case_id) + "?tab=" + e(tab) + '">'
+        '<button class="btn" type="submit">Copy customer link</button></form>'
         + holds_html + restricted + future + demo
         + '<nav class="tabs">' + tabs + "</nav>" + inner)
 
@@ -455,7 +468,7 @@ def _tab_checklist(conn, case_id, **kw):
                    + '</span><span class="group__tally">' + str(in_hand) + " of "
                    + str(len(group)) + " accepted</span></div>")
         for i in group:
-            out.append(_check_row(i))
+            out.append(_check_row(i, case_id))
         out.append("</section>")
 
     # Anything with a level the KB has added since this list was written still
@@ -465,13 +478,51 @@ def _tab_checklist(conn, case_id, **kw):
     if rest:
         out.append('<section class="group"><div class="group__head">'
                    '<span class="group__name">Other</span></div>')
-        out.extend(_check_row(i) for i in rest)
+        out.extend(_check_row(i, case_id) for i in rest)
         out.append("</section>")
+    out.append(_add_item_form(conn, case_id))
     return "".join(out)
 
 
-def _check_row(item) -> str:
+def _add_item_form(conn, case_id) -> str:
+    """Ask the customer for one more document after the pack was built. It
+    appears on their checklist at once, by a generic name on a restricted case."""
+    types = "".join('<option value="' + e(t) + '">' + e(t.replace("_", " ")) + "</option>"
+                    for t in data.addable_document_types())
+    people = '<option value="">The business, not a person</option>' + "".join(
+        '<option value="' + e(p["individual_id"]) + '">' + e(p["full_name"]) + "</option>"
+        for p in data.people(conn, case_id))
+    return ('<form method="post" action="/action/add-item" class="panel">'
+            '<input type="hidden" name="case_id" value="' + e(case_id) + '">'
+            '<input type="hidden" name="back" value="/case/' + e(case_id) + '?tab=Checklist">'
+            '<h3>Request another document</h3>'
+            '<div class="formgrid">'
+            '<div class="field"><label>Document</label><select name="document_type">'
+            + types + "</select></div>"
+            '<div class="field"><label>For</label><select name="subject">' + people
+            + "</select></div>"
+            '<div class="field"><label>Reason (internal)</label>'
+            '<input type="text" name="reason" required></div></div>'
+            '<button class="btn btn--primary" type="submit">Add to the checklist</button>'
+            '<p class="foot">Added as required. The customer sees it on their checklist at '
+            "once; send the matching approved message from the Communications tab.</p>"
+            "</form>")
+
+
+def _check_row(item, case_id="") -> str:
     tone, mark, plain = CHECK_STATUS.get(item["status"], ("none", "?", item["status"]))
+    confirm = ""
+    if item.get("awaiting_confirmation"):
+        plain = "awaiting your confirmation"
+        confirm = ('<form method="post" action="/action/confirm-condition" class="btn-row '
+                   'check__confirm">'
+                   '<input type="hidden" name="item_id" value="' + e(item["item_id"]) + '">'
+                   '<input type="hidden" name="back" value="/case/' + e(case_id)
+                   + '?tab=Checklist">'
+                   '<input type="text" name="reason" placeholder="Reason" required>'
+                   '<button class="btn" name="applies" value="yes">Applies</button>'
+                   '<button class="btn" name="applies" value="no">Does not apply</button>'
+                   "</form>")
     if item["file_name"]:
         file_html = '<span class="check__file">' + e(item["file_name"]) + "</span>"
     else:
@@ -489,21 +540,26 @@ def _check_row(item) -> str:
             '<span class="check__side">' + attempts
             + chip(plain, tone=("neutral" if tone == "none" else tone))
             + '<span class="check__ids">' + e(item["rule_id"]) + " &middot; "
-            + e(item["item_id"]) + "</span></span></div>")
+            + e(item["item_id"]) + "</span></span>" + confirm + "</div>")
 
 
 def _tab_documents(conn, case_id, role="analyst", reviewer="analyst.demo", **kw):
     out = ["<h2>Documents and extraction</h2>"]
+    names = data.uploaded_names(conn, case_id)
     for doc in data.documents(conn, case_id):
         held = doc["quality_status"] == "manual_review_required"
         flags = ('<span class="type">[' + e(doc["quality_flags"]) + "]</span>"
                  if doc["quality_flags"] else "")
-        summary = ("<summary>" + e(doc["file_name"])
+        own_name = names.get(doc["file_name"])
+        by_applicant = (chip("uploaded by applicant", tone="info")
+                        if own_name is not None else "")
+        summary = ("<summary>" + e(own_name or doc["file_name"])
                    + chip(doc["quality_status"],
                           {"accepted_for_checks": "ok",
                            "manual_review_required": "warn",
-                           "resubmission_required": "bad"})
-                   + flags + "</summary>")
+                           "resubmission_required": "bad",
+                           "superseded": "neutral"})
+                   + by_applicant + flags + "</summary>")
 
         if doc["sample_path"]:
             href = "/doc/" + e(doc["document_id"])
@@ -521,6 +577,13 @@ def _tab_documents(conn, case_id, role="analyst", reviewer="analyst.demo", **kw)
 
         right = ["<p><strong>Screen verdict:</strong> "
                  + cell(doc["quality_status_at_screen"]) + "</p>"]
+        if own_name is not None:
+            right.append("<p><strong>Uploaded by the applicant</strong> as "
+                         + e(own_name) + '; stored as <span class="type">'
+                         + e(doc["file_name"]) + "</span></p>")
+        if doc["quality_status"] == "superseded":
+            right.append(note("Replaced by a newer upload on the same checklist item. Kept "
+                              "on the record; nothing downstream reads it.", "info"))
         if doc["resubmission_reasons"]:
             right.append("<p><strong>Reasons:</strong> " + e(doc["resubmission_reasons"]) + "</p>")
         if doc["released_by"]:

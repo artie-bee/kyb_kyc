@@ -189,7 +189,7 @@ def test_case_2_id_needs_resubmission_and_the_ubo_declaration_is_not_uploaded(jo
     assert "Upload a new copy" in director_id
 
     ubo = item_block(checklist, "Declaration of beneficial owners")
-    assert "Not yet uploaded" in ubo and "Send file" in ubo
+    assert "Not uploaded yet" in ubo and "Send file" in ubo
 
     steps = words(pages["/"])
     assert "We need 2 documents from you" in steps
@@ -226,7 +226,7 @@ def test_case_8_uses_a_separate_partner_onboarding_process(journeys):
     for path in ("/", "/checklist"):
         assert "This application uses a separate partner onboarding process" in \
             words(pages[path]), path
-    assert 'action="/upload"' not in pages["/checklist"], "a partner uploads elsewhere"
+    assert 'action="/upload"' not in pages["/checklist"], "every partner document is in"
     assert 'class="steps"' not in pages["/"], "the onboarding steps are not this journey"
 
 
@@ -297,31 +297,36 @@ def test_an_upload_is_a_plain_form_post_and_reaches_the_console(demo):
     assert status == 303 and where.startswith("/checklist?m=")
 
     after = customer.get(where)[1]
-    assert "We have received your file" in words(after)
+    assert "now under review" in words(after)
     card = item_block(after, "Denton Halliwell")
-    # Mock mode: the deterministic rules pass it, and nobody has read it yet, so
-    # to the customer it is received - not accepted.
-    assert "Received" in card and "Accepted" not in card.split("Upload history")[0]
-    assert "Replaced by a newer upload" in card and "Upload history (2)" in card
-    assert "Send file" not in card, "nothing more to upload for an item we have"
+    # Mock mode: the deterministic rules pass it and the visual check waits for a
+    # person, which to the customer is simply "under review".
+    assert "Under review" in card
+    assert "Send file" not in card, "nothing more to upload while it is being looked at"
+    assert "visual" not in card.lower(), "no internal wording reaches the customer"
 
     conn = data.connect(demo["db"])
     doc = conn.execute("SELECT * FROM document WHERE case_id = 'WAL-ONB-0002'"
                        " ORDER BY document_id DESC LIMIT 1").fetchone()
-    assert doc["file_name"].startswith("new_passport__")
-    assert doc["quality_status"] == "accepted_for_checks", "deterministic rules only"
+    assert re.fullmatch(r"[0-9a-f]{32}\.jpg", doc["file_name"]), "stored under a random name"
+    assert doc["quality_status"] == "manual_review_required"
+    assert "visual_check_not_run" in doc["quality_flags"]
+    old = conn.execute("SELECT quality_status FROM document WHERE case_id = 'WAL-ONB-0002'"
+                       " AND file_name = 'director_id_halliwell_scan.jpg'").fetchone()
+    assert old["quality_status"] == "superseded", "the earlier upload is kept, marked replaced"
+    assert data.uploaded_names(conn, "WAL-ONB-0002")[doc["file_name"]] == "new_passport.jpg"
     screened = conn.execute(
         "SELECT actor_type, payload_summary FROM audit_event WHERE case_id = 'WAL-ONB-0002'"
         " AND action = 'document_quality_checked' ORDER BY event_id DESC LIMIT 1").fetchone()
     assert screened["actor_type"] == "system", "no AI verdict was given, so none is claimed"
-    assert "checker=deterministic_only" in screened["payload_summary"]
+    assert "checker=mock_upload" in screened["payload_summary"]
+    assert any("visual check not run in mock mode" in h.reason
+               for h in data.open_holds(conn, "WAL-ONB-0002"))
     stored = demo["uploads"] / "WAL-ONB-0002" / doc["file_name"]
     assert stored.read_bytes() == JPEG, "the file must arrive byte for byte"
     actions = [r["action"] for r in conn.execute(
         "SELECT action FROM audit_event WHERE case_id = 'WAL-ONB-0002'")]
     assert "document_uploaded" in actions and "portal_access_issued" in actions
-    # the UBO declaration is still owed, so the case waits on the customer
-    assert any(h.owner == "customer" for h in data.open_holds(conn, "WAL-ONB-0002"))
     conn.close()
 
 
@@ -333,8 +338,8 @@ def test_a_file_that_could_never_pass_is_refused_at_the_door(demo):
     conn.close()
 
     for name, content, says in (
-            ("renamed.pdf", JPEG, "does not look like a PDF"),
-            ("notes.docx", b"PK\x03\x04", "We accept PDF, JPG, PNG files only"),
+            ("renamed.pdf", JPEG, "This file is not really a PDF"),
+            ("notes.docx", b"PK\x03\x04", "We accept PDF, JPG and PNG files only"),
             ("empty.pdf", b"", "The file was empty")):
         status, where = customer.upload(item, name, content)
         assert status == 303
@@ -354,13 +359,13 @@ def test_a_customer_cannot_upload_to_someone_elses_case_or_after_the_checks(demo
 
     customer = Customer(demo["base"]).open_as("WAL-ONB-0002")
     status, where = customer.upload(foreign, "poa.pdf", b"%PDF-1.4\n")
-    assert "That item is not on your checklist" in words(customer.get(where)[1])
+    assert "We have not asked you for this document" in words(customer.get(where)[1])
 
-    # Case 1 has been through the paid checks; its documents are no longer taken.
+    # Case 1 has everything it was asked for; there is nothing left to upload.
     first = Customer(demo["base"]).open_as("WAL-ONB-0001")
     page = first.get("/checklist")[1]
-    assert 'action="/upload"' not in page
-    assert "Your documents are with our onboarding team" in words(page)
+    assert 'action="/upload"' not in page.split("optional")[0]
+    assert "0 of 6 still needed" in words(page)
 
 
 def test_the_pages_do_not_need_javascript(journeys):

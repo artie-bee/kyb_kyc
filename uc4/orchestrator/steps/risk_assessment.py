@@ -120,7 +120,10 @@ def gather_facts(conn, case_id: str, kb: KnowledgeBase) -> tuple[dict, dict]:
         note(condition, hits, [s["check_id"] for s in hits])
     resub = [d for d in documents if d["quality_status_at_screen"] == "resubmission_required"]
     note("document_resubmission_required", resub, [d["document_id"] for d in resub])
-    manual = [d for d in documents if d["quality_status_at_screen"] == "manual_review_required"]
+    # A document held only because no visual check could run (mock mode, a
+    # portal upload) was not found at fault; it is not scored as if it were.
+    manual = [d for d in documents if d["quality_status_at_screen"] == "manual_review_required"
+              and "visual_check_not_run" not in (d["quality_flags"] or "").split("|")]
     note("document_manual_review", manual, [d["document_id"] for d in manual])
 
     # Insufficient evidence means "could not be determined": a provider that did

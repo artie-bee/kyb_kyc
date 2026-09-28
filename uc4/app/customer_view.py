@@ -30,10 +30,12 @@ sys.path.insert(0, str(UC4))
 
 from orchestrator.kb import KnowledgeBase                                  # noqa: E402
 from orchestrator.steps.communication import scan                          # noqa: E402
+from orchestrator.steps import document_quality                           # noqa: E402
 from orchestrator.steps.document_quality import (CLOSED_STATUSES,          # noqa: E402
-                                                 MAX_UPLOAD_BYTES, OPEN_FOR_UPLOAD,
-                                                 accepted_extensions,
-                                                 document_stage_open)
+                                                 OPEN_FOR_UPLOAD, accepted_extensions,
+                                                 uploaded_names)
+from orchestrator.steps.requirement_pack import (ADDED_RULE_ID,            # noqa: E402
+                                                 shown_to_customer)
 
 # Internal status -> what the applicant is told. Deliberately vague where the
 # internal status would give away a finding.
@@ -93,27 +95,23 @@ DOCUMENT_LABELS = {
     "website_or_platform_details": "Website or platform details",
 }
 
-# The checklist statuses a customer sees. Under review never says why: the
-# faults that send a document to a person rather than back to the customer
+# The four statuses a customer ever sees. "Under review" covers anything a
+# person is still looking at - a document held at the quality screen for any
+# reason, the visual check mock mode cannot run, fields waiting to be typed in -
+# and says nothing about which: the faults that send a document to a person
 # (suspected alteration, a name that does not match) are exactly the ones a
 # customer must not be told about.
-NOT_UPLOADED = "Not yet uploaded"
-RECEIVED = "Received"
-UNDER_REVIEW = "Under review"
 ACCEPTED = "Accepted"
+UNDER_REVIEW = "Under review"
 RESUBMIT = "Resubmission needed"
-REPLACED = "Replaced by a newer upload"
+NOT_UPLOADED = "Not uploaded yet"
+CUSTOMER_STATUSES = (ACCEPTED, UNDER_REVIEW, RESUBMIT, NOT_UPLOADED)
 
-# Why a resubmission is needed, keyed by the reason code on the document. Only
-# resubmission reasons are here, and only what the customer can act on.
-PLAIN_REASON = {
-    "document_unreadable": "We could not read this document clearly. Please upload a "
-                           "sharp, complete copy of the original.",
-    "document_expired": "This document has expired. Please upload one that is still valid.",
-    "proof_of_address_too_old": "This document is too old. Please upload one dated within "
-                                "the last {days} days.",
-}
-PLAIN_REASON_FALLBACK = "Please upload a new copy of this document."
+# What an item an analyst added later is called on a case with a restricted
+# finding. Naming the document ("source of wealth statement", after a PEP hit)
+# would say why it was asked for; the approved message that goes with the
+# request says what to send.
+GENERIC_DOCUMENT = "An additional document we have asked for"
 
 
 def customer_view(conn, case_id: str) -> dict:
@@ -147,13 +145,20 @@ def customer_view(conn, case_id: str) -> dict:
 
 
 def _items(conn, case_id: str) -> list:
-    """The checklist as the customer sees it: waived items are not asked for."""
-    return conn.execute(
+    """The checklist as the customer sees it. Waived items, and conditions an
+    analyst has not yet confirmed apply, are not asked of the customer at all."""
+    rows = conn.execute(
         "SELECT i.*, ind.full_name FROM checklist_item i JOIN requirement_pack p"
         " USING (pack_id) LEFT JOIN individual ind"
         " ON ind.individual_id = i.subject_individual_id"
-        " WHERE p.case_id = ? AND i.status != 'waived' ORDER BY i.item_id",
-        (case_id,)).fetchall()
+        " WHERE p.case_id = ? ORDER BY i.item_id", (case_id,)).fetchall()
+    return [r for r in rows if shown_to_customer(r)]
+
+
+def _needed(item) -> bool:
+    """Counts towards "X of Y still needed": everything shown except optional
+    items. A conditional item that is shown is one that applies."""
+    return item["level"] != "optional"
 
 
 def _still_being_read(conn, document_id: str | None, kb: KnowledgeBase) -> bool:
@@ -185,10 +190,10 @@ def _steps(conn, case_id: str, case, applied_on: str) -> list[dict]:
     status = case["status"]
     kb = KnowledgeBase()
     items = _items(conn, case_id)
-    required_open = [i for i in items if i["level"] == "required" and (
+    required_open = [i for i in items if _needed(i) and (
         i["status"] != "accepted"
         or _still_being_read(conn, _current_document(conn, i["item_id"]), kb))]
-    owed = [i for i in items if i["level"] == "required" and i["status"] in OPEN_FOR_UPLOAD]
+    owed = [i for i in items if _needed(i) and i["status"] in OPEN_FOR_UPLOAD]
     closed = status in CLOSED_STATUSES
 
     steps = [("done", f"We received your application on {applied_on}.")]
@@ -235,75 +240,92 @@ def _steps(conn, case_id: str, case, applied_on: str) -> list[dict]:
 
 
 def _item_status(item, current, being_read=False) -> str:
-    if item["status"] == "accepted":
-        return RECEIVED if being_read else ACCEPTED
-    if item["status"] == "manual_review":
-        return UNDER_REVIEW
+    """One of the four customer statuses, from the records as they stand now."""
     if item["status"] == "resubmission_requested":
         return RESUBMIT
-    return RECEIVED if current is not None else NOT_UPLOADED
+    if item["status"] == "accepted":
+        return UNDER_REVIEW if being_read else ACCEPTED
+    if item["status"] == "manual_review" or current is not None:
+        return UNDER_REVIEW
+    return NOT_UPLOADED
 
 
-def _reason(current, rule: dict | None) -> str:
+def _reason(current, rule: dict | None, kb: KnowledgeBase) -> str:
+    """The approved wording (kb/resubmission_reason_text.csv) for why this
+    document must be sent again. Never empty: "*" covers any other reason."""
+    texts = kb.resubmission_reason_text
     codes = [c for c in ((current["resubmission_reasons"] if current else "") or "").split("|")
              if c]
-    for code in codes:
-        if code in PLAIN_REASON:
-            return PLAIN_REASON[code].format(days=(rule or {}).get("max_age_days") or "90")
-    return PLAIN_REASON_FALLBACK
+    code = next((c for c in codes if c in texts), "*")
+    return texts[code]["customer_text"].format(days=(rule or {}).get("max_age_days") or "90")
 
 
 def customer_checklist(conn, case_id: str, kb: KnowledgeBase | None = None) -> dict:
-    """What the customer owes and what they have sent, and nothing else.
+    """The customer's checklist: what the backend says this case needs, read
+    fresh from the checklist_item rows every time. The portal only displays it.
 
-    Per item: the document name, the person it is for, one of five statuses, a
-    reason only when a resubmission is needed, whether it can be uploaded now,
-    and every upload made against it - older ones marked as replaced.
+    Included: required items; optional items, labelled and not counted; items
+    an analyst added later, as soon as they exist (by a generic name when the
+    case has a restricted finding). Left out: waived items, and conditions an
+    analyst has not yet confirmed.
+
+    Each item carries only what a customer may see - its checklist item id, a
+    plain document name, the person it is for, one of four statuses, the
+    approved reason when a resubmission is needed, whether it can be uploaded
+    now, and the names of the files uploaded for it before. No rule ids,
+    conditions, notes, holds, flags, internal statuses, bands, scores or findings.
     """
     kb = kb or KnowledgeBase()
     case = conn.execute("SELECT * FROM onboarding_case WHERE case_id = ?", (case_id,)).fetchone()
     if case is None:
         raise KeyError(f"no such case {case_id}")
+    applicant = conn.execute("SELECT legal_name FROM applicant WHERE applicant_id = ?",
+                             (case["applicant_id"],)).fetchone()
     rules = {r["rule_id"]: r for r in kb.requirement_rules}
-    open_case = (case["status"] not in CLOSED_STATUSES
-                 and not case["white_label_branch_flag"])
-    collecting = open_case and document_stage_open(conn, case_id)
-    required, other = [], []
+    names = uploaded_names(conn, case_id)
+    open_case = case["status"] not in CLOSED_STATUSES
+    restricted = bool(case["restricted_finding"])
+
+    items, needed, still_needed = [], 0, 0
     for item in _items(conn, case_id):
         docs = conn.execute(
             "SELECT d.* FROM checklist_item_document cid JOIN document d USING (document_id)"
             " WHERE cid.item_id = ? ORDER BY d.document_id", (item["item_id"],)).fetchall()
         current = docs[-1] if docs else None
-        if current is None and item["level"] != "required" and not collecting:
-            continue        # an optional item nobody sent, once no more are being taken
-        status = _item_status(item, current,
-                              _still_being_read(conn, current["document_id"] if current else None,
-                                                kb))
-        history = [{"file_name": d["file_name"],
-                    "uploaded": (d["upload_time"] or "").replace("T", " ").rstrip("Z")[:16],
-                    "label": status if d is current else REPLACED}
-                   for d in reversed(docs)]
-        entry = {
-            "item_id": item["item_id"],
-            "document": DOCUMENT_LABELS.get(item["document_type"],
-                                            item["document_type"].replace("_", " ").capitalize()),
-            "person": item["full_name"] or "",
+        # A partner case stops after the quality screen by design, so nothing is
+        # waiting to read its accepted files: accepted there means accepted.
+        being_read = (not case["white_label_branch_flag"] and _still_being_read(
+            conn, current["document_id"] if current else None, kb))
+        status = _item_status(item, current, being_read)
+        generic = item["rule_id"] == ADDED_RULE_ID and restricted
+        if _needed(item):
+            needed += 1
+            still_needed += status != ACCEPTED
+        items.append({
+            "checklist_item_id": item["item_id"],
+            "document": GENERIC_DOCUMENT if generic else DOCUMENT_LABELS.get(
+                item["document_type"], item["document_type"].replace("_", " ").capitalize()),
+            "person": "" if generic else (item["full_name"] or ""),
+            "optional": item["level"] == "optional",
             "status": status,
-            "reason": _reason(current, rules.get(item["rule_id"])) if status == RESUBMIT else "",
-            "can_upload": collecting and item["status"] in OPEN_FOR_UPLOAD,
-            "history": history,
-        }
-        (required if item["level"] == "required" else other).append(entry)
+            "reason": _reason(current, rules.get(item["rule_id"]), kb) if status == RESUBMIT
+            else "",
+            "can_upload": open_case and item["status"] in OPEN_FOR_UPLOAD,
+            # newest first; a portal upload by the customer's own file name
+            "previous_uploads": [names.get(d["file_name"], d["file_name"])
+                                 for d in reversed(docs)],
+        })
     extensions = accepted_extensions(kb)
     return {
-        "case_id": case_id,
-        "required": required,
-        "other": other,
+        "applicant_name": applicant["legal_name"] if applicant else "",
+        "items": items,
+        "still_needed": still_needed,
+        "total_needed": needed,
         "accepted_types": [x for x in extensions if x != "jpeg"],
         "accept_attr": ",".join("." + x for x in extensions),
-        "max_mb": MAX_UPLOAD_BYTES // (1024 * 1024),
+        "max_mb": document_quality.MAX_UPLOAD_BYTES // (1024 * 1024),
         "open": open_case,
-        "collecting": collecting,
+        "partner": bool(case["white_label_branch_flag"]),
     }
 
 

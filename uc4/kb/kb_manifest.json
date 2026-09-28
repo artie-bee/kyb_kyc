@@ -1,5 +1,5 @@
 {
-  "kb_version": "kb-2026.09-poc-v8",
+  "kb_version": "kb-2026.09-poc-v9",
   "items": {
     "applicant_type_rules": {
       "file": "applicant_type_rules.csv",
@@ -85,6 +85,11 @@
       "file": "decision_reason_codes.csv",
       "version": "1.0",
       "brief_section": "5.10 - Analyst decision, reason vocabulary"
+    },
+    "resubmission_reason_text": {
+      "file": "resubmission_reason_text.csv",
+      "version": "1.0",
+      "brief_section": "5.9 - Approved customer wording for why a document must be sent again"
     }
   }
 }

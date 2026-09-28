@@ -386,7 +386,7 @@ DB_TABLES = {
     ],
     # customer portal access; only the hash of each token is stored
     "portal_token": [
-        "token_hash", "case_id", "issued_by", "issued_at", "revoked_at",
+        "token_hash", "case_id", "issued_by", "issued_at", "revoked_at", "expires_at",
     ],
     "registry_check": [
         "check_id", "case_id", "applicant_id", "provider_name", "company_status",
@@ -432,6 +432,10 @@ DB_ENUMS = {
     ("finding", "source"): ["registry", "identity", "ubo"],
     ("extracted_field", "entry_method"): ["extracted", "awaiting_analyst_entry",
                                           "entered_by_analyst"],
+    # the live status adds 'superseded' (an upload replaced by a newer one on the
+    # same item); quality_status_at_screen never takes it
+    ("document", "quality_status"): ["pending", "accepted_for_checks", "resubmission_required",
+                                     "manual_review_required", "superseded"],
 }
 
 

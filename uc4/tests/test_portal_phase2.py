@@ -166,9 +166,19 @@ def typed_values(conn, case_id, fields) -> dict:
 
 
 def upload_everything(conn, case_id):
-    for item in customer_checklist(conn, case_id)["required"]:
-        if item["can_upload"]:
-            data.upload_document(conn, case_id, item["item_id"], "document.pdf", PDF)
+    for item in customer_checklist(conn, case_id)["items"]:
+        if item["can_upload"] and not item["optional"]:
+            data.upload_document(conn, case_id, item["checklist_item_id"], "document.pdf", PDF)
+
+
+def release_visual_checks(conn, case_id):
+    """The analyst looks at each upload the mock visual check could not, and
+    releases it with the ordinary release_document()."""
+    for doc in conn.execute("SELECT document_id FROM document WHERE case_id = ?"
+                            " AND quality_status = 'manual_review_required'"
+                            " AND quality_flags LIKE '%visual_check_not_run%'",
+                            (case_id,)).fetchall():
+        data.release_document(conn, doc[0], "analyst.test", "accept", "looked at it: clear")
 
 
 def type_everything_in(conn, case_id, override=None):
@@ -181,6 +191,7 @@ def type_everything_in(conn, case_id, override=None):
 def run_to_the_end(conn, case_id, scenario="clean"):
     data.choose_demo_scenario(conn, case_id, scenario, "analyst.test")
     upload_everything(conn, case_id)
+    release_visual_checks(conn, case_id)
     type_everything_in(conn, case_id)
     return conn.execute("SELECT * FROM onboarding_case WHERE case_id = ?", (case_id,)).fetchone()
 
@@ -249,7 +260,7 @@ def test_submitting_goes_through_the_existing_intake_and_builds_the_checklist(de
     actions = [r[0] for r in demo["conn"].execute(
         "SELECT action FROM audit_event WHERE case_id = ? ORDER BY event_id", (case_id,))]
     assert actions[0] == "case_created" and "applicant_classified" in actions
-    assert customer_checklist(demo["conn"], case_id)["required"], "no checklist was built"
+    assert customer_checklist(demo["conn"], case_id)["items"], "no checklist was built"
     created = demo["conn"].execute("SELECT payload_summary FROM audit_event WHERE case_id = ?"
                                    " AND action = 'case_created'", (case_id,)).fetchone()[0]
     assert "synthetic data" in created
@@ -328,13 +339,23 @@ def test_mock_mode_never_labels_keyed_values_as_extracted(demo):
     case_id = submit(conn)
     upload_everything(conn, case_id)
 
-    # the deterministic rules ran for real, and then the case waits for a person
+    # the deterministic rules ran for real, and the visual check waits for a person
     docs = conn.execute("SELECT * FROM document WHERE case_id = ?", (case_id,)).fetchall()
-    assert docs and {d["quality_status"] for d in docs} == {"accepted_for_checks"}
+    assert docs and {d["quality_status"] for d in docs} == {"manual_review_required"}
+    reasons = [h.reason for h in data.open_holds(conn, case_id)]
+    assert any("visual check not run in mock mode" in r for r in reasons), reasons
+    assert all(i["status"] == "Under review" for i in customer_checklist(conn, case_id)["items"]
+               if not i["optional"])
+
+    # released by the analyst, the files still wait for their fields to be typed in
+    release_visual_checks(conn, case_id)
     reasons = [h.reason for h in data.open_holds(conn, case_id)]
     assert any("fields not read automatically in mock mode" in r for r in reasons), reasons
-    assert all(i["status"] == "Received" for i in customer_checklist(conn, case_id)["required"]
-               if i["status"] != "Not yet uploaded")
+    # a file with fields still to type in stays under review; one with no fields
+    # to read (a selfie, say) is accepted once a person has looked at it
+    statuses = [i["status"] for i in customer_checklist(conn, case_id)["items"]
+                if not i["optional"]]
+    assert set(statuses) <= {"Under review", "Accepted"} and "Under review" in statuses
 
     type_everything_in(conn, case_id)
     methods = {r[0] for r in conn.execute(
@@ -369,13 +390,14 @@ def test_a_typed_in_date_goes_through_the_expiry_rule(demo):
     conn = demo["conn"]
     case_id = submit(conn)
     upload_everything(conn, case_id)
+    release_visual_checks(conn, case_id)
     awaiting = data.awaiting_fields(conn, case_id)
     doc_of = {d: conn.execute("SELECT document_type FROM document WHERE document_id = ?",
                               (d,)).fetchone()[0] for d in awaiting}
     id_doc = next(d for d, t in doc_of.items() if t == "id_document")
     type_everything_in(conn, case_id, {id_doc: {"expiry_date": "2020-01-01"}})
 
-    item = next(i for i in customer_checklist(conn, case_id)["required"]
+    item = next(i for i in customer_checklist(conn, case_id)["items"]
                 if i["document"].startswith("Identity document"))
     assert item["status"] == "Resubmission needed" and "expired" in item["reason"]
     assert item["can_upload"]
@@ -471,6 +493,7 @@ def test_the_console_offers_the_scenario_on_demo_cases_only_and_audits_it(demo):
         data.choose_demo_scenario(conn, case_id, "made_up", "analyst.one")
 
     upload_everything(conn, case_id)
+    release_visual_checks(conn, case_id)
     type_everything_in(conn, case_id)
     with pytest.raises(ScenarioRefused):   # the providers have answered; it stands
         data.choose_demo_scenario(conn, case_id, "clean", "analyst.one")

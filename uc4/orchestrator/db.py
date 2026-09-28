@@ -226,7 +226,9 @@ CREATE TABLE IF NOT EXISTS audit_event (
 CREATE TABLE IF NOT EXISTS portal_token (
     token_hash TEXT PRIMARY KEY,
     case_id TEXT NOT NULL REFERENCES onboarding_case(case_id),
-    issued_by TEXT NOT NULL, issued_at TEXT NOT NULL, revoked_at TEXT
+    issued_by TEXT NOT NULL, issued_at TEXT NOT NULL, revoked_at TEXT,
+    -- after this the link stops working; a token with none is treated as expired
+    expires_at TEXT
 );
 -- Section 12: audit history must never be modified or deleted.
 CREATE TRIGGER IF NOT EXISTS audit_no_update BEFORE UPDATE ON audit_event
@@ -273,6 +275,7 @@ def is_demo_case(case_id: str | None) -> bool:
 # Columns added after a database may already exist. CREATE TABLE IF NOT EXISTS
 # leaves an older table as it was, so each one is added here if it is missing.
 _ADDED_COLUMNS = (
+    ("portal_token", "expires_at", "TEXT"),
     ("extracted_field", "entry_method",
      "TEXT NOT NULL DEFAULT 'extracted' CHECK (entry_method IN "
      "('extracted', 'awaiting_analyst_entry', 'entered_by_analyst'))"),

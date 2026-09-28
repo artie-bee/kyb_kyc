@@ -21,9 +21,10 @@ from orchestrator import (db, demo_scenarios, holds, live_mode,           # noqa
                           portal_access)
 from orchestrator.kb import KnowledgeBase                                  # noqa: E402
 from orchestrator.quality_checker import get_upload_checker                # noqa: E402
+from orchestrator import settings                                          # noqa: E402
 from orchestrator.steps import (analyst_review, communication, decision,   # noqa: E402
                                 document_quality, evidence_pack, extraction,
-                                verification)
+                                requirement_pack, verification)
 from orchestrator.orchestrator import (QUALITY_CHECKER_MODE,              # noqa: E402
                                        process_application, resume)
 from orchestrator.providers import DEMO_SCENARIOS, SIMULATED               # noqa: E402
@@ -275,12 +276,18 @@ def audit_trail(conn, case_id: str) -> list[dict]:
 
 
 def checklist(conn, case_id: str) -> list[dict]:
-    return _rows(conn,
+    """Every checklist item with its CURRENT document. An item a customer has
+    uploaded to more than once has a superseded history; that shows on the
+    Documents tab, and the item itself appears here once."""
+    rows = _rows(conn,
                  "SELECT i.*, d.file_name FROM checklist_item i"
                  " JOIN requirement_pack p USING (pack_id)"
-                 " LEFT JOIN checklist_item_document cid USING (item_id)"
-                 " LEFT JOIN document d USING (document_id)"
+                 " LEFT JOIN document d ON d.document_id = (SELECT MAX(c.document_id)"
+                 "  FROM checklist_item_document c WHERE c.item_id = i.item_id)"
                  " WHERE p.case_id = ? ORDER BY i.item_id", (case_id,))
+    for r in rows:
+        r["awaiting_confirmation"] = requirement_pack.awaiting_confirmation(r)
+    return rows
 
 
 def documents(conn, case_id: str) -> list[dict]:
@@ -648,3 +655,41 @@ def is_demo_case(case_id: str) -> bool:
 
 def document_stage_open(conn, case_id: str) -> bool:
     return document_quality.document_stage_open(conn, case_id)
+
+
+# ---------------------------------------------------------------------------
+# The upload space: what the console shows and does about it
+# ---------------------------------------------------------------------------
+
+def uploaded_names(conn, case_id: str) -> dict:
+    """{stored file name: the customer's own file name} for portal uploads."""
+    return document_quality.uploaded_names(conn, case_id)
+
+
+def addable_document_types() -> list[str]:
+    """Every document type the KB knows, for the analyst's "request another
+    document" form. Read from the KB, so a new type needs no screen change."""
+    return sorted({r["document_type"] for r in kb().requirement_rules})
+
+
+def confirm_condition(conn, item_id, analyst_id, applies, reason):
+    result = requirement_pack.confirm_condition(conn, item_id, analyst_id, applies, reason, kb())
+    conn.commit()
+    return result
+
+
+def add_checklist_item(conn, case_id, document_type, analyst_id, reason, subject=None):
+    item_id = requirement_pack.add_item(conn, case_id, document_type, analyst_id, reason,
+                                        subject or None, kb())
+    # The case now owes a document again; Step 3 routes it like any other.
+    document_quality.route_case(conn, case_id, kb())
+    conn.commit()
+    return item_id
+
+
+def customer_link(conn, case_id, issued_by) -> str:
+    """A fresh customer link for this case. The token is shown this once and
+    only its hash is kept; the case id is not in the link."""
+    token = portal_access.issue(conn, case_id, issued_by, kb())
+    conn.commit()
+    return f"{settings.PORTAL_URL}/access/{token}"

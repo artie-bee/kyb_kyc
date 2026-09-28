@@ -117,3 +117,89 @@ def run(conn, case_id: str, application: dict, kb: KnowledgeBase) -> PackResult:
     db.update_case(conn, case_id, next_action_owner="customer")
     return PackResult(case_id, pack_id, counts["required"], counts["optional"],
                       counts["conditional"], "document_quality", problems)
+
+
+# ---------------------------------------------------------------------------
+# After the pack is built: confirming a condition, adding an item later
+# ---------------------------------------------------------------------------
+
+# The phrase the pack writes on a conditional item whose question the form did
+# not answer. Such an item is not yet asked of the customer.
+AWAITING = "analyst to confirm"
+# rule_id on an item an analyst added after the pack was built, e.g. during
+# enhanced due diligence. It has no KB rule behind it; the note says who and why.
+ADDED_RULE_ID = "ADDED-BY-ANALYST"
+
+
+def awaiting_confirmation(item) -> bool:
+    """A conditional item nobody has yet said applies to this case."""
+    return (item["level"] == "conditional" and item["status"] == "pending"
+            and AWAITING in (item["note"] or ""))
+
+
+def shown_to_customer(item) -> bool:
+    """Whether the customer is asked for this item at all. Waived items and
+    conditions still waiting for an analyst are not."""
+    return item["status"] != "waived" and not awaiting_confirmation(item)
+
+
+def confirm_condition(conn, item_id: str, analyst_id: str, applies: bool, reason: str,
+                      kb: KnowledgeBase | None = None) -> dict:
+    """An analyst settles a condition the form did not answer. If it applies the
+    item is asked of the customer; if not it is waived, and stays on the record."""
+    kb = kb or KnowledgeBase()
+    if not (analyst_id or "").strip():
+        raise ValueError("the confirming analyst must be identified")
+    if not (reason or "").strip():
+        raise ValueError("a reason is required to settle a condition")
+    item = conn.execute(
+        "SELECT i.*, p.case_id FROM checklist_item i JOIN requirement_pack p USING (pack_id)"
+        " WHERE i.item_id = ?", (item_id,)).fetchone()
+    if item is None:
+        raise KeyError(f"no such checklist item {item_id}")
+    if not awaiting_confirmation(item):
+        raise ValueError(f"{item_id} is not a condition waiting to be confirmed")
+    if applies:
+        status, note = "pending", f"Confirmed as applying by {analyst_id}: {reason}"
+    else:
+        status, note = "waived", f"Confirmed as not applying by {analyst_id}: {reason}"
+    conn.execute("UPDATE checklist_item SET status = ?, note = ? WHERE item_id = ?",
+                 (status, note, item_id))
+    db.audit(conn, item["case_id"], "analyst", analyst_id, "conditional_item_confirmed",
+             f"{item_id} ({item['document_type']}) {'applies' if applies else 'does not apply'}"
+             f"; reason: {reason}", kb.version)
+    return {"item_id": item_id, "status": status}
+
+
+def add_item(conn, case_id: str, document_type: str, analyst_id: str, reason: str,
+             subject_individual_id: str | None = None,
+             kb: KnowledgeBase | None = None) -> str:
+    """An analyst asks the customer for one more document after the pack was
+    built - enhanced due diligence, say. It is required, and it appears on the
+    customer's checklist as soon as it exists."""
+    kb = kb or KnowledgeBase()
+    if not (analyst_id or "").strip():
+        raise ValueError("the analyst adding the item must be identified")
+    if not (reason or "").strip():
+        raise ValueError("a reason is required to add a checklist item")
+    if document_type not in {r["document_type"] for r in kb.requirement_rules}:
+        raise ValueError(f"{document_type!r} is not a document type the KB knows")
+    pack = conn.execute("SELECT pack_id FROM requirement_pack WHERE case_id = ?",
+                        (case_id,)).fetchone()
+    if pack is None:
+        raise ValueError(f"{case_id} has no requirement pack to add to")
+    if subject_individual_id and conn.execute(
+            "SELECT 1 FROM individual i JOIN onboarding_case c USING (applicant_id)"
+            " WHERE c.case_id = ? AND i.individual_id = ?",
+            (case_id, subject_individual_id)).fetchone() is None:
+        raise ValueError(f"{subject_individual_id} is not a person on {case_id}")
+    item_id = db.next_id(conn, "checklist_item")
+    conn.execute(
+        "INSERT INTO checklist_item (item_id, pack_id, rule_id, subject_individual_id,"
+        " document_type, level, status, note) VALUES (?,?,?,?,?,'required','pending',?)",
+        (item_id, pack["pack_id"], ADDED_RULE_ID, subject_individual_id, document_type,
+         f"Added by {analyst_id}: {reason}"))
+    db.audit(conn, case_id, "analyst", analyst_id, "checklist_item_added",
+             f"{item_id} ({document_type}) added after the requirement pack; reason: {reason}",
+             kb.version)
+    return item_id

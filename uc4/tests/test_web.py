@@ -34,10 +34,10 @@ from web import render, server                                        # noqa: E4
 @pytest.fixture(scope="module")
 def site(tmp_path_factory):
     """A server on a real port, over its own copy of the demo database."""
-    if not data.DB_PATH.exists():
-        data.reset_demo()
+    # Built fresh rather than copied from the demo's own database: that one holds
+    # whatever a presenter has done in it since, portal applications included.
     copy = tmp_path_factory.mktemp("web") / "onboarding.db"
-    shutil.copy(data.DB_PATH, copy)
+    data.reset_demo(copy)
 
     server.drop_connection()
     server._conn = data.connect(copy)

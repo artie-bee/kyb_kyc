@@ -10,13 +10,17 @@ sequential and anyone could guess the next one), and only its hash is stored.
     resolve(conn, token)              -> the case id, or None
     revoke(conn, token, revoked_by)
 
+Every token expires (settings.PORTAL_LINK_DAYS, default 14 days). An expired,
+revoked or unknown token opens nothing, and a token opens only its own case.
+
 This module writes; the portal only calls it. Every issue and revoke is audited.
 """
 
 import hashlib
 import secrets
+from datetime import datetime, timedelta, timezone
 
-from . import db
+from . import db, settings
 
 ACTOR = "step.portal_access"
 
@@ -25,18 +29,26 @@ def _hash(token: str) -> str:
     return hashlib.sha256(token.encode("utf-8")).hexdigest()
 
 
-def issue(conn, case_id: str, issued_by: str, kb=None) -> str:
+def _stamp(when: datetime) -> str:
+    return when.strftime("%Y-%m-%dT%H:%M:%SZ")
+
+
+def issue(conn, case_id: str, issued_by: str, kb=None, valid_days: float | None = None) -> str:
     """A new token for this case. The raw value is returned once and not kept."""
     if not (issued_by or "").strip():
         raise ValueError("a portal token must say who issued it")
     if conn.execute("SELECT 1 FROM onboarding_case WHERE case_id = ?",
                     (case_id,)).fetchone() is None:
         raise KeyError(f"no such case {case_id}")
+    days = settings.PORTAL_LINK_DAYS if valid_days is None else valid_days
+    expires = _stamp(datetime.now(timezone.utc) + timedelta(days=days))
     token = secrets.token_urlsafe(24)
-    conn.execute("INSERT INTO portal_token (token_hash, case_id, issued_by, issued_at)"
-                 " VALUES (?,?,?,?)", (_hash(token), case_id, issued_by, db.now()))
+    conn.execute("INSERT INTO portal_token (token_hash, case_id, issued_by, issued_at,"
+                 " expires_at) VALUES (?,?,?,?,?)",
+                 (_hash(token), case_id, issued_by, db.now(), expires))
     db.audit(conn, case_id, "system", ACTOR, "portal_access_issued",
-             f"customer portal access issued by {issued_by}", getattr(kb, "version", None))
+             f"customer portal access issued by {issued_by}; expires {expires}",
+             getattr(kb, "version", None))
     return token
 
 
@@ -45,7 +57,8 @@ def resolve(conn, token: str | None) -> str | None:
     if not token:
         return None
     row = conn.execute("SELECT case_id FROM portal_token WHERE token_hash = ?"
-                       " AND revoked_at IS NULL", (_hash(token),)).fetchone()
+                       " AND revoked_at IS NULL AND expires_at > ?",
+                       (_hash(token), db.now())).fetchone()
     return row["case_id"] if row else None
 
 

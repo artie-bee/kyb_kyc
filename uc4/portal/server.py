@@ -181,7 +181,7 @@ class Handler(BaseHTTPRequestHandler):
                             "My application"
                     elif path == "/checklist":
                         body = render.checklist(view, customer_checklist(conn, case_id))
-                        title = active = "Documents"
+                        title = active = "Documents needed"
                     else:
                         body, title, active = render.messages(view), "Messages", "Messages"
                     return self._page(render.page(title, body, view, active, flash, demo))
@@ -315,9 +315,19 @@ class Handler(BaseHTTPRequestHandler):
         except UploadRefused as refusal:
             # The orchestrator's own wording, which is written for the customer.
             key = self._flash_put("err", str(refusal))
+            return self._redirect("/checklist?m=" + key + anchor)
+        # What happened to it, re-read from the records rather than assumed.
+        item = next((i for i in customer_checklist(conn, case_id)["items"]
+                     if i["checklist_item_id"] == item_id), None)
+        status = item["status"] if item else ""
+        if status == "Accepted":
+            key = self._flash_put("ok", "Thank you. Your file has been accepted.")
+        elif status == "Resubmission needed":
+            key = self._flash_put("err", "We could not accept this file. " + item["reason"])
         else:
-            key = self._flash_put("ok", "We have received your file. We will check it and "
-                                        "let you know if we need anything else.")
+            key = self._flash_put("ok", "Thank you. We have your file and it is now under "
+                                        "review. We will let you know if we need anything "
+                                        "else.")
         return self._redirect("/checklist?m=" + key + anchor)
 
 

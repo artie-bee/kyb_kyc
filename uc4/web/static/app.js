@@ -24,6 +24,22 @@
     try { localStorage.setItem(KEY, next); } catch (e) { /* nothing to do */ }
   });
 
+  // ---- copy the customer link --------------------------------------------
+  // Without the script the link is still on the page, selectable by hand.
+  Array.prototype.forEach.call(document.querySelectorAll("[data-copy]"), function (btn) {
+    btn.addEventListener("click", function () {
+      var box = document.getElementById(btn.getAttribute("data-copy"));
+      if (!box) return;
+      box.select();
+      var done = function () { btn.textContent = "Copied"; };
+      if (navigator.clipboard) {
+        navigator.clipboard.writeText(box.value).then(done, function () {
+          document.execCommand("copy"); done();
+        });
+      } else { document.execCommand("copy"); done(); }
+    });
+  });
+
   // ---- case picker ------------------------------------------------------
   var picker = document.getElementById("casepick");
   if (picker) picker.addEventListener("change", function () {

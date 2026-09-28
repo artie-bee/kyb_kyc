@@ -2739,6 +2739,7 @@
                   "manual_review_required",
                   "pending",
                   "resubmission_required",
+                  "superseded",
                   ""
                 ]
               },
@@ -3749,6 +3750,12 @@
                   "string",
                   "null"
                 ]
+              },
+              "expires_at": {
+                "type": [
+                  "string",
+                  "null"
+                ]
               }
             },
             "required": [
@@ -3756,7 +3763,8 @@
               "case_id",
               "issued_by",
               "issued_at",
-              "revoked_at"
+              "revoked_at",
+              "expires_at"
             ],
             "additionalProperties": false
           }

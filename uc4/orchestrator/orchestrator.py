@@ -11,7 +11,7 @@ import json
 import sys
 from pathlib import Path
 
-from . import db
+from . import db, holds
 from .kb import KnowledgeBase
 from .extractor import get_extractor
 from .quality_checker import get_checker
@@ -147,6 +147,21 @@ def resume(conn, case_id: str, application: dict, kb: KnowledgeBase,
     while next_step:
         if next_step not in STEPS:
             trace["waiting_for"] = next_step
+            break
+        if next_step == "verification" and not document_quality.document_stage_open(conn, case_id):
+            # The paid checks have already answered on this case. A document
+            # that arrived afterwards - one an analyst added during enhanced due
+            # diligence, say - has been screened and read; it does not re-run
+            # the providers, whose answers stand. The analyst reads the new
+            # document alongside them, and the case goes back to where its band
+            # put it rather than to where the re-run steps left it.
+            assessment = conn.execute("SELECT risk_band FROM risk_assessment WHERE case_id = ?",
+                                      (case_id,)).fetchone()
+            if assessment:
+                holds.apply_status(conn, case_id, kb,
+                                   *risk_assessment._clear_routing(assessment["risk_band"]))
+            trace["stopped_at"] = "verification"
+            trace["reason"] = "the paid checks have already run; they are not repeated"
             break
         kwargs = {}
         if next_step == "document_quality":

@@ -45,6 +45,11 @@ class KnowledgeBase:
                                        for r in _read_csv("communication_schedule.csv")}
         self.adverse_media_categories = {r["category"]: r
                                          for r in _read_csv("adverse_media_categories.csv")}
+        # The approved wording a customer is shown for why a document must be
+        # sent again, by reason code; "*" is the wording for any other reason.
+        self.resubmission_reason_text = {
+            r["reason_code"]: r for r in _read_csv("resubmission_reason_text.csv")
+            if r["approval_status"] == "approved"}
 
     def reason_codes_for(self, decision: str | None = None) -> list[dict]:
         """The reason codes the KB permits, narrowed to one decision if given.

@@ -26,6 +26,36 @@
     });
   }
 
+  // ---- drag and drop: an extra on a normal file input ---------------------
+  // Without the script the input is an ordinary "choose a file" control and the
+  // hint stays hidden, so the page never promises something it cannot do.
+  Array.prototype.forEach.call(document.querySelectorAll(".dropzone"), function (zone) {
+    var input = zone.querySelector("input[type=file]");
+    var hint = zone.querySelector(".dropzone__hint");
+    var text = zone.querySelector(".dropzone__text");
+    if (!input) return;
+    if (hint) hint.hidden = false;
+    function show() {
+      if (input.files && input.files.length && text) text.textContent = input.files[0].name;
+    }
+    input.addEventListener("change", show);
+    ["dragenter", "dragover"].forEach(function (name) {
+      zone.addEventListener(name, function (ev) {
+        ev.preventDefault(); zone.classList.add("dropzone--over");
+      });
+    });
+    ["dragleave", "drop"].forEach(function (name) {
+      zone.addEventListener(name, function () { zone.classList.remove("dropzone--over"); });
+    });
+    zone.addEventListener("drop", function (ev) {
+      ev.preventDefault();
+      if (ev.dataTransfer && ev.dataTransfer.files.length) {
+        input.files = ev.dataTransfer.files;
+        show();
+      }
+    });
+  });
+
   // ---- upload: say it is happening, and stop a second click resending it ---
   Array.prototype.forEach.call(document.querySelectorAll("form.upload"), function (form) {
     form.addEventListener("submit", function () {

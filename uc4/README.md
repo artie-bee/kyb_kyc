@@ -180,6 +180,43 @@ travel between steps as hidden fields, so nothing is stored until it is sent.
 
 `tests/test_portal_phase2.py` covers each rule above.
 
+### The upload space and the dynamic checklist
+
+The portal's **Documents needed** page shows what `customer_view.customer_checklist()`
+returns, read fresh from the `checklist_item` rows on every request. The portal
+names no document type and counts nothing itself.
+
+- **Shown:** required items; optional items, labelled *optional* and left out of
+  "X of Y still needed"; items an analyst adds later (console, Checklist tab,
+  *Request another document*), which appear at once and are named generically
+  on a case with a restricted finding. **Not shown:** waived items, and
+  conditions the form did not answer until an analyst confirms they apply
+  (Checklist tab, *Applies / Does not apply*).
+- **Four statuses only:** Accepted, Under review (any hold, including the mock
+  visual check), Resubmission needed (with the approved reason from
+  `kb/resubmission_reason_text.csv`), Not uploaded yet.
+- **`document_quality.receive_upload()`** is the only way in. It refuses a
+  closed case, an item not asked for, an item already accepted, the wrong type,
+  an empty file, a file over the limit (`WALLESTER_UC4_MAX_UPLOAD_MB`, default
+  10) and bytes that do not match the extension. It virus-scans the file
+  (`orchestrator/virus_scanner.py`: mock reports clean, live is a stub), stores
+  it under a random name with its SHA-256 in the audit trail, marks any earlier
+  upload on the item `superseded` (kept), and runs the **same Step 3 `run()`**
+  every scripted document goes through. In mock mode that means the
+  deterministic rules for real, then a hold *"visual check not run in mock
+  mode"*, released in the console with the existing *Release document*. After
+  that, the phase 2 field-typing step applies. A successful upload stops
+  reminders about that item.
+- **A document that arrives after the paid checks** (one added during enhanced
+  due diligence, say) is screened and read, but `resume()` does not re-run the
+  providers. The case goes back to the status its risk band implies.
+- **Access:** *Copy customer link* on every console case page makes a fresh
+  link, shown once. Tokens expire (`WALLESTER_UC4_PORTAL_LINK_DAYS`, default
+  14), only their hash is kept, each opens one case, and no case id appears in
+  any portal URL.
+
+`tests/test_portal_uploads.py` covers each rule above.
+
 ## Run
 # On Windows PowerShell the shell does not expand the glob, so expand it explicitly:
 python -m orchestrator.orchestrator (Get-ChildItem sample_applications\from_dataset\*.json | ForEach-Object FullName)
