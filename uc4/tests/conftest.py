@@ -22,3 +22,15 @@ from orchestrator import clock                                        # noqa: E4
 def fixed_clock():
     with clock.use(clock.FakeClock(clock.DEMO_START)) as fixed:
         yield fixed
+
+
+# Settings a developer's shell may carry (LLM_PROVIDER=groq, say) that would make
+# a test's outcome depend on the machine it runs on. Each test starts without
+# them; a test that needs one sets it with monkeypatch.
+_SHELL_SETTINGS = ("LLM_PROVIDER", "WALLESTER_UC4_MODEL", "WALLESTER_UC4_TEMPERATURE")
+
+
+@pytest.fixture(autouse=True)
+def no_shell_settings(monkeypatch):
+    for name in _SHELL_SETTINGS:
+        monkeypatch.delenv(name, raising=False)

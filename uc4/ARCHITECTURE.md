@@ -74,6 +74,19 @@ not an absence of one, so it has its own code and scores as a risk factor.
 
 ---
 
+### Holds the portal adds
+
+| Placed by | Reason | Released by |
+|---|---|---|
+| Step 3 (mock mode) | visual check not run in mock mode | an analyst, with the existing *Release document* |
+| Step 4 (mock mode) | fields not read automatically in mock mode | Step 4 itself, once the analyst has typed the fields in |
+| `reassessment.py` | new evidence after assessment - analyst to review | an analyst: *Re-run verification* or *Keep the assessment* |
+
+The last one is placed under its own step name, so no step that re-routes can
+lift it. Only a named person can.
+
+---
+
 ## The knowledge base
 
 | File | What it decides |
@@ -118,6 +131,10 @@ unless the mode is changed explicitly.
 | Media relevance | `media_relevance.py` | replays the category | stub |
 | Risk / pack narrative | `narrator.py` | assembles from the pack | stub |
 | Template choice | `steps/communication.py` | first allowed template | stub |
+| Portal upload quality | `quality_checker.py` | deterministic rules, then a hold "visual check not run in mock mode" | the live checker reads the file |
+| Portal upload fields | `steps/extraction.py` | an analyst types them in (`entered_by_analyst`) | the live extractor reads the file |
+| Virus scan | `virus_scanner.py` | reports clean | stub |
+| Providers on a demo case | `providers.py` | "Simulated provider response", mirroring the entered details or the console's demo scenario | stubs |
 
 **Live mode is opt-in and off.** `LIVE_MODE_READY` in
 `orchestrator/live_mode.py` is `False`, and selecting a live implementation
@@ -162,8 +179,15 @@ Whatever is behind an interface, three rules hold:
 
 ## The demo app
 
-`web/` is the front end: plain HTML and CSS over `http.server`, served by
-`tools/serve.py`. `app/` holds the functions it calls. Both read the database
+Two front ends, on the same stack - plain HTML and CSS over `http.server`, no
+framework, no template engine, no build step:
+
+- `web/` is the **analyst console**, served by `tools/serve.py` on port 8700;
+- `portal/` is the **customer portal**, served by `tools/serve_portal.py` on
+  port 8701. It has its own server, routes and stylesheets, and does not import
+  or serve anything of the console's.
+
+`app/` holds the functions both call. Both read the database
 directly but **never write to it**: every action calls the orchestrator function that
 owns the rule, so holds, role checks and the sanctions rules apply on screen
 exactly as they do in the pipeline. `app/customer_view.py` is a plain function
@@ -174,7 +198,40 @@ A human action on a screen clears a hold and then calls
 `orchestrator.resume()`, which carries the case on from wherever it now
 stands. Without that the case would be unblocked and going nowhere, which is
 not what the pipeline does. Extraction skips documents it has already read, so
-resuming cannot duplicate values.
+resuming cannot duplicate values. `resume()` never runs the paid checks a
+second time: once they have answered, only the analyst's **Re-run
+verification** does.
+
+### The customer portal
+
+- **What a customer sees is decided in one place**: `app/customer_view.py`.
+  `customer_checklist()` reads the case's `checklist_item` rows fresh on every
+  request and returns only what a customer may see: a plain document name, the
+  person, one of four statuses, an approved reason for a resubmission, whether
+  an upload is allowed, and earlier file names. The portal names no document
+  type and counts nothing itself.
+- **Every page passes through `leaks()`** before it is sent. A page with
+  restricted wording on it is refused, not shown.
+- **One way in for a file**: `document_quality.receive_upload()`. It refuses
+  what could never pass, virus-scans, stores under a random name with the
+  SHA-256 in the audit trail, supersedes the earlier upload, and runs the same
+  Step 3 `run()` as every scripted document. There is no second quality path.
+- **Access** is a random token per case (`orchestrator/portal_access.py`). Only
+  its hash is stored; it opens one case, it expires
+  (`WALLESTER_UC4_PORTAL_LINK_DAYS`, default 14), and no case id appears in a
+  portal URL. The console's **Copy customer link** issues one.
+- **Demo applications** (`/apply`) go through the existing intake and become
+  `WAL-DEMO-` cases. Every dataset comparison leaves them out, and Reset demo
+  deletes them.
+
+### One clock
+
+`orchestrator/clock.py` is the only thing that reads the time. Every
+timestamp, token expiry, document age and "waited N days" reads the injected
+clock, in UTC. The running servers use the real time. The demo database and
+the tests run on a fixed instant (`DEMO_START`). A local date and a UTC
+timestamp can therefore never disagree about what day it is, which is exactly
+what made case 14 read "16 days" for five hours of every night.
 
 ## Running it
 
@@ -185,6 +242,13 @@ python tools/compare_to_dataset.py        # score against the dataset
 python tools/export_case.py               # audit bundle per case
 python tools/make_sample_documents.py     # demo document files
 python tools/evaluate_live.py             # live vs mock, needs an API key
-python tools/serve.py                     # the demo screens
+python tools/serve.py                     # analyst console  http://127.0.0.1:8700/
+python tools/serve_portal.py              # customer portal  http://127.0.0.1:8701/demo
 python -m pytest tests -q
 ```
+
+Run the two servers side by side, in two terminals, over the same
+`onboarding.db`. Settings come from the environment:
+`WALLESTER_UC4_PORTAL_LINK_DAYS` (customer link expiry, default 14),
+`WALLESTER_UC4_MAX_UPLOAD_MB` (default 10), `WALLESTER_UC4_PORTAL_URL` and
+`WALLESTER_UC4_VIRUS_SCANNER`. README.md lists them with their defaults.
