@@ -11,6 +11,8 @@ Total running time: about 35 minutes (5 min opening, 25 min scenarios, 5 min clo
 **Setup checklist (10 minutes before the demo):**
 
 - [ ] Open the orchestrator folder in VS Code and run `python tools/serve.py` (it opens http://127.0.0.1:8700/).
+- [ ] For Scenario 2b: in a second terminal run `python tools/serve_portal.py` (port 8701), and `python tools/make_sample_documents.py` once so the two upload files exist.
+- [ ] Close any old terminal still running a server: on Windows two servers can share a port, and your browser may reach the old one.
 - [ ] Click **Reset demo** in the sidebar. All 14 cases should stop at their first human action (11 open holds, 0 decisions, 0 communications).
 - [ ] Check no LIVE badge shows in the sidebar (mock mode shows none), and the decision form's role is set to **analyst**.
 - [ ] Close every other browser tab and notification. Zoom the browser to 110–125% so the room can read it.
@@ -70,6 +72,51 @@ Be precise here. This POC is a standalone build that *represents* the reuse spli
 **What to say:** "The system caught the problem *before* spending money on any paid verification. No identity check, no registry lookup, no screening call was made for a document that was never going to pass. And the customer got a precise request instead of a vague 'please resend your documents.' No one typed that message; it came from the template library and the checklist."
 
 **Proves:** *Reduced manual chasing* · *Better status visibility* (cost avoidance is the headline demo value in 14.2)
+
+---
+
+## Scenario 2b (optional): the customer fixes it · Case WAL-ONB-0002 · 5 min
+
+**Story:** the same customer receives the request, opens the portal, and sends a clear director ID and the missing ownership declaration. Run this straight after Scenario 2, with the customer portal open in a second browser tab.
+
+**You need:** the portal running (`python tools/serve_portal.py`, port 8701) and the two upload files, made by `python tools/make_sample_documents.py`:
+- `sample_documents/scenario_2b/halliwell_id_clear.jpg`, the director ID from Scenario 2, drawn clearly this time;
+- `sample_documents/scenario_2b/northbridge_ownership_declaration.pdf`, the missing ownership (UBO) declaration.
+
+Both are synthetic specimens. Never upload a real document.
+
+1. **Console, Case 2:** click **Copy customer link** under the case header, then **Copy**. The link opens this one application only. It carries no case number and expires after 14 days.
+2. **Portal:** paste the link into the second tab. Open **Documents needed**. The header reads **2 of 11 still needed**.
+   - *Identity document (passport or ID card) - Denton Halliwell* shows **Resubmission needed**, the reason *"We could not read this document clearly…"*, and *Previous upload: director_id_halliwell_scan.jpg (replaced when you upload a new one)*.
+   - *Declaration of beneficial owners* shows **Not uploaded yet**.
+3. **Portal:** upload `halliwell_id_clear.jpg` against the identity document and `northbridge_ownership_declaration.pdf` against the declaration. Each upload answers *"Thank you. We have your file and it is now under review."* Both rows now say **Under review**.
+4. **Console, Case 2, Documents tab:** both files are marked **uploaded by applicant**, and the blurred scan is still listed as **superseded**. The case header shows the hold *"visual check not run in mock mode: 2 uploaded document(s) waiting for an analyst to look at them"*.
+5. **Console:** on each of the two uploads, open the file, type a reason (*Clear copy, matches the director*) and click **Accept**. The hold changes to *"fields not read automatically in mock mode"*, because in mock mode nothing reads an uploaded file, so a person types in what it says.
+6. **Console, Documents tab:** type the fields exactly as printed on the files, then **Save the fields**.
+
+   | Director ID (`halliwell_id_clear.jpg`) | Type |
+   |---|---|
+   | full name | `Denton Halliwell` |
+   | expiry date | `2030-09-18` |
+   | date of birth | `1978-06-02` |
+   | document number | `GB-DH-5159942` |
+
+   | Ownership declaration (`northbridge_ownership_declaration.pdf`) | Type |
+   |---|---|
+   | ubo name | `Denton Halliwell` |
+   | ownership percentage | `60` |
+   | control basis | `Direct shareholding` |
+   | ubo name 2 | `Priya Nankivell` |
+   | indirect ownership path | *(leave blank)* |
+
+   Each value is recorded as **entered by an analyst**, never as extracted.
+7. **Console, Checks tab:** the case has run on into verification. Step 5 made its calls: registry (2 attempts), identity for both directors, and screening for all three subjects.
+   - *Expect this:* the dataset scripts no provider answers for case 2, so the mock providers report no answer. The registry shows **unavailable**, the Risk tab reads **insufficient evidence, not scored**, and the case is held for an analyst.
+8. **Portal:** refresh. **0 of 11 still needed**. *My application* shows *Documents reviewed: done* and *Verification and review: "Further review is needed before we can finish…"*. There is no mention of providers, holds or evidence.
+
+**What to say:** "The customer fixed it themselves, in their own words and their own time. Nobody chased them by email. The blurred copy isn't thrown away; it's kept, marked as replaced. And when the paid checks finally ran and a provider didn't answer, the system didn't wave the case through. It stopped and put it on an analyst's desk. The customer, meanwhile, sees nothing but a calm 'further review'."
+
+**Proves:** *Reduced manual chasing* · *Auditability* (every upload, release and typed value is in the audit trail under a name) · *No weak-compliance implication* (a silent provider is never a pass)
 
 ---
 

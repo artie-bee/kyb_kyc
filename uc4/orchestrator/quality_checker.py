@@ -55,6 +55,9 @@ class QualityVerdict:
     notes: str = ""
     expiry_date: str | None = None
     document_date: str | None = None
+    # Set by a checker that could not do the visual half of the check (mock mode,
+    # a real upload). Step 3 then holds the document for a person, for this reason.
+    hold_reason: str | None = None
 
     def validate(self) -> "QualityVerdict":
         unknown = [f for f in self.flags if f not in ALLOWED_FLAGS]
@@ -183,3 +186,36 @@ def get_checker(mode: str = "mock") -> QualityChecker:
     if mode not in CHECKERS:
         raise ValueError(f"unknown checker mode '{mode}'; choose from {sorted(CHECKERS)}")
     return CHECKERS[mode]()
+
+
+VISUAL_CHECK_NOT_RUN = "visual check not run in mock mode"
+
+
+class MockUploadChecker(QualityChecker):
+    """The checker for a real upload while the pipeline runs in mock mode.
+
+    The mock checker replays a verdict scripted on the document. A file that
+    arrived through the portal has no script, and nothing in mock mode can look
+    at it. So this checker makes no judgement: no flags, no dates. Step 3 still
+    runs its deterministic rules - file type, page count - for real, and then,
+    because the visual half of the check (blur, cropping, tampering, the right
+    document) has not been done by anyone, it holds the document for an analyst
+    with the reason "visual check not run in mock mode". The analyst releases it
+    with the ordinary release_document(). That is not a pass anybody gave until
+    a person gives it.
+    """
+
+    mode = "mock_upload"
+    version = None
+    uses_judgement = False
+
+    def check(self, document: dict) -> QualityVerdict:
+        return QualityVerdict(flags=[], confidence=0.0,
+                              notes="mock mode: no automated visual check was run",
+                              hold_reason=VISUAL_CHECK_NOT_RUN).validate()
+
+
+def get_upload_checker(mode: str = "mock") -> QualityChecker:
+    """The checker for a file a customer uploaded. Live modes read the file; mock
+    mode runs the deterministic rules and holds the file for a person to look at."""
+    return MockUploadChecker() if mode == "mock" else get_checker(mode)

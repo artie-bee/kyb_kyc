@@ -26,6 +26,13 @@ from orchestrator.kb import KnowledgeBase                      # noqa: E402
 from orchestrator.orchestrator import process_application      # noqa: E402
 from tools.dataset_to_applications import DEFAULT_DATASET, DEFAULT_OUT   # noqa: E402
 
+# Cases made through the portal's demo form have no dataset row to compare with.
+# Every query below leaves them out, so a demo case can never shift, add to or
+# fail a dataset comparison.
+NOT_DEMO = f"NOT LIKE '{db.DEMO_CASE_PREFIX}%'"
+DEMO_APPLICANTS = (f"(SELECT applicant_id FROM onboarding_case"
+                   f" WHERE case_id LIKE '{db.DEMO_CASE_PREFIX}%')")
+
 FIELDS = ("applicant_type", "jurisdiction_path", "entity_scope",
           "white_label_branch_flag", "checklist items (rule+subject)")
 
@@ -59,16 +66,18 @@ def compare(conn: sqlite3.Connection, dataset: Path = DEFAULT_DATASET) -> list[t
     # The orchestrator mints its own individual ids; map them back by name.
     name_to_ds = {r["full_name"]: r["individual_id"] for r in read_csv(dataset / "individual.csv")}
     orc_ind = {r["individual_id"]: name_to_ds.get(r["full_name"], r["individual_id"])
-               for r in conn.execute("SELECT individual_id, full_name FROM individual")}
+               for r in conn.execute("SELECT individual_id, full_name FROM individual"
+                                        f" WHERE applicant_id NOT IN {DEMO_APPLICANTS}")}
     orc_items = defaultdict(set)
     for r in conn.execute(
             "SELECT p.case_id, i.rule_id, i.subject_individual_id FROM checklist_item i "
-            "JOIN requirement_pack p USING (pack_id)"):
+            f"JOIN requirement_pack p USING (pack_id) WHERE p.case_id {NOT_DEMO}"):
         subj = orc_ind.get(r["subject_individual_id"], "-") if r["subject_individual_id"] else "-"
         orc_items[r["case_id"]].add((r["rule_id"], subj))
 
     # Cases are processed in dataset order, so the nth case matches the nth row.
-    orc_cases = list(conn.execute("SELECT * FROM onboarding_case ORDER BY case_id"))
+    orc_cases = list(conn.execute(f"SELECT * FROM onboarding_case WHERE case_id {NOT_DEMO}"
+                                  " ORDER BY case_id"))
     rows = []
     for ds_case, orc in zip(cases, orc_cases):
         cid = ds_case["case_id"]
@@ -108,7 +117,8 @@ def compare_documents(conn: sqlite3.Connection, dataset: Path = DEFAULT_DATASET)
            r["resubmission_required"])
           for r in read_csv(dataset / "document.csv")}
     rows = []
-    for r in conn.execute("SELECT * FROM document ORDER BY document_id"):
+    for r in conn.execute(f"SELECT * FROM document WHERE case_id {NOT_DEMO}"
+                          " ORDER BY document_id"):
         key = (r["case_id"], r["file_name"])
         screened = r["quality_status_at_screen"]
         got = (screened, r["quality_flags"] or "", r["resubmission_reasons"] or "",
@@ -139,7 +149,7 @@ def compare_fields(conn: sqlite3.Connection, dataset: Path = DEFAULT_DATASET) ->
     for r in conn.execute(
             "SELECT d.case_id, d.file_name, f.name, f.value, f.confidence,"
             " f.corrected_by_analyst FROM extracted_field f JOIN document d USING (document_id)"
-            " ORDER BY f.field_id"):
+            f" WHERE d.case_id {NOT_DEMO} ORDER BY f.field_id"):
         key = (r["case_id"], r["file_name"], r["name"])
         got = (r["value"] or "", f'{float(r["confidence"]):.2f}',
                "true" if r["corrected_by_analyst"] else "false")
@@ -162,7 +172,8 @@ def compare_verification(conn: sqlite3.Connection, dataset: Path = DEFAULT_DATAS
     reg_cmp = ("company_status", "name_match", "number_match", "address_match",
                "director_match", "ubo_supported_by_registry", "result")
     ds_reg = {r["case_id"]: r for r in read_csv(dataset / "registry_check.csv")}
-    for r in conn.execute("SELECT * FROM registry_check ORDER BY check_id"):
+    for r in conn.execute(f"SELECT * FROM registry_check WHERE case_id {NOT_DEMO}"
+                          " ORDER BY check_id"):
         want = ds_reg.get(r["case_id"])
         got = tuple(str(r[c]) for c in reg_cmp)
         exp = tuple(want[c] for c in reg_cmp) if want else None
@@ -178,7 +189,7 @@ def compare_verification(conn: sqlite3.Connection, dataset: Path = DEFAULT_DATAS
               for r in read_csv(dataset / "identity_check.csv")}
     for r in conn.execute(
             "SELECT c.*, i.full_name FROM identity_check c JOIN individual i USING (individual_id)"
-            " ORDER BY c.check_id"):
+            f" WHERE c.case_id {NOT_DEMO} ORDER BY c.check_id"):
         want = ds_idc.get((r["case_id"], r["full_name"]))
         got = tuple(str(r[c]) for c in idc_cmp)
         exp = tuple(want[c] for c in idc_cmp) if want else None
@@ -191,7 +202,7 @@ def compare_verification(conn: sqlite3.Connection, dataset: Path = DEFAULT_DATAS
     ds_by_name = {(name_by_ds[k[0]], k[1]): v for k, v in ds_ubo.items()}
     for r in conn.execute(
             "SELECT u.*, i.full_name FROM ubo u JOIN individual i USING (individual_id)"
-            " ORDER BY u.ubo_id"):
+            f" WHERE u.applicant_id NOT IN {DEMO_APPLICANTS} ORDER BY u.ubo_id"):
         want = ds_by_name.get((r["full_name"], str(r["ownership_percentage"])))
         rows.append((None, f"ubo verification_status / {r['full_name']}",
                      want["verification_status"] if want else "(no dataset row)",
@@ -219,7 +230,8 @@ def compare_screening(conn: sqlite3.Connection, dataset: Path = DEFAULT_DATASET)
     rows = []
     for r in conn.execute(
             "SELECT s.*, i.full_name FROM screening_check s "
-            "LEFT JOIN individual i USING (individual_id) ORDER BY s.check_id"):
+            f"LEFT JOIN individual i USING (individual_id) WHERE s.case_id {NOT_DEMO}"
+            " ORDER BY s.check_id"):
         subject = r["full_name"] or ""
         want = ds.get((r["case_id"], subject))
         got = tuple(str(r[c] or "") for c in cmp_cols)
@@ -245,7 +257,8 @@ def compare_risk(conn: sqlite3.Connection, dataset: Path = DEFAULT_DATASET) -> l
     ds_packs = {r["case_id"] for r in read_csv(dataset / "evidence_pack.csv")}
 
     rows = []
-    for r in conn.execute("SELECT * FROM risk_assessment ORDER BY assessment_id"):
+    for r in conn.execute(f"SELECT * FROM risk_assessment WHERE case_id {NOT_DEMO}"
+                          " ORDER BY assessment_id"):
         want = ds_ra.get(r["case_id"])
         score = "" if r["risk_score"] is None else str(r["risk_score"])
         got = (r["risk_band"], r["recommended_action"], score,
@@ -264,7 +277,8 @@ def compare_risk(conn: sqlite3.Connection, dataset: Path = DEFAULT_DATASET) -> l
                      f"{len(theirs)} factors", f"{len(ours)} factors",
                      "YES" if ours == theirs else "NO"))
 
-    for r in conn.execute("SELECT case_id FROM evidence_pack ORDER BY evidence_pack_id"):
+    for r in conn.execute(f"SELECT case_id FROM evidence_pack WHERE case_id {NOT_DEMO}"
+                          " ORDER BY evidence_pack_id"):
         rows.append((r["case_id"], "evidence_pack",
                      "present" if r["case_id"] in ds_packs else "(no dataset row)",
                      "present", "YES" if r["case_id"] in ds_packs else "NO"))

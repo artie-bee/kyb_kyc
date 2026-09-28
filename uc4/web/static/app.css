@@ -561,3 +561,10 @@ th:focus-visible, select:focus-visible, textarea:focus-visible {
 .nextsteps li { margin:5px 0; font-size:13px; line-height:1.55; }
 .nextsteps li strong { font-weight:600; }
 .nextsteps__blocked { color:var(--warn); }
+
+/* ---------- customer link and checklist actions ---------------------------- */
+
+.linkform { margin:-6px 0 14px; }
+.linkbox { font-family:var(--mono); font-size:12px; flex:1 1 420px; min-width:0; }
+.check__confirm { width:100%; padding-left:28px; margin-top:6px; }
+.check__confirm input[type=text] { max-width:320px; }

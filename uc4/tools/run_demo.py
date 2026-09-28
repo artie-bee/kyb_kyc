@@ -25,6 +25,7 @@ UC4 = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(UC4))
 
 from orchestrator import db, holds                                  # noqa: E402
+from orchestrator.clock import DEMO_START, FakeClock, use           # noqa: E402
 from orchestrator.kb import KnowledgeBase                           # noqa: E402
 from orchestrator.orchestrator import process_application           # noqa: E402
 from orchestrator.steps import communication, decision              # noqa: E402
@@ -69,9 +70,15 @@ def run(conn, dataset: Path = DEFAULT_DATASET, app_dir: Path = DEFAULT_OUT,
     corrections and decisions for a person to make - which is what the demo app
     is for."""
     kb = KnowledgeBase()
-    # Holds are stamped with the real clock, so the demo clock starts there and
-    # then runs forward; otherwise no time appears to pass at all.
-    clock = clock or communication.FakeClock(date.today())
+    # One clock for the whole run: the holds are stamped on it and the chase
+    # counts days on it, so the two can never disagree about the date. It stands
+    # at the demo's fixed start unless the caller brings its own.
+    demo_clock = clock or FakeClock(DEMO_START)
+    with use(demo_clock):
+        return _run(conn, dataset, app_dir, demo_clock, kb, verbose, stop_before_human_actions)
+
+
+def _run(conn, dataset, app_dir, clock, kb, verbose, stop_before_human_actions) -> dict:
     decisions = scripted_decisions(dataset)
     silent = scripted_silence(dataset)
     results = {}

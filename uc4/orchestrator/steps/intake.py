@@ -17,6 +17,8 @@ from ..kb import KnowledgeBase, match_rule
 
 ACTOR = "step.intake"
 REQUIRED_FIELDS = ["legal_name", "entity_type", "country"]
+# application["origin"] for an application made in the portal's demo form
+DEMO_ORIGIN = "portal_demo"
 
 
 @dataclass
@@ -65,14 +67,22 @@ def run(conn, application: dict, kb: KnowledgeBase) -> IntakeResult:
          a.get("country") or "(missing)", a.get("business_activity"),
          a.get("expected_usage"), None),
     )
-    case_id = db.next_id(conn, "onboarding_case")
+    # An application typed into the portal's demo form is synthetic and has no
+    # dataset row behind it, so it gets its own case series (WAL-DEMO-).
+    demo = application.get("origin") == DEMO_ORIGIN
+    if demo and application["source_channel"] != "portal":
+        raise ValueError("a demo application can only arrive through the portal")
+    case_id = db.next_id(conn, "onboarding_case",
+                         prefix=db.DEMO_CASE_PREFIX if demo else None)
     conn.execute(
         "INSERT INTO onboarding_case (case_id, applicant_id, source_channel, status,"
         " created_at, updated_at) VALUES (?,?,?,?,?,?)",
         (case_id, applicant_id, application["source_channel"], "submitted", ts, ts),
     )
     db.audit(conn, case_id, "system", ACTOR, "case_created",
-             f"Application {application.get('application_id')} via {application['source_channel']}")
+             f"Application {application.get('application_id')} via {application['source_channel']}"
+             + ("; demo application typed into the customer portal (synthetic data)"
+                if demo else ""))
 
     # 2. Completeness check on the form itself.
     missing = [f"applicant.{f}" for f in REQUIRED_FIELDS if not a.get(f)]

@@ -7,8 +7,9 @@ their own tables with the same column names as the ER diagram.
 """
 
 import sqlite3
-from datetime import datetime, timezone
 from pathlib import Path
+
+from . import clock
 
 SCHEMA = """
 CREATE TABLE IF NOT EXISTS applicant (
@@ -91,7 +92,13 @@ CREATE TABLE IF NOT EXISTS extracted_field (
     corrected_by_analyst INTEGER NOT NULL DEFAULT 0,
     -- set when the value is unusable as read: missing, or below the confidence
     -- floor. An analyst supplies the value; the orchestrator never guesses it.
-    needs_analyst_correction INTEGER NOT NULL DEFAULT 0
+    needs_analyst_correction INTEGER NOT NULL DEFAULT 0,
+    -- how the value got here. 'extracted' is a machine reading (OCR or a live
+    -- model). In mock mode nothing reads an uploaded file, so an analyst types
+    -- the values from it: 'awaiting_analyst_entry' until they do, then
+    -- 'entered_by_analyst'. A keyed value is never recorded as extracted.
+    entry_method TEXT NOT NULL DEFAULT 'extracted'
+        CHECK (entry_method IN ('extracted', 'awaiting_analyst_entry', 'entered_by_analyst'))
 );
 CREATE TABLE IF NOT EXISTS registry_check (
     check_id TEXT PRIMARY KEY,
@@ -213,6 +220,17 @@ CREATE TABLE IF NOT EXISTS audit_event (
     payload_summary TEXT NOT NULL, model_or_prompt_version TEXT,
     timestamp TEXT NOT NULL
 );
+-- How an applicant reaches their own case in the customer portal. Only a hash
+-- of the token is kept, so a copy of this database does not let anyone sign in
+-- as a customer. Nothing else about the portal is stored: what it shows is read
+-- from the same tables the console reads, so the two cannot disagree.
+CREATE TABLE IF NOT EXISTS portal_token (
+    token_hash TEXT PRIMARY KEY,
+    case_id TEXT NOT NULL REFERENCES onboarding_case(case_id),
+    issued_by TEXT NOT NULL, issued_at TEXT NOT NULL, revoked_at TEXT,
+    -- after this the link stops working; a token with none is treated as expired
+    expires_at TEXT
+);
 -- Section 12: audit history must never be modified or deleted.
 CREATE TRIGGER IF NOT EXISTS audit_no_update BEFORE UPDATE ON audit_event
 BEGIN SELECT RAISE(ABORT, 'audit_event is append-only'); END;
@@ -245,6 +263,26 @@ ID_PREFIX = {
 }
 
 
+# Cases created through the customer portal's demo application form. They are
+# numbered on their own, never mixed into the dataset's WAL-ONB- sequence, and
+# every dataset comparison leaves them out.
+DEMO_CASE_PREFIX = "WAL-DEMO-"
+
+
+def is_demo_case(case_id: str | None) -> bool:
+    return bool(case_id) and case_id.startswith(DEMO_CASE_PREFIX)
+
+
+# Columns added after a database may already exist. CREATE TABLE IF NOT EXISTS
+# leaves an older table as it was, so each one is added here if it is missing.
+_ADDED_COLUMNS = (
+    ("portal_token", "expires_at", "TEXT"),
+    ("extracted_field", "entry_method",
+     "TEXT NOT NULL DEFAULT 'extracted' CHECK (entry_method IN "
+     "('extracted', 'awaiting_analyst_entry', 'entered_by_analyst'))"),
+)
+
+
 def connect(path: str | Path = "onboarding.db",
             same_thread_only: bool = True) -> sqlite3.Connection:
     """Open the store.
@@ -258,18 +296,29 @@ def connect(path: str | Path = "onboarding.db",
     conn.row_factory = sqlite3.Row
     conn.execute("PRAGMA foreign_keys = ON")
     conn.executescript(SCHEMA)
+    for table, column, decl in _ADDED_COLUMNS:
+        if column not in {r[1] for r in conn.execute(f"PRAGMA table_info({table})")}:
+            conn.execute(f"ALTER TABLE {table} ADD COLUMN {column} {decl}")
     return conn
 
 
 def now() -> str:
-    return datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+    """The timestamp for a row, from the one injected clock (orchestrator/clock.py)."""
+    return clock.stamp()
 
 
-def next_id(conn: sqlite3.Connection, table: str) -> str:
-    col, prefix = ID_PREFIX[table]
+def next_id(conn: sqlite3.Connection, table: str, prefix: str | None = None) -> str:
+    col, default = ID_PREFIX[table]
+    prefix = prefix or default
     width = 6 if table in ("audit_event", "checklist_item") else 4
-    (count,) = conn.execute(f"SELECT COUNT(*) FROM {table}").fetchone()
-    return f"{prefix}{count + 1:0{width}d}"
+    # One past the highest number already used under this prefix. Not a row
+    # count: a re-run of verification replaces rows, and a count that drops
+    # would hand out an id another case already holds. Each case series (the
+    # dataset's WAL-ONB-, the portal's WAL-DEMO-) numbers itself.
+    (highest,) = conn.execute(
+        f"SELECT MAX(CAST(SUBSTR({col}, ?) AS INTEGER)) FROM {table} WHERE {col} LIKE ?",
+        (len(prefix) + 1, prefix + "%")).fetchone()
+    return f"{prefix}{(highest or 0) + 1:0{width}d}"
 
 
 def audit(conn, case_id, actor_type, actor_id, action, payload_summary, version=None):

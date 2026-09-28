@@ -288,6 +288,46 @@ def build(dataset: Path, out: Path, cases: tuple) -> list[dict]:
     return made
 
 
+# ---------------------------------------------------------------------------
+# Scenario 2b - the customer fixes case 2 through the portal
+# ---------------------------------------------------------------------------
+
+# Who the synthetic ownership declaration names. Case 2 declares no beneficial
+# owners of its own, so these are invented for the demo; DEMO_SCRIPT.md tells
+# the analyst to type exactly these values.
+SCENARIO_2B_OWNERS = (("Denton Halliwell", "60"), ("Priya Nankivell", "40"))
+
+
+def build_scenario_2b(dataset: Path, out: Path) -> list[Path]:
+    """The two files a presenter uploads in Scenario 2b: the same director ID
+    that case 2's blurred scan shows, drawn clearly this time, and the missing
+    ownership declaration. Both are synthetic and marked as specimens."""
+    people = {r["full_name"]: r for r in read_csv(dataset / "individual.csv")}
+    blurred = next(r for r in read_csv(dataset / "document.csv")
+                   if r["case_id"] == "WAL-ONB-0002"
+                   and r["quality_flags"] == "blurred_unreadable")
+    director = people["Denton Halliwell"]
+    folder = out / "scenario_2b"
+    folder.mkdir(parents=True, exist_ok=True)
+
+    card = {**blurred, "document_id": "SCENARIO-2B", "expiry_date": ""}
+    id_path = folder / "halliwell_id_clear.jpg"
+    identity_card(card, invented_id_details(director, blurred)).convert("RGB").save(
+        id_path, quality=92)
+
+    declaration = {"document_type": "ubo_declaration", "document_id": "SCENARIO-2B",
+                   "case_id": "WAL-ONB-0002"}
+    fields = [{"name": "ubo_name", "value": SCENARIO_2B_OWNERS[0][0]},
+              {"name": "ownership_percentage", "value": SCENARIO_2B_OWNERS[0][1]},
+              {"name": "ubo_name_2", "value": SCENARIO_2B_OWNERS[1][0]},
+              {"name": "control_basis", "value": "Direct shareholding"}]
+    ubo_path = folder / "northbridge_ownership_declaration.pdf"
+    save_pdf(paper(declaration, fields, "Declared by the directors of Northbridge Craft "
+                                        "Supplies Ltd (UK-99010288), GB"),
+             ubo_path, "2026-09-28T09:00:00Z")
+    return [id_path, ubo_path]
+
+
 def main() -> None:
     ap = argparse.ArgumentParser(description="Generate the demo document files.")
     ap.add_argument("--dataset", type=Path, default=DEFAULT_DATASET)
@@ -311,6 +351,8 @@ def main() -> None:
               f"values" + (f", {blurred} deliberately blurred carrying {unreadable} "
                            f"unreadable value(s)" if blurred else ""))
     print(f"\n{len(made)} file(s) in {args.out}")
+    for path in build_scenario_2b(args.dataset, args.out):
+        print(f"Scenario 2b upload: {path}")
 
 
 if __name__ == "__main__":

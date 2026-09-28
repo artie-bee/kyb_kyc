@@ -17,17 +17,29 @@ from pathlib import Path
 UC4 = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(UC4))
 
-from orchestrator import db, holds, live_mode                              # noqa: E402
+from orchestrator import (clock, db, demo_scenarios, holds, live_mode,    # noqa: E402
+                          portal_access)
 from orchestrator.kb import KnowledgeBase                                  # noqa: E402
+from orchestrator.quality_checker import get_upload_checker                # noqa: E402
+from orchestrator import settings                                          # noqa: E402
 from orchestrator.steps import (analyst_review, communication, decision,   # noqa: E402
-                                evidence_pack, extraction, verification)
-from orchestrator.orchestrator import resume                               # noqa: E402
+                                document_quality, evidence_pack, extraction,
+                                requirement_pack, verification)
+from orchestrator.orchestrator import (QUALITY_CHECKER_MODE,              # noqa: E402
+                                       process_application, resume)
+from orchestrator.providers import DEMO_SCENARIOS, SIMULATED               # noqa: E402
+from orchestrator.steps.intake import DEMO_ORIGIN                          # noqa: E402
 from tools.export_case import export                                       # noqa: E402
 from tools.run_demo import run as run_demo                                 # noqa: E402
 from tools.dataset_to_applications import DEFAULT_OUT as APPLICATIONS       # noqa: E402
 
 DB_PATH = UC4 / "onboarding.db"
 SAMPLE_DOCS = UC4 / "sample_documents"
+UPLOADS = document_quality.UPLOADS
+# Applications typed into the portal's demo form, one JSON file per WAL-DEMO-
+# case - the same shape as the dataset's application files, and like them not a
+# table. Git-ignored, and emptied by Reset demo.
+PORTAL_APPLICATIONS = UC4 / "portal_applications"
 
 
 # ---------------------------------------------------------------------------
@@ -48,10 +60,27 @@ def reset_demo(path: Path = DB_PATH) -> None:
     """
     if path.exists():
         path.unlink()
+    # Rebuilding the database drops every WAL-DEMO- case with it. Their saved
+    # applications and every file uploaded through the portal go too - but only
+    # for the demo's own database, never for a copy a test is resetting.
+    if Path(path).resolve() == DB_PATH.resolve():
+        _clear(PORTAL_APPLICATIONS, "*.json")
+        _clear(UPLOADS, "*/*")
     conn = db.connect(path)
     run_demo(conn, verbose=False, stop_before_human_actions=True)
     conn.commit()
     conn.close()
+
+
+def _clear(folder: Path, pattern: str) -> None:
+    if not folder.exists():
+        return
+    for f in folder.glob(pattern):
+        if f.is_file():
+            f.unlink()
+    for d in sorted((p for p in folder.glob("*") if p.is_dir()), reverse=True):
+        if not any(d.iterdir()):
+            d.rmdir()
 
 
 def mode_badge() -> str:
@@ -71,11 +100,7 @@ def _rows(conn, sql, params=()):
 
 
 def ageing_days(created_at: str) -> int:
-    try:
-        created = datetime.fromisoformat(created_at.replace("Z", "+00:00"))
-    except (ValueError, AttributeError):
-        return 0
-    return (datetime.now(timezone.utc) - created).days
+    return clock.days_since(created_at)
 
 
 def dashboard(conn) -> list[dict]:
@@ -247,12 +272,18 @@ def audit_trail(conn, case_id: str) -> list[dict]:
 
 
 def checklist(conn, case_id: str) -> list[dict]:
-    return _rows(conn,
+    """Every checklist item with its CURRENT document. An item a customer has
+    uploaded to more than once has a superseded history; that shows on the
+    Documents tab, and the item itself appears here once."""
+    rows = _rows(conn,
                  "SELECT i.*, d.file_name FROM checklist_item i"
                  " JOIN requirement_pack p USING (pack_id)"
-                 " LEFT JOIN checklist_item_document cid USING (item_id)"
-                 " LEFT JOIN document d USING (document_id)"
+                 " LEFT JOIN document d ON d.document_id = (SELECT MAX(c.document_id)"
+                 "  FROM checklist_item_document c WHERE c.item_id = i.item_id)"
                  " WHERE p.case_id = ? ORDER BY i.item_id", (case_id,))
+    for r in rows:
+        r["awaiting_confirmation"] = requirement_pack.awaiting_confirmation(r)
+    return rows
 
 
 def documents(conn, case_id: str) -> list[dict]:
@@ -260,9 +291,17 @@ def documents(conn, case_id: str) -> list[dict]:
     for doc in out:
         doc["fields"] = _rows(conn, "SELECT * FROM extracted_field WHERE document_id = ?"
                                     " ORDER BY field_id", (doc["document_id"],))
-        candidate = SAMPLE_DOCS / case_id / doc["file_name"]
-        doc["sample_path"] = candidate if candidate.exists() else None
+        doc["sample_path"] = document_file(case_id, doc["file_name"])
     return out
+
+
+def document_file(case_id: str, file_name: str) -> Path | None:
+    """Where a document's file is: a generated sample, or a portal upload."""
+    for root in (SAMPLE_DOCS, UPLOADS):
+        candidate = (root / case_id / file_name).resolve()
+        if str(candidate).startswith(str(root.resolve())) and candidate.exists():
+            return candidate
+    return None
 
 
 def people(conn, case_id: str) -> list[dict]:
@@ -401,9 +440,22 @@ def export_bundle(conn, case_id: str) -> dict:
 # Actions - each one calls the orchestrator, never the database
 # ---------------------------------------------------------------------------
 
-def _application(case_id: str) -> dict:
-    """The application this case was built from, for the steps that need it."""
+def _application(case_id: str, conn=None) -> dict:
+    """The application this case was built from, for the steps that need it.
+
+    A demo case's application is the one the portal saved, with the demo
+    scenario the analyst chose (read from the audit trail) for the simulated
+    providers.
+    """
     import json
+    if db.is_demo_case(case_id):
+        path = PORTAL_APPLICATIONS / f"{case_id}.json"
+        if not path.exists():
+            raise FileNotFoundError(f"no saved demo application for {case_id}")
+        application = json.loads(path.read_text(encoding="utf-8"))
+        if conn is not None:
+            application["demo_scenario"] = demo_scenarios.current(conn, case_id)
+        return application
     matches = sorted(APPLICATIONS.glob(f"*{case_id}.json"))
     if not matches:
         raise FileNotFoundError(
@@ -421,7 +473,7 @@ def carry_on(conn, case_id: str) -> dict:
     """
     if open_holds(conn, case_id):
         return {"stopped_at": "holds", "reason": "holds are still open"}
-    trace = resume(conn, case_id, _application(case_id), kb())
+    trace = resume(conn, case_id, _application(case_id, conn), kb())
     conn.commit()
     return trace
 
@@ -493,3 +545,166 @@ def send_message(conn, case_id, situation, approver):
 
 def known_ids(conn, case_id: str) -> set:
     return evidence_pack.known_ids(conn, case_id)
+
+
+# ---------------------------------------------------------------------------
+# Customer portal actions - the same rule: call the orchestrator, never SQL
+# ---------------------------------------------------------------------------
+
+def upload_document(conn, case_id, item_id, file_name, content, uploads_dir=None):
+    """A customer's file, through Step 3, and the case carried on if it can be.
+
+    UploadRefused comes back to the caller with wording meant for the customer.
+    """
+    try:
+        result = document_quality.receive_upload(
+            conn, case_id, item_id, file_name, content, kb(),
+            checker=get_upload_checker(QUALITY_CHECKER_MODE), uploads_dir=uploads_dir)
+    except document_quality.UploadRefused:
+        conn.commit()           # the refusal is audited; that record must survive it
+        raise
+    conn.commit()
+    carry_on(conn, case_id)
+    return result
+
+
+def issue_portal_access(conn, case_id, issued_by):
+    token = portal_access.issue(conn, case_id, issued_by, kb())
+    conn.commit()
+    return token
+
+
+def portal_case(conn, token):
+    return portal_access.resolve(conn, token)
+
+
+def end_portal_session(conn, token):
+    ended = portal_access.revoke(conn, token, "customer", kb())
+    conn.commit()
+    return ended
+
+
+# ---------------------------------------------------------------------------
+# Demo applications from the portal (phase 2) - synthetic data only
+# ---------------------------------------------------------------------------
+
+def submit_application(conn, application: dict) -> str:
+    """A demo application typed into the portal, through intake like any other.
+
+    The applicant type is never taken from the form: whatever the form sent is
+    dropped, and Step 1 classifies from the facts with the AT rules. The saved
+    application is what the later steps read, exactly as they read a dataset
+    application file.
+    """
+    import json
+    application = {k: v for k, v in application.items()
+                   if k not in ("applicant_type", "route", "case_id")}
+    application["origin"] = DEMO_ORIGIN
+    application["source_channel"] = "portal"
+    trace = process_application(conn, application, kb())
+    case_id = trace["intake"]["case_id"]
+    PORTAL_APPLICATIONS.mkdir(parents=True, exist_ok=True)
+    (PORTAL_APPLICATIONS / f"{case_id}.json").write_text(
+        json.dumps(application, indent=2, ensure_ascii=False), encoding="utf-8")
+    conn.commit()
+    return case_id
+
+
+def awaiting_fields(conn, case_id: str) -> dict:
+    """Per document, the fields waiting for an analyst to type them in."""
+    out = {}
+    for doc in conn.execute("SELECT document_id FROM document WHERE case_id = ?"
+                            " ORDER BY document_id", (case_id,)):
+        rows = [dict(r) for r in extraction.fields_awaiting_entry(conn, doc["document_id"])]
+        if rows:
+            required = set(kb().required_fields_for(conn.execute(
+                "SELECT document_type FROM document WHERE document_id = ?",
+                (doc["document_id"],)).fetchone()[0]))
+            for r in rows:
+                r["required"] = r["name"] in required
+            out[doc["document_id"]] = rows
+    return out
+
+
+def enter_fields(conn, document_id, analyst_id, values):
+    case_id = conn.execute("SELECT case_id FROM document WHERE document_id = ?",
+                           (document_id,)).fetchone()[0]
+    result = extraction.enter_fields(conn, document_id, analyst_id, values, kb())
+    conn.commit()
+    carry_on(conn, case_id)
+    return result
+
+
+def demo_scenario(conn, case_id: str) -> str:
+    return demo_scenarios.current(conn, case_id)
+
+
+def choose_demo_scenario(conn, case_id, scenario, analyst_id):
+    chosen = demo_scenarios.choose(conn, case_id, scenario, analyst_id, kb())
+    conn.commit()
+    return chosen
+
+
+def is_demo_case(case_id: str) -> bool:
+    return db.is_demo_case(case_id)
+
+
+def document_stage_open(conn, case_id: str) -> bool:
+    return document_quality.document_stage_open(conn, case_id)
+
+
+# ---------------------------------------------------------------------------
+# The upload space: what the console shows and does about it
+# ---------------------------------------------------------------------------
+
+def uploaded_names(conn, case_id: str) -> dict:
+    """{stored file name: the customer's own file name} for portal uploads."""
+    return document_quality.uploaded_names(conn, case_id)
+
+
+def addable_document_types() -> list[str]:
+    """Every document type the KB knows, for the analyst's "request another
+    document" form. Read from the KB, so a new type needs no screen change."""
+    return sorted({r["document_type"] for r in kb().requirement_rules})
+
+
+def confirm_condition(conn, item_id, analyst_id, applies, reason):
+    result = requirement_pack.confirm_condition(conn, item_id, analyst_id, applies, reason, kb())
+    conn.commit()
+    return result
+
+
+def add_checklist_item(conn, case_id, document_type, analyst_id, reason, subject=None):
+    item_id = requirement_pack.add_item(conn, case_id, document_type, analyst_id, reason,
+                                        subject or None, kb())
+    # The case now owes a document again; Step 3 routes it like any other.
+    document_quality.route_case(conn, case_id, kb())
+    conn.commit()
+    return item_id
+
+
+def customer_link(conn, case_id, issued_by) -> str:
+    """A fresh customer link for this case. The token is shown this once and
+    only its hash is kept; the case id is not in the link."""
+    token = portal_access.issue(conn, case_id, issued_by, kb())
+    conn.commit()
+    return f"{settings.PORTAL_URL}/access/{token}"
+
+
+# ---------------------------------------------------------------------------
+# New evidence after the assessment
+# ---------------------------------------------------------------------------
+
+def reassessment_hold(conn, case_id: str):
+    from orchestrator import reassessment
+    return reassessment.open_hold(conn, case_id)
+
+
+def rerun_verification(conn, case_id, analyst_id, reason):
+    from orchestrator.orchestrator import rerun_verification as rerun
+    return rerun(conn, case_id, _application(case_id, conn), kb(), analyst_id, reason)
+
+
+def keep_assessment(conn, case_id, analyst_id, reason):
+    from orchestrator.orchestrator import keep_assessment as keep
+    return keep(conn, case_id, kb(), analyst_id, reason)

@@ -1,4 +1,17 @@
-# Wallester UC4 - First KB items and first orchestration layers
+# Wallester UC4 - KYB/KYC onboarding orchestration POC
+
+Two front ends over one pipeline: the **analyst console** (port 8700) and the
+**customer portal** (port 8701). Demo only, synthetic data throughout.
+
+```
+pip install -r requirements.txt
+python tools/serve.py           # analyst console  http://127.0.0.1:8700/
+python tools/serve_portal.py    # customer portal  http://127.0.0.1:8701/demo
+```
+
+Run them side by side in two terminals; both read and act on the same
+`onboarding.db`. Settings are in the *Settings* section below - customer links
+expire after `WALLESTER_UC4_PORTAL_LINK_DAYS` (default 14).
 
 ## What's here
 kb/                         Knowledge base (read-only CSV, versioned in kb_manifest.json)
@@ -16,6 +29,7 @@ kb/                         Knowledge base (read-only CSV, versioned in kb_manif
   risk_scoring_matrix.csv      Risk factors and weights (Section 5.8)
                                EVERY weight is a POC placeholder for Wallester to confirm
   risk_bands.csv               Score thresholds and the hard floors that override them
+  resubmission_reason_text.csv Approved customer wording for why a document must be sent again
   message_template.csv         The approved message library (Section 5.9)
   communication_rules.csv      Which template for which situation (Sections 5.9, 11.3)
   analyst_decision_taxonomy.csv Decisions, roles and resulting status (5.10, 10.7)
@@ -40,8 +54,19 @@ orchestrator/
   steps/communication.py    Step 8a: customer messages, templates only (5.9, 11.3)
   steps/decision.py         Step 8b: the human decision (5.10, 10.7, 18)
   holds.py                  Case holds - the one place a case is stopped or released
-  quality_checker.py        AI half of Step 3 (mock / live vision)
+  quality_checker.py        AI half of Step 3 (mock / live vision; mock_upload for portal files)
   extractor.py              AI half of Step 4 (mock / live)
+  clock.py                  The one clock: every timestamp, expiry and "N days" reads it
+  settings.py               Operating limits from the environment (see Settings)
+  portal_access.py          Customer links: random token, hash stored, expiry, one case
+  virus_scanner.py          Scan for portal uploads (mock: clean / live: stub)
+  reassessment.py           The "new evidence after assessment" hold
+  demo_scenarios.py         Console-only choice of what simulated providers find (demo cases)
+app/
+  data.py                   What both front ends read, and every action they take
+  customer_view.py          The only place that decides what an applicant may be shown
+web/                        The analyst console (port 8700)
+portal/                     The customer portal (port 8701): own server, routes and CSS
 sample_applications/        6 test applications (normal, complex, branch, and failure cases)
   from_dataset/             10 applications rebuilt from the scripted dataset (generated)
 tools/
@@ -49,8 +74,11 @@ tools/
   compare_to_dataset.py       Runs the orchestrator and scores it against the dataset
   run_demo.py                 All 14 cases through Steps 1-8, scripted humans replayed
   export_case.py              Audit bundle per case: rows, trail, versions (10.8)
-  make_sample_documents.py    Demo document files for cases 1, 2, 3, 4 and 6
+  make_sample_documents.py    Demo document files for cases 1, 2, 3, 4 and 6, and the
+                              two Scenario 2b uploads (sample_documents/scenario_2b/)
   evaluate_live.py            Live model vs the scripted answers -> eval_report.md
+  serve.py                    Runs the analyst console
+  serve_portal.py             Runs the customer portal
 prompts/                    Versioned prompt files; the version is audited per call
 sample_documents/           Generated demo files (git-ignored)
 ARCHITECTURE.md             The 8 steps, holds, the KB, and mock vs live
@@ -69,6 +97,14 @@ tests/test_app.py             12 tests - no SQL writes in app/ or web/, the cust
                               a human action carries the case forward
 tests/test_web.py             the console - every screen and tab renders, actions
                               redirect, and the backend's refusals reach the screen
+tests/test_portal.py          the customer portal - one test per customer journey
+                              (cases 2, 5, 6, 8, 11, 12, 13, 14), uploads with
+                              JavaScript off, no SQL writes, no console routes
+tests/test_portal_phase2.py   demo applications: classified by facts, never in a dataset
+                              comparison, typed values never labelled as extracted
+tests/test_portal_uploads.py  the upload space and dynamic checklist
+tests/test_reassessment.py    uploads after the assessment wait for an analyst
+tests/test_clock.py           one clock: the same results at any hour
 tests/test_schema_sync.py     6 tests - fails if the dataset or database gains a
                               column or enum value the schema file does not describe
 
@@ -99,11 +135,159 @@ own function, so a refusal you see - "cannot approve while holds are open",
 "compliance role required" - is the real rule refusing. `tests/test_app.py`
 scans `app/` and `web/` for SQL writes and fails if it finds any.
 
+## Customer portal (port 8701)
+
+The applicant's side, on the same stack as the console: plain `http.server`,
+HTML built in Python, plain CSS, and one small optional script. It serves none
+of the console's routes. Run the two side by side, in two terminals:
+
+```
+python tools/serve.py           # console   http://127.0.0.1:8700/
+python tools/serve_portal.py    # portal    http://127.0.0.1:8701/demo
+python tools/serve_portal.py --no-demo   # no case selector: customer links only
+```
+
+Both read and act on the same `onboarding.db`, so a file uploaded in the portal
+is waiting in the console's Documents tab for an analyst. "Reset demo" lives in
+the console only; the portal never resets anything.
+
+Screens: **My application** (five customer steps, one plain line each),
+**Documents needed** (see *The upload space* below), **Messages** (everything
+sent to the applicant, in order), **/apply** (a new demo application), and
+**/demo**, a case selector that opens the portal as any customer. A real
+customer arrives instead through **Copy customer link** in the console.
+
+The rules it keeps:
+- every upload goes through `document_quality.receive_upload()`, and from there
+  through the same Step 3 as every other document;
+- customer links are random tokens, only their hash is stored, each opens one
+  case, and each expires (`WALLESTER_UC4_PORTAL_LINK_DAYS`, default 14). No case
+  id appears in any portal URL;
+- only one new table, `portal_token`. Everything else is read from the tables
+  the console reads;
+- every page passes through `customer_view.leaks()` before it is sent, and a
+  page carrying restricted wording is refused rather than shown;
+- every page works with JavaScript off. Uploads are plain multipart form posts,
+  parsed with the standard library, so no new package was needed.
+
+Uploaded files go to `uploads/<case_id>/` under random names (git-ignored);
+demo applications to `portal_applications/` (git-ignored).
+
+### Phase 2: new demo applications (demo only, synthetic data)
+
+**Start a new demo application** on `/demo` opens a six-step form: business,
+contact, people, owners (with percentages, held directly or through a company),
+a few yes/no facts, then check and send. It works with JavaScript off. Answers
+travel between steps as hidden fields, so nothing is stored until it is sent.
+
+- **The customer never chooses an applicant type.** Sending calls the existing
+  intake (`process_application`), and Step 1 classifies from the facts with the
+  AT rules. A form field that tries to name a type is dropped on arrival.
+- **Cases are `WAL-DEMO-0001`, `WAL-DEMO-0002`, ...** with source channel
+  `portal`, numbered apart from the dataset's `WAL-ONB-` series. Every query in
+  `tools/compare_to_dataset.py` leaves them out, and the scores are unchanged.
+  The submitted application is saved to `portal_applications/<case_id>.json`
+  (git-ignored), the same shape as a dataset application file. **Reset demo**
+  deletes the cases, those files and every portal upload.
+- **Reading uploads.** In live mode the real checker and extractor read the
+  file. In mock mode the deterministic quality rules run for real, and then
+  Step 4 holds the case: *"fields not read automatically in mock mode"*. The
+  console's Documents tab shows a form where the analyst types the fields in
+  from the file. Each value is recorded as `entry_method = entered_by_analyst`,
+  never as extracted and never as a correction. Typed dates go through the
+  expiry and age rules. The customer sees **Received** until the file is read.
+  The typed values then go through the existing checks against the customer's
+  entered details.
+- **Simulated providers.** A demo case's registry, identity and screening
+  results mirror what the customer entered, and every one is labelled
+  *"Simulated provider response"*. The label is the provider name, so it
+  appears on every check row, as the actor on every provider audit event, and
+  in the evidence pack. The console's **Demo scenario** control (on the case
+  page, console only) picks clean / address mismatch / PEP match / possible
+  sanctions match. The choice is an audit event and is read back from the audit
+  trail. It is fixed once the providers have answered.
+- **No new tables.** `extracted_field` gains one column, `entry_method`, added
+  in place to an existing database.
+
+`tests/test_portal_phase2.py` covers each rule above.
+
+### The upload space and the dynamic checklist
+
+The portal's **Documents needed** page shows what `customer_view.customer_checklist()`
+returns, read fresh from the `checklist_item` rows on every request. The portal
+names no document type and counts nothing itself.
+
+- **Shown:** required items; optional items, labelled *optional* and left out of
+  "X of Y still needed"; items an analyst adds later (console, Checklist tab,
+  *Request another document*), which appear at once and are named generically
+  on a case with a restricted finding. **Not shown:** waived items, and
+  conditions the form did not answer until an analyst confirms they apply
+  (Checklist tab, *Applies / Does not apply*).
+- **Four statuses only:** Accepted, Under review (any hold, including the mock
+  visual check), Resubmission needed (with the approved reason from
+  `kb/resubmission_reason_text.csv`), Not uploaded yet.
+- **`document_quality.receive_upload()`** is the only way in. It refuses a
+  closed case, an item not asked for, an item already accepted, the wrong type,
+  an empty file, a file over the limit (`WALLESTER_UC4_MAX_UPLOAD_MB`, default
+  10) and bytes that do not match the extension. It virus-scans the file
+  (`orchestrator/virus_scanner.py`: mock reports clean, live is a stub), stores
+  it under a random name with its SHA-256 in the audit trail, marks any earlier
+  upload on the item `superseded` (kept), and runs the **same Step 3 `run()`**
+  every scripted document goes through. In mock mode that means the
+  deterministic rules for real, then a hold *"visual check not run in mock
+  mode"*, released in the console with the existing *Release document*. After
+  that, the phase 2 field-typing step applies. A successful upload stops
+  reminders about that item.
+- **A document that arrives after the paid checks** (one added during enhanced
+  due diligence, say) is screened and read, but `resume()` does not re-run the
+  providers. The case goes back to the status its risk band implies.
+- **Access:** *Copy customer link* on every console case page makes a fresh
+  link, shown once. Tokens expire (`WALLESTER_UC4_PORTAL_LINK_DAYS`, default
+  14), only their hash is kept, each opens one case, and no case id appears in
+  any portal URL.
+
+`tests/test_portal_uploads.py` covers each rule above.
+
+### Uploads after the assessment
+
+A document that arrives once the paid checks have answered is still checked and
+read. It then places an analyst hold, *"new evidence after assessment - analyst
+to review"*, and the case status follows from that hold as usual. The risk band
+does not move. On the case page the analyst chooses one of two actions, each
+with a reason and each audited:
+- **Re-run verification**: the only way the paid checks run again. The previous
+  registry, identity and risk results are archived verbatim in the audit trail
+  and replaced. Screening results, including any sanctions or PEP match, are
+  never touched.
+- **Keep the assessment**: the hold is released and the band stands.
+
+`tests/test_reassessment.py` covers both.
+
+## Settings
+
+Read from the environment; the defaults are the demo's.
+
+| Variable | Default | What it sets |
+|---|---|---|
+| `WALLESTER_UC4_PORTAL_LINK_DAYS` | `14` | How long a customer link works |
+| `WALLESTER_UC4_MAX_UPLOAD_MB` | `10` | The largest file the portal accepts |
+| `WALLESTER_UC4_PORTAL_URL` | `http://127.0.0.1:8701` | The address in a copied customer link |
+| `WALLESTER_UC4_VIRUS_SCANNER` | `mock` | `mock` (reports clean) or `live` (stub) |
+| `LLM_PROVIDER` | `anthropic` | Which model answers in live mode (see *Live mode*) |
+
+**One clock.** Every timestamp, expiry and "waited N days" reads the injected
+clock in `orchestrator/clock.py`. The running servers use the real UTC time.
+The demo database and the test suite run on a fixed instant (`DEMO_START`,
+2026-09-28 09:00 UTC), so their results are identical at any hour, and the
+scripted documents' expiry and age rules never drift.
+
 ## Run
 # On Windows PowerShell the shell does not expand the glob, so expand it explicitly:
 python -m orchestrator.orchestrator (Get-ChildItem sample_applications\from_dataset\*.json | ForEach-Object FullName)
 python tools/dataset_to_applications.py     # rebuild the 10 applications
 python tools/compare_to_dataset.py          # print the comparison table
+python tools/serve.py                       # analyst console, port 8700
+python tools/serve_portal.py                # customer portal, port 8701
 python -m pytest tests -q
 
 ## Flow so far

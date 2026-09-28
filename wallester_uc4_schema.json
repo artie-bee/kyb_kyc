@@ -2739,6 +2739,7 @@
                   "manual_review_required",
                   "pending",
                   "resubmission_required",
+                  "superseded",
                   ""
                 ]
               },
@@ -3045,6 +3046,18 @@
                   "string",
                   "null"
                 ]
+              },
+              "entry_method": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "enum": [
+                  "awaiting_analyst_entry",
+                  "entered_by_analyst",
+                  "extracted",
+                  ""
+                ]
               }
             },
             "required": [
@@ -3055,7 +3068,8 @@
               "confidence",
               "source_page",
               "corrected_by_analyst",
-              "needs_analyst_correction"
+              "needs_analyst_correction",
+              "entry_method"
             ],
             "additionalProperties": false
           }
@@ -3698,6 +3712,59 @@
               "audience",
               "body",
               "sent_at"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "portal_token": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "token_hash": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "case_id": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "issued_by": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "issued_at": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "revoked_at": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "expires_at": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            },
+            "required": [
+              "token_hash",
+              "case_id",
+              "issued_by",
+              "issued_at",
+              "revoked_at",
+              "expires_at"
             ],
             "additionalProperties": false
           }
